@@ -80,9 +80,9 @@ middleSchoolLogic: "Not active",
 recommendedPathway: "Coached Foundation",
 roles: [
 "Teaching & Learning Coach: recommended",
-"Curriculum & Assessment Designer: optional/shared",
 "Language & Academic Performance Coach: strongly recommended",
-"Signature Programs / Project Design Lead: not necessary",
+"Learning Experience Design function: required — protects project quality, documentation, and educator planning",
+"Curriculum & Assessment Designer: optional/shared",
 ],
 risk:
 "If too lean, the school may open with operational viability but uneven classroom quality. The main risk is variation across founding educators.",
@@ -646,7 +646,7 @@ const decisionPanelItems = [
 scenario: "Scenario A",
 decision: "Protect launch quality",
 signal: "MAP + early evidence",
-budget: "Baseline + LAP recommended",
+budget: "Baseline includes Learning Experience Design; LAP Coach recommended",
 tone: "border-emerald-200 bg-emerald-50 text-emerald-800",
 },
 {
@@ -994,9 +994,9 @@ rows: [
 {
 scenario: "Scenario A",
 status: "Estrutura básica",
-commitment: "PDJ embedded in classroom routines.",
-adult: "No dedicated project mentor.",
-budget: "Baseline.",
+commitment: "PDJ operates through full-class experiential projects embedded in classroom routines; Learning Experience Design protects project quality and documentation.",
+adult: "Learning Experience Design function required; no dedicated Project Mentor.",
+budget: "Baseline includes Learning Experience Design; no dedicated Project Mentor.",
 },
 {
 scenario: "Scenario B",
@@ -1063,8 +1063,8 @@ rows: [
 {
 scenario: "Scenario A",
 status: "Add-on potencial",
-commitment: "Additional founding educator coaching; expanded documentation support; LAP Coach recommended from launch.",
-adult: "Validate coaching, documentation, and academic performance scope.",
+commitment: "Learning Experience Design is baseline; LAP Coach recommended from launch.",
+adult: "Validate incremental coaching, documentation support beyond baseline, and academic performance scope.",
 budget: "Acréscimo ao orçamento, se aprovado: R$ ________",
 budgetPlaceholder: true,
 },
@@ -2599,7 +2599,7 @@ export default function OfferScenariosTab() {
 
 		        <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
 		          {[
-		            ["Minimum credible path", "Scenario A", "Protege a qualidade de lançamento com MAP, evidências iniciais e LAP recomendado."],
+		            ["Minimum credible path", "Scenario A", "Protege a qualidade de lançamento com Learning Experience Design no baseline, MAP, evidências iniciais e LAP recomendado."],
 		            ["Strongest pre-Middle School path", "Scenario B", "Usa Grade 4 para formar identidade Concept antes do limiar de Middle School."],
 		            ["Category-shift path", "Scenario D", "Ativa clusters, Creative Hub, MUN, advisory e nova pressão de infraestrutura adulta."],
 		          ].map(([label, scenario, detail]) => (
