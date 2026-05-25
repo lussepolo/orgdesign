@@ -59,7 +59,8 @@ strategicIdentity: "Foundation + early academic evidence",
 offerStage: "Early Years + first Lower School cycle",
 classroomPackage: [
 "Founding consistency across EY and the first LS cycle",
-"Early evidence routines start while the offer remains foundational",
+"PDJ operates through full-class experiential projects embedded in classroom routines",
+"Learning Experience Design function protects project quality, documentation, and learning-engine fidelity",
 ],
 specialistEcosystem: [
 "Specialist planning premise: see Operating Assumptions.",
@@ -294,7 +295,7 @@ const middleSchoolProgression = [
 ["Grades 9-12", "High School specialization, pathways, credentials, internships, university-facing evidence"],
 		  ];
 const mentorshipProgression = [
-["Up to Grade 5", "Educators mentor through classroom projects and protocols"],
+["Up to Grade 5", "PDJ is a classroom design and documentation system; educators guide full-class experiential projects through each division's learning engine — Explorers in EY, Researchers in LS"],
 ["Grade 6", "Educators act as mentors within a coordinated project-design architecture"],
 ["Grade 7", "Educators continue mentoring, with more external testing and pathway logic"],
 ["Grade 8", "Program-led mentorship model, Babson EPIC culmination"],
@@ -427,10 +428,10 @@ ecosystem: "Full shared specialist ecosystem plus mature secondary academic laye
 },
 		  ];
 const synthesisStatements = [
-"The Rio scenarios are not only enrollment scenarios. Each grade ceiling changes the pedagogical offer, the adult ecosystem, and the specialist infrastructure required to make the Concept experience credible.",
-"Grade 6 is the threshold where the model changes category. It activates Middle School clusters, electives, Passion Project, advisory, project mentorship, and shared specialist infrastructure. It is not one more Lower School grade.",
+"The Rio launch model should not reproduce São Paulo's mature organizational design. It should protect the same learning promise through a compressed adult ecosystem: fixed classroom ownership, shared specialist capacity, early academic performance and language monitoring, curriculum coherence, wellbeing support, Learning Experience Design, and visible documentation of learning.",
+"Grade 6 is the threshold where the model changes category. It activates Middle School clusters, electives, Passion Projects, advisory, project mentorship, and shared specialist infrastructure. It is not one more Lower School grade.",
+"Project Design Journey begins as a classroom-based experiential learning framework. From Early Years through Grade 5, projects are full-class investigations guided by educators through the learning engine of each division. Passion Projects begin only in Grade 6, when learners work in small groups of 3–5 and project mentorship becomes a coordinated operating function.",
 "Specialists should not be treated as one generic FTE pool. Body & Movement, Sound Exploration, Artistic Design, Performing Arts, and Design Technologies each have distinct load patterns, space needs, age-band constraints, and links to signature programs.",
-"For now, these scenarios remain explanatory and board-facing. Later, leadership can decide which assumptions become cost-driving.",
 ];
 const baselineDivisionArchitecture = [
 {
@@ -632,7 +633,7 @@ type: "Baseline from launch, matures over time",
 },
 {
 system: "Signature program routines",
-why: "PDJ begins in classroom routines; Grade 5 Pathways activate; Grade 6 Creative Hub and MUN activate.",
+why: "PDJ is a classroom-based experiential learning framework from EY through Grade 5 — full-class projects guided by educators. Passion Projects begin only in Grade 6, when projects shift to small groups and project mentorship becomes a coordinated function. Grade 5 Pathways activate; Grade 6 Creative Hub and MUN activate.",
 type: "Scenario-dependent activation",
 },
 {
@@ -880,7 +881,7 @@ const ecosystemLayerPrintSummaries: Record<string, string> = {
 classroom: "A estrutura de sala permanece como baseline; o avanço dos cenários muda a intensidade de documentação, transição e cluster.",
 "academic-language": "MAP, aquisição de língua e performance acadêmica começam cedo e deixam de ser opcionais conforme a complexidade cresce.",
 specialists: "Especialistas funcionam como ecossistema compartilhado; o risco é subcontar carga, espaço e conexão com programas autorais.",
-signature: "Programas autorais amadurecem por limiares: PDJ primeiro, Pathways em Grade 5, Creative Hub e MUN em Grade 6.",
+signature: "Programas autorais amadurecem por limiares: PDJ como framework de sala EY–Grade 5, Pathways em Grade 5, Passion Projects e Creative Hub apenas em Grade 6.",
 "ms-hs": "A prontidão secundária evolui de cultura e ponte formal para lançamento real de Middle School em Grade 6.",
 budget: "Add-ons permanecem placeholders de governança; nenhum valor é integrado a payroll nesta leitura.",
 };
@@ -1846,8 +1847,7 @@ export default function OfferScenariosTab() {
               <div className="offer-scenarios-print-soft-panel p-5">
                 <h3 className="text-xl text-slate-950">São Paulo specialist reference</h3>
                 <p className="mt-2 text-xs leading-relaxed text-slate-600">
-                  A composição abaixo funciona como referência de arquitetura especialista observada no
-                  ecossistema atual. Para Rio, os números permanecem premissas de planejamento.
+                  São Paulo represents the mature flagship ecosystem — a contrast model, not a staffing template for Rio. A composição abaixo é referência de arquitetura especialista. Para Rio, os números permanecem premissas de planejamento.
                 </p>
                 <div className="mt-4 space-y-2">
                   {currentSpecialistEcosystem.map(([area, names, count]) => (
@@ -2417,7 +2417,7 @@ export default function OfferScenariosTab() {
                     <div className="rounded-[2rem] bg-white p-6">
                       <h4 className="text-xl font-black text-slate-950">Referência São Paulo</h4>
                       <p className="mt-3 text-sm font-semibold leading-relaxed text-slate-600">
-                        A composição abaixo é referência de arquitetura especialista, não plano final de contratação para Rio.
+                        São Paulo represents the mature flagship ecosystem — a contrast model, not a staffing template for Rio. A composição abaixo é referência de arquitetura especialista do ecossistema maduro.
                       </p>
                       <div className="mt-5 grid gap-2">
                         {currentSpecialistEcosystem.map(([area, names, count]) => (
