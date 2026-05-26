@@ -75,7 +75,7 @@ offerStage: "Early Years + first Lower School cycle",
 classroomPackage: [
 "Fixed classroom package: EY = reference educator + assistant + monitor; LS = reference educator + assistant",
 "PDJ operates through full-class experiential projects embedded in classroom routines",
-"Learning Experience Design function protects project quality, documentation, and learning-engine fidelity",
+"Learning Experience Design function supports project quality, documentation, and learning-engine fidelity",
 ],
 specialistEcosystem: [
 "Specialist planning premise: see Operating Assumptions.",
@@ -97,13 +97,13 @@ recommendedPathway: "Coached Foundation",
 roles: [
 "Teaching & Learning Coach: recommended",
 "Language & Academic Performance Coach: strongly recommended",
-"Learning Experience Design function: required — protects project quality, documentation, and educator planning",
+"Learning Experience Design function: required — supports project quality, documentation, and educator planning",
 "Curriculum & Assessment Designer: optional/shared",
 ],
 risk:
 "If too lean, the school may open with operational viability but uneven classroom quality. The main risk is variation across founding educators.",
 boardSentence:
-"Scenario A protects launch quality and early academic evidence without adding Middle School or signature-program infrastructure.",
+"Scenario A establishes the basic offer and early academic evidence without adding Middle School or signature-program infrastructure.",
 tone: "border-emerald-200 bg-emerald-50 text-emerald-700",
 },
 {
@@ -112,19 +112,19 @@ gradeCeiling: "Up to Grade 4",
 targetEnrollment: "258 learners",
 modeledCapacity: "346 learners",
 impliedOccupancy: "74.6%",
-strategicIdentity: "Academic progression + Concept identity formation",
+strategicIdentity: "Researchers progression + Concept identity",
 offerStage: "Lower School progression",
 classroomPackage: [
 "Fixed classroom package continues: EY = reference educator + assistant + monitor; LS = reference educator + assistant",
-"Grade 4 deepens documentation, reflection, learner habits, academic evidence, and Concept identity",
-"PDJ remains full-class; Learning Experience Design becomes more important as documentation and reflection deepen",
+"Grade 4 makes the Lower School Researchers engine more visible through inquiry, evidence-making, Math reasoning, Scientific Literacy, documentation, and academic language",
+"PDJ remains full-class; Learning Experience Design becomes more important as documentation and academic evidence deepen",
 ],
 specialistEcosystem: [
 "Specialist planning premise: see Operating Assumptions.",
 ],
 signaturePrograms: [
 "MAP cycles and performance visibility increase",
-"Project routines, reflection habits, and student agency consolidate",
+"Inquiry, evidence-making, academic language, and research routines consolidate",
 "Preparation for Grade 5 Pathways",
 "Early portfolio evidence begins",
 ],
@@ -141,12 +141,12 @@ roles: [
 "Teaching & Learning Coach: recommended",
 "Language & Academic Performance Coach: strongly recommended",
 "Curriculum & Assessment Designer: recommended/shared",
-"Learning Experience Design function: more important as documentation and reflection deepen; Project Mentorship is not active yet",
+"Learning Experience Design function: more important as documentation, academic evidence, and research routines deepen; Project Mentorship is not active yet",
 ],
 risk:
-"If Scenario B is treated only as one additional grade, the campus misses the opportunity to form learners before Middle School. Grade 4 should be used to consolidate the learning habits and evidence culture that make Grade 5 Pathways and Grade 6 Middle School more coherent.",
+"If Scenario B is treated only as one additional grade, the campus misses the opportunity to make the Lower School Researchers engine academically visible before Middle School. Grade 4 should consolidate inquiry, evidence-making, Math reasoning, Scientific Literacy, academic language, and research routines that make Grade 5 Pathways and Grade 6 Middle School more coherent.",
 boardSentence:
-"Scenario B turns Grade 4 into the main pre-Middle School identity formation step, preparing learners for Grade 5 Pathways.",
+"Scenario B turns Grade 4 into the main Researchers progression step, preparing learners for Grade 5 Pathways.",
 tone: "border-blue-200 bg-blue-50 text-blue-700",
 },
 {
@@ -372,7 +372,7 @@ risk: "Higher cost before enrollment density fully matures.",
 		  ];
 const scenarioMatrix = [
 ["Scenario A", "Grade 3", "228", "302", "75.5%", "Foundation + early academic evidence", "EY: reference educator + assistant + monitor; LS: reference educator + assistant", "Shared, lighter version", "MAP from Grade 1, classroom PDJ, language monitoring", "Not active", "Coached Foundation"],
-["Scenario B", "Grade 4", "258", "346", "74.6%", "Academic progression + Concept identity formation", "EY: reference educator + assistant + monitor; LS: reference educator + assistant", "Shared, broader LS load", "MAP cycles, Concept learning habits, early portfolio, Grade 5 Pathways preparation; PDJ full-class", "Not active", "Academic Progression"],
+["Scenario B", "Grade 4", "258", "346", "74.6%", "Researchers progression + Concept identity", "EY: reference educator + assistant + monitor; LS: reference educator + assistant", "Shared, broader LS load", "MAP cycles, inquiry, evidence-making, academic language, early portfolio, Grade 5 Pathways preparation; PDJ full-class", "Not active", "Academic Progression"],
 ["Scenario C", "Grade 5", "288", "390", "73.8%", "Lower School completion + Pathways activation", "EY: reference educator + assistant + monitor; LS: reference educator + assistant", "Full LS continuity", "Pathway classes active; PDJ full-class; no Passion Projects; Creative Hub preparation only", "Preparation only", "Transition Readiness"],
 ["Scenario D", "Grade 6", "318", "440", "72.3%", "Middle School launch + global/program activation", "EY/LS remains; Grade 6 cluster model", "Shared EY/LS/MS ecosystem", "Creative Hub, MUN, Passion Project, advisory, electives, mentorship", "Active", "Middle School Signature Launch"],
 		  ];
@@ -382,7 +382,7 @@ year: "2028",
 stage: "Foundational launch",
 ceiling: "EY + Grades 1-3",
 experience: "Grade 1 MAP Testing begins. Classroom quality, family relationship, learning documentation, language acquisition monitoring, academic performance routines, and PDJ embedded in routines.",
-ecosystem: "Reference educators, support package, monitors, Language & Academic Performance Coach, coaching, and shared specialist coverage.",
+ecosystem: "EY classroom package, LS classroom package, Language & Academic Performance Coach, coaching, and shared specialist coverage.",
 },
 {
 year: "2029",
@@ -510,7 +510,7 @@ inactive: [
 "AP and College Counseling begin in Grade 9",
 ],
 activation:
-"Scenario A reaches Grade 3 with MAP and academic evidence; Scenario B adds Grade 4 identity formation; Scenario C activates Grade 5 Pathways",
+"Scenario A reaches Grade 3 with MAP and academic evidence; Scenario B adds Grade 4 Researchers progression; Scenario C activates Grade 5 Pathways",
 },
 {
 division: "Middle School",
@@ -627,8 +627,8 @@ why: "Every section needs an adult responsible for relationships, learning, rout
 type: "Non-negotiable baseline",
 },
 {
-system: "Support package",
-why: "Enables differentiation, transitions, supervision, care, and small-group work.",
+system: "Classroom package",
+why: "Defines the adult structure inside the classroom: EY = reference educator + assistant + monitor; LS = reference educator + assistant.",
 type: "Baseline adjusted by age band",
 },
 {
@@ -666,15 +666,15 @@ type: "Baseline/recommended infrastructure",
 const decisionPanelItems = [
 {
 scenario: "Scenario A",
-decision: "Protect launch quality",
+decision: "Establish basic offer",
 signal: "MAP + early evidence",
 budget: "Baseline includes Learning Experience Design; LAP Coach recommended",
 tone: "border-emerald-200 bg-emerald-50 text-emerald-800",
 },
 {
 scenario: "Scenario B",
-decision: "Form Concept identity",
-signal: "Grade 4 as pre-Middle School runway",
+decision: "Deepen Researchers engine",
+signal: "Grade 4 academic progression",
 budget: "C&A support likely",
 tone: "border-blue-200 bg-blue-50 text-blue-800",
 },
@@ -698,7 +698,7 @@ const minimumAcademicOperationGroups = [
 label: "Student-facing baseline",
 title: "Linha de base vivida pelo estudante",
 description: "O que estudantes e famílias experimentam diretamente desde o primeiro dia.",
-systems: ["Classroom ownership", "Support package", "Specialist access"],
+systems: ["Classroom ownership", "Classroom package", "Specialist access"],
 tone: "border-emerald-100 bg-emerald-50",
 },
 {
@@ -791,7 +791,7 @@ area: "Learning Experience Design",
 originallyBudgeted: "Learning Experience Designer.",
 currentRecommendation: "Keep as baseline.",
 incrementalBudgetImpact: "No increment unless scope or FTE changes.",
-whyNecessary: "Protects PDJ quality, documentation, and learning-engine fidelity.",
+whyNecessary: "Supports PDJ quality, documentation, and learning-engine fidelity.",
 },
 {
 area: "After School",
@@ -827,14 +827,14 @@ area: "Scenario-specific programs",
 originallyBudgeted: "Not active.",
 currentRecommendation: "No Pathways, Creative Hub, MUN, Passion Projects, MS advisory, or academic electives.",
 incrementalBudgetImpact: "No increment.",
-whyNecessary: "Keeps Scenario A focused on launch quality without funding later program layers.",
+whyNecessary: "Keeps Scenario A focused on the basic offer without funding later program layers.",
 },
 ],
 },
 {
 scenario: "Scenario B",
 gradeCeiling: "Up to Grade 4",
-strategicFrame: "Academic progression + Concept identity formation",
+strategicFrame: "Researchers progression + Concept identity",
 rows: [
 ...sharedBudgetRows,
 {
@@ -842,7 +842,7 @@ area: "Specialist capacity",
 originallyBudgeted: "1 Body & Movement, 1 Arts, 1 Music.",
 currentRecommendation: "Validate load as Lower School usage deepens.",
 incrementalBudgetImpact: "Only the delta beyond the original 1 + 1 + 1 specialist baseline.",
-whyNecessary: "Keeps specialist coverage viable as Grade 4 adds documentation and program load.",
+whyNecessary: "Keeps specialist coverage viable as Grade 4 adds inquiry, documentation, evidence-making, and program load.",
 },
 {
 area: "Language Acquisition Coach / academic-language support",
@@ -854,9 +854,9 @@ whyNecessary: "Supports stronger MAP cycles, intervention routines, and academic
 {
 area: "Scenario-specific programs",
 originallyBudgeted: "No Passion Projects or Middle School program layer.",
-currentRecommendation: "Strengthen Concept identity, documentation, reflection, and learner habits.",
+currentRecommendation: "Strengthen the Lower School Researchers engine, documentation, academic evidence, research routines, and academic language.",
 incrementalBudgetImpact: "Only if added role allocation, specialist capacity, or external cost is required.",
-whyNecessary: "Uses Grade 4 to form learners before Grade 5 Pathways and Grade 6 Middle School.",
+whyNecessary: "Uses Grade 4 to make academic inquiry and evidence routines visible before Grade 5 Pathways and Grade 6 Middle School.",
 },
 ],
 },
@@ -954,7 +954,7 @@ year: "2028",
 stage: "Foundational launch",
 ceiling: "EY + Grades 1-3",
 experience: "MAP begins in Grade 1; learning evidence and PDJ routines become visible.",
-ecosystem: "Reference educators, support, monitors, LAP Coach, coaching, shared specialists.",
+ecosystem: "EY classroom package, LS classroom package, LAP Coach, coaching, shared specialists.",
 },
 {
 year: "2029",
@@ -1031,8 +1031,8 @@ tone: "border-emerald-200 bg-emerald-50 text-emerald-800",
 {
 id: "B",
 title: "Scenario B",
-identity: "Academic progression + Concept identity formation",
-delta: "Concept identity formation before Middle School",
+identity: "Researchers progression + Concept identity",
+delta: "Researchers engine becomes academically visible before Middle School",
 tone: "border-blue-200 bg-blue-50 text-blue-800",
 },
 {
@@ -1177,15 +1177,15 @@ rows: [
 {
 scenario: "Scenario A",
 status: "Estrutura básica",
-commitment: "PDJ operates through full-class experiential projects embedded in classroom routines; Learning Experience Design protects project quality and documentation.",
+commitment: "PDJ operates through full-class experiential projects embedded in classroom routines; Learning Experience Design supports project quality and documentation.",
 adult: "Learning Experience Design function required; no dedicated Project Mentor.",
 budget: "Baseline includes Learning Experience Design; no dedicated Project Mentor.",
 },
 {
 scenario: "Scenario B",
-status: "Formação de identidade",
-commitment: "Full-class PDJ continues; documentation, reflection, and learner habits deepen through Grade 4; Learning Experience Design becomes more intentional.",
-adult: "Use Grade 4 to form learners before MS; Learning Experience Design gains importance; Project Mentorship is not active yet.",
+status: "Progressão acadêmica",
+commitment: "Full-class PDJ continues; inquiry, evidence-making, Math reasoning, Scientific Literacy, documentation, and academic language deepen through Grade 4; Learning Experience Design becomes more intentional.",
+adult: "Use Grade 4 to strengthen the Researchers engine before MS; Learning Experience Design gains importance; Project Mentorship is not active yet.",
 budget: "No dedicated Signature Programs Lead yet.",
 },
 {
@@ -1218,7 +1218,7 @@ budget: "None.",
 {
 scenario: "Scenario B",
 status: "Preparação cultural",
-commitment: "Concept identity formation before Middle School.",
+commitment: "Researchers progression before Middle School.",
 adult: "Stronger reflection, documentation, agency routines.",
 budget: "Low/moderate support and coaching.",
 },
@@ -2310,7 +2310,7 @@ export default function OfferScenariosTab() {
                   <div className="grid gap-4 lg:grid-cols-4">
                     {[
                       ["Caminho básico da oferta", "Cenário A", "Estabelece a base da experiência escolar, com pacote de sala, MAP, PDJ em rotina e Learning Experience Design, mas ainda sem uma camada robusta de diferenciação acadêmica."],
-                      ["Caminho de progressão acadêmica", "Cenário B", "Grade 4 começa a fortalecer documentação, hábitos de aprendizagem, evidência acadêmica e identidade Concept."],
+                      ["Caminho de progressão acadêmica", "Cenário B", "Grade 4 torna o motor Researchers mais visível por investigação, evidências, raciocínio matemático, Scientific Literacy, documentação e linguagem acadêmica."],
                       ["Caminho pré-Middle School", "Cenário C", "Grade 5 ativa Pathways e protocolos de transição; projetos seguem em lógica full-class."],
                       ["Caminho com mudança operacional", "Cenário D", "Grade 6 ativa ritmo de Middle School, Passion Projects, clusters e mentoria de projeto."],
                     ].map(([label, scenario, detail]) => (
@@ -2903,9 +2903,9 @@ export default function OfferScenariosTab() {
 
 		        <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
 		          {[
-		            ["Minimum credible path", "Scenario A", "Protege a qualidade de lançamento com Learning Experience Design no baseline, MAP, evidências iniciais e LAP recomendado."],
-		            ["Strongest pre-Middle School path", "Scenario B", "Usa Grade 4 para formar identidade Concept antes do limiar de Middle School."],
-		            ["Category-shift path", "Scenario D", "Ativa clusters, Creative Hub, MUN, advisory e nova pressão de infraestrutura adulta."],
+		            ["Basic offer path", "Scenario A", "Estabelece a oferta básica com Learning Experience Design no baseline, MAP, evidências iniciais e LAP recomendado."],
+		            ["Academic progression path", "Scenario B", "Usa Grade 4 para tornar o motor Researchers mais visível por investigação, evidências e linguagem acadêmica."],
+		            ["Middle School operating shift", "Scenario D", "Ativa clusters, Creative Hub, MUN, advisory e nova pressão de infraestrutura adulta."],
 		          ].map(([label, scenario, detail]) => (
 		            <div key={label} className="rounded-2xl border border-slate-200 bg-white p-4">
 		              <div className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">{label}</div>
@@ -2970,7 +2970,7 @@ export default function OfferScenariosTab() {
 				              </p>
 				            </div>
 				            <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-[11px] font-bold leading-relaxed text-slate-300 lg:max-w-sm">
-				              Read from left to right: baseline protection, identity formation, Pathways activation, then Middle School operating-model launch.
+				              Read from left to right: basic offer, Researchers progression, Pathways activation, then Middle School operating-model launch.
 				            </div>
 				          </div>
 				          <div className="mt-5 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
