@@ -62,39 +62,85 @@ const Badge = ({
 const MS_ROADMAP_DATA = [
   {
     year: "2031", phase: "Grade 6 Launch", sections: "1-2 Sections", students: 50, fte: 3,
-    description: "Agile launch model prioritizing core culture and instructional versatility.",
+    description: "Grade 6 is the category shift into the Designers engine: cluster educators launch Passion Projects, advisory, documentation, critique cycles, and Project Mentorship as a coordinated function.",
     clusters: [
-      { name: "STEM (Mathematics & Natural Sciences)", type: "MS" },
-      { name: "Humanities (Portuguese & Social Sciences)", type: "MS" },
-      { name: "Global Studies (ELA & Projects)", type: "MS" },
+      { name: "Mathematics + Natural Sciences foundations", type: "MS" },
+      { name: "Humanities / Portuguese & Social Sciences", type: "MS" },
+      { name: "English Language Arts / Global Studies / Project Design coordination", type: "MS" },
     ]
   },
   {
     year: "2032", phase: "Grade 6-7 Growth", sections: "2-4 Sections", students: 100, fte: 7,
-    description: "Strategic transition to specialized instructional roles. Grade 7 introduces dedicated subject specialists while Grade 6 maintains cluster support.",
+    description: "Grade 7 strengthens subject specialization while project-based learning coordination remains a function, not an automatic dedicated payroll role.",
     clusters: [
-      { name: "Math, ELA & Portuguese Specialists", type: "MS" },
-      { name: "Social & Natural Science Specialists", type: "MS" },
-      { name: "Project Designer", type: "MS" },
+      { name: "Mathematics specialization", type: "MS" },
+      { name: "Portuguese + Social Sciences inquiry", type: "MS" },
+      { name: "Dedicated Natural Sciences domain", type: "MS" },
+      { name: "English Language Arts / Global Studies / Project Design coordination", type: "MS" },
     ]
   },
   {
     year: "2033", phase: "Grade 6-8 Full MS", sections: "6 Sections", students: 150, fte: 10,
-    description: "Operational efficiency at scale. Core teams handle 6 sections with a dedicated Coach driving pedagogical excellence across the division.",
+    description: "Grade 8 completes the Middle School readiness model with clearer subject domains, portfolio evidence, rubrics, and High School transition routines.",
     clusters: [
-      { name: "Math Team (2 Educators)", type: "MS" },
-      { name: "ELA Team (2 Educators)", type: "MS" },
-      { name: "Portuguese Team (2 Educators)", type: "MS" },
-      { name: "Science & Social Science Specialists", type: "MS" },
-      { name: "Teaching & Learning Coach", type: "SHARED" }
+      { name: "Mathematics", type: "MS" },
+      { name: "ELA / Global Studies", type: "MS" },
+      { name: "Portuguese + Social Sciences", type: "MS" },
+      { name: "Dedicated Natural Sciences", type: "MS" },
+      { name: "Learning Experience / Teaching & Learning support", type: "SHARED" }
     ]
   }
 ];
 
 const MIDDLE_SCHOOL_DATA = [
-  { grade: "Grade 6", focus: "Cluster-based Inquiry", model: "STEM + Humanities Clusters", ratio: "1:12.5", max: 50 },
-  { grade: "Grade 7", focus: "Specialist Transition", model: "Subject Specialists", ratio: "1:10", max: 50 },
-  { grade: "Grade 8", focus: "Academic Rigor", model: "Subject Specialists", ratio: "1:10", max: 50 },
+  { grade: "Grade 6", focus: "Designers Launch", model: "3 cluster educators + coordinated project functions", ratio: "1:12.5", max: 50 },
+  { grade: "Grade 7", focus: "Hybrid Specialization", model: "Mathematics, Portuguese, ELA, Natural Sciences, Social Sciences + aligned program functions", ratio: "1:10", max: 50 },
+  { grade: "Grade 8", focus: "High School Readiness", model: "Core-subject specialist model + Babson EPIC and program functions", ratio: "1:10", max: 50 },
+];
+
+const MS_OWNERSHIP_PROGRESSION = [
+  {
+    stage: "Grade 6",
+    model: "Cluster launch with explicit subject ownership.",
+    details: [
+      "Some domains may be combined for load viability.",
+      "Mathematics + Natural Sciences can be combined if complemented by Pathways, Advisory, STEAM elective, Project Mentorship, scientific inquiry, documentation, or critique cycles.",
+      "Passion Projects begin in Grade 6; Project Mentorship is a coordinated function, not automatic payroll.",
+    ],
+  },
+  {
+    stage: "Grade 7",
+    model: "Hybrid specialization.",
+    details: [
+      "Mathematics, Portuguese, and English Language Arts become viable full-load domains in a two-section Grades 6-7 model.",
+      "Natural Sciences becomes dedicated but still needs complementary load.",
+      "Social Sciences becomes dedicated but still needs complementary load.",
+    ],
+  },
+  {
+    stage: "Grade 8",
+    model: "Core-subject specialist model, not cluster-based.",
+    details: [
+      "Babson EPIC Certificate replaces Passion Projects as the main Grade 8 project-based entrepreneurship experience.",
+      "Mathematics, Portuguese, and English Language Arts each require two balanced educators in the two-section Grades 6-8 model.",
+      "Natural Sciences and Social Sciences each become viable one-educator subject-specialist loads.",
+      "Program functions continue: Babson EPIC, Pathways, Advisory, Electives, documentation, portfolio evidence, critique cycles, and external-facing presentation routines.",
+    ],
+  },
+];
+
+const MS_EDUCATOR_LOAD_ROWS = [
+  ["Grade 6, two sections", "Mathematics + Natural Sciences", "20", "1", "12 Mathematics + 8 Natural Sciences", "4 slots to reach 24", "Pathways, Advisory, STEAM elective, Project Mentorship, scientific inquiry", "Viable only if complemented"],
+  ["Grades 6-7, two sections", "Mathematics", "24", "1", "24", "0 to reach 24, up to 4 to max", "STEAM elective, data, Babson preparation", "Viable full-load domain"],
+  ["Grades 6-7, two sections", "Portuguese", "24", "1", "24", "0 to reach 24, up to 4 to max", "Writing, argumentation, portfolio evidence", "Viable full-load domain; does not need Social Sciences for load viability"],
+  ["Grades 6-7, two sections", "English Language Arts", "24", "1", "24", "0 to reach 24, up to 4 to max", "Research communication, presentation, portfolio evidence", "Viable full-load domain"],
+  ["Grades 6-7, two sections", "Natural Sciences", "16", "1", "16", "8 slots to reach 24", "Project Mentorship, scientific inquiry, documentation, critique cycles", "Dedicated domain, but needs complementary load"],
+  ["Grades 6-7, two sections", "Social Sciences", "16", "1", "16", "8 slots to reach 24", "Pathways, Advisory, MUN, civic inquiry, stakeholder mapping", "Dedicated domain, but needs complementary load"],
+  ["Grades 6-8, two sections", "Mathematics", "36", "2", "18 + 18", "Each educator needs 6 slots to reach 24, up to 10 to reach 28", "STEAM elective, Babson EPIC metrics, market sizing, financial modeling, data analysis", "Two balanced educators with aligned program functions"],
+  ["Grades 6-8, two sections", "Portuguese", "36", "2", "18 + 18", "Each educator needs 6 slots to reach 24, up to 10 to reach 28", "Babson EPIC writing, interviews, argumentation, reflection journals, portfolio evidence", "Two balanced educators with aligned literacy/project evidence functions"],
+  ["Grades 6-8, two sections", "English Language Arts", "36", "2", "18 + 18", "Each educator needs 6 slots to reach 24, up to 10 to reach 28", "Babson EPIC pitch, research communication, external-facing documentation, presentation support", "Two balanced educators with aligned communication/project functions"],
+  ["Grades 6-8, two sections", "Natural Sciences", "24", "1", "24", "0 to reach 24, up to 4 to max", "Scientific inquiry, evidence quality, prototyping", "Viable full subject-specialist load"],
+  ["Grades 6-8, two sections", "Social Sciences", "24", "1", "24", "0 to reach 24, up to 4 to max", "Babson EPIC social impact, SDG/context research, MUN, Pathways", "Viable full subject-specialist load"],
 ];
 
 type MiddleSchoolTabProps = {
@@ -169,16 +215,16 @@ const MiddleSchoolTab = ({ sections, setSections }: MiddleSchoolTabProps) => {
         <Card className="lg:col-span-2" title="Middle School: The Bridge" icon={Database}>
           <div className="space-y-6">
             <p className="text-sm text-slate-500 leading-relaxed">
-              Middle School at Concept is a strategic bridge between the generalist model of Lower School and the specialist model of High School. In Grade 6, we maintain stability through a cluster model (STEM and Humanities), while Grade 7 and 8 introduce dedicated subject specialists.
+              Middle School at Concept is the transition from Lower School Researchers into the Designers learning engine. Grade 6 is not one more Lower School grade: it activates Passion Projects, advisory, Creative Hub access, MUN, academic electives, documentation, portfolio evidence, critique cycles, and Project Mentorship as a coordinated function. A dedicated Project Mentor is conditional on validated cluster educator capacity.
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="p-4 rounded-2xl bg-blue-50 border border-blue-100">
-                <div className="flex items-center gap-2 mb-2"><Cpu className="h-4 w-4 text-blue-500" /><h4 className="text-xs font-bold text-slate-900">STEM Cluster</h4></div>
-                <p className="text-[10px] text-slate-500 leading-relaxed">Integrating Math and Natural Sciences to build quantitative literacy and scientific inquiry skills.</p>
+                <div className="flex items-center gap-2 mb-2"><Cpu className="h-4 w-4 text-blue-500" /><h4 className="text-xs font-bold text-slate-900">Mathematics / Natural Sciences</h4></div>
+                <p className="text-[10px] text-slate-500 leading-relaxed">Grade 6 integrates Mathematics and Natural Sciences foundations; from Grade 7 onward, Natural Sciences becomes a dedicated domain.</p>
               </div>
               <div className="p-4 rounded-2xl bg-amber-50 border border-amber-100">
-                <div className="flex items-center gap-2 mb-2"><BookOpen className="h-4 w-4 text-amber-500" /><h4 className="text-xs font-bold text-slate-900">Humanities Cluster</h4></div>
-                <p className="text-[10px] text-slate-500 leading-relaxed">Combining Portuguese and Social Sciences to develop critical reading, writing, and historical perspective.</p>
+                <div className="flex items-center gap-2 mb-2"><BookOpen className="h-4 w-4 text-amber-500" /><h4 className="text-xs font-bold text-slate-900">Humanities / Project Design</h4></div>
+                <p className="text-[10px] text-slate-500 leading-relaxed">Portuguese remains connected to Social Sciences through literacy, argumentation, civic and historical inquiry, while ELA / Global Studies carries the project-design language function.</p>
               </div>
             </div>
           </div>
@@ -187,16 +233,84 @@ const MiddleSchoolTab = ({ sections, setSections }: MiddleSchoolTabProps) => {
           <div className="space-y-4">
             <div className="flex justify-between items-center p-3 bg-slate-50 rounded-xl border border-slate-100">
               <span className="text-[10px] font-bold text-slate-400 uppercase">Grade 6</span>
-              <Badge variant="info">Cluster Model</Badge>
+              <Badge variant="info">Designers Cluster Launch</Badge>
             </div>
             <div className="flex justify-between items-center p-3 bg-slate-50 rounded-xl border border-slate-100">
               <span className="text-[10px] font-bold text-slate-400 uppercase">Grade 7-8</span>
-              <Badge variant="purple">Specialist Model</Badge>
+              <Badge variant="purple">Subject Domains</Badge>
             </div>
-            <p className="text-[10px] text-slate-400 italic">Cumulative ramp: 3 FTE with Grade 6, 7 FTE when Grade 7 opens, and 10 FTE when Grade 8 opens.</p>
+            <p className="text-[10px] text-slate-400 italic">Cumulative ramp remains 3 FTE with Grade 6, 7 FTE when Grade 7 opens, and 10 FTE when Grade 8 opens. Project Mentorship starts as a coordinated function, not automatic payroll.</p>
           </div>
         </Card>
       </div>
+
+      <Card title="Instructional Ownership Progression" icon={BookOpen}>
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+          {MS_OWNERSHIP_PROGRESSION.map((stage) => (
+            <div key={stage.stage} className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
+              <div className="text-[10px] font-bold uppercase tracking-widest text-blue-600">{stage.stage}</div>
+              <h4 className="mt-2 text-sm font-bold text-slate-900">{stage.model}</h4>
+              <ul className="mt-3 space-y-2 text-[10px] leading-relaxed text-slate-500">
+                {stage.details.map((detail) => (
+                  <li key={`${stage.stage}-${detail}`} className="flex gap-2">
+                    <ChevronRight className="mt-0.5 h-3 w-3 shrink-0 text-blue-300" />
+                    <span>{detail}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </Card>
+
+      <Card title="Educator Load Logic by Opening Stage" icon={Users}>
+        <div className="space-y-4">
+          <p className="text-xs font-medium leading-relaxed text-slate-500">
+            This model uses a two-section-per-grade scenario to illustrate educator load logic. It is not yet
+            a dynamic staffing calculator; future versions should allow sections per grade to be adjusted.
+            A 24-slot load is the minimum viable full-time educator load; 28 slots is the maximum teaching
+            load. Complementary functions complete the educator profile only when they align with the domain.
+          </p>
+          <div className="overflow-x-auto rounded-2xl border border-slate-100">
+            <table className="min-w-[980px] w-full text-left">
+              <thead>
+                <tr className="bg-slate-50 text-[9px] uppercase tracking-widest text-slate-400">
+                  {[
+                    "Opening stage",
+                    "Domain",
+                    "Weekly core slots",
+                    "Educators needed at 28 max",
+                    "Suggested distribution",
+                    "Complementary load need",
+                    "Best complementary functions",
+                    "Staffing implication",
+                  ].map((header) => (
+                    <th key={header} className="px-3 py-3 font-bold">{header}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {MS_EDUCATOR_LOAD_ROWS.map((row) => (
+                  <tr key={`${row[0]}-${row[1]}`} className="border-t border-slate-100 text-[10px] leading-relaxed text-slate-500">
+                    {row.map((cell, index) => (
+                      <td key={`${row[0]}-${row[1]}-${index}`} className={cn("px-3 py-3 align-top", index === 1 && "font-bold text-slate-900", index === 7 && "font-semibold text-blue-700")}>
+                        {cell}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className="rounded-2xl border border-blue-100 bg-blue-50 p-4 text-xs font-medium leading-relaxed text-slate-600">
+            By Grade 8, educator need is no longer driven by cluster coverage. It is driven by
+            subject-slot load and aligned program ownership. Domains with 36 weekly slots require
+            two educators at a 28-slot maximum, but the preferred distribution is balanced: 18 core
+            slots per educator, completed through domain-aligned program functions such as Babson
+            EPIC, electives, portfolio evidence, and critique cycles.
+          </div>
+        </div>
+      </Card>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {MIDDLE_SCHOOL_DATA.map((item, idx) => (
