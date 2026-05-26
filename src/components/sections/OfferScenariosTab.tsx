@@ -2307,11 +2307,12 @@ export default function OfferScenariosTab() {
                     </div>
                   </div>
 
-                  <div className="grid gap-4 lg:grid-cols-3">
+                  <div className="grid gap-4 lg:grid-cols-4">
                     {[
-                      ["Caminho mínimo crível", "Scenario B", "Progressão acadêmica com formação de identidade Concept antes do Middle School."],
-                      ["Caminho pré-Middle School mais forte", "Scenario C", "Lower School completo com Pathways ativo e ponte formal para Grade 6."],
-                      ["Mudança de categoria", "Scenario D", "Somente com ecossistema adulto aprovado para cluster, advisory, Creative Hub, MUN e especialistas."],
+                      ["Caminho básico da oferta", "Cenário A", "Estabelece a base da experiência escolar, com pacote de sala, MAP, PDJ em rotina e Learning Experience Design, mas ainda sem uma camada robusta de diferenciação acadêmica."],
+                      ["Caminho de progressão acadêmica", "Cenário B", "Grade 4 começa a fortalecer documentação, hábitos de aprendizagem, evidência acadêmica e identidade Concept."],
+                      ["Caminho pré-Middle School", "Cenário C", "Grade 5 ativa Pathways e protocolos de transição; projetos seguem em lógica full-class."],
+                      ["Caminho com mudança operacional", "Cenário D", "Grade 6 ativa ritmo de Middle School, Passion Projects, clusters e mentoria de projeto."],
                     ].map(([label, scenario, detail]) => (
                       <div key={label} className="rounded-[2rem] bg-[#e8eef3] p-5">
                         <div className="text-[10px] font-black uppercase tracking-[0.24em] text-[#214B74]">{label}</div>
