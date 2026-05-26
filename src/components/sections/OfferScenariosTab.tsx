@@ -101,8 +101,8 @@ strategicIdentity: "Academic progression + Concept identity formation",
 offerStage: "Lower School progression",
 classroomPackage: [
 "Fixed classroom package continues: EY = reference educator + assistant + monitor; LS = reference educator + assistant",
-"Grade 4 deepens documentation, reflection, project language, and Concept identity",
-"Learners are formed before the Grade 5 Pathways threshold",
+"Grade 4 deepens documentation, reflection, learner habits, academic evidence, and Concept identity",
+"PDJ remains full-class; Learning Experience Design becomes more important as documentation and reflection deepen",
 ],
 specialistEcosystem: [
 "Specialist planning premise: see Operating Assumptions.",
@@ -124,9 +124,9 @@ middleSchoolLogic: "Not active",
 recommendedPathway: "Academic Progression",
 roles: [
 "Teaching & Learning Coach: recommended",
-"Curriculum & Assessment Designer: recommended/shared",
 "Language & Academic Performance Coach: strongly recommended",
-"Signature Programs / Project Design Lead: not necessary",
+"Curriculum & Assessment Designer: recommended/shared",
+"Learning Experience Design function: more important as documentation and reflection deepen; Project Mentorship is not active yet",
 ],
 risk:
 "If Scenario B is treated only as one additional grade, the campus misses the opportunity to form learners before Middle School. Grade 4 should be used to consolidate the learning habits and evidence culture that make Grade 5 Pathways and Grade 6 Middle School more coherent.",
@@ -144,15 +144,17 @@ strategicIdentity: "Lower School completion + Pathways activation",
 offerStage: "Complete Lower School pathway",
 classroomPackage: [
 "Fixed classroom package continues: EY = reference educator + assistant + monitor; LS = reference educator + assistant",
-"Grade 5 activates Pathways and transition protocols",
-"Learner agency and portfolio evidence become more explicit",
+"Grade 5 activates Pathways and transition protocols; projects remain full-class experiential projects",
+"Passion Projects are not active yet; Project Mentorship begins with the Grade 6 Passion Project model",
 ],
 specialistEcosystem: [
 "Specialist planning premise: see Operating Assumptions.",
 ],
 signaturePrograms: [
 "Pathway classes active in Grade 5",
-"PDJ protocols, portfolio evidence, and Festival of Learning become more formal",
+"PDJ remains full-class: educator-guided whole-class inquiry projects, evidence gathering, and presentation routines",
+"Learning Experience Design and pathway coordination become stronger",
+"Portfolio evidence, Festival of Learning quality, and family-facing narratives mature",
 ],
 notActiveYet: [
 "Creative Hub",
@@ -165,10 +167,10 @@ middleSchoolLogic: "Preparation only",
 recommendedPathway: "Transition Readiness",
 roles: [
 "Teaching & Learning Coach: recommended",
-"Curriculum & Assessment Designer: recommended",
 "Language & Academic Performance Coach: required / strongly recommended",
-"Signature Programs / Project Design Lead: optional/shared",
-"Project Mentors: no dedicated role yet",
+"Curriculum & Assessment Designer: recommended",
+"Learning Experience Design function: strongly recommended — strongest pre-Middle School PDJ coordination",
+"Project Mentorship: not active yet",
 ],
 risk:
 "The risk is opening Grade 5 as a normal Lower School grade without preparing the academic and project architecture for Grade 6.",
@@ -200,8 +202,8 @@ offerActivated: [
 ],
 classroomPackage: [
 "Fixed classroom package continues: EY = reference educator + assistant + monitor; LS = reference educator + assistant",
-"Grade 6 shifts to cluster architecture",
-"Middle School rhythm begins while EY/LS baseline continues underneath",
+"Grade 6 shifts toward cluster architecture; Middle School operating rhythm begins",
+"Passion Projects begin in Grade 6: small-group learner-led projects, typically 3–5 learners per group",
 ],
 grade6ClusterModel: [
 "STEM Cluster: Integrated Mathematics + Natural Sciences",
@@ -214,9 +216,10 @@ specialistEcosystem: [
 ],
 signaturePrograms: [
 "Grade 6 cluster model launches",
-"PDJ shifts into a Middle School operating rhythm",
+"PDJ shifts from classroom design system to mentorship architecture through Passion Projects",
+"Projects shift from full-class to small-group learner-led; groups are typically 3–5 learners",
 "Advisory, Passion Project, MUN, Creative Hub, and academic elective active",
-"Project mentorship operates as a coordinated function",
+"Project mentorship becomes a coordinated operating function",
 ],
 notActiveYet: [
 "Grade 7 PSAT mock",
@@ -354,8 +357,8 @@ risk: "Higher cost before enrollment density fully matures.",
 		  ];
 const scenarioMatrix = [
 ["Scenario A", "Grade 3", "228", "302", "75.5%", "Foundation + early academic evidence", "EY: reference educator + assistant + monitor; LS: reference educator + assistant", "Shared, lighter version", "MAP from Grade 1, classroom PDJ, language monitoring", "Not active", "Coached Foundation"],
-["Scenario B", "Grade 4", "258", "346", "74.6%", "Academic progression + Concept identity formation", "EY: reference educator + assistant + monitor; LS: reference educator + assistant", "Shared, broader LS load", "MAP cycles, Concept learning habits, early portfolio, Grade 5 Pathways preparation", "Not active", "Academic Progression"],
-["Scenario C", "Grade 5", "288", "390", "73.8%", "Lower School completion + Pathways activation", "EY: reference educator + assistant + monitor; LS: reference educator + assistant", "Full LS continuity", "Pathway classes active; Creative Hub preparation only", "Preparation only", "Transition Readiness"],
+["Scenario B", "Grade 4", "258", "346", "74.6%", "Academic progression + Concept identity formation", "EY: reference educator + assistant + monitor; LS: reference educator + assistant", "Shared, broader LS load", "MAP cycles, Concept learning habits, early portfolio, Grade 5 Pathways preparation; PDJ full-class", "Not active", "Academic Progression"],
+["Scenario C", "Grade 5", "288", "390", "73.8%", "Lower School completion + Pathways activation", "EY: reference educator + assistant + monitor; LS: reference educator + assistant", "Full LS continuity", "Pathway classes active; PDJ full-class; no Passion Projects; Creative Hub preparation only", "Preparation only", "Transition Readiness"],
 ["Scenario D", "Grade 6", "318", "440", "72.3%", "Middle School launch + global/program activation", "EY/LS remains; Grade 6 cluster model", "Shared EY/LS/MS ecosystem", "Creative Hub, MUN, Passion Project, advisory, electives, mentorship", "Active", "Middle School Signature Launch"],
 		  ];
 const experienceGrowthRoadmap = [
@@ -1005,15 +1008,15 @@ budget: "Baseline includes Learning Experience Design; no dedicated Project Ment
 {
 scenario: "Scenario B",
 status: "Formação de identidade",
-commitment: "Project routines and Concept identity formation.",
-adult: "Use Grade 4 to form learners before MS.",
+commitment: "Full-class PDJ continues; documentation, reflection, and learner habits deepen through Grade 4; Learning Experience Design becomes more intentional.",
+adult: "Use Grade 4 to form learners before MS; Learning Experience Design gains importance; Project Mentorship is not active yet.",
 budget: "No dedicated Signature Programs Lead yet.",
 },
 {
 scenario: "Scenario C",
 status: "Ativo",
-commitment: "Grade 5 Pathways classes are active.",
-adult: "Pathways coordination may become shared/partial.",
+commitment: "Grade 5 Pathways classes are active; PDJ remains full-class; Learning Experience Design and pathway coordination strengthen.",
+adult: "Learning Experience Design coordination is important; Project Mentorship begins with the Grade 6 Passion Project model.",
 budget: "Possible shared Signature/Pathways coordination.",
 },
 {
