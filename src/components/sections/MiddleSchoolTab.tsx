@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo, useState } from "react";
 import { BookOpen, ChevronRight, Cpu, Database, Users } from "lucide-react";
 import { motion } from "motion/react";
 import { cn } from "../../lib/utils";
@@ -129,18 +129,129 @@ const MS_OWNERSHIP_PROGRESSION = [
   },
 ];
 
-const MS_EDUCATOR_LOAD_ROWS = [
-  ["Grade 6, two sections", "Mathematics + Natural Sciences", "20", "1", "12 Mathematics + 8 Natural Sciences", "4 slots to reach 24", "Pathways, Advisory, STEAM elective, Project Mentorship, scientific inquiry", "Viable only if complemented"],
-  ["Grades 6-7, two sections", "Mathematics", "24", "1", "24", "0 to reach 24, up to 4 to max", "STEAM elective, data, Babson preparation", "Viable full-load domain"],
-  ["Grades 6-7, two sections", "Portuguese", "24", "1", "24", "0 to reach 24, up to 4 to max", "Writing, argumentation, portfolio evidence", "Viable full-load domain; does not need Social Sciences for load viability"],
-  ["Grades 6-7, two sections", "English Language Arts", "24", "1", "24", "0 to reach 24, up to 4 to max", "Research communication, presentation, portfolio evidence", "Viable full-load domain"],
-  ["Grades 6-7, two sections", "Natural Sciences", "16", "1", "16", "8 slots to reach 24", "Project Mentorship, scientific inquiry, documentation, critique cycles", "Dedicated domain, but needs complementary load"],
-  ["Grades 6-7, two sections", "Social Sciences", "16", "1", "16", "8 slots to reach 24", "Pathways, Advisory, MUN, civic inquiry, stakeholder mapping", "Dedicated domain, but needs complementary load"],
-  ["Grades 6-8, two sections", "Mathematics", "36", "2", "18 + 18", "Each educator needs 6 slots to reach 24, up to 10 to reach 28", "STEAM elective, Babson EPIC metrics, market sizing, financial modeling, data analysis", "Two balanced educators with aligned program functions"],
-  ["Grades 6-8, two sections", "Portuguese", "36", "2", "18 + 18", "Each educator needs 6 slots to reach 24, up to 10 to reach 28", "Babson EPIC writing, interviews, argumentation, reflection journals, portfolio evidence", "Two balanced educators with aligned literacy/project evidence functions"],
-  ["Grades 6-8, two sections", "English Language Arts", "36", "2", "18 + 18", "Each educator needs 6 slots to reach 24, up to 10 to reach 28", "Babson EPIC pitch, research communication, external-facing documentation, presentation support", "Two balanced educators with aligned communication/project functions"],
-  ["Grades 6-8, two sections", "Natural Sciences", "24", "1", "24", "0 to reach 24, up to 4 to max", "Scientific inquiry, evidence quality, prototyping", "Viable full subject-specialist load"],
-  ["Grades 6-8, two sections", "Social Sciences", "24", "1", "24", "0 to reach 24, up to 4 to max", "Babson EPIC social impact, SDG/context research, MUN, Pathways", "Viable full subject-specialist load"],
+type MiddleSchoolGrade = "g6" | "g7" | "g8";
+type SectionCount = 0 | 1 | 2;
+type CoreDomainId = "mathematics" | "naturalSciences" | "portuguese" | "socialSciences" | "englishLanguageArts";
+type ProgramFunctionId =
+  | "passionProjects"
+  | "babsonEpic"
+  | "pathways"
+  | "advisory"
+  | "bodyMovement"
+  | "electives"
+  | "globalExpressionLeadership";
+
+const SECTION_COUNT_OPTIONS: SectionCount[] = [0, 1, 2];
+const LOAD_THRESHOLD_OPTIONS = [20, 22, 24, 26, 28, 30];
+const BLOCK_OPTIONS = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+const MS_GRADE_LABELS: Record<MiddleSchoolGrade, string> = {
+  g6: "Grade 6",
+  g7: "Grade 7",
+  g8: "Grade 8",
+};
+
+const CORE_DOMAIN_ASSUMPTIONS: Array<{
+  id: CoreDomainId;
+  label: string;
+  defaultSlotsPerSection: number;
+  complementaryFunctions: string[];
+}> = [
+  {
+    id: "mathematics",
+    label: "Mathematics",
+    defaultSlotsPerSection: 6,
+    complementaryFunctions: ["STEAM elective", "Babson EPIC metrics", "market sizing", "financial modeling", "data analysis", "impact measurement"],
+  },
+  {
+    id: "naturalSciences",
+    label: "Natural Sciences",
+    defaultSlotsPerSection: 4,
+    complementaryFunctions: ["scientific inquiry", "evidence quality", "experimentation", "prototyping", "sustainability, health, or environmental projects", "lab / investigation preparation"],
+  },
+  {
+    id: "portuguese",
+    label: "Portuguese",
+    defaultSlotsPerSection: 6,
+    complementaryFunctions: ["Babson EPIC writing", "stakeholder interview scripts", "argumentation", "reflection journals", "portfolio evidence", "public communication in Portuguese"],
+  },
+  {
+    id: "socialSciences",
+    label: "Social Sciences",
+    defaultSlotsPerSection: 4,
+    complementaryFunctions: ["Babson EPIC social impact framing", "SDG/context research", "stakeholder mapping", "MUN", "civic inquiry", "Pathways", "ethical impact analysis"],
+  },
+  {
+    id: "englishLanguageArts",
+    label: "English Language Arts",
+    defaultSlotsPerSection: 6,
+    complementaryFunctions: ["Babson EPIC pitch coaching", "research communication", "external-facing documentation", "presentation support", "mentor communication", "portfolio evidence in English"],
+  },
+];
+
+const PROGRAM_FUNCTION_ASSUMPTIONS: Array<{
+  id: ProgramFunctionId;
+  label: string;
+  defaultSlotsPerSection: number;
+  activeGrades: MiddleSchoolGrade[];
+  ownerDomains: string;
+  notes: string;
+}> = [
+  {
+    id: "passionProjects",
+    label: "Passion Projects",
+    defaultSlotsPerSection: 2,
+    activeGrades: ["g6", "g7"],
+    ownerDomains: "English Language Arts, Global Studies, domain mentors",
+    notes: "Active only in Grades 6-7; Project Mentorship remains a coordinated function.",
+  },
+  {
+    id: "babsonEpic",
+    label: "Babson EPIC Certificate",
+    defaultSlotsPerSection: 2,
+    activeGrades: ["g8"],
+    ownerDomains: "Mathematics, Portuguese, English Language Arts, Social Sciences",
+    notes: "Grade 8 project-based entrepreneurship anchor; replaces Passion Projects in Grade 8.",
+  },
+  {
+    id: "pathways",
+    label: "Pathways",
+    defaultSlotsPerSection: 1,
+    activeGrades: ["g6", "g7", "g8"],
+    ownerDomains: "Portuguese, Social Sciences, advisory",
+    notes: "Supports readiness, reflection, portfolio evidence, and transition routines.",
+  },
+  {
+    id: "advisory",
+    label: "Advisory",
+    defaultSlotsPerSection: 1,
+    activeGrades: ["g6", "g7", "g8"],
+    ownerDomains: "Cluster educators, Social Sciences, division team",
+    notes: "Belonging, routines, learner agency, and documentation touchpoint.",
+  },
+  {
+    id: "bodyMovement",
+    label: "Body & Movement",
+    defaultSlotsPerSection: 2,
+    activeGrades: ["g6", "g7", "g8"],
+    ownerDomains: "Body & Movement specialist",
+    notes: "Specialist pillar load; not part of core subject educator load.",
+  },
+  {
+    id: "electives",
+    label: "Electives",
+    defaultSlotsPerSection: 4,
+    activeGrades: ["g6", "g7", "g8"],
+    ownerDomains: "Domain-aligned specialists or MS educators",
+    notes: "Complements subject load when tied to a domain, not random filler.",
+  },
+  {
+    id: "globalExpressionLeadership",
+    label: "Global Expression / Leadership",
+    defaultSlotsPerSection: 2,
+    activeGrades: ["g6", "g7", "g8"],
+    ownerDomains: "English Language Arts, Global Studies, Social Sciences",
+    notes: "Supports public communication, leadership routines, and external-facing evidence.",
+  },
 ];
 
 type MiddleSchoolTabProps = {
@@ -148,7 +259,128 @@ type MiddleSchoolTabProps = {
   setSections: (s: number) => void;
 };
 
+const buildBalancedDistribution = (totalSlots: number, maxTeachingLoad: number) => {
+  if (totalSlots === 0) return [];
+  const educatorCount = Math.ceil(totalSlots / Math.max(1, maxTeachingLoad));
+  const baseLoad = Math.floor(totalSlots / educatorCount);
+  const remainder = totalSlots % educatorCount;
+
+  return Array.from({ length: educatorCount }, (_, index) => baseLoad + (index < remainder ? 1 : 0));
+};
+
+const formatSlotList = (loads: number[]) => (loads.length ? loads.join(" + ") : "Not active");
+
 const MiddleSchoolTab = ({ sections, setSections }: MiddleSchoolTabProps) => {
+  const [msSectionsByGrade, setMsSectionsByGrade] = useState<Record<MiddleSchoolGrade, SectionCount>>({
+    g6: 2,
+    g7: 0,
+    g8: 0,
+  });
+  const [minViableLoad, setMinViableLoad] = useState(24);
+  const [maxTeachingLoad, setMaxTeachingLoad] = useState(28);
+  const [domainSlotsPerSection, setDomainSlotsPerSection] = useState<Record<CoreDomainId, number>>(
+    () => Object.fromEntries(CORE_DOMAIN_ASSUMPTIONS.map((domain) => [domain.id, domain.defaultSlotsPerSection])) as Record<CoreDomainId, number>,
+  );
+  const [programSlotsPerSection, setProgramSlotsPerSection] = useState<Record<ProgramFunctionId, number>>(
+    () => Object.fromEntries(PROGRAM_FUNCTION_ASSUMPTIONS.map((program) => [program.id, program.defaultSlotsPerSection])) as Record<ProgramFunctionId, number>,
+  );
+
+  const activeGrades = useMemo(
+    () => (Object.entries(msSectionsByGrade) as Array<[MiddleSchoolGrade, SectionCount]>)
+      .filter(([, sectionCount]) => sectionCount > 0)
+      .map(([grade]) => grade),
+    [msSectionsByGrade],
+  );
+  const totalMiddleSchoolSections = activeGrades.reduce((total, grade) => total + msSectionsByGrade[grade], 0);
+  const validationWarnings = useMemo(() => {
+    const warnings: string[] = [];
+
+    if (msSectionsByGrade.g7 > 0 && msSectionsByGrade.g6 === 0) {
+      warnings.push("Grade 7 cannot be active if Grade 6 has 0 sections.");
+    }
+    if (msSectionsByGrade.g8 > 0 && (msSectionsByGrade.g6 === 0 || msSectionsByGrade.g7 === 0)) {
+      warnings.push("Grade 8 cannot be active unless both Grade 6 and Grade 7 are active.");
+    }
+    if (Object.values(msSectionsByGrade).some((sectionCount) => sectionCount > 2)) {
+      warnings.push("Rio model is capped at 2 sections per grade.");
+    }
+    if (maxTeachingLoad < minViableLoad) {
+      warnings.push("Maximum teaching load is lower than the minimum viable load.");
+    }
+    if (totalMiddleSchoolSections === 0) {
+      warnings.push("No Middle School grades active.");
+    }
+
+    return warnings;
+  }, [maxTeachingLoad, minViableLoad, msSectionsByGrade, totalMiddleSchoolSections]);
+  const activeStage = useMemo(() => {
+    if (totalMiddleSchoolSections === 0) return "No active Middle School model";
+    if (msSectionsByGrade.g8 > 0 && msSectionsByGrade.g6 > 0 && msSectionsByGrade.g7 > 0) return "Core-subject specialist model";
+    if (msSectionsByGrade.g7 > 0 && msSectionsByGrade.g6 > 0) return "Hybrid specialization";
+    if (msSectionsByGrade.g6 > 0 && msSectionsByGrade.g7 === 0 && msSectionsByGrade.g8 === 0) return "Cluster launch";
+    return "Invalid Rio progression";
+  }, [msSectionsByGrade, totalMiddleSchoolSections]);
+  const validationStatus = validationWarnings.length ? "Review needed" : "Valid Rio model";
+  const educatorLoadRows = useMemo(() => CORE_DOMAIN_ASSUMPTIONS.map((domain) => {
+    const weeklyCoreSlots = activeGrades.reduce(
+      (total, grade) => total + (msSectionsByGrade[grade] * domainSlotsPerSection[domain.id]),
+      0,
+    );
+    const distribution = buildBalancedDistribution(weeklyCoreSlots, maxTeachingLoad);
+    const remainingToMin = distribution.map((load) => Math.max(0, minViableLoad - load));
+    const remainingBeforeMax = distribution.map((load) => Math.max(0, maxTeachingLoad - load));
+    const hasOverload = distribution.some((load) => load > maxTeachingLoad);
+    const needsComplementaryLoad = distribution.some((load) => load < minViableLoad);
+    const status = weeklyCoreSlots === 0
+      ? "Not active"
+      : hasOverload
+        ? "Requires redistribution"
+        : needsComplementaryLoad
+          ? "Needs complementary load"
+          : "Viable full load";
+
+    return {
+      domain: domain.label,
+      weeklyCoreSlots,
+      educatorsNeeded: distribution.length,
+      distribution,
+      complementaryLoadNeed: weeklyCoreSlots === 0 ? "Not active" : remainingToMin.every((slots) => slots === 0) ? `0 to reach ${minViableLoad}` : `${formatSlotList(remainingToMin)} slots to reach ${minViableLoad}`,
+      remainingCapacity: weeklyCoreSlots === 0 ? "Not active" : `${formatSlotList(remainingBeforeMax)} slots before ${maxTeachingLoad}`,
+      complementaryFunctions: domain.complementaryFunctions.join(", "),
+      status,
+    };
+  }), [activeGrades, domainSlotsPerSection, maxTeachingLoad, minViableLoad, msSectionsByGrade]);
+  const programFunctionRows = useMemo(() => PROGRAM_FUNCTION_ASSUMPTIONS.map((program) => {
+    const activeProgramGrades = program.activeGrades.filter((grade) => msSectionsByGrade[grade] > 0);
+    const weeklySlots = activeProgramGrades.reduce(
+      (total, grade) => total + (msSectionsByGrade[grade] * programSlotsPerSection[program.id]),
+      0,
+    );
+
+    return {
+      functionName: program.label,
+      activeGrades: activeProgramGrades.length ? activeProgramGrades.map((grade) => MS_GRADE_LABELS[grade]).join(", ") : "Not active",
+      weeklySlots,
+      ownerDomains: program.ownerDomains,
+      notes: program.notes,
+    };
+  }), [msSectionsByGrade, programSlotsPerSection]);
+  const grade6ClusterInsight = useMemo(() => {
+    const grade6Sections = msSectionsByGrade.g6;
+    const mathematicsSlots = grade6Sections * domainSlotsPerSection.mathematics;
+    const naturalSciencesSlots = grade6Sections * domainSlotsPerSection.naturalSciences;
+    const combinedSlots = mathematicsSlots + naturalSciencesSlots;
+    const gapToMinimumLoad = Math.max(0, minViableLoad - combinedSlots);
+
+    return {
+      mathematicsSlots,
+      naturalSciencesSlots,
+      combinedSlots,
+      gapToMinimumLoad,
+      active: grade6Sections > 0 && msSectionsByGrade.g7 === 0 && msSectionsByGrade.g8 === 0,
+    };
+  }, [domainSlotsPerSection, minViableLoad, msSectionsByGrade]);
+
   return (
     <div className="space-y-8">
       <div className="pt-4">
@@ -266,22 +498,150 @@ const MiddleSchoolTab = ({ sections, setSections }: MiddleSchoolTabProps) => {
       <Card title="Educator Load Logic by Opening Stage" icon={Users}>
         <div className="space-y-4">
           <p className="text-xs font-medium leading-relaxed text-slate-500">
-            This model uses a two-section-per-grade scenario to illustrate educator load logic. It is not yet
-            a dynamic staffing calculator; future versions should allow sections per grade to be adjusted.
-            A 24-slot load is the minimum viable full-time educator load; 28 slots is the maximum teaching
-            load. Complementary functions complete the educator profile only when they align with the domain.
+            This simulator models Rio's Middle School load with a maximum of two sections per grade.
+            A 24-slot load is the minimum viable full-time educator load; 28 slots is the maximum
+            teaching load. Complementary functions complete the educator profile only when they align
+            with the domain.
           </p>
+          <div className="grid grid-cols-1 gap-3 lg:grid-cols-5">
+            {(Object.keys(msSectionsByGrade) as MiddleSchoolGrade[]).map((grade) => (
+              <label key={`ms-section-control-${grade}`} className="space-y-2 rounded-2xl border border-slate-100 bg-slate-50 p-3">
+                <span className="block text-[9px] font-bold uppercase tracking-widest text-slate-400">{MS_GRADE_LABELS[grade]} sections</span>
+                <select
+                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 outline-none focus:border-blue-400"
+                  value={msSectionsByGrade[grade]}
+                  onChange={(event) => setMsSectionsByGrade((current) => ({
+                    ...current,
+                    [grade]: Number(event.target.value) as SectionCount,
+                  }))}
+                >
+                  {SECTION_COUNT_OPTIONS.map((option) => (
+                    <option key={`${grade}-${option}`} value={option}>{option}</option>
+                  ))}
+                </select>
+              </label>
+            ))}
+            <label className="space-y-2 rounded-2xl border border-slate-100 bg-slate-50 p-3">
+              <span className="block text-[9px] font-bold uppercase tracking-widest text-slate-400">Minimum load</span>
+              <select
+                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 outline-none focus:border-blue-400"
+                value={minViableLoad}
+                onChange={(event) => setMinViableLoad(Number(event.target.value))}
+              >
+                {LOAD_THRESHOLD_OPTIONS.map((option) => (
+                  <option key={`min-${option}`} value={option}>{option} slots</option>
+                ))}
+              </select>
+            </label>
+            <label className="space-y-2 rounded-2xl border border-slate-100 bg-slate-50 p-3">
+              <span className="block text-[9px] font-bold uppercase tracking-widest text-slate-400">Maximum load</span>
+              <select
+                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 outline-none focus:border-blue-400"
+                value={maxTeachingLoad}
+                onChange={(event) => setMaxTeachingLoad(Number(event.target.value))}
+              >
+                {LOAD_THRESHOLD_OPTIONS.map((option) => (
+                  <option key={`max-${option}`} value={option}>{option} slots</option>
+                ))}
+              </select>
+            </label>
+          </div>
+
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-3 xl:grid-cols-6">
+            {[
+              ["Active stage", activeStage],
+              ["Grade sections", `G6 ${msSectionsByGrade.g6} · G7 ${msSectionsByGrade.g7} · G8 ${msSectionsByGrade.g8}`],
+              ["Total MS sections", `${totalMiddleSchoolSections}`],
+              ["Minimum viable load", `${minViableLoad} slots`],
+              ["Maximum teaching load", `${maxTeachingLoad} slots`],
+              ["Validation status", validationStatus],
+            ].map(([label, value]) => (
+              <div key={`ms-load-summary-${label}`} className="rounded-2xl border border-slate-100 bg-slate-50 p-3">
+                <div className="text-[9px] font-bold uppercase tracking-widest text-slate-400">{label}</div>
+                <div className="mt-2 text-sm font-bold text-slate-900">{value}</div>
+              </div>
+            ))}
+          </div>
+
+          {validationWarnings.length > 0 && (
+            <div className="rounded-2xl border border-amber-100 bg-amber-50 p-4 text-xs font-semibold leading-relaxed text-amber-900">
+              {validationWarnings.map((warning) => (
+                <div key={warning}>{warning}</div>
+              ))}
+            </div>
+          )}
+
+          <details className="rounded-2xl border border-slate-100 bg-slate-50 p-3">
+            <summary className="cursor-pointer text-[10px] font-bold uppercase tracking-widest text-slate-500">
+              Advanced assumptions
+            </summary>
+            <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
+              {CORE_DOMAIN_ASSUMPTIONS.map((domain) => (
+                <label key={`domain-block-control-${domain.id}`} className="space-y-2 rounded-2xl border border-slate-100 bg-white p-3">
+                  <span className="block text-[9px] font-bold uppercase tracking-widest text-slate-400">{domain.label}</span>
+                  <select
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-bold text-slate-700 outline-none focus:border-blue-400"
+                    value={domainSlotsPerSection[domain.id]}
+                    onChange={(event) => setDomainSlotsPerSection((current) => ({
+                      ...current,
+                      [domain.id]: Number(event.target.value),
+                    }))}
+                  >
+                    {BLOCK_OPTIONS.map((option) => (
+                      <option key={`domain-${domain.id}-${option}`} value={option}>{option} slots / section</option>
+                    ))}
+                  </select>
+                </label>
+              ))}
+              {PROGRAM_FUNCTION_ASSUMPTIONS.map((program) => (
+                <label key={`program-block-control-${program.id}`} className="space-y-2 rounded-2xl border border-slate-100 bg-white p-3">
+                  <span className="block text-[9px] font-bold uppercase tracking-widest text-slate-400">{program.label}</span>
+                  <select
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-bold text-slate-700 outline-none focus:border-blue-400"
+                    value={programSlotsPerSection[program.id]}
+                    onChange={(event) => setProgramSlotsPerSection((current) => ({
+                      ...current,
+                      [program.id]: Number(event.target.value),
+                    }))}
+                  >
+                    {BLOCK_OPTIONS.map((option) => (
+                      <option key={`program-${program.id}-${option}`} value={option}>{option} slots / section</option>
+                    ))}
+                  </select>
+                </label>
+              ))}
+            </div>
+          </details>
+
+          {grade6ClusterInsight.active && (
+            <div className="rounded-2xl border border-blue-100 bg-blue-50 p-4 text-xs font-medium leading-relaxed text-slate-600">
+              Grade 6 cluster insight: Mathematics + Natural Sciences produces {grade6ClusterInsight.combinedSlots}
+              {" "}weekly slots ({grade6ClusterInsight.mathematicsSlots} Mathematics + {grade6ClusterInsight.naturalSciencesSlots}
+              {" "}Natural Sciences), leaving a {grade6ClusterInsight.gapToMinimumLoad}-slot gap to the {minViableLoad}-slot
+              minimum viable load. This gap may be completed through Pathways, Advisory, STEAM elective,
+              Project Mentorship, scientific inquiry, documentation, or critique cycles. Project Mentorship
+              remains a coordinated function, not automatic payroll.
+            </div>
+          )}
+
+          {msSectionsByGrade.g8 > 0 && (
+            <div className="rounded-2xl border border-purple-100 bg-purple-50 p-4 text-xs font-medium leading-relaxed text-slate-600">
+              Grade 8 is not cluster-based. Babson EPIC Certificate replaces Passion Projects as the
+              Grade 8 project-based entrepreneurship anchor, while subject-slot load drives educator need.
+            </div>
+          )}
+
           <div className="overflow-x-auto rounded-2xl border border-slate-100">
             <table className="min-w-[980px] w-full text-left">
               <thead>
                 <tr className="bg-slate-50 text-[9px] uppercase tracking-widest text-slate-400">
                   {[
-                    "Opening stage",
                     "Domain",
                     "Weekly core slots",
-                    "Educators needed at 28 max",
+                    "Educators needed at max",
                     "Suggested distribution",
                     "Complementary load need",
+                    "Remaining capacity before max",
                     "Best complementary functions",
                     "Staffing implication",
                   ].map((header) => (
@@ -290,18 +650,45 @@ const MiddleSchoolTab = ({ sections, setSections }: MiddleSchoolTabProps) => {
                 </tr>
               </thead>
               <tbody>
-                {MS_EDUCATOR_LOAD_ROWS.map((row) => (
-                  <tr key={`${row[0]}-${row[1]}`} className="border-t border-slate-100 text-[10px] leading-relaxed text-slate-500">
-                    {row.map((cell, index) => (
-                      <td key={`${row[0]}-${row[1]}-${index}`} className={cn("px-3 py-3 align-top", index === 1 && "font-bold text-slate-900", index === 7 && "font-semibold text-blue-700")}>
-                        {cell}
-                      </td>
-                    ))}
+                {educatorLoadRows.map((row) => (
+                  <tr key={row.domain} className="border-t border-slate-100 text-[10px] leading-relaxed text-slate-500">
+                    <td className="px-3 py-3 align-top font-bold text-slate-900">{row.domain}</td>
+                    <td className="px-3 py-3 align-top">{row.weeklyCoreSlots}</td>
+                    <td className="px-3 py-3 align-top">{row.educatorsNeeded}</td>
+                    <td className="px-3 py-3 align-top">{formatSlotList(row.distribution)}</td>
+                    <td className="px-3 py-3 align-top">{row.complementaryLoadNeed}</td>
+                    <td className="px-3 py-3 align-top">{row.remainingCapacity}</td>
+                    <td className="px-3 py-3 align-top">{row.complementaryFunctions}</td>
+                    <td className="px-3 py-3 align-top font-semibold text-blue-700">{row.status}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
+
+          <div className="overflow-x-auto rounded-2xl border border-slate-100">
+            <table className="min-w-[820px] w-full text-left">
+              <thead>
+                <tr className="bg-slate-50 text-[9px] uppercase tracking-widest text-slate-400">
+                  {["Function", "Active grades", "Weekly slots generated", "Suggested owner domains", "Notes"].map((header) => (
+                    <th key={header} className="px-3 py-3 font-bold">{header}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {programFunctionRows.map((row) => (
+                  <tr key={row.functionName} className="border-t border-slate-100 text-[10px] leading-relaxed text-slate-500">
+                    <td className="px-3 py-3 align-top font-bold text-slate-900">{row.functionName}</td>
+                    <td className="px-3 py-3 align-top">{row.activeGrades}</td>
+                    <td className="px-3 py-3 align-top">{row.weeklySlots}</td>
+                    <td className="px-3 py-3 align-top">{row.ownerDomains}</td>
+                    <td className="px-3 py-3 align-top">{row.notes}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
           <div className="rounded-2xl border border-blue-100 bg-blue-50 p-4 text-xs font-medium leading-relaxed text-slate-600">
             By Grade 8, educator need is no longer driven by cluster coverage. It is driven by
             subject-slot load and aligned program ownership. Domains with 36 weekly slots require
