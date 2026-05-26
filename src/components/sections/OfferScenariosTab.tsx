@@ -343,10 +343,12 @@ const bodyMovementReferenceLoads = [
 		  ];
 const bodyMovementReferenceTotals = ["Total Body & Movement load", "27", "38", "20", "20", "2", "107"];
 const middleSchoolClusters = [
-["STEM Cluster", "Integrated Mathematics + Natural Sciences", "One cluster educator at launch if load allows"],
-["Humanities Cluster", "Língua Portuguesa + Social Sciences", "One cluster educator at launch if load allows"],
-["Global Studies / Project Design", "ELA + Passion Project + Global Expression / early pathways", "One educator or shared project-design role"],
-["Shared specialist ecosystem", "Body & Movement, Creative Hub, Arts, Design, electives", "Reuses the EY/LS specialist ecosystem"],
+["Grade 6 STEM launch profile", "Mathematics + Natural Sciences foundations", "Grade 6 launch profile only; viable when complemented by Pathways, Advisory, STEAM elective, Project Mentorship, scientific inquiry, documentation, or critique cycles"],
+["Grade 7 hybrid specialization", "Mathematics, Portuguese, and English Language Arts become stronger full-load domains; Natural Sciences and Social Sciences become dedicated domains with aligned complementary functions", "Hybrid specialization stage; not a cluster-only model"],
+["Humanities coordination", "Portuguese and Social Sciences remain academically connected through argumentation, civic inquiry, academic language, and evidence routines", "Portuguese does not need Social Sciences for load viability once Grades 6-7 have two sections"],
+["English Language Arts / Global Studies coordination", "ELA, communication, documentation, early pathways, and project-based learning routines", "Coordinated function, not a default project-design payroll role"],
+["Shared specialist ecosystem", "Body & Movement, Sound Exploration / Music, Artistic Design / Atelier, and Design Technologies / Learning Experience Designer", "Distinct capacity domains; not one generic specialist pool"],
+["Grade 8 program transition", "Grades 6-7 use Passion Projects as the project-based learning structure", "Grade 8 transitions to Babson EPIC Certificate as the entrepreneurship and external-facing evidence experience"],
 		  ];
 const middleSchoolProgression = [
 ["Grade 6", "Cluster-based launch"],
@@ -356,9 +358,9 @@ const middleSchoolProgression = [
 		  ];
 const mentorshipProgression = [
 ["Up to Grade 5", "PDJ is a classroom design and documentation system; educators guide full-class experiential projects through each division's learning engine — Explorers in EY, Researchers in LS"],
-["Grade 6", "Educators act as mentors within a coordinated project-design architecture"],
-["Grade 7", "Educators continue mentoring, with more external testing and pathway logic"],
-["Grade 8", "Program-led mentorship model, Babson EPIC culmination"],
+["Grade 6", "Educators act as mentors within coordinated project architecture"],
+["Grade 7", "Hybrid specialization and pathway logic strengthen mentorship routines"],
+["Grade 8", "Babson EPIC program-led mentorship and evidence routines"],
 ["High School", "Specialist mentorship, capstones, internships, university-facing evidence"],
 		  ];
 const projectMentorTriggers = [
@@ -2263,7 +2265,7 @@ export default function OfferScenariosTab() {
                 </div>
               </div>
               <div className="offer-scenarios-print-soft-panel p-5">
-                <h3 className="text-xl text-slate-950">Middle School cluster model</h3>
+                <h3 className="text-xl text-slate-950">Middle School instructional model by stage</h3>
                 <div className="mt-4 space-y-2">
                   {middleSchoolClusters.map(([cluster, coverage, premise]) => (
                     <div key={`print-cluster-${cluster}`} className="rounded-xl bg-white p-3 text-xs leading-relaxed text-slate-600">
@@ -3060,7 +3062,7 @@ export default function OfferScenariosTab() {
 
                   <div className="grid gap-4 xl:grid-cols-2">
                     <div className="rounded-[2rem] bg-white p-6">
-                      <h4 className="text-xl font-black text-slate-950">Middle School cluster model</h4>
+                      <h4 className="text-xl font-black text-slate-950">Middle School instructional model by stage</h4>
                       <div className="mt-5 space-y-2">
                         {middleSchoolClusters.map(([cluster, coverage, premise]) => (
                           <div key={`console-${cluster}`} className="rounded-2xl bg-[#e8eef3] p-4">
@@ -4258,19 +4260,19 @@ export default function OfferScenariosTab() {
 		            </div>
 		          </Card>
 
-			          <Card title="Lançamento Middle School: Modelo por Clusters" icon={Database}>
+			          <Card title="Lançamento Middle School: modelo instrucional por estágio" icon={Database}>
 			            <div className="space-y-4">
 			              <p className="text-sm leading-relaxed text-slate-600">
-			                Operating detail for Scenario D: cluster coverage, launch premise, and how the
-			                model matures after Grade 6.
+			                Operating detail for Scenario D: Grade 6 cluster launch, Grade 7 hybrid
+			                specialization, and Grade 8 core-subject specialist model with program functions.
 		              </p>
 		              <div className="overflow-x-auto rounded-2xl border border-slate-100">
 		                <table className="min-w-[720px] w-full text-left">
 		                  <thead>
 		                    <tr className="bg-slate-50 text-[10px] uppercase tracking-widest text-slate-400">
-		                      <th className="px-3 py-3">Cluster</th>
+		                      <th className="px-3 py-3">Stage / function</th>
 		                      <th className="px-3 py-3">Coverage</th>
-		                      <th className="px-3 py-3">Staffing premise</th>
+		                      <th className="px-3 py-3">Operating premise</th>
 		                    </tr>
 		                  </thead>
 		                  <tbody>
