@@ -635,7 +635,7 @@ items: [
 "Learning documentation and portfolio routines",
 "MAP from Grade 1",
 "Intervention/enrichment cycles",
-"PDJ routines",
+"PDJ through Researchers inquiry",
 "Specialist access",
 "Family-facing evidence of learning",
 "Language & Academic Performance monitoring",
@@ -647,11 +647,11 @@ note: "Grade 6 is no longer classroom-centered.",
 items: [
 "Cluster educators",
 "Advisory routine",
-"Passion Project routine",
+"Passion Projects",
 "Creative Hub access",
 "MUN activation",
 "Academic elective",
-"Project mentorship coordination",
+"Project Mentorship as a coordinated function",
 "Shared specialists",
 "Performance/language monitoring",
 "Portfolio evidence",
@@ -672,28 +672,28 @@ type: "Baseline adjusted by age band",
 },
 {
 system: "Specialist access",
-why: "Concept's experience depends on movement, sound/music, arts, design, and technologies.",
+why: "Concept's experience depends on Body & Movement, Sound Exploration / Music, Artistic Design / Atelier, and Design Technologies / Learning Experience Designer. Design Technologies represents the Learning Experience Designer's classroom-facing capacity, not a separate specialist payroll role.",
 type: "Shared specialist ecosystem",
 },
 {
 system: "Academic performance and language acquisition",
-why: "MAP begins in Grade 1, and bilingual/international learning requires early language monitoring, intervention, enrichment, and family-facing evidence.",
+why: "MAP from Grade 1, the bilingual model, Science of Reading alignment, language monitoring, intervention, enrichment, and family-facing evidence work together to make academic progress visible.",
 type: "Recommended from launch; required as complexity grows",
 guardrail: "Do not present Language & Academic Performance Coach as a late-stage add-on.",
 },
 {
 system: "Curriculum and assessment coherence",
-why: "Prevents each educator from inventing the academic experience independently.",
+why: "Connects teacher-as-researcher practice, shared curriculum, assessment, documentation, and evidence routines so educators do not invent the academic experience independently.",
 type: "Shared/recommended in early scenarios; stronger by Grade 4/5",
 },
 {
 system: "Documentation and portfolio",
-why: "Makes learning visible to families and supports progression across divisions.",
+why: "Makes thinking visible, supports teacher interpretation and learner metacognition, creates family-facing evidence, and shows progression across divisions.",
 type: "Baseline from launch, matures over time",
 },
 {
 system: "Signature program routines",
-why: "PDJ is a classroom-based experiential learning framework from EY through Grade 5 — full-class projects guided by educators. Passion Projects begin only in Grade 6, when projects shift to small groups and project mentorship becomes a coordinated function. Grade 5 Pathways activate; Grade 6 Creative Hub and MUN activate.",
+why: "Project Design Journey is the schoolwide umbrella for experiential learning. In Early Years, it is expressed through Reggio-inspired Explorers inquiry. In Lower School, it becomes more explicit through Researchers and phenomenon-based learning. Through Grade 5, projects remain full-class investigations guided by educators. Passion Projects begin in Grade 6.",
 type: "Scenario-dependent activation",
 },
 {
@@ -3083,18 +3083,15 @@ export default function OfferScenariosTab() {
                     </div>
                   </div>
 
-                  <div className="grid gap-4 xl:grid-cols-3">
-                    {pathwayOptions.map((pathway) => (
-                      <div key={`console-${pathway.title}`} className={cn("rounded-[2rem] p-5", pathway.recommendation ? "bg-[#16334f] text-white" : "bg-white text-slate-950")}>
-                        <h4 className="text-xl font-black">{pathway.title}</h4>
-                        <p className={cn("mt-3 text-sm font-semibold leading-relaxed", pathway.recommendation ? "text-blue-50/75" : "text-slate-600")}>
-                          {pathway.purpose}
-                        </p>
-                        <div className={cn("mt-4 text-xs font-bold leading-relaxed", pathway.recommendation ? "text-white/75" : "text-slate-500")}>
-                          {pathway.risk}
-                        </div>
-                      </div>
-                    ))}
+                  <div className="rounded-[2rem] bg-white p-6">
+                    <h4 className="text-xl font-black text-slate-950">How to read the scenarios</h4>
+                    <p className="mt-3 max-w-4xl text-sm font-semibold leading-relaxed text-slate-600">
+                      Scenario A protects the basic launch offer. Scenario B strengthens Lower School
+                      academic visibility through the Researchers engine. Scenario C completes the Lower
+                      School pathway and transition architecture. Scenario D changes category by activating
+                      Middle School rhythm, Passion Projects, cluster logic, and conditional project
+                      mentorship capacity.
+                    </p>
                   </div>
 
                   <div className="rounded-[2rem] bg-white p-6">
