@@ -35,8 +35,17 @@ const Card = ({ children, className, title, subtitle, icon: Icon, actions, style
 
 type OfferScenarioView = "brief" | "ladder" | "scenario" | "budget" | "architecture" | "appendix";
 
+type BudgetRowStatus =
+  | "Baseline control"
+  | "Mapping validation"
+  | "Scenario driver"
+  | "Potential increment"
+  | "Conditional increment"
+  | "Not active";
+
 type BudgetComparisonRow = {
   area: string;
+  status: BudgetRowStatus;
   originallyBudgeted: string;
   currentRecommendation: string;
   incrementalBudgetImpact: string;
@@ -795,39 +804,59 @@ budgetSlot: "R$ ________",
 ];
 const budgetComparisonColumns = [
 "Area",
-"Originally budgeted",
+"Original basis",
 "Current recommendation",
-"Incremental budget impact",
-"Why the increment is necessary",
+"Increment rule",
+"Validation needed",
+];
+const scenarioBudgetComparisonColumns = [
+"Status",
+"Area",
+"Original basis",
+"Current recommendation",
+"Increment rule",
+"Why it matters / validation",
 ];
 const sharedBudgetRows: BudgetComparisonRow[] = [
 {
 area: "Classroom package",
+status: "Baseline control",
 originallyBudgeted: "EY and LS classroom package.",
 currentRecommendation: "EY = reference educator + assistant + monitor. LS = reference educator + assistant.",
 incrementalBudgetImpact: "No increment unless quantity, FTE, salary band, or coverage changes.",
-whyNecessary: "Clarifies the baseline classroom package and avoids confusion with broader support roles.",
+whyNecessary: "Validate only if quantity, FTE, salary band, or coverage changes.",
 },
 {
 area: "Leadership",
+status: "Baseline control",
 originallyBudgeted: "Division Principal / division leadership basis.",
 currentRecommendation: "Keep as baseline.",
 incrementalBudgetImpact: "No increment unless scope or FTE changes.",
-whyNecessary: "Protects launch coherence, division routines, family interface, and operating decisions.",
+whyNecessary: "Confirm title and scope mapping against the salary basis.",
 },
 {
 area: "Learning Experience Design",
+status: "Baseline control",
 originallyBudgeted: "Learning Experience Designer.",
 currentRecommendation: "Keep as baseline.",
 incrementalBudgetImpact: "No increment unless scope or FTE changes.",
-whyNecessary: "Supports PDJ quality, documentation, and learning-engine fidelity.",
+whyNecessary: "Validate only if scope, FTE, salary band, or coverage changes.",
 },
 {
-area: "After School",
+area: "After School role mapping",
+status: "Mapping validation",
 originallyBudgeted: "After School Educator, HC 1 from 2028. Coordinator scope not confirmed.",
 currentRecommendation: "Add or validate After School Coordinator scope.",
 incrementalBudgetImpact: "No increment only if existing After School Educator covers coordinator scope. Otherwise, validate coordinator increment with Finance/HR.",
-whyNecessary: "Protects after-school logistics, family communication, vendor routines, enrichment operations, and avoids overload on academic leadership.",
+whyNecessary: "Confirm whether coordinator scope is baseline, a scope upgrade, or a reclassification.",
+},
+{
+area: "Specialist baseline",
+status: "Baseline control",
+originallyBudgeted: "1 Body & Movement, 1 Arts, 1 Music.",
+currentRecommendation: "Keep as the original specialist baseline.",
+incrementalBudgetImpact: "Only capacity beyond 1 + 1 + 1 is a potential increment.",
+whyNecessary: "Validate scenario-specific specialist deltas separately by load, schedule, space, and program ambition.",
 },
 ];
 const scenarioBudgetComparisons: ScenarioBudgetComparison[] = [
@@ -836,16 +865,17 @@ scenario: "Scenario A",
 gradeCeiling: "Up to Grade 3",
 strategicFrame: "Minimum credible launch path",
 rows: [
-...sharedBudgetRows,
 {
-area: "Specialist capacity",
-originallyBudgeted: "1 Body & Movement, 1 Arts, 1 Music.",
-currentRecommendation: "Keep launch specialist baseline.",
-incrementalBudgetImpact: "No increment unless Scenario A expands beyond 1 + 1 + 1.",
-whyNecessary: "Prevents the original specialist baseline from being misread as a new cost.",
+area: "Specialist expansion beyond baseline",
+status: "Not active",
+originallyBudgeted: "1 Body & Movement, 1 Arts, 1 Music already covered in Baseline / Governance Controls.",
+currentRecommendation: "No specialist expansion beyond the original 1 + 1 + 1 baseline for Scenario A.",
+incrementalBudgetImpact: "No increment unless timetable validation shows coverage, age-band, setup, or program complexity exceeds baseline capacity.",
+whyNecessary: "Keeps Scenario A as the basic offer path while preserving the need to validate specialist load as usage deepens.",
 },
 {
 area: "Language Acquisition Coach / academic-language support",
+status: "Potential increment",
 originallyBudgeted: "Not found in payroll role basis; validate with Finance/HR.",
 currentRecommendation: "LAP Coach / academic-language support strongly recommended.",
 incrementalBudgetImpact: "Increment unless Finance/HR confirms this support was already budgeted.",
@@ -853,6 +883,7 @@ whyNecessary: "Supports MAP, bilingual monitoring, intervention, enrichment, and
 },
 {
 area: "Scenario-specific programs",
+status: "Not active",
 originallyBudgeted: "Not active.",
 currentRecommendation: "No Pathways, Creative Hub, MUN, Passion Projects, MS advisory, or academic electives.",
 incrementalBudgetImpact: "No increment.",
@@ -865,25 +896,27 @@ scenario: "Scenario B",
 gradeCeiling: "Up to Grade 4",
 strategicFrame: "Researchers progression + Concept identity",
 rows: [
-...sharedBudgetRows,
 {
-area: "Specialist capacity",
-originallyBudgeted: "1 Body & Movement, 1 Arts, 1 Music.",
+area: "Specialist load pressure",
+status: "Potential increment",
+originallyBudgeted: "Shared specialist baseline covers 1 Body & Movement, 1 Arts, 1 Music.",
 currentRecommendation: "Validate load as Lower School usage deepens.",
 incrementalBudgetImpact: "Only the delta beyond the original 1 + 1 + 1 specialist baseline.",
 whyNecessary: "Keeps specialist coverage viable as Grade 4 adds inquiry, documentation, evidence-making, and program load.",
 },
 {
 area: "Language Acquisition Coach / academic-language support",
+status: "Potential increment",
 originallyBudgeted: "Not found in payroll role basis; validate with Finance/HR.",
 currentRecommendation: "LAP Coach / academic-language support strongly recommended.",
 incrementalBudgetImpact: "Increment unless Finance/HR confirms this support was already budgeted.",
 whyNecessary: "Supports stronger MAP cycles, intervention routines, and academic evidence.",
 },
 {
-area: "Scenario-specific programs",
+area: "Researchers progression",
+status: "Scenario driver",
 originallyBudgeted: "No Passion Projects or Middle School program layer.",
-currentRecommendation: "Strengthen the Lower School Researchers engine, documentation, academic evidence, research routines, and academic language.",
+currentRecommendation: "Strengthen phenomenon-based learning, documentation, evidence-making, Math reasoning, Scientific Literacy, academic language, and research routines.",
 incrementalBudgetImpact: "Only if added role allocation, specialist capacity, or external cost is required.",
 whyNecessary: "Uses Grade 4 to make academic inquiry and evidence routines visible before Grade 5 Pathways and Grade 6 Middle School.",
 },
@@ -894,26 +927,44 @@ scenario: "Scenario C",
 gradeCeiling: "Up to Grade 5",
 strategicFrame: "Lower School completion + Pathways activation",
 rows: [
-...sharedBudgetRows,
 {
-area: "Specialist capacity",
-originallyBudgeted: "1 Body & Movement, 1 Arts, 1 Music.",
+area: "Specialist / Design Technologies load",
+status: "Potential increment",
+originallyBudgeted: "Shared specialist baseline covers 1 Body & Movement, 1 Arts, 1 Music.",
 currentRecommendation: "Validate specialist and Design Technologies load for Pathways readiness.",
 incrementalBudgetImpact: "Only the delta beyond the original 1 + 1 + 1 specialist baseline.",
 whyNecessary: "Prevents Pathways and transition readiness from overloading the shared specialist model.",
 },
 {
 area: "Language Acquisition Coach / academic-language support",
+status: "Potential increment",
 originallyBudgeted: "Not found in payroll role basis; validate with Finance/HR.",
 currentRecommendation: "LAP Coach / academic-language support required / strongly recommended.",
 incrementalBudgetImpact: "Increment unless Finance/HR confirms this support was already budgeted.",
 whyNecessary: "Supports Grade 5 monitoring, intervention, enrichment, and transition evidence.",
 },
 {
-area: "Scenario-specific programs",
+area: "Grade 5 Pathways and transition protocols",
+status: "Scenario driver",
 originallyBudgeted: "Grade 5 Pathways coordination not confirmed in payroll basis.",
-currentRecommendation: "Activate Grade 5 Pathways and transition protocols; projects remain full-class.",
+currentRecommendation: "Activate Grade 5 Pathways, transition protocols, portfolio evidence, and readiness routines.",
 incrementalBudgetImpact: "Only if Pathways requires added FTE, role allocation, specialist capacity, or external cost.",
+whyNecessary: "Completes Lower School and builds the Middle School bridge.",
+},
+{
+area: "Full-class PDJ",
+status: "Scenario driver",
+originallyBudgeted: "PDJ is part of the schoolwide learning model.",
+currentRecommendation: "Keep Grade 5 projects as full-class experiential projects through the Researchers engine.",
+incrementalBudgetImpact: "No automatic increment unless delivery requires added role allocation, specialist capacity, or external cost.",
+whyNecessary: "Preserves the Scenario C boundary without implying Passion Projects are active.",
+},
+{
+area: "Passion Projects",
+status: "Not active",
+originallyBudgeted: "Not active before Grade 6.",
+currentRecommendation: "Do not activate Passion Projects or Project Mentorship in Scenario C.",
+incrementalBudgetImpact: "No increment.",
 whyNecessary: "Builds the Middle School bridge without implying Passion Projects or Project Mentorship are active.",
 },
 ],
@@ -923,16 +974,17 @@ scenario: "Scenario D",
 gradeCeiling: "Up to Grade 6",
 strategicFrame: "Middle School launch + program activation",
 rows: [
-...sharedBudgetRows,
 {
-area: "Specialist capacity",
-originallyBudgeted: "1 Body & Movement, 1 Arts, 1 Music.",
+area: "Creative Hub / Design Technologies / shared Middle School capacity",
+status: "Potential increment",
+originallyBudgeted: "Shared specialist baseline covers 1 Body & Movement, 1 Arts, 1 Music; Creative Hub and MS capacity not confirmed as covered.",
 currentRecommendation: "Validate expanded specialist, Creative Hub, Design Technologies, and shared MS capacity.",
 incrementalBudgetImpact: "Only the delta beyond the original 1 + 1 + 1 specialist baseline.",
 whyNecessary: "Grade 6 adds a Middle School rhythm, spaces, schedules, and program layers.",
 },
 {
 area: "Language Acquisition Coach / academic-language support",
+status: "Potential increment",
 originallyBudgeted: "Not found in payroll role basis; validate with Finance/HR.",
 currentRecommendation: "LAP Coach / academic-language support required / strongly recommended.",
 incrementalBudgetImpact: "Increment unless Finance/HR confirms this support was already budgeted.",
@@ -940,10 +992,27 @@ whyNecessary: "Supports bilingual monitoring, intervention, enrichment, and MS-f
 },
 {
 area: "Project Mentorship / Passion Projects",
+status: "Scenario driver",
 originallyBudgeted: "Not active before Grade 6. No dedicated Project Mentor payroll role currently modeled.",
 currentRecommendation: "Activate Project Mentorship as a coordinated function for Grade 6 Passion Projects. First allocate to cluster educators if timetable capacity allows.",
-incrementalBudgetImpact: "No automatic increment. Increment only if validated mentorship load exceeds available Grade 6 / Grade 7 cluster educator capacity. Dedicated or partial Project Mentor FTE to be validated with Finance/HR.",
+incrementalBudgetImpact: "No automatic increment for the function itself.",
 whyNecessary: "Passion Projects require adult mentorship for learner agency, feedback cycles, documentation, critique, and public presentation quality.",
+},
+{
+area: "Cluster educator capacity validation",
+status: "Mapping validation",
+originallyBudgeted: "Grade 6 / Grade 7 cluster educator capacity exists in the model, but unused mentorship capacity is not calculated.",
+currentRecommendation: "Validate timetable capacity after teaching, advisory, Passion Projects, Creative Hub, MUN, electives, documentation, critique, and planning.",
+incrementalBudgetImpact: "No increment if mentorship can be absorbed by cluster educators.",
+whyNecessary: "Prevents Project Mentorship from being treated as a dedicated payroll role before load is validated.",
+},
+{
+area: "Dedicated Project Mentor",
+status: "Conditional increment",
+originallyBudgeted: "No dedicated Project Mentor payroll role currently modeled.",
+currentRecommendation: "Add dedicated or partial Project Mentor FTE only if validated mentorship load exceeds available cluster educator capacity.",
+incrementalBudgetImpact: "Conditional payroll increment; salary band, FTE, and annualized cost to be validated with Finance/HR.",
+whyNecessary: "Keeps Scenario D neutral while preserving the staffing trigger for Passion Project fidelity.",
 },
 ],
 },
@@ -954,6 +1023,14 @@ const budgetComparisonValidationNotes = [
 "Confirm whether After School Educator and After School Coordinator are the same role; if not, classify the coordinator as a new role, scope upgrade, or reclassification.",
 "Validate missing increments as R$ ___ monthly, R$ ___ annualized, FTE ___.",
 ];
+const budgetStatusClassName: Record<BudgetRowStatus, string> = {
+"Baseline control": "bg-emerald-50 text-emerald-700 border-emerald-100",
+"Mapping validation": "bg-amber-50 text-amber-700 border-amber-100",
+"Scenario driver": "bg-blue-50 text-[#214B74] border-blue-100",
+"Potential increment": "bg-purple-50 text-[#4b254b] border-purple-100",
+"Conditional increment": "bg-rose-50 text-rose-700 border-rose-100",
+"Not active": "bg-slate-50 text-slate-500 border-slate-200",
+};
 const governanceQuestions = [
 "Which scenario becomes the business-plan baseline?",
 "Which adult ecosystem roles are approved as baseline?",
@@ -1958,6 +2035,42 @@ export default function OfferScenariosTab() {
                 cobertura, escopo ou reclassificação.
               </p>
             </div>
+            <div className="offer-scenarios-print-avoid-break overflow-hidden rounded-[18px] bg-white">
+              <div className="border-b border-slate-100 px-4 py-3">
+                <div className="offer-scenarios-print-label text-xs text-[#214B74]">
+                  Shared controls
+                </div>
+                <h3 className="mt-1 text-xl text-slate-950">Baseline / Governance Controls</h3>
+                <p className="mt-1 text-xs leading-relaxed text-slate-600">
+                  Linhas de base renderizadas uma vez para preservar rastreabilidade sem diluir os drivers materiais de cada cenário.
+                </p>
+              </div>
+              <table className="w-full text-left">
+                <thead>
+                  <tr>
+                    {budgetComparisonColumns.map((header) => (
+                      <th key={`print-budget-governance-${header}`} className="px-3 py-3">{header}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {sharedBudgetRows.map((row) => (
+                    <tr key={`print-budget-governance-${row.area}`} className="border-t border-slate-100 align-top">
+                      <td className="px-3 py-3 text-slate-950">
+                        {row.area}
+                        <div className={cn("mt-2 inline-flex rounded-full border px-2 py-1 text-[9px] font-black uppercase tracking-widest", budgetStatusClassName[row.status])}>
+                          {row.status}
+                        </div>
+                      </td>
+                      <td className="px-3 py-3 text-slate-600">{row.originallyBudgeted}</td>
+                      <td className="px-3 py-3 text-slate-600">{row.currentRecommendation}</td>
+                      <td className="px-3 py-3 text-[#4b254b]">{row.incrementalBudgetImpact}</td>
+                      <td className="px-3 py-3 text-slate-600">{row.whyNecessary}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
             {scenarioBudgetComparisons.map((scenario) => (
               <div key={`print-budget-comparison-${scenario.scenario}`} className="offer-scenarios-print-avoid-break overflow-hidden rounded-[18px] bg-white">
                 <div className="border-b border-slate-100 px-4 py-3">
@@ -1970,7 +2083,7 @@ export default function OfferScenariosTab() {
                 <table className="w-full text-left">
                   <thead>
                     <tr>
-                      {budgetComparisonColumns.map((header) => (
+                      {scenarioBudgetComparisonColumns.map((header) => (
                         <th key={`print-budget-comparison-${scenario.scenario}-${header}`} className="px-3 py-3">{header}</th>
                       ))}
                     </tr>
@@ -1978,6 +2091,11 @@ export default function OfferScenariosTab() {
                   <tbody>
                     {scenario.rows.map((row) => (
                       <tr key={`print-budget-comparison-${scenario.scenario}-${row.area}`} className="border-t border-slate-100 align-top">
+                        <td className="px-3 py-3">
+                          <div className={cn("inline-flex rounded-full border px-2 py-1 text-[9px] font-black uppercase tracking-widest", budgetStatusClassName[row.status])}>
+                            {row.status}
+                          </div>
+                        </td>
                         <td className="px-3 py-3 text-slate-950">{row.area}</td>
                         <td className="px-3 py-3 text-slate-600">{row.originallyBudgeted}</td>
                         <td className="px-3 py-3 text-slate-600">{row.currentRecommendation}</td>
@@ -2578,6 +2696,44 @@ export default function OfferScenariosTab() {
                       </div>
                     ))}
                   </div>
+                  <div className="overflow-hidden rounded-[2rem] bg-white">
+                    <div className="border-b border-slate-100 px-5 py-4">
+                      <div className="text-[10px] font-black uppercase tracking-[0.24em] text-[#214B74]">
+                        Shared controls
+                      </div>
+                      <h4 className="mt-1 text-xl font-black text-slate-950">Baseline / Governance Controls</h4>
+                      <p className="mt-1 text-xs font-bold leading-relaxed text-slate-500">
+                        Linhas de base renderizadas uma vez para preservar rastreabilidade Finance/HR sem repetir controles genéricos dentro de cada cenário.
+                      </p>
+                    </div>
+                    <div className="overflow-x-auto">
+                      <table className="min-w-[1180px] w-full text-left">
+                        <thead>
+                          <tr className="bg-[#edf3f7] text-[10px] font-black uppercase tracking-[0.18em] text-[#214B74]">
+                            {budgetComparisonColumns.map((header) => (
+                              <th key={`budget-governance-${header}`} className="px-4 py-3">{header}</th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {sharedBudgetRows.map((row) => (
+                            <tr key={`budget-governance-${row.area}`} className="border-t border-slate-100 align-top text-xs text-slate-600">
+                              <td className="px-4 py-3 font-black text-slate-950">
+                                {row.area}
+                                <div className={cn("mt-2 inline-flex rounded-full border px-2 py-1 text-[9px] font-black uppercase tracking-widest", budgetStatusClassName[row.status])}>
+                                  {row.status}
+                                </div>
+                              </td>
+                              <td className="px-4 py-3 font-semibold leading-relaxed">{row.originallyBudgeted}</td>
+                              <td className="px-4 py-3 font-semibold leading-relaxed">{row.currentRecommendation}</td>
+                              <td className="px-4 py-3 font-semibold leading-relaxed text-[#4b254b]">{row.incrementalBudgetImpact}</td>
+                              <td className="px-4 py-3 font-semibold leading-relaxed">{row.whyNecessary}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
                   {scenarioBudgetComparisons.map((scenario) => (
                     <div key={`budget-comparison-${scenario.scenario}`} className="overflow-hidden rounded-[2rem] bg-white">
                       <div className="border-b border-slate-100 px-5 py-4">
@@ -2593,7 +2749,7 @@ export default function OfferScenariosTab() {
                         <table className="min-w-[1180px] w-full text-left">
                           <thead>
                             <tr className="bg-[#edf3f7] text-[10px] font-black uppercase tracking-[0.18em] text-[#214B74]">
-                              {budgetComparisonColumns.map((header) => (
+                              {scenarioBudgetComparisonColumns.map((header) => (
                                 <th key={`${scenario.scenario}-${header}`} className="px-4 py-3">{header}</th>
                               ))}
                             </tr>
@@ -2601,6 +2757,11 @@ export default function OfferScenariosTab() {
                           <tbody>
                             {scenario.rows.map((row) => (
                               <tr key={`${scenario.scenario}-${row.area}`} className="border-t border-slate-100 align-top text-xs text-slate-600">
+                                <td className="px-4 py-3">
+                                  <div className={cn("inline-flex rounded-full border px-2 py-1 text-[9px] font-black uppercase tracking-widest", budgetStatusClassName[row.status])}>
+                                    {row.status}
+                                  </div>
+                                </td>
                                 <td className="px-4 py-3 font-black text-slate-950">{row.area}</td>
                                 <td className="px-4 py-3 font-semibold leading-relaxed">{row.originallyBudgeted}</td>
                                 <td className="px-4 py-3 font-semibold leading-relaxed">{row.currentRecommendation}</td>
@@ -3440,6 +3601,44 @@ export default function OfferScenariosTab() {
                     ))}
                   </div>
                   <div className="space-y-5">
+                    <div className="overflow-hidden rounded-2xl border border-slate-100">
+                      <div className="border-b border-slate-100 bg-white px-4 py-3">
+                        <div className="text-[9px] font-black uppercase tracking-widest text-slate-400">
+                          Shared controls
+                        </div>
+                        <h4 className="mt-1 text-base font-black text-slate-900">Baseline / Governance Controls</h4>
+                        <p className="mt-1 text-xs font-bold leading-relaxed text-slate-500">
+                          Linhas de base renderizadas uma vez para preservar rastreabilidade sem repetir controles genéricos em cada cenário.
+                        </p>
+                      </div>
+                      <div className="overflow-x-auto">
+                        <table className="min-w-[1180px] w-full text-left">
+                          <thead>
+                            <tr className="bg-slate-50 text-[10px] uppercase tracking-widest text-slate-400">
+                              {budgetComparisonColumns.map((header) => (
+                                <th key={`legacy-budget-governance-${header}`} className="px-4 py-3">{header}</th>
+                              ))}
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {sharedBudgetRows.map((row) => (
+                              <tr key={`legacy-budget-governance-${row.area}`} className="border-t border-slate-100 align-top text-xs text-slate-600">
+                                <td className="px-4 py-3 font-bold text-slate-900">
+                                  {row.area}
+                                  <div className={cn("mt-2 inline-flex rounded-full border px-2 py-1 text-[9px] font-black uppercase tracking-widest", budgetStatusClassName[row.status])}>
+                                    {row.status}
+                                  </div>
+                                </td>
+                                <td className="px-4 py-3 font-semibold leading-relaxed">{row.originallyBudgeted}</td>
+                                <td className="px-4 py-3 font-semibold leading-relaxed">{row.currentRecommendation}</td>
+                                <td className="px-4 py-3 font-semibold leading-relaxed text-purple-800">{row.incrementalBudgetImpact}</td>
+                                <td className="px-4 py-3 font-semibold leading-relaxed">{row.whyNecessary}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
                     {scenarioBudgetComparisons.map((scenario) => (
                       <div key={`legacy-budget-comparison-${scenario.scenario}`} className="overflow-hidden rounded-2xl border border-slate-100">
                         <div className="border-b border-slate-100 bg-white px-4 py-3">
@@ -3453,7 +3652,7 @@ export default function OfferScenariosTab() {
                           <table className="min-w-[1180px] w-full text-left">
                             <thead>
                               <tr className="bg-slate-50 text-[10px] uppercase tracking-widest text-slate-400">
-                                {budgetComparisonColumns.map((header) => (
+                                {scenarioBudgetComparisonColumns.map((header) => (
                                   <th key={`${scenario.scenario}-${header}-legacy`} className="px-4 py-3">{header}</th>
                                 ))}
                               </tr>
@@ -3461,6 +3660,11 @@ export default function OfferScenariosTab() {
                             <tbody>
                               {scenario.rows.map((row) => (
                                 <tr key={`${scenario.scenario}-${row.area}-legacy`} className="border-t border-slate-100 align-top text-xs text-slate-600">
+                                  <td className="px-4 py-3">
+                                    <div className={cn("inline-flex rounded-full border px-2 py-1 text-[9px] font-black uppercase tracking-widest", budgetStatusClassName[row.status])}>
+                                      {row.status}
+                                    </div>
+                                  </td>
                                   <td className="px-4 py-3 font-bold text-slate-900">{row.area}</td>
                                   <td className="px-4 py-3 font-semibold leading-relaxed">{row.originallyBudgeted}</td>
                                   <td className="px-4 py-3 font-semibold leading-relaxed">{row.currentRecommendation}</td>
