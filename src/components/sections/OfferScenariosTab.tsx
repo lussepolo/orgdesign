@@ -2889,28 +2889,132 @@ export default function OfferScenariosTab() {
                     </p>
                   </div>
 
-                  <div className="rounded-[2rem] bg-[#16334f] p-6 text-white">
-                    <div className="text-[10px] font-black uppercase tracking-[0.28em] text-blue-100/70">
-                      Specialist Capacity System
+                  <div className="rounded-[2rem] bg-white p-6">
+                    <div className="text-[10px] font-black uppercase tracking-[0.28em] text-slate-400">
+                      Specialist Pillar Load & Growth Triggers
                     </div>
-                    <p className="mt-3 max-w-3xl text-sm font-semibold leading-relaxed text-blue-50/80">
-                      Body & Movement é uma das lógicas de carga especialista. Sound, Arts, Design Technologies e Creative Hub também precisam ser avaliados por carga, espaço, setup, faixa etária e maturidade da oferta.
-                    </p>
-                    <div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-                      {specialistCapacityDomains.map((domain) => (
-                        <div key={domain.domain} className="rounded-[1.5rem] bg-white/10 p-4">
-                          <h4 className="text-lg font-black leading-tight text-white">{domain.domain}</h4>
-                          <p className="mt-3 text-xs font-semibold leading-relaxed text-blue-50/75">{domain.loadSignal}</p>
-                          <div className="mt-4 grid gap-2 text-xs font-bold text-white/85">
-                            <div><span className="text-blue-100/60">Lean:</span> {domain.lean}</div>
-                            <div><span className="text-blue-100/60">Balanced:</span> {domain.balanced}</div>
-                            <div><span className="text-blue-100/60">Premium / Grade 6:</span> {domain.premium}</div>
+                    <h4 className="mt-3 text-2xl font-black tracking-tight text-slate-950">
+                      Quando a capacidade especialista deixa de ser viável?
+                    </h4>
+                    <div className="mt-4 space-y-4">
+                      <p className="text-sm font-semibold leading-relaxed text-slate-600">
+                        Especialistas não são um bloco único de FTE. Cada área possui uma lógica própria
+                        de carga, espaço e progressão: Body & Movement é altamente recorrente; Sound
+                        Exploration exige cobertura ampla em EY/LS; Design Technologies / Learning Experience Designer se conecta à
+                        arquitetura de projetos e Creative Hub; Artistic Design / Atelier e Performing Arts
+                        sustentam expressão, exposição e programas autorais.
+                      </p>
+                      <p className="text-sm font-semibold leading-relaxed text-slate-600">
+                        Design Technologies é o tempo de sala do Learning Experience Designer, não um
+                        papel especialista separado. Os quatro pilares abaixo simulam capacidade de
+                        agenda; eles não convertem automaticamente quatro pilares em quatro cargos
+                        distintos de payroll.
+                      </p>
+                      <div className="rounded-2xl border border-amber-100 bg-amber-50 px-4 py-3 text-xs font-semibold leading-relaxed text-slate-700">
+                        Body & Movement, Sound Exploration / Music, and Artistic Design / Atelier represent
+                        specialist educator capacity. Design Technologies / Learning Experience Designer
+                        represents classroom-facing Learning Experience Designer capacity. Performing Arts
+                        is initially embedded through Sound Exploration / Music; Creative Hub is not active
+                        as a scheduled learner program before Grade 6.
+                      </div>
+                      <div className="grid grid-cols-1 gap-3 md:grid-cols-5">
+                        {[
+                          {
+                            label: "Final grade offered",
+                            value: specialistFinalGrade,
+                            options: specialistFinalGradeOptions,
+                            onChange: (value: string) => setSpecialistFinalGrade(value as SpecialistFinalGrade),
+                          },
+                          {
+                            label: "Sections per grade",
+                            value: specialistSectionsPerGrade,
+                            options: specialistSectionsPerGradeOptions,
+                            onChange: (value: string) => setSpecialistSectionsPerGrade(Number(value) as SpecialistSectionsPerGrade),
+                          },
+                          {
+                            label: "Blocks per pillar / grade",
+                            value: specialistBlocksPerGrade,
+                            options: specialistBlocksPerGradeOptions,
+                            onChange: (value: string) => setSpecialistBlocksPerGrade(Number(value) as SpecialistBlocksPerGrade),
+                          },
+                          {
+                            label: "Block duration",
+                            value: specialistBlockDuration,
+                            options: specialistBlockDurationOptions,
+                            onChange: (value: string) => setSpecialistBlockDuration(Number(value) as SpecialistBlockDuration),
+                          },
+                          {
+                            label: "Capacity threshold",
+                            value: specialistCapacityThreshold,
+                            options: specialistCapacityThresholdOptions,
+                            onChange: (value: string) => setSpecialistCapacityThreshold(Number(value) as SpecialistCapacityThreshold),
+                          },
+                        ].map((control) => (
+                          <label key={`visible-${control.label}`} className="space-y-2 rounded-2xl border border-slate-100 bg-slate-50 p-3">
+                            <span className="block text-[9px] font-black uppercase tracking-widest text-slate-400">{control.label}</span>
+                            <select
+                              className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 outline-none focus:border-[#214B74]"
+                              value={control.value}
+                              onChange={(event) => control.onChange(event.target.value)}
+                            >
+                              {control.options.map((option) => (
+                                <option key={`visible-${control.label}-${option}`} value={option}>
+                                  {typeof option === "number" && control.label === "Block duration" ? `${option} min` : option}
+                                </option>
+                              ))}
+                            </select>
+                          </label>
+                        ))}
+                      </div>
+                      <div className="grid grid-cols-2 gap-3 lg:grid-cols-6">
+                        {[
+                          ["Grade levels included", `${specialistGradeLevelCount} levels`],
+                          ["Blocks per pillar/week", `${specialistBlocksPerPillar} blocks`],
+                          ["Hours per pillar/week", specialistHoursDisplay],
+                          ["Capacity status", specialistCapacityStatus],
+                          ["Recommended FTE per pillar", `${specialistRecommendedFTEPerPillar}`],
+                          ["Capacity-equivalent across four pillars", `${specialistCapacityEquivalentAcrossFourPillars}`],
+                        ].map(([label, value]) => (
+                          <div key={`visible-specialist-simulator-output-${label}`} className="rounded-2xl border border-slate-100 bg-slate-50 p-3">
+                            <div className="text-[9px] font-black uppercase tracking-widest text-slate-400">{label}</div>
+                            <div className="mt-2 text-lg font-black text-slate-950">{value}</div>
                           </div>
-                          <div className="mt-4 rounded-2xl bg-white/10 p-3 text-xs font-semibold leading-relaxed text-white/80">
-                            {domain.risk}
-                          </div>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
+                      <div className="overflow-x-auto rounded-2xl border border-slate-100">
+                        <table className="min-w-[720px] w-full text-left">
+                          <thead>
+                            <tr className="bg-slate-50 text-[10px] uppercase tracking-widest text-slate-400">
+                              <th className="px-3 py-3">Reference case</th>
+                              <th className="px-3 py-3">Sections</th>
+                              <th className="px-3 py-3">Final grade</th>
+                              <th className="px-3 py-3">Blocks</th>
+                              <th className="px-3 py-3">Hours</th>
+                              <th className="px-3 py-3">Status</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {specialistPillarSimulatorRows.map(([label, sections, grade, blocks, hours, status]) => (
+                              <tr key={`visible-specialist-pillar-simulator-${label}`} className="border-t border-slate-100 text-xs font-semibold text-slate-600">
+                                <td className="px-3 py-3 font-black text-slate-900">{label}</td>
+                                <td className="px-3 py-3">{sections}</td>
+                                <td className="px-3 py-3">{grade}</td>
+                                <td className="px-3 py-3">{blocks}</td>
+                                <td className="px-3 py-3">{hours}</td>
+                                <td className="px-3 py-3 font-black text-[#4b254b]">{status}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                      <div className="rounded-2xl border border-[#214B74]/15 bg-[#edf3f7] px-4 py-3 text-xs font-semibold leading-relaxed text-slate-700">
+                        With one section per grade, one full-time educator per specialist pillar remains
+                        viable through Grade 5. With two sections per grade, each pillar reaches at least
+                        32 weekly blocks, which triggers the need to double specialist capacity or redesign
+                        the role. For Design Technologies / Learning Experience Designer, this refers to
+                        the Learning Experience Designer's classroom-facing capacity, not a separate
+                        specialist role.
+                      </div>
                     </div>
                   </div>
 
