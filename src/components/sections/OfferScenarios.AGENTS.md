@@ -23,7 +23,7 @@ The platform should help answer four questions for each scenario:
 - Up to Grade 3.
 - Basic offer path.
 - Provides the base of the school experience.
-- Includes classroom package, MAP from Grade 1, PDJ in classroom routine, and Learning Experience Design.
+- Includes classroom package, PDJ through Early Years Explorers and early Lower School Researchers, MAP from Grade 1, and Learning Experience Design.
 - Does not provide robust academic differentiation support.
 - Should not be framed as a strong quality-protection scenario.
 
@@ -31,7 +31,7 @@ The platform should help answer four questions for each scenario:
 
 - Up to Grade 4.
 - This is where the offer begins to improve through the Lower School Researchers learning engine.
-- Project Design Journey remains full-class, but becomes more academically rigorous through inquiry, evidence-making, Math reasoning, and Scientific Literacy.
+- Project Design Journey remains full-class, but becomes more academically rigorous through phenomenon-based learning, inquiry, evidence-making, Math reasoning, and Scientific Literacy.
 - Strengthens documentation, academic evidence, research routines, academic language, and Concept identity.
 - Learner habits may be referenced only as part of research routines, not as the main driver of the scenario.
 - No Passion Projects yet.
@@ -59,9 +59,9 @@ Scenario changes are not only grade-ceiling changes. Each transition changes the
 
 ### A -> B: From basic offer to stronger academic progression
 
-Scenario A is the basic offer path. It establishes the base of the school experience: classroom package, MAP from Grade 1, PDJ in classroom routine, and Learning Experience Design. It does not yet provide robust academic differentiation support.
+Scenario A is the basic offer path. It establishes the base of the school experience: classroom package, PDJ through Early Years Explorers and early Lower School Researchers, MAP from Grade 1, and Learning Experience Design. It does not yet provide robust academic differentiation support.
 
-Scenario B is where the offer begins to improve. Grade 4 deepens the Lower School Researchers learning engine: learners are expected to document more carefully, reason with evidence, strengthen Math and Scientific Literacy, use academic language more intentionally, and engage in more rigorous full-class inquiry through PDJ. Passion Projects are not active yet.
+Scenario B is where the offer begins to improve. Grade 4 deepens the Lower School Researchers learning engine through phenomenon-based learning: learners are expected to document more carefully, reason with evidence, strengthen Math and Scientific Literacy, use academic language more intentionally, and engage in more rigorous full-class inquiry through PDJ. Passion Projects are not active yet.
 
 ### B -> C: From academic progression to Lower School completion
 
@@ -95,6 +95,218 @@ Broader support roles are separate from classroom package. This ecosystem includ
 
 Do not merge classroom package language with broader support ecosystem language.
 
+## Offer Pillar Semantics
+
+The Offer Scenarios platform must preserve the pedagogical promise of Escola Concept's offer, not only its staffing model. Scenario decisions should be interpreted through the interaction of language, literacy, inquiry, documentation, social-emotional development, belonging, and teacher research practice.
+
+### Bilingual Program
+
+- Early Years: English immersion, approximately 90% English and 10% Portuguese.
+- Grade 1: gradual transition, approximately 80% English and 20% Portuguese.
+- Grade 2 through High School: approximately 60% English and 40% Portuguese.
+
+Bilingualism should not be treated as exposure only. It must connect to academic language, disciplinary vocabulary, Science of Reading, Math reasoning, Scientific Literacy, documentation, and family-facing evidence.
+
+### Science of Reading
+
+Science of Reading supports the bilingual program by making early literacy explicit, systematic, and cognitively grounded.
+
+It connects to:
+
+- oral language
+- phonological awareness
+- phonics and decoding
+- vocabulary
+- fluency
+- comprehension
+- academic language
+- bilingual transfer where appropriate
+
+### Math Literacy
+
+Math Literacy begins in Pre-K4.
+
+In Early Years, it appears through playful and embodied mathematical thinking:
+
+- quantity
+- pattern
+- spatial reasoning
+- comparison
+- classification
+- measurement
+- mathematical language
+- representation
+
+In Lower School, Math Literacy becomes more explicit through the Researchers engine:
+
+- reasoning
+- evidence
+- explanation
+- problem representation
+- connection to real phenomena
+
+### Scientific Literacy
+
+Scientific Literacy has exploratory roots in Early Years and becomes a structured program from Grade 1.
+
+In Early Years, Scientific Literacy appears through:
+
+- observation
+- sensory investigation
+- curiosity
+- materials
+- environment
+- documentation
+
+From Grade 1, Scientific Literacy becomes more structured through:
+
+- observation
+- questioning
+- claims and evidence
+- explanation
+- data interpretation
+- investigation design
+- scientific vocabulary
+- communication of findings
+
+Scientific Literacy is central to the Researchers learning engine.
+
+### Documentation of Learning
+
+Documentation of Learning is a cognitive, pedagogical, and institutional practice.
+
+It supports:
+
+- making thinking visible
+- teacher interpretation
+- learner metacognition
+- family-facing evidence
+- planning and intervention
+- quality control
+- academic coherence
+- preservation of each divisional learning engine
+
+Documentation is not decoration or portfolio aesthetics.
+
+### Reggio Emilia Approach in Early Years
+
+Early Years is Reggio-inspired.
+
+Reggio Emilia is not an aesthetic. It is an epistemic stance toward children's thinking.
+
+It should be reflected through:
+
+- image of the child as capable and relational
+- environment as learning condition
+- materials and atelier practices
+- observation and documentation
+- emergent inquiry
+- family and community connection
+- teacher as researcher of classroom practice
+
+### Project Design Journey
+
+Project Design Journey is the schoolwide umbrella.
+
+Do not describe Early Years as outside PDJ. Do not describe Grade 1 as the beginning of PDJ itself.
+
+Use this framing:
+
+- Early Years: PDJ through Reggio-inspired Explorers inquiry.
+- Lower School: PDJ through Researchers and phenomenon-based learning.
+- Middle School: PDJ through Designers, Passion Projects, small-group work, mentorship, iteration, critique, and prototyping.
+- High School: PDJ through Innovative Global Citizenship, research, external impact, entrepreneurship, futures thinking, disciplinary depth, and public contribution.
+
+Keep this rule:
+
+- Grade 1 is where PDJ becomes more explicitly structured through Lower School's Researchers engine and phenomenon-based learning.
+- Grade 6 is where Passion Projects begin.
+- Project Mentorship begins with Grade 6 Passion Projects.
+
+### Social-Emotional Learning
+
+SEL is part of the learning architecture, not a separate pastoral layer.
+
+It supports:
+
+- emotional regulation
+- attention and readiness to learn
+- relationship skills
+- responsible decision-making
+- collaborative learning
+- conflict navigation
+- learner agency
+- academic risk-taking
+
+### Habits of Mind
+
+Habits of Mind are cognitive dispositions for intelligent action under uncertainty.
+
+They are not behavior compliance.
+
+They support:
+
+- persistence
+- flexible thinking
+- questioning
+- metacognition
+- accuracy
+- listening with understanding
+- responsible risk-taking
+- transfer across contexts
+
+Habits of Mind should support academic rigor, not replace it.
+
+### Anti-Bullying, Belonging, Dignity, and Conflict Resolution
+
+These are protective learning infrastructure.
+
+They support:
+
+- school connectedness
+- psychological safety
+- dignity
+- peer relationships
+- adult trust
+- conflict repair
+- safe participation in collaborative learning
+- language development
+- learner agency
+
+Do not frame these as compliance only.
+
+### Teacher as Researcher of Classroom Practice
+
+Teachers are researchers of classroom practice starting in Toddlers 1.
+
+This means teachers observe, document, interpret, test adjustments, and refine practice based on evidence of learner thinking, participation, language, relationships, and environment.
+
+Teacher-as-researcher practice connects to:
+
+- Reggio Emilia in Early Years
+- Documentation of Learning
+- Project Design Journey
+- Science of Reading implementation
+- Math and Scientific Literacy
+- SEL and belonging
+- professional learning
+- action research
+
+## Project Design Journey Semantics
+
+Project Design Journey is the schoolwide umbrella for experiential learning across all divisions. It does not begin only in Grade 1, and Early Years must not be described as outside PDJ.
+
+Project Design Journey is translated differently through each divisional learning engine:
+
+- Early Years / Explorers: PDJ is expressed through the Reggio Emilia approach: sensory investigation, play, environment, emergent inquiry, documentation, and teacher-as-researcher practice.
+- Lower School / Researchers: PDJ is expressed through phenomenon-based learning: full-class inquiry, observation, evidence-making, Math reasoning, Scientific Literacy, academic language, and documentation.
+- Middle School / Designers: PDJ shifts toward learner agency, Passion Projects, small-group projects, mentorship, prototyping, critique, iteration, and complex problem framing.
+- High School / Innovative Global Citizens: PDJ extends toward research, external impact, entrepreneurship, futures thinking, disciplinary depth, global competencies, and public contribution.
+
+Use this replacement rule whenever copy suggests that PDJ starts in Grade 1:
+
+"Project Design Journey is the schoolwide umbrella. In Early Years, it is expressed through the Reggio Emilia approach and the Explorers learning engine. From Grade 1 onward, it becomes more explicitly structured through Lower School's Researchers engine and phenomenon-based learning."
+
 ## Learning Engine Semantics
 
 The Offer Scenarios platform must not treat scenarios as grade-ceiling changes only. Each scenario also represents how Escola Concept's divisional learning engines become visible through the offer.
@@ -110,19 +322,19 @@ Project Design Journey is translated differently depending on the divisional lea
 
 ### Explorers, Early Years
 
-PDJ appears through curiosity, sensory investigation, play, care routines, environment, language emergence, and documentation of discovery.
+PDJ is expressed through the Reggio Emilia approach: sensory investigation, play, environment, emergent inquiry, documentation, and teacher-as-researcher practice.
 
 ### Researchers, Lower School
 
-PDJ becomes more academically explicit through inquiry, observation, evidence-making, Math reasoning, Scientific Literacy, documentation, academic language, and research routines.
+PDJ is expressed through phenomenon-based learning. It becomes more academically explicit through full-class inquiry, observation, evidence-making, Math reasoning, Scientific Literacy, academic language, documentation, and research routines.
 
 ### Designers, Middle School
 
-PDJ shifts toward learner agency, iteration, small-group project work, Passion Projects, mentorship, prototyping, critique, and more complex problem framing.
+PDJ shifts toward learner agency, Passion Projects, small-group project work, mentorship, prototyping, critique, iteration, and complex problem framing.
 
 ### Innovative Global Citizens, High School
 
-PDJ connects to future-facing citizenship, disciplinary depth, external impact, entrepreneurship, research, global competencies, and public contribution.
+PDJ extends toward research, external impact, entrepreneurship, futures thinking, disciplinary depth, global competencies, and public contribution.
 
 ### Scenario A and Learning Engines
 
@@ -130,8 +342,8 @@ Scenario A includes Early Years and Lower School up to Grade 3.
 
 It establishes the basic offer across:
 
-- Explorers in Early Years
-- early Researchers in Lower School
+- Explorers in Early Years, where PDJ is expressed through the Reggio Emilia approach.
+- early Researchers in Lower School, where PDJ becomes more explicitly structured through phenomenon-based learning from Grade 1 onward.
 
 It should not be framed as robust quality protection or robust academic differentiation. It provides the base experience, but the Researchers engine is still in its early stage.
 
@@ -139,7 +351,7 @@ It should not be framed as robust quality protection or robust academic differen
 
 Scenario B adds Grade 4.
 
-This is where the offer begins to improve because the Lower School Researchers engine becomes more academically visible.
+This is where the offer begins to improve because the Lower School Researchers engine becomes more academically visible through phenomenon-based learning.
 
 Do not frame Scenario B mainly around "learner habits." Learner habits can be mentioned as secondary, but the main semantic shift is academic and epistemic:
 
@@ -158,7 +370,7 @@ PDJ remains full-class. Passion Projects are not active yet.
 
 Scenario C adds Grade 5 and completes Lower School.
 
-The Researchers engine reaches a stronger pre-Middle School maturity.
+The Researchers engine reaches a stronger pre-Middle School maturity through Pathways, transition protocols, portfolio evidence, and readiness routines.
 
 Grade 5 activates:
 
@@ -238,18 +450,21 @@ Each scenario activates or postpones specific program offerings.
 
 - Basic offer path.
 - No Pathways, Creative Hub, MUN, Passion Projects, Middle School advisory, or academic electives.
-- Focuses on base school experience, classroom routine, MAP, PDJ, documentation, and Learning Experience Design.
+- Includes PDJ through Early Years Explorers and early Lower School Researchers.
+- Focuses on base school experience, classroom routine, MAP from Grade 1, documentation, and Learning Experience Design.
+- The Researchers engine is still in its early stage and does not yet provide robust academic differentiation.
 
 ### Scenario B
 
 - Grade 4 strengthens the Lower School Researchers engine.
-- PDJ remains full-class, but becomes more academically rigorous through inquiry, evidence-making, Math reasoning, Scientific Literacy, and academic language.
+- PDJ remains full-class, but becomes more academically rigorous through phenomenon-based learning, inquiry, evidence-making, Math reasoning, Scientific Literacy, and academic language.
 - Documentation and academic evidence become more intentional.
 - Still no Passion Projects.
 
 ### Scenario C
 
 - Grade 5 activates Pathways and transition protocols.
+- Researchers reaches stronger pre-Middle School maturity through portfolio evidence and readiness routines.
 - Projects remain full-class.
 - Passion Projects are not active yet.
 - Project Mentorship is not active yet.
@@ -257,7 +472,8 @@ Each scenario activates or postpones specific program offerings.
 ### Scenario D
 
 - Grade 6 activates Middle School rhythm.
-- Passion Projects, small-group learner-led work, clusters, advisory, Creative Hub, MUN, academic electives, and project mentorship become relevant.
+- The model begins its transition toward the Middle School Designers engine.
+- Passion Projects, small-group learner-led work, clusters, advisory, Creative Hub, MUN, academic electives, iteration, critique, learner agency, and project mentorship become relevant.
 
 ## Academic Rigor Semantics
 
@@ -276,11 +492,11 @@ Academic rigor grows across scenarios through:
 
 Scenario A establishes the basic offer and early academic evidence, but does not yet provide robust support for academic differentiation.
 
-Scenario B is where the offer begins to improve through the Lower School Researchers engine: stronger inquiry routines, Math reasoning, Scientific Literacy, academic language, documentation quality, and evidence-based learning.
+Scenario B is where the offer begins to improve through the Lower School Researchers engine: phenomenon-based learning, stronger inquiry routines, Math reasoning, Scientific Literacy, academic language, documentation quality, and evidence-based learning.
 
-Scenario C strengthens pre-Middle School readiness through Pathways and transition routines.
+Scenario C strengthens pre-Middle School readiness through Pathways, transition routines, portfolio evidence, and readiness routines.
 
-Scenario D changes the operating model and requires more coordination across academic rigor, program offerings, and learner-led project work.
+Scenario D changes the operating model by beginning the transition toward the Designers engine and requires more coordination across academic rigor, program offerings, and learner-led project work.
 
 ## Baseline vs Increment Logic
 
@@ -320,6 +536,30 @@ Its role is to support PDJ fidelity, documentation quality, learning-engine tran
 Learning Experience Design should not be confused with Project Mentorship.
 Project Mentorship becomes relevant with Grade 6 Passion Projects.
 
+## Scenario D Project Mentorship Capacity Semantics
+
+Project Mentorship begins in Scenario D because Grade 6 activates Passion Projects and the transition toward the Middle School Designers learning engine.
+
+However, Project Mentorship should not automatically be treated as a dedicated payroll role.
+
+The platform should first check whether Grade 6 / Grade 7 cluster educators have available capacity after required teaching, advisory, Passion Projects, documentation, critique, Creative Hub, MUN, academic electives, and planning responsibilities are allocated.
+
+If cluster educators have available capacity, Project Mentorship may be treated as a shared or hybrid function absorbed by existing Middle School educators.
+
+If required mentorship load exceeds available cluster educator capacity, the uncovered gap should be treated as a conditional increment:
+
+- partial FTE
+- dedicated Project Mentor
+- program coordination allocation
+- or another validated staffing model
+
+The budget comparison should distinguish:
+
+- Project Mentorship as an activated function
+- Dedicated Project Mentor as a conditional payroll role
+
+Do not calculate a payroll increment until the app has a validated timetable/load model for Grade 6 / Grade 7 cluster educators.
+
 ## Specialist Capacity Logic
 
 - Original specialist baseline is only 1 Body & Movement, 1 Arts, 1 Music.
@@ -350,6 +590,9 @@ Scenario transitions should feel smooth in the interface, but semantically disti
 - Do not frame Scenario A as robust quality protection.
 - Do not visually privilege Scenario D.
 - Do not merge classroom package and support ecosystem language.
+- Do not treat offer pillars as isolated programs. Bilingualism, Science of Reading, Math Literacy, Scientific Literacy, Documentation of Learning, Reggio Emilia, PDJ, SEL, Habits of Mind, belonging, conflict resolution, and teacher research must be interpreted as an integrated learning architecture.
+- Do not describe Early Years as outside Project Design Journey.
+- Do not describe Grade 1 as the start of Project Design Journey itself.
 - Do not start Passion Projects before Grade 6.
 - Do not activate Project Mentorship before Grade 6.
 - Do not describe Grade 5 Pathways as Passion Projects.
@@ -370,6 +613,13 @@ Scenario transitions should feel smooth in the interface, but semantically disti
 - Which specialist expansions are driven by classroom capacity versus program ambition?
 - Which program offerings require dedicated adult capacity?
 - What classroom capacity threshold triggers additional specialists or dedicated coordination?
+- What weekly teaching, advisory, Passion Project, Creative Hub, MUN, elective, documentation, critique, and planning blocks are assigned to Grade 6 / Grade 7 cluster educators?
+- What capacity threshold defines when Project Mentorship can no longer be absorbed by cluster educators?
+- Should Project Mentorship be absorbed by cluster educators, shared with Learning Experience Design, or modeled as a dedicated FTE?
+- What salary basis should be used if a dedicated Project Mentor becomes necessary?
+- Which offer pillars are already covered by existing roles, and which require additional adult capacity, training, documentation routines, or leadership monitoring as scenarios expand?
+- Which offer pillars create additional load as the campus moves from Scenario A to B, C, and D?
+- Which adult roles are responsible for preserving the coherence of the learning architecture across bilingualism, literacy, inquiry, documentation, SEL, and teacher research?
 
 ## Maintenance Rule
 
