@@ -330,8 +330,9 @@ const specialistPillarSimulatorRows = [
 const currentSpecialistEcosystem = [
 ["Body & Movement", "Marcello Humeniuk, Maíra Jardim, Felipe Pierrobon, Kirk Barros", "Reference planning premise: 4 educators"],
 ["Sound Exploration / Music", "Igor, Bianca", "Reference planning premise: 2 educators"],
-["Artistic Design / Performing Arts, referência combinada", "Alexandre, Ariádine, Marcio, Lívia", "Reference planning premise: 4 educators"],
-["Design Technologies", "Babi, Duda, Larissa, Juliana, Iris", "Reference planning premise: 5 educators"],
+["Artistic Design / Atelier", "Alexandre, Ariádine, Marcio, Lívia", "Reference planning premise includes atelier and exhibition infrastructure"],
+["Performing Arts", "Embedded through Sound Exploration / Music at launch", "Program layer, not one of the four simulator pillars"],
+["Design Technologies / Learning Experience Designer capacity", "Babi, Duda, Larissa, Juliana, Iris", "Reference planning premise: classroom-facing Learning Experience Designer capacity"],
 ["Total specialist ecosystem reference", "Shared reference team", "Reference planning premise: 15 educators"],
 		  ];
 const bodyMovementReferenceLoads = [
@@ -371,25 +372,25 @@ const projectMentorTriggers = [
 const pathwayOptions = [
 {
 title: "Lean Business Plan",
-purpose: "Protect margin and avoid premature hierarchy.",
+purpose: "Basic offer posture for Scenario A or an A-B launch path.",
 structure: [
-"Protect baseline architecture without premature hierarchy",
+"Protect basic offer architecture without premature hierarchy",
 "Lean shared specialists and coaching support",
 "LAP Coach recommended from launch",
-"If Grade 6 opens: three-cluster premise, no dedicated project mentors",
+"No Middle School rhythm or signature-program launch layer",
 ],
 bestFor: ["Lower enrollment certainty", "Margin protection", "Cost control", "Basic launch viability"],
 risk:
-"Risk: quality depends heavily on individual educator capacity.",
+"Risk: academic differentiation and specialist load depend heavily on shared adult capacity.",
 },
 {
 title: "Balanced Operating Model",
-purpose: "Protect viability and pedagogical credibility at the same time.",
+purpose: "Lower School completion posture aligned to Scenario C.",
 structure: [
-"Protect baseline and add stronger quality control",
+"Protect baseline and strengthen Grade 5 readiness",
 "Shared specialists across EY/LS and later MS",
-"T&L plus C&A support mature by Grade 4/5",
-"If Grade 6 opens: cluster launch with shared/partial signature coordination",
+"Pathways, portfolio evidence, and transition routines become active",
+"Projects remain full-class; Passion Projects are not active yet",
 ],
 bestFor: ["Pedagogical credibility", "Cost discipline", "Progressive maturity", "Board-facing defensibility"],
 risk: "Risk: requires disciplined coordination before enrollment density fully matures.",
@@ -397,12 +398,12 @@ recommendation: "Default recommendation",
 },
 {
 title: "Premium Signature-Program Launch",
-purpose: "Use the pedagogical offer as a market differentiator.",
+purpose: "Middle School rhythm posture aligned to Scenario D.",
 structure: [
 "Use the offer as a visible market differentiator",
 "Fuller shared specialist ecosystem",
 "T&L, C&A, LAP, and signature-program leadership included",
-"If Grade 6 opens: visible Creative Hub, elective, Passion Project, and advisory layer",
+"Grade 6 activates Creative Hub, MUN, advisory, academic electives, Passion Projects, and project mentorship as a function",
 ],
 bestFor: ["Premium market positioning", "Differentiation in Rio", "Visible Concept identity", "Strong family-facing narrative"],
 risk: "Higher cost before enrollment density fully matures.",
@@ -419,28 +420,28 @@ const experienceGrowthRoadmap = [
 year: "2028",
 stage: "Foundational launch",
 ceiling: "EY + Grades 1-3",
-experience: "Grade 1 MAP Testing begins. Classroom quality, family relationship, learning documentation, language acquisition monitoring, academic performance routines, and PDJ embedded in routines.",
+experience: "PDJ is already schoolwide: EY uses Reggio-inspired Explorers inquiry, while Grade 1 begins MAP and makes the Lower School Researchers engine more explicit through phenomenon-based learning.",
 ecosystem: "EY classroom package, LS classroom package, Language & Academic Performance Coach, coaching, and shared specialist coverage.",
 },
 {
 year: "2029",
 stage: "Lower School progression",
 ceiling: "Up to Grade 4",
-experience: "MAP cycles continue. Academic progression becomes more visible through curriculum coherence, intervention, enrichment, evidence of learning, and early portfolio habits.",
+experience: "Grade 4 makes the Researchers engine more academically visible through inquiry, evidence-making, Math reasoning, Scientific Literacy, documentation, academic language, and MAP cycles.",
 ecosystem: "Reference educator model remains primary; curriculum, assessment, language acquisition, and academic performance support become more important.",
 },
 {
 year: "2030",
 stage: "Pathways activation",
 ceiling: "Up to Grade 5",
-experience: "Grade 5 Pathways classes begin. Learner agency, project protocols, portfolio evidence, and Creative Hub readiness prepare the Middle School threshold.",
+experience: "Grade 5 completes Lower School, activates Pathways and transition routines, and keeps projects as full-class Researchers investigations. Creative Hub remains readiness only.",
 ecosystem: "Full LS specialist continuity, academic monitoring, portfolio evidence, project-design preparation, and Pathways facilitation.",
 },
 {
 year: "2031",
 stage: "Middle School launch",
 ceiling: "Up to Grade 6",
-experience: "Grade 6 Creative Hub and MUN begin. Clusters, advisory, Passion Project, academic elective, and project mentorship activate the Middle School operating rhythm.",
+experience: "Grade 6 begins Middle School rhythm: Passion Projects in small groups, Creative Hub, MUN, advisory, academic electives, and project mentorship as a coordinated function.",
 ecosystem: "Cluster educators plus shared specialist ecosystem; project mentorship starts as a coordinated function and Pathways continue from Grade 5.",
 },
 {
@@ -489,8 +490,8 @@ ecosystem: "Full shared specialist ecosystem plus mature secondary academic laye
 const synthesisStatements = [
 "The Rio launch model should not reproduce São Paulo's mature organizational design. It should protect the same learning promise through a compressed adult ecosystem: fixed classroom ownership, shared specialist capacity, early academic performance and language monitoring, curriculum coherence, wellbeing support, Learning Experience Design, and visible documentation of learning.",
 "Grade 6 is the threshold where the model changes category. It activates Middle School clusters, electives, Passion Projects, advisory, project mentorship, and shared specialist infrastructure. It is not one more Lower School grade.",
-"Project Design Journey begins as a classroom-based experiential learning framework. From Early Years through Grade 5, projects are full-class investigations guided by educators through the learning engine of each division. Passion Projects begin only in Grade 6, when learners work in small groups of 3–5 and project mentorship becomes a coordinated operating function.",
-"Specialists should not be treated as one generic FTE pool. Body & Movement, Sound Exploration, Artistic Design, Performing Arts, and Design Technologies each have distinct load patterns, space needs, age-band constraints, and links to signature programs.",
+"Project Design Journey is the schoolwide umbrella for experiential learning. In Early Years, it is expressed through Reggio-inspired Explorers inquiry. In Lower School, it is expressed through Researchers and phenomenon-based learning. Through Grade 5, projects remain full-class investigations guided by educators. In Grade 6, Passion Projects begin in small groups of 3–5, and project mentorship becomes a coordinated operating function.",
+"Specialist capacity should not be treated as one generic FTE pool. Body & Movement, Sound Exploration / Music, Artistic Design / Atelier, and Design Technologies / Learning Experience Designer each carry different load patterns, space needs, age-band constraints, and links to the learning architecture. Performing Arts remains an embedded program layer initially absorbed by Sound Exploration / Music, not a separate pillar in the simulator.",
 ];
 const baselineDivisionArchitecture = [
 {
@@ -2905,7 +2906,7 @@ export default function OfferScenariosTab() {
                         sustentam expressão, exposição e programas autorais.
                       </p>
                       <p className="text-sm font-semibold leading-relaxed text-slate-600">
-                        Design Technologies é o tempo de sala do Learning Experience Designer, não um
+                        Design Technologies / Learning Experience Designer é o tempo de sala do Learning Experience Designer, não um
                         papel especialista separado. Os quatro pilares abaixo simulam capacidade de
                         agenda; eles não convertem automaticamente quatro pilares em quatro cargos
                         distintos de payroll.
@@ -3020,16 +3021,20 @@ export default function OfferScenariosTab() {
 
                   <div className="grid gap-4 xl:grid-cols-2">
                     <div className="rounded-[2rem] bg-white p-6">
-                      <h4 className="text-xl font-black text-slate-950">Body & Movement load</h4>
+                      <h4 className="text-xl font-black text-slate-950">Specialist capacity trigger examples</h4>
                       <p className="mt-3 text-sm font-semibold leading-relaxed text-slate-600">
-                        Mantém a lógica de 30 blocos por educador como uma premissa de capacidade, não como cálculo de payroll.
+                        Estes exemplos seguem a mesma lógica do simulador acima. A linha de duas seções é
+                        um stress test de capacidade, não a premissa default dos cenários.
                       </p>
                       <div className="mt-5 space-y-2">
-                        {bodyMovementLoads.map(([scenario, load, premise]) => (
-                          <div key={`console-${scenario}`} className="grid gap-2 rounded-2xl bg-[#f5f0e7] p-3 text-xs font-semibold text-slate-600 md:grid-cols-[0.7fr_0.8fr_1.5fr]">
-                            <div className="font-black text-slate-950">{scenario}</div>
-                            <div>{load}</div>
-                            <div>{premise}</div>
+                        {specialistPillarSimulatorRows.map(([label, sections, grade, blocks, hours, status]) => (
+                          <div key={`console-specialist-trigger-${label}`} className="grid gap-2 rounded-2xl bg-[#f5f0e7] p-3 text-xs font-semibold text-slate-600 md:grid-cols-[1fr_0.7fr_0.7fr_0.7fr_0.5fr_1fr]">
+                            <div className="font-black text-slate-950">{label}</div>
+                            <div>{sections}</div>
+                            <div>{grade}</div>
+                            <div>{blocks}</div>
+                            <div>{hours}</div>
+                            <div className="font-black text-[#4b254b]">{status}</div>
                           </div>
                         ))}
                       </div>
@@ -3037,7 +3042,9 @@ export default function OfferScenariosTab() {
                     <div className="rounded-[2rem] bg-white p-6">
                       <h4 className="text-xl font-black text-slate-950">Referência São Paulo</h4>
                       <p className="mt-3 text-sm font-semibold leading-relaxed text-slate-600">
-                        São Paulo represents the mature flagship ecosystem — a contrast model, not a staffing template for Rio. A composição abaixo é referência de arquitetura especialista do ecossistema maduro.
+                        São Paulo is a mature ecosystem reference, not a Rio staffing template. It shows
+                        how specialist infrastructure expands when the school reaches mature enrollment,
+                        space use, program density, and signature-program complexity.
                       </p>
                       <div className="mt-5 grid gap-2">
                         {currentSpecialistEcosystem.map(([area, names, count]) => (
@@ -4040,7 +4047,7 @@ export default function OfferScenariosTab() {
 		                sustentam expressão, exposição e programas autorais.
 		              </p>
 		              <p className="text-sm leading-relaxed text-slate-600">
-		                Design Technologies é o tempo de sala do Learning Experience Designer, não um
+		                Design Technologies / Learning Experience Designer é o tempo de sala do Learning Experience Designer, não um
 		                papel especialista separado. Os quatro pilares abaixo simulam capacidade de
 		                agenda; eles não convertem automaticamente quatro pilares em quatro cargos
 		                distintos de payroll.
