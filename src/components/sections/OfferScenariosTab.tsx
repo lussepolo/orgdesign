@@ -289,6 +289,35 @@ premium,
 risk: specialistBudgetImplications[domain] ?? "Validate load, space, and scope before converting premise into hiring.",
 })
 );
+type SpecialistFinalGrade = "Grade 3" | "Grade 4" | "Grade 5" | "Grade 6";
+type SpecialistSectionsPerGrade = 1 | 2 | 3;
+type SpecialistBlocksPerGrade = 1 | 2;
+type SpecialistBlockDuration = 45 | 50;
+type SpecialistCapacityThreshold = 24 | 26 | 30;
+const specialistPillarGradeSequence = [
+"Toddlers 1",
+"Toddlers 2",
+"Pre-K3",
+"Pre-K4",
+"Kindergarten",
+"Grade 1",
+"Grade 2",
+"Grade 3",
+"Grade 4",
+"Grade 5",
+"Grade 6",
+] as const;
+const specialistFinalGradeOptions: SpecialistFinalGrade[] = ["Grade 3", "Grade 4", "Grade 5", "Grade 6"];
+const specialistSectionsPerGradeOptions: SpecialistSectionsPerGrade[] = [1, 2, 3];
+const specialistBlocksPerGradeOptions: SpecialistBlocksPerGrade[] = [1, 2];
+const specialistBlockDurationOptions: SpecialistBlockDuration[] = [45, 50];
+const specialistCapacityThresholdOptions: SpecialistCapacityThreshold[] = [24, 26, 30];
+const specialistPillarSimulatorRows = [
+["Opening baseline", "1 section", "Grade 3", "16 blocks", "12 h", "Sustainable"],
+["Extended LS", "1 section", "Grade 5", "20 blocks", "15 h", "Sustainable"],
+["Two-section trigger", "2 sections", "Grade 3", "32 blocks", "24 h", "Requires second specialist"],
+["Full LS, two sections", "2 sections", "Grade 5", "40 blocks", "30 h", "Requires second specialist"],
+];
 const currentSpecialistEcosystem = [
 ["Body & Movement", "Marcello Humeniuk, Maíra Jardim, Felipe Pierrobon, Kirk Barros", "Reference planning premise: 4 educators"],
 ["Sound Exploration / Music", "Igor, Bianca", "Reference planning premise: 2 educators"],
@@ -1283,10 +1312,32 @@ export default function OfferScenariosTab() {
   const [selectedEcosystemLayer, setSelectedEcosystemLayer] = useState("all");
   const [activeView, setActiveView] = useState<OfferScenarioView>("brief");
   const [selectedScenarioTitle, setSelectedScenarioTitle] = useState("Scenario D");
+  const [specialistFinalGrade, setSpecialistFinalGrade] = useState<SpecialistFinalGrade>("Grade 3");
+  const [specialistSectionsPerGrade, setSpecialistSectionsPerGrade] = useState<SpecialistSectionsPerGrade>(1);
+  const [specialistBlocksPerGrade, setSpecialistBlocksPerGrade] = useState<SpecialistBlocksPerGrade>(2);
+  const [specialistBlockDuration, setSpecialistBlockDuration] = useState<SpecialistBlockDuration>(45);
+  const [specialistCapacityThreshold, setSpecialistCapacityThreshold] = useState<SpecialistCapacityThreshold>(26);
 
   const selectedScenario =
     pedagogicalOfferScenarios.find((scenario) => scenario.title === selectedScenarioTitle) ??
     pedagogicalOfferScenarios[3];
+  const specialistGradeLevelCount = specialistPillarGradeSequence.indexOf(specialistFinalGrade) + 1;
+  const specialistBlocksPerPillar =
+    specialistGradeLevelCount * specialistSectionsPerGrade * specialistBlocksPerGrade;
+  const specialistHoursPerPillar = (specialistBlocksPerPillar * specialistBlockDuration) / 60;
+  const specialistRecommendedFTEPerPillar = Math.ceil(specialistBlocksPerPillar / specialistCapacityThreshold);
+  const specialistCapacityEquivalentAcrossFourPillars = specialistRecommendedFTEPerPillar * 4;
+  const specialistCapacityStatus =
+    specialistBlocksPerPillar <= 20
+      ? "Sustainable"
+      : specialistBlocksPerPillar <= specialistCapacityThreshold
+        ? "High but manageable"
+        : specialistBlocksPerPillar <= 30
+          ? "Pressure point"
+          : "Requires second specialist";
+  const specialistHoursDisplay = Number.isInteger(specialistHoursPerPillar)
+    ? `${specialistHoursPerPillar} h`
+    : `${specialistHoursPerPillar.toFixed(1)} h`;
 
   const viewClassName = (view: OfferScenarioView) =>
     cn("offer-scenarios-view-section", activeView !== view && "offer-scenarios-screen-inactive");
@@ -3671,25 +3722,125 @@ export default function OfferScenariosTab() {
 		            </div>
 		          </Card>
 
-		          <Card title="Carga por Área Especialista" icon={Palette}>
+		          <Card title="Specialist Pillar Load & Growth Triggers" icon={Palette}>
 		            <div className="space-y-4">
 		              <p className="text-sm leading-relaxed text-slate-600">
 		                Especialistas não são um bloco único de FTE. Cada área possui uma lógica própria
 		                de carga, espaço e progressão: Body & Movement é altamente recorrente; Sound
-		                Exploration exige cobertura ampla em EY/LS; Design Technologies se conecta à
-		                arquitetura de projetos e Creative Hub; Artistic Design e Performing Arts
+		                Exploration exige cobertura ampla em EY/LS; Design Technologies / Learning Experience Designer se conecta à
+		                arquitetura de projetos e Creative Hub; Artistic Design / Atelier e Performing Arts
 		                sustentam expressão, exposição e programas autorais.
 		              </p>
 		              <p className="text-sm leading-relaxed text-slate-600">
-		                Design Technologies depende de faixa etária, espaço, setup, formato de projeto e
-		                conexão com Creative Hub. Os números abaixo são premissas de planejamento, não
-		                contagem final de contratação.
+		                Design Technologies é o tempo de sala do Learning Experience Designer, não um
+		                papel especialista separado. Os quatro pilares abaixo simulam capacidade de
+		                agenda; eles não convertem automaticamente quatro pilares em quatro cargos
+		                distintos de payroll.
 		              </p>
 		              <div className="rounded-2xl border border-amber-100 bg-amber-50 px-4 py-3 text-xs leading-relaxed text-slate-700">
-		                1 specialist educator can carry up to 30 instructional slots per week. Above 30
-		                weekly slots, the area requires additional educator capacity. Some areas may
-		                require additional educators even below 30 slots because of age-band
-		                specialization, space constraints, setup needs, or signature-program complexity.
+		                Body & Movement, Sound Exploration / Music, and Artistic Design / Atelier represent
+		                specialist educator capacity. Design Technologies / Learning Experience Designer
+		                represents classroom-facing Learning Experience Designer capacity. Performing Arts
+		                is initially embedded through Sound Exploration / Music; Creative Hub is not active
+		                as a scheduled learner program before Grade 6.
+		              </div>
+		              <div className="grid grid-cols-1 gap-3 md:grid-cols-5">
+		                {[
+		                  {
+		                    label: "Final grade offered",
+		                    value: specialistFinalGrade,
+		                    options: specialistFinalGradeOptions,
+		                    onChange: (value: string) => setSpecialistFinalGrade(value as SpecialistFinalGrade),
+		                  },
+		                  {
+		                    label: "Sections per grade",
+		                    value: specialistSectionsPerGrade,
+		                    options: specialistSectionsPerGradeOptions,
+		                    onChange: (value: string) => setSpecialistSectionsPerGrade(Number(value) as SpecialistSectionsPerGrade),
+		                  },
+		                  {
+		                    label: "Blocks per pillar / grade",
+		                    value: specialistBlocksPerGrade,
+		                    options: specialistBlocksPerGradeOptions,
+		                    onChange: (value: string) => setSpecialistBlocksPerGrade(Number(value) as SpecialistBlocksPerGrade),
+		                  },
+		                  {
+		                    label: "Block duration",
+		                    value: specialistBlockDuration,
+		                    options: specialistBlockDurationOptions,
+		                    onChange: (value: string) => setSpecialistBlockDuration(Number(value) as SpecialistBlockDuration),
+		                  },
+		                  {
+		                    label: "Capacity threshold",
+		                    value: specialistCapacityThreshold,
+		                    options: specialistCapacityThresholdOptions,
+		                    onChange: (value: string) => setSpecialistCapacityThreshold(Number(value) as SpecialistCapacityThreshold),
+		                  },
+		                ].map((control) => (
+		                  <label key={control.label} className="space-y-2 rounded-2xl border border-slate-100 bg-white p-3">
+		                    <span className="block text-[9px] font-black uppercase tracking-widest text-slate-400">{control.label}</span>
+		                    <select
+		                      className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-bold text-slate-700 outline-none focus:border-[#214B74]"
+		                      value={control.value}
+		                      onChange={(event) => control.onChange(event.target.value)}
+		                    >
+		                      {control.options.map((option) => (
+		                        <option key={`${control.label}-${option}`} value={option}>
+		                          {typeof option === "number" && control.label === "Block duration" ? `${option} min` : option}
+		                        </option>
+		                      ))}
+		                    </select>
+		                  </label>
+		                ))}
+		              </div>
+		              <div className="grid grid-cols-2 gap-3 lg:grid-cols-6">
+		                {[
+		                  ["Grade levels included", `${specialistGradeLevelCount} levels`],
+		                  ["Blocks per pillar/week", `${specialistBlocksPerPillar} blocks`],
+		                  ["Hours per pillar/week", specialistHoursDisplay],
+		                  ["Capacity status", specialistCapacityStatus],
+		                  ["Recommended FTE per pillar", `${specialistRecommendedFTEPerPillar}`],
+		                  ["Capacity-equivalent across four pillars", `${specialistCapacityEquivalentAcrossFourPillars}`],
+		                ].map(([label, value]) => (
+		                  <div key={`specialist-simulator-output-${label}`} className="rounded-2xl border border-slate-100 bg-white p-3">
+		                    <div className="text-[9px] font-black uppercase tracking-widest text-slate-400">{label}</div>
+		                    <div className="mt-2 text-lg font-black text-slate-950">{value}</div>
+		                  </div>
+		                ))}
+		              </div>
+		              <div className="overflow-x-auto rounded-2xl border border-slate-100">
+		                <table className="min-w-[720px] w-full text-left">
+		                  <thead>
+		                    <tr className="bg-slate-50 text-[10px] uppercase tracking-widest text-slate-400">
+		                      <th className="px-3 py-3">Reference case</th>
+		                      <th className="px-3 py-3">Sections</th>
+		                      <th className="px-3 py-3">Final grade</th>
+		                      <th className="px-3 py-3">Blocks</th>
+		                      <th className="px-3 py-3">Hours</th>
+		                      <th className="px-3 py-3">Status</th>
+		                    </tr>
+		                  </thead>
+		                  <tbody>
+		                    {specialistPillarSimulatorRows.map(([label, sections, grade, blocks, hours, status]) => (
+		                      <tr key={`specialist-pillar-simulator-${label}`} className="border-t border-slate-100 text-xs text-slate-600">
+		                        <td className="px-3 py-3 font-bold text-slate-900">{label}</td>
+		                        <td className="px-3 py-3 font-semibold">{sections}</td>
+		                        <td className="px-3 py-3 font-semibold">{grade}</td>
+		                        <td className="px-3 py-3">{blocks}</td>
+		                        <td className="px-3 py-3">{hours}</td>
+		                        <td className="px-3 py-3 font-bold text-[#4b254b]">{status}</td>
+		                      </tr>
+		                    ))}
+		                  </tbody>
+		                </table>
+		              </div>
+		              <div className="rounded-2xl border border-[#214B74]/15 bg-[#edf3f7] px-4 py-3 text-xs leading-relaxed text-slate-700">
+		                With one section per grade, one full-time educator per specialist pillar remains
+		                viable through Grade 5. With two sections per grade, each pillar reaches at least
+		                32 weekly blocks, which triggers the need to double specialist capacity or redesign
+		                the role. For Design Technologies / Learning Experience Designer, this refers to
+		                the Learning Experience Designer's classroom-facing capacity, not a separate
+		                specialist role.
 		              </div>
 		            </div>
 		          </Card>
