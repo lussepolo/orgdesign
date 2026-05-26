@@ -2248,10 +2248,10 @@ export default function OfferScenariosTab() {
                     Leitura estratégica
                   </div>
                   <p className="mt-4 text-xl font-black leading-tight">
-                    O Cenário D não é apenas uma série a mais. Ele muda a categoria operacional da escola.
+                    Compare antes de decidir.
                   </p>
                   <p className="mt-4 text-sm font-semibold leading-relaxed text-blue-50/80">
-                    Se Grade 6 for lançado, o business plan precisa contemplar cluster, advisory, Creative Hub, MUN, mentoria de projeto e capacidade especialista compartilhada.
+                    Cada cenário deve ser lido pela mesma lógica: o que já estava orçado, o que passa a ser recomendado, qual é o incremento e que risco o incremento mitiga.
                   </p>
                 </div>
               </div>
