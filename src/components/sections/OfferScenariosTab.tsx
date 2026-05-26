@@ -58,7 +58,7 @@ impliedOccupancy: "75.5%",
 strategicIdentity: "Foundation + early academic evidence",
 offerStage: "Early Years + first Lower School cycle",
 classroomPackage: [
-"Founding consistency across EY and the first LS cycle",
+"Fixed classroom package: EY = reference educator + assistant + monitor; LS = reference educator + assistant",
 "PDJ operates through full-class experiential projects embedded in classroom routines",
 "Learning Experience Design function protects project quality, documentation, and learning-engine fidelity",
 ],
@@ -100,6 +100,7 @@ impliedOccupancy: "74.6%",
 strategicIdentity: "Academic progression + Concept identity formation",
 offerStage: "Lower School progression",
 classroomPackage: [
+"Fixed classroom package continues: EY = reference educator + assistant + monitor; LS = reference educator + assistant",
 "Grade 4 deepens documentation, reflection, project language, and Concept identity",
 "Learners are formed before the Grade 5 Pathways threshold",
 ],
@@ -142,6 +143,7 @@ impliedOccupancy: "73.8%",
 strategicIdentity: "Lower School completion + Pathways activation",
 offerStage: "Complete Lower School pathway",
 classroomPackage: [
+"Fixed classroom package continues: EY = reference educator + assistant + monitor; LS = reference educator + assistant",
 "Grade 5 activates Pathways and transition protocols",
 "Learner agency and portfolio evidence become more explicit",
 ],
@@ -197,6 +199,7 @@ offerActivated: [
 "Multiple learning spaces",
 ],
 classroomPackage: [
+"Fixed classroom package continues: EY = reference educator + assistant + monitor; LS = reference educator + assistant",
 "Grade 6 shifts to cluster architecture",
 "Middle School rhythm begins while EY/LS baseline continues underneath",
 ],
@@ -350,9 +353,9 @@ risk: "Higher cost before enrollment density fully matures.",
 },
 		  ];
 const scenarioMatrix = [
-["Scenario A", "Grade 3", "228", "302", "75.5%", "Foundation + early academic evidence", "EY/LS reference educator + support", "Shared, lighter version", "MAP from Grade 1, classroom PDJ, language monitoring", "Not active", "Coached Foundation"],
-["Scenario B", "Grade 4", "258", "346", "74.6%", "Academic progression + Concept identity formation", "EY/LS reference educator + support", "Shared, broader LS load", "MAP cycles, Concept learning habits, early portfolio, Grade 5 Pathways preparation", "Not active", "Academic Progression"],
-["Scenario C", "Grade 5", "288", "390", "73.8%", "Lower School completion + Pathways activation", "EY/LS reference educator + support", "Full LS continuity", "Pathway classes active; Creative Hub preparation only", "Preparation only", "Transition Readiness"],
+["Scenario A", "Grade 3", "228", "302", "75.5%", "Foundation + early academic evidence", "EY: reference educator + assistant + monitor; LS: reference educator + assistant", "Shared, lighter version", "MAP from Grade 1, classroom PDJ, language monitoring", "Not active", "Coached Foundation"],
+["Scenario B", "Grade 4", "258", "346", "74.6%", "Academic progression + Concept identity formation", "EY: reference educator + assistant + monitor; LS: reference educator + assistant", "Shared, broader LS load", "MAP cycles, Concept learning habits, early portfolio, Grade 5 Pathways preparation", "Not active", "Academic Progression"],
+["Scenario C", "Grade 5", "288", "390", "73.8%", "Lower School completion + Pathways activation", "EY: reference educator + assistant + monitor; LS: reference educator + assistant", "Full LS continuity", "Pathway classes active; Creative Hub preparation only", "Preparation only", "Transition Readiness"],
 ["Scenario D", "Grade 6", "318", "440", "72.3%", "Middle School launch + global/program activation", "EY/LS remains; Grade 6 cluster model", "Shared EY/LS/MS ecosystem", "Creative Hub, MUN, Passion Project, advisory, electives, mentorship", "Active", "Middle School Signature Launch"],
 		  ];
 const experienceGrowthRoadmap = [
@@ -439,8 +442,8 @@ division: "Early Years",
 tone: "border-emerald-100 bg-emerald-50",
 composition: [
 "Reference educator",
-"Support educator / assistant",
-"Monitor / operational support where age-band routine requires it",
+"Assistant",
+"Monitor",
 "Shared specialist access: Body & Movement, Sound Exploration, Artistic Design, Design Technologies",
 ],
 minimum: [
@@ -465,8 +468,8 @@ division: "Lower School",
 tone: "border-blue-100 bg-blue-50",
 composition: [
 "Reference educator per section",
-"Support package by grade band and learner need",
-"Operational support for supervision and transitions",
+"Assistant",
+"Supervision and transition routines",
 "Shared specialist ecosystem",
 ],
 minimum: [
@@ -558,8 +561,8 @@ const baselineEnxovalPackages = [
 title: "Early Years classroom enxoval",
 items: [
 "Reference educator",
-"Support educator / assistant",
-"Monitor / operational support",
+"Assistant",
+"Monitor",
 "Learning documentation system",
 "Family communication routines",
 "Age-appropriate materials and atelier access",
@@ -571,7 +574,7 @@ items: [
 title: "Lower School classroom enxoval",
 items: [
 "Reference educator per section",
-"Support package",
+"Assistant",
 "Learning documentation and portfolio routines",
 "MAP from Grade 1",
 "Intervention/enrichment cycles",
@@ -1559,6 +1562,9 @@ export default function OfferScenariosTab() {
                 </tbody>
               </table>
             </div>
+            <p className="mt-3 text-xs leading-relaxed text-slate-500">
+              Classroom package refers only to the adult structure inside the classroom. Broader support roles, including leadership, Learning Experience Design, counseling, academic support, and specialists, are treated separately in the support ecosystem layer.
+            </p>
           </section>
 
           <section className="offer-scenarios-print-page offer-scenarios-print-page-break space-y-6">
@@ -2721,6 +2727,9 @@ export default function OfferScenariosTab() {
 				              </tbody>
 				            </table>
 				          </div>
+				          <p className="mt-3 text-xs leading-relaxed text-slate-500">
+				            Classroom package refers only to the adult structure inside the classroom. Broader support roles, including leadership, Learning Experience Design, counseling, academic support, and specialists, are treated separately in the support ecosystem layer.
+				          </p>
 				        </Card>
 
 				        </div>
@@ -3590,6 +3599,9 @@ export default function OfferScenariosTab() {
 		              </tbody>
 		            </table>
 		          </div>
+		          <p className="mt-3 text-xs leading-relaxed text-slate-500">
+		            Classroom package refers only to the adult structure inside the classroom. Broader support roles, including leadership, Learning Experience Design, counseling, academic support, and specialists, are treated separately in the support ecosystem layer.
+		          </p>
 		        </Card>
 
 			        <Card
