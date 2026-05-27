@@ -299,7 +299,7 @@ risk: specialistBudgetImplications[domain] ?? "Validate load, space, and scope b
 })
 );
 type SpecialistFinalGrade = "Grade 3" | "Grade 4" | "Grade 5" | "Grade 6";
-type SpecialistSectionsPerGrade = 1 | 2 | 3;
+type SpecialistSectionsPerGrade = 1 | 2;
 type SpecialistBlocksPerGrade = 1 | 2;
 type SpecialistBlockDuration = 45 | 50;
 type SpecialistCapacityThreshold = 24 | 26 | 30;
@@ -317,7 +317,7 @@ const specialistPillarGradeSequence = [
 "Grade 6",
 ] as const;
 const specialistFinalGradeOptions: SpecialistFinalGrade[] = ["Grade 3", "Grade 4", "Grade 5", "Grade 6"];
-const specialistSectionsPerGradeOptions: SpecialistSectionsPerGrade[] = [1, 2, 3];
+const specialistSectionsPerGradeOptions: SpecialistSectionsPerGrade[] = [1, 2];
 const specialistBlocksPerGradeOptions: SpecialistBlocksPerGrade[] = [1, 2];
 const specialistBlockDurationOptions: SpecialistBlockDuration[] = [45, 50];
 const specialistCapacityThresholdOptions: SpecialistCapacityThreshold[] = [24, 26, 30];

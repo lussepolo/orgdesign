@@ -173,6 +173,7 @@ const MiddleSchoolTab = ({ sections, setSections }: MiddleSchoolTabProps) => {
   const [programSlotsPerSection, setProgramSlotsPerSection] = useState<Record<ProgramFunctionId, number>>(
     createDefaultProgramSlotsPerSection,
   );
+  const [advancedAssumptionsOpen, setAdvancedAssumptionsOpen] = useState(false);
 
   const activeGrades = useMemo(
     () => getActiveGrades(msSectionsByGrade),
@@ -406,46 +407,52 @@ const MiddleSchoolTab = ({ sections, setSections }: MiddleSchoolTabProps) => {
             </div>
           )}
 
-          <details className="rounded-2xl border border-slate-100 bg-slate-50 p-3">
+          <details
+            className="rounded-2xl border border-slate-100 bg-slate-50 p-3"
+            open={advancedAssumptionsOpen}
+            onToggle={(event) => setAdvancedAssumptionsOpen(event.currentTarget.open)}
+          >
             <summary className="cursor-pointer text-[10px] font-bold uppercase tracking-widest text-slate-500">
               Advanced assumptions
             </summary>
-            <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
-              {CORE_DOMAIN_ASSUMPTIONS.map((domain) => (
-                <label key={`domain-block-control-${domain.id}`} className="space-y-2 rounded-2xl border border-slate-100 bg-white p-3">
-                  <span className="block text-[9px] font-bold uppercase tracking-widest text-slate-400">{domain.label}</span>
-                  <select
-                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-bold text-slate-700 outline-none focus:border-blue-400"
-                    value={domainSlotsPerSection[domain.id]}
-                    onChange={(event) => setDomainSlotsPerSection((current) => ({
-                      ...current,
-                      [domain.id]: Number(event.target.value),
-                    }))}
-                  >
-                    {BLOCK_OPTIONS.map((option) => (
-                      <option key={`domain-${domain.id}-${option}`} value={option}>{option} slots / section</option>
-                    ))}
-                  </select>
-                </label>
-              ))}
-              {PROGRAM_FUNCTION_ASSUMPTIONS.map((program) => (
-                <label key={`program-block-control-${program.id}`} className="space-y-2 rounded-2xl border border-slate-100 bg-white p-3">
-                  <span className="block text-[9px] font-bold uppercase tracking-widest text-slate-400">{program.label}</span>
-                  <select
-                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-bold text-slate-700 outline-none focus:border-blue-400"
-                    value={programSlotsPerSection[program.id]}
-                    onChange={(event) => setProgramSlotsPerSection((current) => ({
-                      ...current,
-                      [program.id]: Number(event.target.value),
-                    }))}
-                  >
-                    {BLOCK_OPTIONS.map((option) => (
-                      <option key={`program-${program.id}-${option}`} value={option}>{option} slots / section</option>
-                    ))}
-                  </select>
-                </label>
-              ))}
-            </div>
+            {advancedAssumptionsOpen && (
+              <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
+                {CORE_DOMAIN_ASSUMPTIONS.map((domain) => (
+                  <label key={`domain-block-control-${domain.id}`} className="space-y-2 rounded-2xl border border-slate-100 bg-white p-3">
+                    <span className="block text-[9px] font-bold uppercase tracking-widest text-slate-400">{domain.label}</span>
+                    <select
+                      className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-bold text-slate-700 outline-none focus:border-blue-400"
+                      value={domainSlotsPerSection[domain.id]}
+                      onChange={(event) => setDomainSlotsPerSection((current) => ({
+                        ...current,
+                        [domain.id]: Number(event.target.value),
+                      }))}
+                    >
+                      {BLOCK_OPTIONS.map((option) => (
+                        <option key={`domain-${domain.id}-${option}`} value={option}>{option} slots / section</option>
+                      ))}
+                    </select>
+                  </label>
+                ))}
+                {PROGRAM_FUNCTION_ASSUMPTIONS.map((program) => (
+                  <label key={`program-block-control-${program.id}`} className="space-y-2 rounded-2xl border border-slate-100 bg-white p-3">
+                    <span className="block text-[9px] font-bold uppercase tracking-widest text-slate-400">{program.label}</span>
+                    <select
+                      className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-bold text-slate-700 outline-none focus:border-blue-400"
+                      value={programSlotsPerSection[program.id]}
+                      onChange={(event) => setProgramSlotsPerSection((current) => ({
+                        ...current,
+                        [program.id]: Number(event.target.value),
+                      }))}
+                    >
+                      {BLOCK_OPTIONS.map((option) => (
+                        <option key={`program-${program.id}-${option}`} value={option}>{option} slots / section</option>
+                      ))}
+                    </select>
+                  </label>
+                ))}
+              </div>
+            )}
           </details>
 
           {grade6ClusterInsight.active && (
