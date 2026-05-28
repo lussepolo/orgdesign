@@ -58,9 +58,14 @@ export interface ScheduleUnit {
   label: string;
   minutes: number | null;
   scheduleMode: ScheduleMode;
-  countsTowardTeachingLoad: boolean;
-  countsTowardMentorshipContact: boolean;
-  countsTowardProgramOwnership: boolean;
+  /**
+   * These flags indicate which load categories a unit may support. They are not
+   * additive counting rules; actual workload counting comes from item-level
+   * loadCategory, MentorshipLoadItem, and explicit assignment logic.
+   */
+  eligibleForTeachingLoad: boolean;
+  eligibleForMentorshipContact: boolean;
+  eligibleForProgramOwnership: boolean;
   isFixedSynchronizedBlock: boolean;
   validationRequired: boolean;
   notes: string;
@@ -79,6 +84,11 @@ export interface CourseLoadItem {
   subdomain?: string;
   loadCategory: LoadCategory;
   scheduleUnitId: ScheduleUnitKind;
+  sourceScheduleMode?: ScheduleMode;
+  referenceUnitKind?: ScheduleUnitKind;
+  referenceCycleMinutes?: number | null;
+  referenceCycleLabel?: string;
+  requiresRioConversion?: boolean;
   weeklySlots: number | null;
   minutesPerSlot: number | null;
   weeklyMinutes: number | null;
@@ -86,6 +96,8 @@ export interface CourseLoadItem {
   slotEvidenceLevel: EvidenceLevel;
   source: "rio_mock" | "sao_paulo_reference" | "manual_validation";
   requiredHiringProfileIds: string[];
+  requiredPrimaryProfileIds?: string[];
+  supportingProfileIds?: string[];
   credentialOrSpecializationRequirement?: string;
   deliveryModelOptions: DeliveryModel[];
   scenarioFit: ScenarioId[];
@@ -167,15 +179,29 @@ export interface ScenarioOutput {
   validationWarnings: string[];
 }
 
+export interface RioEquivalentConversion {
+  sourceMinutes: number;
+  sourceUnitKind?: ScheduleUnitKind;
+  exactSingleBlockEquivalent: number;
+  displaySingleBlockEquivalent: number;
+  exactDoubleBlockEquivalent: number;
+  displayDoubleBlockEquivalent: number;
+  remainderAgainst45: number;
+  remainderAgainst90: number;
+  fitStatus: FitStatus;
+  warnings: string[];
+  validationRequired: boolean;
+}
+
 export const HIGH_SCHOOL_SCHEDULE_UNITS: Record<ScheduleUnitKind, ScheduleUnit> = {
   rio_single_45: {
     id: "rio_single_45",
     label: "Rio single block",
     minutes: 45,
     scheduleMode: "rio_weekly",
-    countsTowardTeachingLoad: true,
-    countsTowardMentorshipContact: true,
-    countsTowardProgramOwnership: false,
+    eligibleForTeachingLoad: true,
+    eligibleForMentorshipContact: true,
+    eligibleForProgramOwnership: false,
     isFixedSynchronizedBlock: false,
     validationRequired: true,
     notes: "Rio weekly planning unit. Use for direct subject or mentorship contact when curriculum validates it.",
@@ -185,9 +211,9 @@ export const HIGH_SCHOOL_SCHEDULE_UNITS: Record<ScheduleUnitKind, ScheduleUnit> 
     label: "Rio double block",
     minutes: 90,
     scheduleMode: "rio_weekly",
-    countsTowardTeachingLoad: true,
-    countsTowardMentorshipContact: true,
-    countsTowardProgramOwnership: false,
+    eligibleForTeachingLoad: true,
+    eligibleForMentorshipContact: true,
+    eligibleForProgramOwnership: false,
     isFixedSynchronizedBlock: false,
     validationRequired: true,
     notes: "Rio weekly double block. Likely unit for labs, seminars, projects, and long-form work if validated.",
@@ -197,9 +223,9 @@ export const HIGH_SCHOOL_SCHEDULE_UNITS: Record<ScheduleUnitKind, ScheduleUnit> 
     label: "Sao Paulo A-F rotation record",
     minutes: 255,
     scheduleMode: "sao_paulo_reference",
-    countsTowardTeachingLoad: true,
-    countsTowardMentorshipContact: false,
-    countsTowardProgramOwnership: false,
+    eligibleForTeachingLoad: true,
+    eligibleForMentorshipContact: false,
+    eligibleForProgramOwnership: false,
     isFixedSynchronizedBlock: false,
     validationRequired: true,
     notes: "Reference-only mature-model unit inferred as Period 1 + Period 3 + Period 4 across a six-day rotation.",
@@ -209,9 +235,9 @@ export const HIGH_SCHOOL_SCHEDULE_UNITS: Record<ScheduleUnitKind, ScheduleUnit> 
     label: "Sao Paulo X-block, 75 minutes",
     minutes: 75,
     scheduleMode: "sao_paulo_reference",
-    countsTowardTeachingLoad: true,
-    countsTowardMentorshipContact: true,
-    countsTowardProgramOwnership: true,
+    eligibleForTeachingLoad: true,
+    eligibleForMentorshipContact: true,
+    eligibleForProgramOwnership: true,
     isFixedSynchronizedBlock: false,
     validationRequired: true,
     notes: "Reference-only fixed weekday block. Can represent course, mentorship, or program contact depending on label.",
@@ -221,9 +247,9 @@ export const HIGH_SCHOOL_SCHEDULE_UNITS: Record<ScheduleUnitKind, ScheduleUnit> 
     label: "Sao Paulo X-block, 60 minutes",
     minutes: 60,
     scheduleMode: "sao_paulo_reference",
-    countsTowardTeachingLoad: true,
-    countsTowardMentorshipContact: true,
-    countsTowardProgramOwnership: true,
+    eligibleForTeachingLoad: true,
+    eligibleForMentorshipContact: true,
+    eligibleForProgramOwnership: true,
     isFixedSynchronizedBlock: false,
     validationRequired: true,
     notes: "Reference-only shorter Wednesday-style block found in the Sao Paulo file.",
@@ -233,9 +259,9 @@ export const HIGH_SCHOOL_SCHEDULE_UNITS: Record<ScheduleUnitKind, ScheduleUnit> 
     label: "Sao Paulo advisory",
     minutes: 25,
     scheduleMode: "sao_paulo_reference",
-    countsTowardTeachingLoad: false,
-    countsTowardMentorshipContact: true,
-    countsTowardProgramOwnership: true,
+    eligibleForTeachingLoad: false,
+    eligibleForMentorshipContact: true,
+    eligibleForProgramOwnership: true,
     isFixedSynchronizedBlock: false,
     validationRequired: true,
     notes: "Reference-only advisory unit. Recurrence and Wednesday duration require validation before Rio modeling.",
@@ -245,9 +271,9 @@ export const HIGH_SCHOOL_SCHEDULE_UNITS: Record<ScheduleUnitKind, ScheduleUnit> 
     label: "Fixed Project Mentorship Block",
     minutes: null,
     scheduleMode: "rio_weekly",
-    countsTowardTeachingLoad: false,
-    countsTowardMentorshipContact: true,
-    countsTowardProgramOwnership: true,
+    eligibleForTeachingLoad: false,
+    eligibleForMentorshipContact: true,
+    eligibleForProgramOwnership: true,
     isFixedSynchronizedBlock: true,
     validationRequired: true,
     notes: "Protected Rio mentorship block. It does not conflict with regular subject teaching, but it counts toward workload.",
@@ -257,9 +283,9 @@ export const HIGH_SCHOOL_SCHEDULE_UNITS: Record<ScheduleUnitKind, ScheduleUnit> 
     label: "Shared program block",
     minutes: null,
     scheduleMode: "rio_weekly",
-    countsTowardTeachingLoad: false,
-    countsTowardMentorshipContact: true,
-    countsTowardProgramOwnership: true,
+    eligibleForTeachingLoad: false,
+    eligibleForMentorshipContact: true,
+    eligibleForProgramOwnership: true,
     isFixedSynchronizedBlock: false,
     validationRequired: true,
     notes: "Count once per educator-contact block unless simultaneous groups or educators are shown.",
@@ -269,9 +295,9 @@ export const HIGH_SCHOOL_SCHEDULE_UNITS: Record<ScheduleUnitKind, ScheduleUnit> 
     label: "Ambiguous/custom block",
     minutes: null,
     scheduleMode: "rio_weekly",
-    countsTowardTeachingLoad: false,
-    countsTowardMentorshipContact: false,
-    countsTowardProgramOwnership: false,
+    eligibleForTeachingLoad: false,
+    eligibleForMentorshipContact: false,
+    eligibleForProgramOwnership: false,
     isFixedSynchronizedBlock: false,
     validationRequired: true,
     notes: "Use only as a placeholder until curriculum or timetable validation resolves duration and workload treatment.",
@@ -294,6 +320,7 @@ export const HIGH_SCHOOL_LOAD_CATEGORY_RULES: Record<LoadCategory, string[]> = {
 };
 
 export const HIGH_SCHOOL_PROGRAM_BLOCK_COUNTING_RULES = [
+  "ScheduleUnit flags indicate eligibility, not automatic additive counting. Actual workload counting must use item-level loadCategory, MentorshipLoadItem, and assignment logic.",
   "Innovation Diploma and Passion Project are counted inside Project Mentorship, not as separate additive workload buckets.",
   "Project Mentorship occurs in a fixed synchronized mentorship block.",
   "The fixed mentorship block does not conflict with regular subject teaching because it is protected in the timetable.",
@@ -302,14 +329,16 @@ export const HIGH_SCHOOL_PROGRAM_BLOCK_COUNTING_RULES = [
   "GCD is counted inside Pathways or Leadership, not as a separate additive workload bucket unless validated later.",
   "Shared or cross-grade blocks count once per educator-contact block, not once per section, unless simultaneous separate groups or educators are shown.",
   "Program ownership is real workload but not automatically a teaching block or new payroll role.",
-  "Portfolio evidence, evidence workflow, documentation workflow, and evidence curation are excluded from this High School load model.",
 ];
+
+export const HIGH_SCHOOL_SCHEDULE_UNIT_COUNTING_NOTE =
+  "ScheduleUnit flags indicate eligibility, not automatic additive counting. Actual workload counting must use item-level loadCategory, MentorshipLoadItem, and explicit assignment logic.";
 
 const toOneDecimal = (value: number): number => Math.round(value * 10) / 10;
 
-export const minutesToRioSingleBlocks = (minutes: number): number => toOneDecimal(minutes / 45);
+export const minutesToRioSingleBlocks = (minutes: number): number => minutes / 45;
 
-export const minutesToRioDoubleBlocks = (minutes: number): number => toOneDecimal(minutes / 90);
+export const minutesToRioDoubleBlocks = (minutes: number): number => minutes / 90;
 
 export const getRioFitStatus = (
   minutes: number,
@@ -330,12 +359,45 @@ export const getRioFitStatus = (
 export const convertSaoPauloMinutesToRioEquivalent = (
   minutes: number,
   sourceUnitKind?: ScheduleUnitKind,
-) => ({
-  weeklyMinutes: minutes,
-  rioSingleBlockEquivalent: minutesToRioSingleBlocks(minutes),
-  rioDoubleBlockEquivalent: minutesToRioDoubleBlocks(minutes),
-  fitStatus: getRioFitStatus(minutes, sourceUnitKind),
-});
+): RioEquivalentConversion => {
+  const warnings: string[] = [];
+  const isSaoPauloRotationReference = sourceUnitKind === "sp_rotation_af_255";
+  const isLikelySaoPauloRotationReference = !sourceUnitKind && minutes === 255;
+
+  if (isSaoPauloRotationReference) {
+    warnings.push(
+      "255 minutes is a Sao Paulo A-F six-day-cycle reference unit and must not be treated as Rio weekly load.",
+    );
+  } else if (isLikelySaoPauloRotationReference) {
+    warnings.push(
+      "255 minutes commonly corresponds to the Sao Paulo A-F six-day-cycle reference; confirm source before treating it as Rio weekly load.",
+    );
+  }
+
+  if (sourceUnitKind && HIGH_SCHOOL_SCHEDULE_UNITS[sourceUnitKind]?.scheduleMode === "sao_paulo_reference") {
+    warnings.push("Sao Paulo reference units require explicit Rio timetable validation before weekly conversion.");
+  }
+
+  const fitStatus = getRioFitStatus(minutes, sourceUnitKind);
+  const validationRequired =
+    fitStatus === "needs_curriculum_validation" ||
+    isLikelySaoPauloRotationReference ||
+    warnings.length > 0;
+
+  return {
+    sourceMinutes: minutes,
+    sourceUnitKind,
+    exactSingleBlockEquivalent: minutesToRioSingleBlocks(minutes),
+    displaySingleBlockEquivalent: toOneDecimal(minutesToRioSingleBlocks(minutes)),
+    exactDoubleBlockEquivalent: minutesToRioDoubleBlocks(minutes),
+    displayDoubleBlockEquivalent: toOneDecimal(minutesToRioDoubleBlocks(minutes)),
+    remainderAgainst45: minutes % 45,
+    remainderAgainst90: minutes % 90,
+    fitStatus,
+    warnings,
+    validationRequired,
+  };
+};
 
 export const HIGH_SCHOOL_EDUCATOR_CAPABILITY_PROFILES: EducatorCapabilityProfile[] = [
   {
@@ -469,8 +531,8 @@ export const HIGH_SCHOOL_EDUCATOR_CAPABILITY_PROFILES: EducatorCapabilityProfile
     notes: "Mentorship is scheduled in a protected block and should not be treated as leftover filler.",
   },
   {
-    id: "gcd_leadership",
-    label: "GCD / Leadership",
+    id: "leadership_with_gcd_scope",
+    label: "Leadership owner with GCD scope",
     canCoverDomains: ["Leadership", "Global Citizen Diploma", "global citizenship", "public contribution"],
     shouldNotCoverDomains: ["Core AP subject instruction", "advanced mathematics"],
     canAbsorbMentorship: true,
@@ -478,8 +540,8 @@ export const HIGH_SCHOOL_EDUCATOR_CAPABILITY_PROFILES: EducatorCapabilityProfile
     sharedMsHsCredibility: "medium",
     partTimeFeasibility: "medium",
     maxMentorshipGroups: 2,
-    specialistTrigger: "GCD or Leadership becomes scheduled, assessed, and externally visible.",
-    notes: "GCD should sit inside Pathways or Leadership until validated as an independent workload bucket.",
+    specialistTrigger: "Leadership with embedded GCD scope becomes scheduled, assessed, and externally visible.",
+    notes: "This is a Pathways/Leadership profile carrying GCD scope, not a separate GCD staffing bucket.",
   },
   {
     id: "body_movement",
@@ -501,9 +563,9 @@ export const DEFAULT_FIXED_PROJECT_MENTORSHIP_BLOCK: ScheduleUnit = {
   label: "Fixed Project Mentorship Block",
   minutes: null,
   scheduleMode: "rio_weekly",
-  countsTowardTeachingLoad: false,
-  countsTowardMentorshipContact: true,
-  countsTowardProgramOwnership: true,
+  eligibleForTeachingLoad: false,
+  eligibleForMentorshipContact: true,
+  eligibleForProgramOwnership: true,
   isFixedSynchronizedBlock: true,
   validationRequired: true,
   notes:
@@ -544,7 +606,7 @@ export const HIGH_SCHOOL_MENTORSHIP_LOAD_ITEMS: MentorshipLoadItem[] = [
       "ap_seminar_research",
       "innovation_design_technologies_project_mentorship",
       "pathways_college_career",
-      "gcd_leadership",
+      "leadership_with_gcd_scope",
     ],
     countsTowardMentorshipContact: true,
     requiresProfileFit: true,
@@ -554,6 +616,14 @@ export const HIGH_SCHOOL_MENTORSHIP_LOAD_ITEMS: MentorshipLoadItem[] = [
 ];
 
 const hours = (minutes: number): number => toOneDecimal(minutes / 60);
+
+const SAO_PAULO_AF_ROTATION_REFERENCE = {
+  sourceScheduleMode: "sao_paulo_reference" as const,
+  referenceUnitKind: "sp_rotation_af_255" as const,
+  referenceCycleMinutes: 255,
+  referenceCycleLabel: "Sao Paulo A-F six-day-cycle reference unit, not Rio weekly load",
+  requiresRioConversion: true,
+};
 
 export const SAO_PAULO_REFERENCE_COURSE_LOAD_ITEMS: CourseLoadItem[] = [
   {
@@ -565,10 +635,11 @@ export const SAO_PAULO_REFERENCE_COURSE_LOAD_ITEMS: CourseLoadItem[] = [
     subdomain: "Redacao",
     loadCategory: "teaching_load",
     scheduleUnitId: "sp_rotation_af_255",
-    weeklySlots: 3,
-    minutesPerSlot: 255,
-    weeklyMinutes: 765,
-    weeklyHours: hours(765),
+    ...SAO_PAULO_AF_ROTATION_REFERENCE,
+    weeklySlots: null,
+    minutesPerSlot: null,
+    weeklyMinutes: null,
+    weeklyHours: null,
     slotEvidenceLevel: "inferred_from_timetable",
     source: "sao_paulo_reference",
     requiredHiringProfileIds: ["hs_portuguese_redacao"],
@@ -577,7 +648,8 @@ export const SAO_PAULO_REFERENCE_COURSE_LOAD_ITEMS: CourseLoadItem[] = [
     maturity: "reference_only",
     hrPayrollValidationRequired: true,
     validationRequired: true,
-    notes: "Source label: Lingua Portuguesa I. Reference-only; Rio frequency requires curriculum validation.",
+    notes:
+      "Source label: Lingua Portuguesa I. Reference-only; 255 minutes is a Sao Paulo six-day-cycle reference, not Rio weekly load. Rio weekly conversion requires explicit curriculum validation.",
   },
   {
     id: "sp_g9_ela",
@@ -587,10 +659,11 @@ export const SAO_PAULO_REFERENCE_COURSE_LOAD_ITEMS: CourseLoadItem[] = [
     domain: "English",
     loadCategory: "teaching_load",
     scheduleUnitId: "sp_rotation_af_255",
-    weeklySlots: 3,
-    minutesPerSlot: 255,
-    weeklyMinutes: 765,
-    weeklyHours: hours(765),
+    ...SAO_PAULO_AF_ROTATION_REFERENCE,
+    weeklySlots: null,
+    minutesPerSlot: null,
+    weeklyMinutes: null,
+    weeklyHours: null,
     slotEvidenceLevel: "inferred_from_timetable",
     source: "sao_paulo_reference",
     requiredHiringProfileIds: ["hs_english_research_communication"],
@@ -603,7 +676,8 @@ export const SAO_PAULO_REFERENCE_COURSE_LOAD_ITEMS: CourseLoadItem[] = [
     maturity: "reference_only",
     hrPayrollValidationRequired: true,
     validationRequired: true,
-    notes: "Shared MS/HS only credible with validated HS writing and advanced-English expertise.",
+    notes:
+      "Shared MS/HS only credible with validated HS writing and advanced-English expertise. The 255-minute Sao Paulo A-F reference is not a Rio weekly value.",
   },
   {
     id: "sp_g9_integrated_math",
@@ -613,10 +687,11 @@ export const SAO_PAULO_REFERENCE_COURSE_LOAD_ITEMS: CourseLoadItem[] = [
     domain: "Mathematics",
     loadCategory: "teaching_load",
     scheduleUnitId: "sp_rotation_af_255",
-    weeklySlots: 3,
-    minutesPerSlot: 255,
-    weeklyMinutes: 765,
-    weeklyHours: hours(765),
+    ...SAO_PAULO_AF_ROTATION_REFERENCE,
+    weeklySlots: null,
+    minutesPerSlot: null,
+    weeklyMinutes: null,
+    weeklyHours: null,
     slotEvidenceLevel: "inferred_from_timetable",
     source: "sao_paulo_reference",
     requiredHiringProfileIds: ["hs_mathematics_advanced_math"],
@@ -629,7 +704,8 @@ export const SAO_PAULO_REFERENCE_COURSE_LOAD_ITEMS: CourseLoadItem[] = [
     maturity: "reference_only",
     hrPayrollValidationRequired: true,
     validationRequired: true,
-    notes: "Source label: Algebra I. Rio should validate whether Grade 9 uses Algebra I, integrated math, or another sequence.",
+    notes:
+      "Source label: Algebra I. Rio should validate whether Grade 9 uses Algebra I, integrated math, or another sequence. The 255-minute Sao Paulo A-F reference is not a Rio weekly value.",
   },
   {
     id: "sp_g9_integrated_natural_sciences",
@@ -640,10 +716,11 @@ export const SAO_PAULO_REFERENCE_COURSE_LOAD_ITEMS: CourseLoadItem[] = [
     subdomain: "Biology / Chemistry / Physics foundation",
     loadCategory: "teaching_load",
     scheduleUnitId: "sp_rotation_af_255",
-    weeklySlots: 3,
-    minutesPerSlot: 255,
-    weeklyMinutes: 765,
-    weeklyHours: hours(765),
+    ...SAO_PAULO_AF_ROTATION_REFERENCE,
+    weeklySlots: null,
+    minutesPerSlot: null,
+    weeklyMinutes: null,
+    weeklyHours: null,
     slotEvidenceLevel: "inferred_from_timetable",
     source: "sao_paulo_reference",
     requiredHiringProfileIds: ["biology_specialist", "chemistry_specialist", "physics_specialist"],
@@ -652,7 +729,8 @@ export const SAO_PAULO_REFERENCE_COURSE_LOAD_ITEMS: CourseLoadItem[] = [
     maturity: "reference_only",
     hrPayrollValidationRequired: true,
     validationRequired: true,
-    notes: "Reference item is integrated; do not assume one generic science educator can cover all three disciplines.",
+    notes:
+      "Reference item is integrated; do not assume one generic science educator can cover all three disciplines. The 255-minute Sao Paulo A-F reference is not a Rio weekly value.",
   },
   {
     id: "sp_g9_ap_human_geography",
@@ -663,10 +741,11 @@ export const SAO_PAULO_REFERENCE_COURSE_LOAD_ITEMS: CourseLoadItem[] = [
     subdomain: "AP Human Geography",
     loadCategory: "teaching_load",
     scheduleUnitId: "sp_rotation_af_255",
-    weeklySlots: 2,
-    minutesPerSlot: 255,
-    weeklyMinutes: 510,
-    weeklyHours: hours(510),
+    ...SAO_PAULO_AF_ROTATION_REFERENCE,
+    weeklySlots: null,
+    minutesPerSlot: null,
+    weeklyMinutes: null,
+    weeklyHours: null,
     slotEvidenceLevel: "inferred_from_timetable",
     source: "sao_paulo_reference",
     requiredHiringProfileIds: ["hs_humanities_ap_world_history"],
@@ -676,7 +755,8 @@ export const SAO_PAULO_REFERENCE_COURSE_LOAD_ITEMS: CourseLoadItem[] = [
     maturity: "reference_only",
     hrPayrollValidationRequired: true,
     validationRequired: true,
-    notes: "Audited source contains AP Human Geography, not AP World History, for Grade 9.",
+    notes:
+      "Audited source contains AP Human Geography, not AP World History, for Grade 9. The 255-minute Sao Paulo A-F reference is not a Rio weekly value.",
   },
   {
     id: "sp_g10_ap_seminar",
@@ -686,20 +766,24 @@ export const SAO_PAULO_REFERENCE_COURSE_LOAD_ITEMS: CourseLoadItem[] = [
     domain: "AP Capstone",
     loadCategory: "teaching_load",
     scheduleUnitId: "sp_rotation_af_255",
-    weeklySlots: 3,
-    minutesPerSlot: 255,
-    weeklyMinutes: 765,
-    weeklyHours: hours(765),
+    ...SAO_PAULO_AF_ROTATION_REFERENCE,
+    weeklySlots: null,
+    minutesPerSlot: null,
+    weeklyMinutes: null,
+    weeklyHours: null,
     slotEvidenceLevel: "inferred_from_timetable",
     source: "sao_paulo_reference",
-    requiredHiringProfileIds: ["ap_seminar_research", "hs_english_research_communication"],
+    requiredHiringProfileIds: ["ap_seminar_research"],
+    requiredPrimaryProfileIds: ["ap_seminar_research"],
+    supportingProfileIds: ["hs_english_research_communication"],
     credentialOrSpecializationRequirement: "AP Seminar capability",
     deliveryModelOptions: ["internal_part_time_educator", "internal_full_time_educator"],
     scenarioFit: ["scenario_b_transitional_part_time_hs", "scenario_c_mature_hs_specialist"],
     maturity: "reference_only",
     hrPayrollValidationRequired: true,
     validationRequired: true,
-    notes: "High load in Sao Paulo reference. Rio should validate if AP Seminar begins in Grade 10.",
+    notes:
+      "High load in Sao Paulo reference. AP Seminar requires the AP Seminar / AP Research profile as primary; HS English / Research Communication is supporting only if explicit AP Seminar credential is validated. The 255-minute Sao Paulo A-F reference is not a Rio weekly value.",
   },
   {
     id: "sp_g10_ap_computer_science_principles",
@@ -709,10 +793,11 @@ export const SAO_PAULO_REFERENCE_COURSE_LOAD_ITEMS: CourseLoadItem[] = [
     domain: "Computer Science",
     loadCategory: "teaching_load",
     scheduleUnitId: "sp_rotation_af_255",
-    weeklySlots: 1,
-    minutesPerSlot: 255,
-    weeklyMinutes: 255,
-    weeklyHours: hours(255),
+    ...SAO_PAULO_AF_ROTATION_REFERENCE,
+    weeklySlots: null,
+    minutesPerSlot: null,
+    weeklyMinutes: null,
+    weeklyHours: null,
     slotEvidenceLevel: "inferred_from_timetable",
     source: "sao_paulo_reference",
     requiredHiringProfileIds: ["innovation_design_technologies_project_mentorship"],
@@ -722,7 +807,8 @@ export const SAO_PAULO_REFERENCE_COURSE_LOAD_ITEMS: CourseLoadItem[] = [
     maturity: "reference_only",
     hrPayrollValidationRequired: true,
     validationRequired: true,
-    notes: "Source spelling is AP Computer Sciences Principles. Rio naming should be normalized.",
+    notes:
+      "Source spelling is AP Computer Sciences Principles. Rio naming should be normalized. The 255-minute Sao Paulo A-F reference is not a Rio weekly value.",
   },
   {
     id: "sp_g11_ap_language_and_composition",
@@ -733,10 +819,11 @@ export const SAO_PAULO_REFERENCE_COURSE_LOAD_ITEMS: CourseLoadItem[] = [
     subdomain: "AP Language",
     loadCategory: "teaching_load",
     scheduleUnitId: "sp_rotation_af_255",
-    weeklySlots: 3,
-    minutesPerSlot: 255,
-    weeklyMinutes: 765,
-    weeklyHours: hours(765),
+    ...SAO_PAULO_AF_ROTATION_REFERENCE,
+    weeklySlots: null,
+    minutesPerSlot: null,
+    weeklyMinutes: null,
+    weeklyHours: null,
     slotEvidenceLevel: "inferred_from_timetable",
     source: "sao_paulo_reference",
     requiredHiringProfileIds: ["hs_english_research_communication"],
@@ -746,7 +833,8 @@ export const SAO_PAULO_REFERENCE_COURSE_LOAD_ITEMS: CourseLoadItem[] = [
     maturity: "reference_only",
     hrPayrollValidationRequired: true,
     validationRequired: true,
-    notes: "Mature-reference AP English load; not a Rio launch commitment.",
+    notes:
+      "Mature-reference AP English load; not a Rio launch commitment. The 255-minute Sao Paulo A-F reference is not a Rio weekly value.",
   },
   {
     id: "sp_g11_ap_biology",
@@ -816,7 +904,7 @@ export const SAO_PAULO_REFERENCE_COURSE_LOAD_ITEMS: CourseLoadItem[] = [
     maturity: "reference_only",
     hrPayrollValidationRequired: true,
     validationRequired: true,
-    notes: "Mixed rotation and X-block evidence. Treat as mentorship/contact load requiring profile-fit supervision.",
+    notes: "Mixed rotation and X-block source inputs. Treat as mentorship/contact load requiring profile-fit supervision.",
   },
   {
     id: "sp_g12_ap_calculus",
@@ -827,10 +915,11 @@ export const SAO_PAULO_REFERENCE_COURSE_LOAD_ITEMS: CourseLoadItem[] = [
     subdomain: "AP Calculus",
     loadCategory: "teaching_load",
     scheduleUnitId: "sp_rotation_af_255",
-    weeklySlots: 1,
-    minutesPerSlot: 255,
-    weeklyMinutes: 255,
-    weeklyHours: hours(255),
+    ...SAO_PAULO_AF_ROTATION_REFERENCE,
+    weeklySlots: null,
+    minutesPerSlot: null,
+    weeklyMinutes: null,
+    weeklyHours: null,
     slotEvidenceLevel: "inferred_from_timetable",
     source: "sao_paulo_reference",
     requiredHiringProfileIds: ["hs_mathematics_advanced_math"],
@@ -840,7 +929,8 @@ export const SAO_PAULO_REFERENCE_COURSE_LOAD_ITEMS: CourseLoadItem[] = [
     maturity: "reference_only",
     hrPayrollValidationRequired: true,
     validationRequired: true,
-    notes: "Mature-reference advanced mathematics load.",
+    notes:
+      "Mature-reference advanced mathematics load. The 255-minute Sao Paulo A-F reference is not a Rio weekly value.",
   },
   {
     id: "sp_g12_ap_precalculus",
@@ -851,10 +941,11 @@ export const SAO_PAULO_REFERENCE_COURSE_LOAD_ITEMS: CourseLoadItem[] = [
     subdomain: "AP Precalculus",
     loadCategory: "teaching_load",
     scheduleUnitId: "sp_rotation_af_255",
-    weeklySlots: 1,
-    minutesPerSlot: 255,
-    weeklyMinutes: 255,
-    weeklyHours: hours(255),
+    ...SAO_PAULO_AF_ROTATION_REFERENCE,
+    weeklySlots: null,
+    minutesPerSlot: null,
+    weeklyMinutes: null,
+    weeklyHours: null,
     slotEvidenceLevel: "inferred_from_timetable",
     source: "sao_paulo_reference",
     requiredHiringProfileIds: ["hs_mathematics_advanced_math"],
@@ -864,7 +955,8 @@ export const SAO_PAULO_REFERENCE_COURSE_LOAD_ITEMS: CourseLoadItem[] = [
     maturity: "reference_only",
     hrPayrollValidationRequired: true,
     validationRequired: true,
-    notes: "Mature-reference advanced mathematics load.",
+    notes:
+      "Mature-reference advanced mathematics load. The 255-minute Sao Paulo A-F reference is not a Rio weekly value.",
   },
   {
     id: "sp_g12_innovation_design_technologies",
@@ -985,7 +1077,7 @@ export const HIGH_SCHOOL_MOCK_SCHEDULE_SCENARIOS: MockScheduleScenario[] = [
       "Mature-model features should not become Rio launch payroll commitments without validation.",
     ],
     canCover: [
-      "AP, advanced sciences, Independent Study, Leadership, GCD, Innovation/Design Technologies, and college-facing functions.",
+      "AP, advanced sciences, Independent Study, Leadership with embedded GCD scope, Innovation/Design Technologies, and college-facing functions.",
       "Separated Biology, Chemistry, Physics, AP English, AP research, and advanced mathematics profiles.",
     ],
     cannotCover: [
@@ -1002,7 +1094,7 @@ export const HIGH_SCHOOL_MOCK_SCHEDULE_SCENARIOS: MockScheduleScenario[] = [
       "ap_seminar_research",
       "pathways_college_career",
       "innovation_design_technologies_project_mentorship",
-      "gcd_leadership",
+      "leadership_with_gcd_scope",
       "body_movement",
     ],
     fixedMentorshipBlockHandling:
@@ -1017,7 +1109,7 @@ export const HIGH_SCHOOL_MOCK_SCHEDULE_SCENARIOS: MockScheduleScenario[] = [
       "Rio Grade 11-12 course offer.",
       "AP pathway commitments.",
       "Independent Study supervision model.",
-      "Leadership and GCD ownership model.",
+      "Leadership/Pathways ownership model carrying embedded GCD scope.",
     ],
   },
 ];
