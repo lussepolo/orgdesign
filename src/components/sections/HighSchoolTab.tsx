@@ -3,6 +3,13 @@ import { ChevronRight, GraduationCap, Info, Scale, Users } from "lucide-react";
 import { motion } from "motion/react";
 import { HS_SUBJECT_DISTRIBUTION, SUBJECT_TO_CATEGORY } from "../../constants";
 import { cn } from "../../lib/utils";
+import {
+  HIGH_SCHOOL_EDUCATOR_CAPABILITY_PROFILES,
+  HIGH_SCHOOL_MOCK_SCHEDULE_SCENARIOS,
+  HIGH_SCHOOL_SCHEDULE_UNIT_COUNTING_NOTE,
+  HIGH_SCHOOL_SCHEDULE_UNITS,
+  convertSaoPauloMinutesToRioEquivalent,
+} from "./highSchoolScheduleModel";
 
 const Card = ({
   children,
@@ -74,7 +81,7 @@ const HS_YEAR_DATA: HSYearData[] = [
   {
     year: "Grade 9",
     scope: "High School Foundation",
-    model: "Dedicated High School Launch Faculty",
+    model: "Provisional HS Launch Faculty",
     fte: "4 FTE",
     curriculum: ["AP", "BNCC", "Common Core"],
     org: [
@@ -87,13 +94,13 @@ const HS_YEAR_DATA: HSYearData[] = [
       "Studio Art II, Rock History, Pottery",
       "Pathways & College/Career"
     ],
-    description: "Grade 9 opens High School with a dedicated 4 FTE educator core for AP-aligned content and University Level sciences while ensuring a seamless transition."
+    description: "Grade 9 opens High School with a provisional educator core for AP-aligned content and advanced science foundations while ensuring a seamless transition."
   },
   {
     year: "Grade 10",
     scope: "High School Specialization I",
-    model: "Dedicated High School Specialists",
-    fte: "0 New FTE (4 Total HS)",
+    model: "Provisional HS Specialist Capacity",
+    fte: "No new teaching FTE pending validation",
     curriculum: ["AP", "BNCC", "Common Core"],
     org: [
       "Língua Portuguesa II & Redação",
@@ -105,12 +112,12 @@ const HS_YEAR_DATA: HSYearData[] = [
       "Studio Art II, Rock History, Pottery",
       "Academic Advising & Mentorship"
     ],
-    description: "Grade 10 opens inside the existing High School educator core. It expands the academic program without adding incremental teaching FTE in the live staffing ramp."
+    description: "Grade 10 opens inside the current instructional-capacity assumption. It expands the academic program while Finance/HR validates whether the teaching ramp remains flat."
   },
   {
     year: "Grade 11",
     scope: "High School Specialization II",
-    model: "Dedicated High School Specialists",
+    model: "Provisional HS Specialist Capacity",
     fte: "3 New FTE (7 Total HS)",
     curriculum: ["AP Research", "AP Calculus", "BNCC"],
     org: [
@@ -118,31 +125,31 @@ const HS_YEAR_DATA: HSYearData[] = [
       "Integrated Math III & AP Precalculus",
       "Integrated Sciences Advanced",
       "AP Biology & AP Chemistry",
-      "AP World History & AP Macro",
+      "AP Social Sciences & AP Macro",
       "Brazilian Studies I & II",
       "Global Expression & Leadership",
       "Innovation Diploma & Design Technologies"
     ],
-    description: "Grade 11 triggers the next expansion point, adding 3 FTE for AP Capstone Research, advanced mathematics, and deeper STEM and humanities specialization."
+    description: "Grade 11 is the next provisional expansion point for AP Capstone Research, advanced mathematics, and deeper STEM and humanities specialization."
   },
   {
     year: "Grade 12",
     scope: "High School Graduation",
-    model: "Dedicated High School Specialists",
+    model: "Provisional HS Specialist Capacity",
     fte: "3 New FTE (10 Total HS)",
     curriculum: ["AP Electives", "College Prep", "BNCC"],
     org: [
       "Língua Portuguesa IV & AP Lit (ELA)",
       "AP Calculus & Integrated Math Adv",
       "AP Precalculus & CS Principles",
-      "Integrated Sciences Univ Topics",
+      "Integrated Sciences / Advanced Topics",
       "AP Biology & AP Chemistry",
-      "AP World History & AP Macro",
+      "AP Social Sciences & AP Macro",
       "Brazilian Studies I & II",
       "Global Expression & Leadership",
       "Innovation Diploma & Design Technologies"
     ],
-    description: "Grade 12 completes the High School teaching ramp at 10 FTE. Staffing then carries forward flat unless a later explicit step is added."
+    description: "Grade 12 completes the current instructional-capacity ramp assumption. Staffing carries forward flat only if later validation confirms the workload model."
   }
 ];
 
@@ -176,7 +183,7 @@ const HS_COURSE_OFFER_ARCHITECTURE: HSCourseOfferArchitecture[] = [
       "Advisory",
       "Project Mentorship or mentorship routines",
       "Global Expression & Leadership",
-      "Global Citizen Diploma foundation",
+      "GCD within Pathways/Leadership foundation",
       "Innovation / Design Technologies foundation",
     ],
     staffingImplication:
@@ -199,7 +206,7 @@ const HS_COURSE_OFFER_ARCHITECTURE: HSCourseOfferArchitecture[] = [
     programFunctions: [
       "Pathways",
       "Academic Advising / mentorship",
-      "Global Citizen Diploma",
+      "GCD within Pathways/Leadership",
       "Innovation / Design Technologies",
     ],
     staffingImplication:
@@ -217,13 +224,13 @@ const HS_COURSE_OFFER_ARCHITECTURE: HSCourseOfferArchitecture[] = [
     advancedLayer: [
       "AP Seminar / AP Research / AP Capstone sequence",
       "AP Biology / AP Chemistry",
-      "AP World History / macro humanities",
+      "AP Social Sciences / macro humanities",
     ],
     programFunctions: [
       "College/Career counseling",
       "External mentors",
       "Capstone-like research or independent work",
-      "Global Citizen Diploma",
+      "GCD within Pathways/Leadership",
       "Innovation / Design Technologies",
     ],
     staffingImplication:
@@ -248,57 +255,10 @@ const HS_COURSE_OFFER_ARCHITECTURE: HSCourseOfferArchitecture[] = [
       "Internships or external mentorship",
       "Leadership",
       "Graduation pathway support",
-      "Global Citizen Diploma / Innovation Diploma completion where applicable",
+      "GCD within Pathways/Leadership and Innovation Diploma completion where applicable",
     ],
     staffingImplication:
       "Grade 12 should not be assumed to have zero workload impact without Finance/HR validation. Even when subject load is stable, independent study, counseling, leadership, external mentorship, and graduation pathway work generate adult workload.",
-  },
-];
-
-interface HSStaffingScenario {
-  name: string;
-  label: string;
-  description: string;
-  canCover: string;
-  cannotCover: string;
-  risk: string;
-  bestUse: string;
-  requirement?: string;
-}
-
-const HS_STAFFING_SCENARIOS: HSStaffingScenario[] = [
-  {
-    name: "Scenario A",
-    label: "Shared MS/HS educators up to Grade 10",
-    description: "Lean launch bridge.",
-    canCover: "Can support early integrated math, selected ELA/social science continuity, and some pathway/advisory routines.",
-    cannotCover:
-      "Cannot be assumed to cover full Biology/Chemistry/Physics, AP-level humanities, advanced English composition, or college-facing expectations without HS expertise.",
-    risk: "Weak HS identity and pressure on Middle School capacity.",
-    bestUse: "Temporary Grade 9-10 launch bridge.",
-    requirement: "Credible only for selected bridge domains with validated HS expertise.",
-  },
-  {
-    name: "Scenario B",
-    label: "Separate MS/HS with part-time Grade 9 educators",
-    description: "Strongest transitional scenario.",
-    canCover:
-      "Can support HS-specific science, Portuguese/Redação, ELA/AP foundations, mathematics, humanities, Pathways, and mentorship routines with clearer ownership.",
-    cannotCover:
-      "Cannot protect learner continuity unless advisory, pathways, mentorship, and College/Career ownership are assigned explicitly.",
-    risk: "Fragmented learner experience if part-time roles are not program-coordinated.",
-    bestUse: "Distinct High School ownership from Grade 9 without overbuilding full mature payroll.",
-    requirement: "Assign advisory, pathways, mentorship, and College/Career ownership explicitly.",
-  },
-  {
-    name: "Scenario C",
-    label: "Mature HS subject-area specialist model",
-    description: "Appropriate for Grade 11-12 or full HS density.",
-    canCover:
-      "Supports AP, advanced sciences, capstones, independent study, internships, College/Career guidance, Global Citizen Diploma, and Design Technologies.",
-    cannotCover: "Should not be activated as a full payroll model before enrollment density supports it.",
-    risk: "Expensive if activated before enrollment density supports it.",
-    bestUse: "Long-term full High School model.",
   },
 ];
 
@@ -313,23 +273,23 @@ const HS_LOAD_DATA = [
   { subject: "ELA / AP Seminar / Research", g9: 5, g10: 5, g11: 10, g12: 10 },
   { subject: "Mathematics / AP Calculus", g9: 5, g10: 5, g11: 5, g12: 5 },
   { subject: "Humanities / History", g9: 6, g10: 5, g11: 5, g12: 5 },
-  { subject: "Sciences (AP / Univ Level)", g9: 6, g10: 8, g11: 8, g12: 8 },
+  { subject: "Sciences / AP lab sciences", g9: 6, g10: 8, g11: 8, g12: 8 },
 ];
 
 const HS_ROADMAP_DATA = [
   {
     year: "2034", phase: "High School Launch (G9)", sections: "1-2 Sections", students: 40, fte: 4,
-    description: "Grade 9 opens High School with a 4 FTE educator core.",
+    description: "Grade 9 opens High School with a provisional teaching-capacity assumption.",
     clusters: [
       { name: "HS Launch Educator Core", type: "HS" },
       { name: "AP Seminar Foundation", type: "HS" },
-      { name: "University Level Sciences", type: "HS" },
+      { name: "Advanced science foundations", type: "HS" },
       { name: "HS Transition Bridge", type: "HS" }
     ]
   },
   {
     year: "2036", phase: "High School Expansion (G11)", sections: "6 Sections", students: 120, fte: 7,
-    description: "Grade 11 is the next defined expansion point, adding 3 FTE and bringing total HS teaching staffing to 7 FTE.",
+    description: "Grade 11 is the next provisional expansion point, bringing the current HS teaching-capacity assumption to 7 FTE.",
     clusters: [
       { name: "Dedicated HS Specialists", type: "HS" },
       { name: "AP Research Core", type: "HS" },
@@ -339,7 +299,7 @@ const HS_ROADMAP_DATA = [
   },
   {
     year: "2037+", phase: "High School Full Ramp (G12)", sections: "8 Sections", students: 160, fte: 10,
-    description: "Grade 12 completes the cumulative ramp at 10 FTE. Teaching staffing carries forward flat after this point.",
+    description: "Grade 12 completes the current cumulative planning ramp at 10 FTE, pending Finance/HR validation.",
     clusters: [
       { name: "AP Capstone Research", type: "HS" },
       { name: "Advanced STEM & Humanities", type: "HS" },
@@ -348,6 +308,126 @@ const HS_ROADMAP_DATA = [
     ]
   }
 ];
+
+const HS_PROFILE_DISPLAY_LABELS: Record<string, string> = {
+  hs_portuguese_redacao: "HS Portuguese / Redação",
+  hs_humanities_ap_world_history: "HS Humanities / AP Social Sciences",
+};
+
+const getHsProfileLabel = (profileId: string) =>
+  HS_PROFILE_DISPLAY_LABELS[profileId] ??
+  HIGH_SCHOOL_EDUCATOR_CAPABILITY_PROFILES.find((profile) => profile.id === profileId)?.label ??
+  profileId;
+
+const formatHighSchoolPreviewText = (text: string) =>
+  text
+    .replaceAll("Portuguese/Redacao", "Portuguese/Redação")
+    .replaceAll("Redacao", "Redação")
+    .replaceAll("Global Citizen Diploma", "Leadership with embedded GCD scope");
+
+const SP_AF_CONVERSION_PREVIEW = convertSaoPauloMinutesToRioEquivalent(
+  HIGH_SCHOOL_SCHEDULE_UNITS.sp_rotation_af_255.minutes ?? 255,
+  "sp_rotation_af_255",
+);
+
+const HS_SCHEDULE_MODE_PREVIEW = [
+  {
+    title: "Rio weekly model",
+    badge: "Primary",
+    variant: "success" as const,
+    items: [
+      `${HIGH_SCHOOL_SCHEDULE_UNITS.rio_single_45.minutes}-minute single block`,
+      `${HIGH_SCHOOL_SCHEDULE_UNITS.rio_double_90.minutes}-minute double block`,
+      "Weekly calendar cycle",
+      "Primary planning mode for Rio",
+    ],
+  },
+  {
+    title: "São Paulo reference model",
+    badge: "Reference",
+    variant: "warning" as const,
+    items: [
+      `A-F rotation record, about ${HIGH_SCHOOL_SCHEDULE_UNITS.sp_rotation_af_255.minutes} minutes per six-day cycle`,
+      `${HIGH_SCHOOL_SCHEDULE_UNITS.sp_x_block_75.minutes}- or ${HIGH_SCHOOL_SCHEDULE_UNITS.sp_x_block_60.minutes}-minute X-blocks`,
+      `Advisory around ${HIGH_SCHOOL_SCHEDULE_UNITS.sp_advisory_25.minutes} minutes`,
+      "Mature-reference density only, not Rio payroll truth",
+    ],
+  },
+];
+
+const HS_LOAD_CATEGORY_PREVIEW = [
+  {
+    title: "Teaching load",
+    variant: "info" as const,
+    items: ["Portuguese / Redação", "ELA", "Mathematics", "Biology", "Chemistry", "Physics", "AP / advanced courses"],
+  },
+  {
+    title: "Mentorship/contact load",
+    variant: "purple" as const,
+    items: ["Project Mentorship", "Passion Project", "Innovation Diploma", "Independent Study"],
+  },
+  {
+    title: "Program ownership load",
+    variant: "success" as const,
+    items: ["Pathways", "Leadership", "GCD within Pathways/Leadership", "College/Career guidance"],
+  },
+];
+
+const HS_CAPABILITY_PREVIEW_GROUPS = [
+  {
+    title: "Language and communication",
+    profileIds: ["hs_portuguese_redacao", "hs_english_research_communication"],
+  },
+  {
+    title: "Math and sciences",
+    profileIds: ["hs_mathematics_advanced_math", "biology_specialist", "chemistry_specialist", "physics_specialist"],
+  },
+  {
+    title: "Humanities and AP",
+    profileIds: ["hs_humanities_ap_world_history", "ap_seminar_research"],
+  },
+  {
+    title: "Pathways and mentorship",
+    profileIds: ["pathways_college_career", "innovation_design_technologies_project_mentorship"],
+  },
+  {
+    title: "Design technologies and leadership",
+    profileIds: ["innovation_design_technologies_project_mentorship", "leadership_with_gcd_scope"],
+  },
+  {
+    title: "Body & Movement",
+    profileIds: ["body_movement"],
+  },
+];
+
+const HS_SCENARIO_PREVIEW_COPY: Record<
+  string,
+  {
+    title: string;
+    bestUse: string;
+    badge: string;
+    variant: "warning" | "success" | "purple";
+  }
+> = {
+  scenario_a_shared_ms_hs_bridge: {
+    title: "Scenario A: Shared MS/HS bridge model",
+    bestUse: "Limited Grade 9-10 bridge when HS capability is validated.",
+    badge: "Limited bridge",
+    variant: "warning",
+  },
+  scenario_b_transitional_part_time_hs: {
+    title: "Scenario B: Transitional part-time HS model",
+    bestUse: "Strongest transitional model for distinct HS ownership without mature overbuild.",
+    badge: "Strong transition",
+    variant: "success",
+  },
+  scenario_c_mature_hs_specialist: {
+    title: "Scenario C: Mature HS specialist model",
+    bestUse: "Mature, high-density model for Grade 11-12 or full High School scale.",
+    badge: "Mature density",
+    variant: "purple",
+  },
+};
 
 type HighSchoolTabProps = {
   sections: number;
@@ -383,23 +463,23 @@ const HighSchoolTab = ({ sections, setSections }: HighSchoolTabProps) => {
             </div>
             <p className="mb-3 text-[10px] font-medium uppercase tracking-wide text-slate-500">Roadmap values are planning premises; section view does not recalculate FTE.</p>
             <p className="text-slate-400 leading-relaxed mb-8 max-w-2xl">
-              The High School model is built on <strong>AP</strong>, <strong>BNCC</strong>, and <strong>Common Core</strong> frameworks. At <strong>{sections * learnersPerSection} learners per grade</strong>, the live teaching ramp carries the 4-year cycle (G9-G12) to <strong>{specialists} Master Educators</strong>.
+              The High School model is built on <strong>AP</strong>, <strong>BNCC</strong>, and <strong>Common Core</strong> frameworks. At <strong>{sections * learnersPerSection} learners per grade</strong>, the current instructional-capacity assumption carries the 4-year cycle (G9-G12) toward a <strong>{specialists}-educator planning view</strong>.
             </p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="p-4 bg-white/5 rounded-2xl border border-white/10">
                 <div className="text-[10px] font-bold text-indigo-400 uppercase mb-1">Phase 1: G9</div>
-                <div className="text-lg font-bold">4 FTE</div>
-                <p className="text-[10px] text-slate-500 mt-2">Initial High School educator core.</p>
+                <div className="text-lg font-bold">4 FTE assumption</div>
+                <p className="text-[10px] text-slate-500 mt-2">Initial High School planning core.</p>
               </div>
               <div className="p-4 bg-white/5 rounded-2xl border border-white/10">
                 <div className="text-[10px] font-bold text-indigo-400 uppercase mb-1">Phase 2: G11</div>
-                <div className="text-lg font-bold">+3 FTE</div>
-                <p className="text-[10px] text-slate-500 mt-2">Advanced AP research expansion.</p>
+                <div className="text-lg font-bold">Provisional +3 FTE</div>
+                <p className="text-[10px] text-slate-500 mt-2">Advanced AP research capacity.</p>
               </div>
               <div className="p-4 bg-white/5 rounded-2xl border border-white/10">
                 <div className="text-[10px] font-bold text-indigo-400 uppercase mb-1">Phase 3: G12</div>
-                <div className="text-lg font-bold">10 FTE Total</div>
-                <p className="text-[10px] text-slate-500 mt-2">Full ramp, then carried flat.</p>
+                <div className="text-lg font-bold">10 FTE planning view</div>
+                <p className="text-[10px] text-slate-500 mt-2">Flat only after validation.</p>
               </div>
             </div>
           </div>
@@ -407,7 +487,7 @@ const HighSchoolTab = ({ sections, setSections }: HighSchoolTabProps) => {
         <Card className="bg-indigo-50 border-indigo-100 p-6">
           <div className="flex items-center gap-2 mb-4"><Info className="h-5 w-5 text-indigo-500" /><h4 className="text-sm font-bold text-slate-900 uppercase tracking-wider">Strategic Logic</h4></div>
           <div className="space-y-4">
-            <p className="text-xs text-slate-600 leading-relaxed"><strong>G9-G10</strong> establishes the foundation with AP Seminar and University Level sciences.</p>
+            <p className="text-xs text-slate-600 leading-relaxed"><strong>G9-G10</strong> establishes the foundation with AP Seminar and advanced science foundations.</p>
             <p className="text-xs text-slate-600 leading-relaxed"><strong>G11-G12</strong> introduces <strong>AP Research</strong> and specialized electives.</p>
           </div>
         </Card>
@@ -476,61 +556,176 @@ const HighSchoolTab = ({ sections, setSections }: HighSchoolTabProps) => {
           ))}
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <div className="mb-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">Mature reference, not Rio template</div>
-          <p className="text-sm font-medium leading-relaxed text-slate-600">
-            São Paulo's mature High School pattern shows why the Rio model must eventually distinguish core subjects,
-            AP/advanced pathways, Biology/Chemistry/Physics coverage, Pathways, Project Mentorship, GCD,
-            Independent Study, Leadership, and Design Technologies. Rio should use this as a reference pattern,
-            not a launch staffing template.
+      </div>
+
+      <div className="space-y-6">
+        <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+          <div className="space-y-2">
+            <div className="flex items-center gap-3">
+              <div className="h-8 w-1 rounded-full bg-cyan-500" />
+              <h3 className="text-2xl font-bold text-slate-900">High School schedule model preview</h3>
+            </div>
+            <p className="max-w-3xl text-sm leading-relaxed text-slate-500">
+              Read-only instructional-capacity model for translating course design into future schedule and capability questions.
+            </p>
+          </div>
+          <Badge variant="info">Read-only preview</Badge>
+        </div>
+
+        <div className="rounded-2xl border border-cyan-100 bg-cyan-50 p-4">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-7">
+            {[
+              "Course offer",
+              "Schedule unit",
+              "Minutes",
+              "Load category",
+              "Educator capability",
+              "Mock schedule",
+              "Hiring implication",
+            ].map((step, idx) => (
+              <div key={step} className="flex items-center gap-2">
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white text-[10px] font-bold text-cyan-700 shadow-sm">
+                  {idx + 1}
+                </div>
+                <div className="text-[10px] font-bold uppercase tracking-wide text-cyan-900">{step}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+          {HS_SCHEDULE_MODE_PREVIEW.map((mode) => (
+            <Card key={mode.title} className="h-full">
+              <div className="mb-4 flex items-center justify-between gap-3">
+                <h4 className="text-base font-bold text-slate-900">{mode.title}</h4>
+                <Badge variant={mode.variant}>{mode.badge}</Badge>
+              </div>
+              <ul className="space-y-2">
+                {mode.items.map((item) => (
+                  <li key={item} className="flex gap-2 text-xs font-medium leading-relaxed text-slate-600">
+                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-cyan-400" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          ))}
+        </div>
+
+        <div className="rounded-2xl border border-amber-100 bg-amber-50 p-4 text-xs font-semibold leading-relaxed text-amber-900">
+          São Paulo is a reference pattern, not a Rio staffing template. A-F rotation records are six-day-cycle references
+          and should not be treated as weekly Rio loads unless explicitly converted and validated.
+        </div>
+
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
+          {HS_LOAD_CATEGORY_PREVIEW.map((category) => (
+            <Card key={category.title} className="h-full">
+              <div className="mb-4 flex items-center justify-between gap-3">
+                <h4 className="text-base font-bold text-slate-900">{category.title}</h4>
+                <Badge variant={category.variant}>Category</Badge>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {category.items.map((item) => (
+                  <span key={item} className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[10px] font-bold text-slate-600">
+                    {item}
+                  </span>
+                ))}
+              </div>
+            </Card>
+          ))}
+        </div>
+
+        <div className="rounded-2xl border border-purple-100 bg-purple-50 p-4">
+          <div className="mb-2 text-[10px] font-bold uppercase tracking-widest text-purple-600">Fixed mentorship block rule</div>
+          <p className="text-xs font-semibold leading-relaxed text-purple-950">
+            Project Mentorship, Passion Project, and Innovation Diploma happen within a fixed synchronized mentorship block.
+            This block is protected in the timetable, so it should not conflict with regular subject teaching. It still counts
+            toward educator workload and must be assigned based on educator profile fit, available total workload capacity,
+            and group capacity.
           </p>
+        </div>
+
+        <div className="space-y-3">
+          <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+            <div>
+              <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Capability mapping</div>
+              <h4 className="text-lg font-bold text-slate-900">Educator capability preview</h4>
+            </div>
+            <Badge variant="default">Capability examples, not final headcount</Badge>
+          </div>
+          <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+            {HS_CAPABILITY_PREVIEW_GROUPS.map((group) => (
+              <div key={group.title}>
+                <div className="mb-2 text-[9px] font-bold uppercase tracking-widest text-slate-400">{group.title}</div>
+                <div className="flex flex-wrap gap-1.5">
+                  {group.profileIds.map((profileId) => (
+                    <span key={`${group.title}-${profileId}`} className="rounded-full border border-slate-100 bg-slate-50 px-2.5 py-1 text-[10px] font-semibold leading-snug text-slate-700">
+                      {getHsProfileLabel(profileId)}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="mb-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">Conversion caution</div>
+          <p className="text-xs font-semibold leading-relaxed text-slate-600">
+            The model supports Rio equivalents for a 255-minute A-F reference as {SP_AF_CONVERSION_PREVIEW.displaySingleBlockEquivalent}
+            {" "}single blocks or {SP_AF_CONVERSION_PREVIEW.displayDoubleBlockEquivalent} double blocks, with validation warnings.
+            Conversion should not be used as payroll truth without curriculum and HR validation.
+          </p>
+          <p className="mt-2 text-[10px] font-semibold leading-relaxed text-slate-400">{HIGH_SCHOOL_SCHEDULE_UNIT_COUNTING_NOTE}</p>
         </div>
       </div>
 
       <div className="space-y-6">
         <div className="flex items-center gap-3">
           <div className="h-8 w-1 rounded-full bg-purple-500" />
-          <h3 className="text-2xl font-bold text-slate-900">High School staffing scenarios against the offer</h3>
+          <h3 className="text-2xl font-bold text-slate-900">High School scenario fit against the offer</h3>
+        </div>
+        <div className="rounded-2xl border border-amber-100 bg-amber-50 p-4 text-xs font-semibold leading-relaxed text-amber-900">
+          Scenario fit is instructional-capacity planning only and does not authorize payroll.
         </div>
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
-          {HS_STAFFING_SCENARIOS.map((scenario, idx) => (
-            <Card key={scenario.name} className="h-full border-l-4 border-l-purple-500">
-              <div className="mb-5 space-y-2">
-                <div className="flex items-center justify-between gap-3">
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-purple-400">{scenario.name}</span>
-                  <Badge variant={idx === 1 ? "success" : idx === 2 ? "purple" : "warning"}>
-                    {idx === 1 ? "Transitional" : idx === 2 ? "Mature" : "Lean bridge"}
-                  </Badge>
+          {HIGH_SCHOOL_MOCK_SCHEDULE_SCENARIOS.map((scenario) => {
+            const scenarioCopy = HS_SCENARIO_PREVIEW_COPY[scenario.id];
+            return (
+              <Card key={scenario.id} className="h-full border-l-4 border-l-purple-500">
+                <div className="mb-5 space-y-2">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-purple-400">
+                      {scenarioCopy.title.split(":")[0]}
+                    </span>
+                    <Badge variant={scenarioCopy.variant}>{scenarioCopy.badge}</Badge>
+                  </div>
+                  <h4 className="text-lg font-bold leading-tight text-slate-900">{scenarioCopy.title}</h4>
                 </div>
-                <h4 className="text-lg font-bold leading-tight text-slate-900">{scenario.label}</h4>
-                <p className="text-xs font-semibold leading-relaxed text-slate-500">{scenario.description}</p>
-              </div>
-              <div className="space-y-3">
-                {[
-                  ["Can credibly cover", scenario.canCover],
-                  ["Cannot assume", scenario.cannotCover],
-                  ["Risk", scenario.risk],
-                  ["Best use", scenario.bestUse],
-                ].map(([label, value]) => (
-                  <div key={`${scenario.name}-${label}`} className="rounded-2xl border border-slate-100 bg-slate-50 p-3">
-                    <div className="mb-1 text-[9px] font-bold uppercase tracking-widest text-slate-400">{label}</div>
-                    <p className="text-[11px] font-medium leading-relaxed text-slate-600">{value}</p>
-                  </div>
-                ))}
-                {scenario.requirement && (
-                  <div className="rounded-2xl border border-amber-100 bg-amber-50 p-3">
-                    <div className="mb-1 text-[9px] font-bold uppercase tracking-widest text-amber-600">Requirement</div>
-                    <p className="text-[11px] font-semibold leading-relaxed text-amber-900">{scenario.requirement}</p>
-                  </div>
-                )}
-              </div>
-            </Card>
-          ))}
+                <div className="space-y-3">
+                  {[
+                    ["Best use", scenarioCopy.bestUse],
+                    ["Can cover", scenario.canCover[0]],
+                    ["Cannot assume", scenario.cannotCover[0]],
+                    ["Risk", scenario.risks[0]],
+                    ["Fixed mentorship handling", scenario.fixedMentorshipBlockHandling],
+                  ].map(([label, value]) => (
+                    <div key={`${scenario.id}-${label}`} className="rounded-2xl border border-slate-100 bg-slate-50 p-3">
+                      <div className="mb-1 text-[9px] font-bold uppercase tracking-widest text-slate-400">{label}</div>
+                      <p className="text-[11px] font-medium leading-relaxed text-slate-600">{formatHighSchoolPreviewText(value)}</p>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            );
+          })}
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <Card className="lg:col-span-2" title={`Full HS Load Analysis (${sections * learnersPerSection} learners/grade)`} icon={Scale}>
+        <Card className="lg:col-span-2" title={`Provisional HS Load View (${sections * learnersPerSection} learners/grade)`} icon={Scale}>
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead>
@@ -566,11 +761,11 @@ const HighSchoolTab = ({ sections, setSections }: HighSchoolTabProps) => {
             </table>
           </div>
         </Card>
-        <Card title="Staffing Verdict" icon={Users}>
+        <Card title="Instructional Planning View" icon={Users}>
           <div className="space-y-6">
             <div className="p-4 bg-indigo-50 rounded-2xl border border-indigo-100">
-              <div className="text-[10px] font-bold text-indigo-600 uppercase mb-2">Requirement</div>
-              <div className="text-2xl font-bold text-slate-900">{specialists} Specialists</div>
+              <div className="text-[10px] font-bold text-indigo-600 uppercase mb-2">Current assumption</div>
+              <div className="text-2xl font-bold text-slate-900">{specialists} specialist-capacity view</div>
             </div>
             <div className="space-y-3">
               <div className="flex justify-between items-center text-[10px] font-bold text-slate-400 uppercase">
@@ -599,7 +794,7 @@ const HighSchoolTab = ({ sections, setSections }: HighSchoolTabProps) => {
           className={cn("flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all border", showStaffing ? "bg-indigo-600 text-white border-indigo-600 shadow-lg shadow-indigo-200" : "bg-white text-slate-600 border-slate-200 hover:border-indigo-300")}
         >
           <Users className="h-4 w-4" />
-          {showStaffing ? "Hide Staffing Impact" : "Show Staffing Impact"}
+          {showStaffing ? "Hide Planning Impact" : "Show Planning Impact"}
         </button>
       </div>
 
@@ -609,8 +804,10 @@ const HighSchoolTab = ({ sections, setSections }: HighSchoolTabProps) => {
           const incrementalFte = HS_RAMP_INCREMENT_FTE_BY_GRADE[idx];
           const totalFteSoFar = HS_RAMP_TOTALS_FOR_DISPLAY[idx];
           const dynamicFte = idx === 0
-            ? `${totalFteSoFar} FTE`
-            : `${incrementalFte} New (${totalFteSoFar} Total)`;
+            ? `${totalFteSoFar} FTE assumption`
+            : incrementalFte === 0
+              ? `No new teaching FTE pending validation (${totalFteSoFar} total)`
+              : `Provisional +${incrementalFte} FTE (${totalFteSoFar} total)`;
 
           return (
             <motion.div key={year.year} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.1 }}>
@@ -628,7 +825,7 @@ const HighSchoolTab = ({ sections, setSections }: HighSchoolTabProps) => {
                 <p className="text-sm text-slate-600 leading-relaxed mb-6">{dynamicDescription}</p>
                 <div className="grid grid-cols-2 gap-4 mb-6">
                   <div className="bg-slate-50 rounded-xl p-3 border border-slate-100">
-                    <div className="text-[10px] font-bold text-slate-400 uppercase mb-1">FTE Impact</div>
+                    <div className="text-[10px] font-bold text-slate-400 uppercase mb-1">Planning impact</div>
                     <div className="text-sm font-bold text-slate-900">{dynamicFte}</div>
                   </div>
                   <div className="bg-slate-50 rounded-xl p-3 border border-slate-100">
@@ -690,7 +887,7 @@ const HighSchoolTab = ({ sections, setSections }: HighSchoolTabProps) => {
                 <p className="text-xs text-slate-500 leading-relaxed mb-6 whitespace-normal">{stage.description}</p>
                 <div className="grid grid-cols-2 gap-3 mb-6">
                   <div className="p-3 bg-slate-50 rounded-xl border border-slate-100"><div className="text-[8px] font-bold text-slate-400 uppercase mb-1">Students</div><div className="text-lg font-bold text-slate-900">{stage.students}</div></div>
-                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-100"><div className="text-[8px] font-bold text-slate-400 uppercase mb-1">FTE</div><div className="text-lg font-bold text-slate-900">{stage.fte}</div></div>
+                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-100"><div className="text-[8px] font-bold text-slate-400 uppercase mb-1">Planning FTE</div><div className="text-lg font-bold text-slate-900">{stage.fte}</div></div>
                 </div>
                 <div className="space-y-2 mt-auto">
                   <div className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-2">Core Clusters</div>
