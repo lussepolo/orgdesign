@@ -1113,3 +1113,232 @@ export const HIGH_SCHOOL_MOCK_SCHEDULE_SCENARIOS: MockScheduleScenario[] = [
     ],
   },
 ];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// High School Scenario Capability Report
+// ─────────────────────────────────────────────────────────────────────────────
+// Capability planning only. Not payroll authorization. Not final headcount.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface HighSchoolCapabilityRow {
+  profileId: string;
+  profileLabel: string;
+  domains: string[];
+  /** IDs of course items in the scenario that list this profile as required. */
+  requiredByCourseItems: string[];
+  /** IDs of mentorship items active in this scenario that list this profile as required. */
+  requiredByMentorshipItems: string[];
+  /** True when at least one relevant course item has category "core_academic_subject". */
+  coreAcademicDemand: boolean;
+  /** True when at least one relevant course item has category "advanced_ap_course". */
+  advancedApDemand: boolean;
+  /**
+   * True when at least one relevant mentorship item uses a fixed synchronized block
+   * and lists this profile as required. The block duration and group capacity remain
+   * unresolved until Rio timetable validation is complete.
+   */
+  fixedMentorshipSupport: boolean;
+  /**
+   * True when the profile's canCoverDomains includes Pathways, Leadership, GCD, or
+   * College/Career scope. GCD is embedded within this profile, not a separate
+   * additive staffing bucket.
+   */
+  pathwaysLeadershipGcdScope: boolean;
+  sharedMsHsCredibility: SharedCredibility;
+  partTimeFeasibility: FeasibilityLevel;
+  /** Condition that activates this capability need. Not a hiring decision. */
+  capabilityTrigger: string;
+  /** Per-profile unresolved items blocking workload or schedule confirmation. */
+  validationBlockers: string[];
+}
+
+export interface HighSchoolScenarioCapabilityReport {
+  selectedScenario: MockScheduleScenario;
+  activeGrades: GradeLevel[];
+  /** Course items whose scenarioFit includes the selected scenario. */
+  relevantCourseItems: CourseLoadItem[];
+  /** Mentorship items whose grade is active in the selected scenario. */
+  relevantMentorshipItems: MentorshipLoadItem[];
+  capabilityRows: HighSchoolCapabilityRow[];
+  /** Aggregated unresolved blockers across all profiles and scenario inputs. */
+  validationBlockers: string[];
+  caveats: string[];
+  methodologyNotes: string[];
+}
+
+const PATHWAYS_LEADERSHIP_GCD_DOMAIN_MARKERS = new Set([
+  "Pathways",
+  "Leadership",
+  "Global Citizen Diploma",
+  "global citizenship",
+  "public contribution",
+  "College/Career",
+  "advisory",
+  "course selection",
+]);
+
+/**
+ * Derives a scenario-specific capability report from the High School model data.
+ *
+ * Profile IDs are sourced from the union of:
+ *   1. selectedScenario.requiredProfileIds
+ *   2. requiredHiringProfileIds on course items matching this scenario
+ *   3. requiredEducatorProfileIds on mentorship items for active grades
+ *
+ * This prevents losing profiles that are scenario-relevant even when a course
+ * item is reference-only or validation-heavy.
+ *
+ * No FTE, payroll, or headcount values are calculated. Capability triggers
+ * describe activation conditions, not hiring decisions.
+ */
+export function buildHighSchoolScenarioCapabilityReport(
+  scenarioId: ScenarioId,
+): HighSchoolScenarioCapabilityReport {
+  const selectedScenario =
+    HIGH_SCHOOL_MOCK_SCHEDULE_SCENARIOS.find((s) => s.id === scenarioId) ??
+    HIGH_SCHOOL_MOCK_SCHEDULE_SCENARIOS[0];
+
+  const activeGrades = selectedScenario.activeGrades;
+
+  const relevantCourseItems = SAO_PAULO_REFERENCE_COURSE_LOAD_ITEMS.filter((item) =>
+    item.scenarioFit.includes(scenarioId),
+  );
+
+  const relevantMentorshipItems = HIGH_SCHOOL_MENTORSHIP_LOAD_ITEMS.filter((item) =>
+    activeGrades.includes(item.grade),
+  );
+
+  // Build profile ID union from three sources to avoid dropping scenario-relevant
+  // profiles that appear only in course items or mentorship items.
+  const profileIdSet = new Set<string>([
+    ...selectedScenario.requiredProfileIds,
+    ...relevantCourseItems.flatMap((item) => item.requiredHiringProfileIds),
+    ...relevantMentorshipItems.flatMap((item) => item.requiredEducatorProfileIds),
+  ]);
+
+  const capabilityRows: HighSchoolCapabilityRow[] = [];
+
+  for (const profileId of profileIdSet) {
+    const profile = HIGH_SCHOOL_EDUCATOR_CAPABILITY_PROFILES.find((p) => p.id === profileId);
+    if (!profile) continue;
+
+    const courseItemsForProfile = relevantCourseItems.filter((item) =>
+      item.requiredHiringProfileIds.includes(profileId),
+    );
+
+    const mentorshipItemsForProfile = relevantMentorshipItems.filter((item) =>
+      item.requiredEducatorProfileIds.includes(profileId),
+    );
+
+    const coreAcademicDemand = courseItemsForProfile.some(
+      (item) => item.category === "core_academic_subject",
+    );
+
+    const advancedApDemand = courseItemsForProfile.some(
+      (item) => item.category === "advanced_ap_course",
+    );
+
+    // Fixed synchronized mentorship blocks require profile-fit assignment and
+    // group-capacity validation; duration is unresolved until Rio timetable confirms.
+    const fixedMentorshipSupport = mentorshipItemsForProfile.some(
+      (item) => item.isFixedSynchronizedBlock,
+    );
+
+    const pathwaysLeadershipGcdScope = profile.canCoverDomains.some((domain) =>
+      PATHWAYS_LEADERSHIP_GCD_DOMAIN_MARKERS.has(domain),
+    );
+
+    const rowBlockers: string[] = [];
+
+    for (const item of courseItemsForProfile) {
+      const unit = HIGH_SCHOOL_SCHEDULE_UNITS[item.scheduleUnitId];
+
+      if (item.validationRequired) {
+        rowBlockers.push(
+          `${item.courseProgramName} (${item.id}): curriculum and Rio timetable validation required before planning.`,
+        );
+      }
+      if (item.weeklyMinutes === null) {
+        rowBlockers.push(
+          `${item.courseProgramName} (${item.id}): weekly minutes unresolved — Sao Paulo reference only, not a Rio weekly value.`,
+        );
+      }
+      if (unit?.scheduleMode === "sao_paulo_reference") {
+        rowBlockers.push(
+          `${item.courseProgramName} (${item.id}): schedule unit "${item.scheduleUnitId}" is Sao Paulo reference-only; Rio weekly equivalent requires explicit curriculum conversion.`,
+        );
+      }
+      if (item.hrPayrollValidationRequired) {
+        rowBlockers.push(
+          `${item.courseProgramName} (${item.id}): HR/Finance validation required before any role or engagement can be activated.`,
+        );
+      }
+    }
+
+    for (const item of mentorshipItemsForProfile) {
+      if (item.validationRequired) {
+        rowBlockers.push(
+          `${item.label} (${item.id}): mentorship block requires validation — duration, profile fit, and group capacity are unresolved.`,
+        );
+      }
+      if (item.mentorshipGroupsRequired === null) {
+        rowBlockers.push(
+          `${item.label} (${item.id}): mentorship group count is unresolved; capacity planning cannot proceed without this input.`,
+        );
+    }
+    }
+
+    capabilityRows.push({
+      profileId,
+      profileLabel: profile.label,
+      domains: profile.canCoverDomains,
+      requiredByCourseItems: courseItemsForProfile.map((item) => item.id),
+      requiredByMentorshipItems: mentorshipItemsForProfile.map((item) => item.id),
+      coreAcademicDemand,
+      advancedApDemand,
+      fixedMentorshipSupport,
+      pathwaysLeadershipGcdScope,
+      sharedMsHsCredibility: profile.sharedMsHsCredibility,
+      partTimeFeasibility: profile.partTimeFeasibility,
+      capabilityTrigger: profile.specialistTrigger,
+      validationBlockers: [...new Set(rowBlockers)],
+    });
+  }
+
+  // Top-level blockers: unresolved scenario inputs plus all per-profile blockers.
+  const scenarioInputBlockers = selectedScenario.unresolvedInputs.map(
+    (input) => `Unresolved scenario input: ${input}`,
+  );
+  const allRowBlockers = capabilityRows.flatMap((row) => row.validationBlockers);
+  const validationBlockers = [...new Set([...scenarioInputBlockers, ...allRowBlockers])];
+
+  const caveats = [
+    "This report is a capability planning document only. It is not payroll authorization, approved staffing, or final headcount.",
+    "São Paulo reference schedules are a planning signal, not a Rio weekly load template. 255-minute A-F rotation units and X-block durations require explicit Rio curriculum validation before any conversion is used for planning.",
+    "GCD (Global Citizen Diploma) scope is embedded within the Pathways/Leadership profile and is not a separate additive staffing bucket unless validated and explicitly separated by curriculum and Finance/HR.",
+    "The fixed synchronized mentorship block is a protected timetable slot. It requires profile-fit assignment and mentorship group capacity validation before workload contact minutes can be counted.",
+    "Biology, Chemistry, and Physics are treated as distinct capability profiles and must not be collapsed into a generic Natural Sciences role without explicit credential validation.",
+    "AP Seminar and AP Research are preserved as a specific capability (ap_seminar_research) distinct from generic English Language Arts or research-communication load.",
+    "Capability triggers describe conditions that activate a profile's planning need. They are not hiring decisions or headcount authorizations.",
+  ];
+
+  const methodologyNotes = [
+    "Profile IDs are derived from the union of: (1) scenario.requiredProfileIds, (2) requiredHiringProfileIds on course items whose scenarioFit includes this scenario, and (3) requiredEducatorProfileIds on mentorship items for active grades. This union prevents losing scenario-relevant profiles when a course item is reference-only or validation-heavy.",
+    ...HIGH_SCHOOL_PROGRAM_BLOCK_COUNTING_RULES,
+    HIGH_SCHOOL_SCHEDULE_UNIT_COUNTING_NOTE,
+    ...HIGH_SCHOOL_LOAD_CATEGORY_RULES.teaching_load,
+    ...HIGH_SCHOOL_LOAD_CATEGORY_RULES.mentorship_contact_load,
+    ...HIGH_SCHOOL_LOAD_CATEGORY_RULES.program_ownership_load,
+  ];
+
+  return {
+    selectedScenario,
+    activeGrades,
+    relevantCourseItems,
+    relevantMentorshipItems,
+    capabilityRows,
+    validationBlockers,
+    caveats,
+    methodologyNotes,
+  };
+}
