@@ -85,40 +85,46 @@ const HS_YEAR_DATA: HSYearData[] = [
     curriculum: ["AP", "BNCC", "Common Core"],
     org: [
       "Língua Portuguesa II & Redação",
-      "Integrated Mathematics II",
       "English Language Arts",
-      "Extensions of Bio, Chem & Physics",
-      "AP Seminar & AP Human Geography",
-      "Social Sciences",
-      "Studio Art II, Rock History, Pottery",
-      "Pathways & College/Career"
+      "Integrated Mathematics II",
+      "Biology, Chemistry & Physics foundations",
+      "Brazilian Studies & Global Studies foundations",
+      "AP Human Geography (humanities AP layer)",
+      "Pathways & College and Career Guidance",
+      "Advisory",
+      "Project Mentorship / Passion Project (fixed mentorship block)",
+      "Global Expression & Leadership / GCD foundation",
+      "Innovation / Design Technologies foundation",
     ],
-    description: "Grade 9 opens High School with a provisional educator core for AP-aligned content and advanced science foundations while ensuring a seamless transition."
+    description: "Grade 9 launches High School with a mixed educator model. New HS-capable educators are hired for validated HS-specific domains. Selected MS educators may extend into Grade 9 only where High School expertise, profile fit, and schedule capacity are validated. Shared MS/HS staffing is a bridge mechanism, not a substitute for High School hiring."
   },
   {
     year: "Grade 10",
     scope: "High School Specialization I",
     model: "Provisional HS Specialist Capacity",
-    fte: "No new teaching FTE pending validation",
+    fte: "No separate Grade 10 FTE step beyond the launch package, pending validation",
     curriculum: ["AP", "BNCC", "Common Core"],
     org: [
       "Língua Portuguesa II & Redação",
-      "Integrated Mathematics II",
       "English Language Arts",
-      "Extensions of Bio, Chem & Physics",
-      "AP Computer Science Principles",
+      "Integrated Mathematics II",
+      "Biology, Chemistry & Physics continuation",
       "AP Seminar",
-      "Studio Art II, Rock History, Pottery",
-      "Academic Advising & Mentorship"
+      "AP Computer Science Principles",
+      "Pathways & College and Career Guidance",
+      "Academic Advising / mentorship",
+      "Project Mentorship / Passion Project (fixed mentorship block)",
+      "GCD within Pathways/Leadership",
+      "Innovation / Design Technologies",
     ],
-    description: "Grade 10 opens inside the current instructional-capacity assumption. It expands the academic program while Finance/HR validates whether the teaching ramp remains flat."
+    description: "Grade 10 extends the Grade 9 launch package — not a separate FTE step without validation. It still requires explicit High School ownership across academics, advisory, mentorship, Pathways, College and Career Guidance, and GCD within Pathways/Leadership."
   },
   {
     year: "Grade 11",
     scope: "High School Specialization II",
     model: "Provisional HS Specialist Capacity",
     fte: "3 New FTE (7 Total HS)",
-    curriculum: ["AP Research", "AP Calculus", "BNCC"],
+    curriculum: ["AP Seminar", "AP Calculus", "BNCC"],
     org: [
       "Língua Portuguesa III & AP Lang (ELA)",
       "Integrated Math III & AP Precalculus",
@@ -136,17 +142,18 @@ const HS_YEAR_DATA: HSYearData[] = [
     scope: "High School Graduation",
     model: "Provisional HS Specialist Capacity",
     fte: "3 New FTE (10 Total HS)",
-    curriculum: ["AP Electives", "College Prep", "BNCC"],
+    curriculum: ["AP Research", "College Prep", "BNCC"],
     org: [
       "Língua Portuguesa IV & AP Lit (ELA)",
       "AP Calculus & Integrated Math Adv",
       "AP Precalculus & CS Principles",
       "Integrated Sciences / Advanced Topics",
       "AP Biology & AP Chemistry",
-      "AP Social Sciences & AP Macro",
+      "AP Research (Social Sciences — Grade 12 capstone)",
+      "AP Macroeconomics / Advanced Social Sciences",
       "Brazilian Studies I & II",
       "Global Expression & Leadership",
-      "Innovation Diploma & Design Technologies"
+      "Innovation Diploma & Design Technologies",
     ],
     description: "Grade 12 completes the current instructional-capacity ramp assumption. Staffing carries forward flat only if later validation confirms the workload model."
   }
@@ -178,15 +185,15 @@ const HS_COURSE_OFFER_ARCHITECTURE: HSCourseOfferArchitecture[] = [
       "AP English / composition readiness",
     ],
     programFunctions: [
-      "Pathways / College-Career orientation",
+      "Pathways / College and Career Guidance",
       "Advisory",
-      "Project Mentorship or mentorship routines",
+      "Project Mentorship / Passion Project (fixed synchronized mentorship block — educator role, not a separate hire by default)",
       "Global Expression & Leadership",
       "GCD within Pathways/Leadership foundation",
       "Innovation / Design Technologies foundation",
     ],
     staffingImplication:
-      "Grade 9 cannot be treated as a simple extension of Middle School. Shared MS/HS staffing is credible only when bridge educators have validated HS expertise, especially in Biology, Chemistry, Physics, advanced English, and humanities.",
+      "Grade 9 launches with a mixed educator model. New HS-capable educators are required for validated HS-specific domains — Biology, Chemistry, Physics, advanced English, and humanities in particular. Selected MS educators may extend only where High School expertise, profile fit, and schedule capacity are validated. Shared MS/HS staffing is a bridge mechanism, not a substitute for High School hiring.",
   },
   {
     grade: "Grade 10",
@@ -204,12 +211,14 @@ const HS_COURSE_OFFER_ARCHITECTURE: HSCourseOfferArchitecture[] = [
     ],
     programFunctions: [
       "Pathways",
+      "College and Career Guidance",
       "Academic Advising / mentorship",
+      "Project Mentorship / Passion Project (fixed synchronized mentorship block)",
       "GCD within Pathways/Leadership",
       "Innovation / Design Technologies",
     ],
     staffingImplication:
-      "Grade 10 may still use shared or part-time staffing in selected domains, but the program is already distinctly High School and needs explicit ownership.",
+      "Grade 10 extends the Grade 9 launch package. It requires explicit High School ownership across academics, advisory, mentorship, Pathways, College and Career Guidance, and GCD within Pathways/Leadership. It does not create a separate FTE step beyond the launch package unless validated.",
   },
   {
     grade: "Grade 11",
@@ -217,13 +226,13 @@ const HS_COURSE_OFFER_ARCHITECTURE: HSCourseOfferArchitecture[] = [
       "Portuguese / Redação",
       "English Language Arts / advanced communication",
       "Advanced Mathematics / AP Precalculus / AP Calculus pathway",
-      "Humanities / Social Sciences",
+      "Brazilian Studies / Global Studies (including Geography and History)",
       "Natural Sciences with explicit Biology, Chemistry, and Physics validation",
     ],
     advancedLayer: [
-      "AP Seminar / AP Research / AP Capstone sequence",
+      "AP Seminar / AP Capstone sequence",
       "AP Biology / AP Chemistry",
-      "AP Social Sciences / macro humanities",
+      "Brazilian Studies / Global Studies / AP Social Sciences",
     ],
     programFunctions: [
       "College/Career counseling",
@@ -241,10 +250,11 @@ const HS_COURSE_OFFER_ARCHITECTURE: HSCourseOfferArchitecture[] = [
       "Portuguese / Redação",
       "English Language Arts",
       "Mathematics / advanced mathematics as needed",
-      "Social Sciences / humanities",
+      "Brazilian Studies / Global Studies / Social Sciences",
       "Natural Sciences as pathway-dependent",
     ],
     advancedLayer: [
+      "AP Research (Social Sciences — Grade 12 capstone)",
       "AP / advanced courses as selected",
       "Independent Study",
       "Capstone-like pathway work",
@@ -271,7 +281,7 @@ const HS_LOAD_DATA = [
   { subject: "Portuguese", g9: 5, g10: 5, g11: 5, g12: 5 },
   { subject: "ELA / AP Seminar / Research", g9: 5, g10: 5, g11: 10, g12: 10 },
   { subject: "Mathematics / AP Calculus", g9: 5, g10: 5, g11: 5, g12: 5 },
-  { subject: "Humanities / History", g9: 6, g10: 5, g11: 5, g12: 5 },
+  { subject: "Brazilian Studies / Global Studies", g9: 6, g10: 5, g11: 5, g12: 5 },
   { subject: "Sciences / AP lab sciences", g9: 6, g10: 8, g11: 8, g12: 8 },
 ];
 
@@ -381,7 +391,7 @@ const HS_CAPABILITY_PREVIEW_GROUPS = [
     profileIds: ["hs_mathematics_advanced_math", "biology_specialist", "chemistry_specialist", "physics_specialist"],
   },
   {
-    title: "Humanities and AP",
+    title: "Humanities, Brazilian Studies & Global Studies",
     profileIds: ["hs_humanities_ap_world_history", "ap_seminar_research"],
   },
   {
@@ -409,7 +419,7 @@ const HS_SCENARIO_PREVIEW_COPY: Record<
 > = {
   scenario_a_shared_ms_hs_bridge: {
     title: "Scenario A: Shared MS/HS bridge model",
-    bestUse: "Limited Grade 9-10 bridge when HS capability is validated.",
+    bestUse: "Limited MS/HS bridge for early G9–G10 continuity in selected validated domains. Not a substitute for High School hiring. Cannot assume full Bio/Chem/Physics, AP humanities, or college-facing expectations without validated HS expertise.",
     badge: "Limited bridge",
     variant: "warning",
   },
@@ -421,7 +431,7 @@ const HS_SCENARIO_PREVIEW_COPY: Record<
   },
   scenario_c_mature_hs_specialist: {
     title: "Scenario C: Mature HS specialist model",
-    bestUse: "Mature, high-density model for Grade 11-12 or full High School scale.",
+    bestUse: "Mature, high-density model for Grade 11-12 or full High School scale. Should not be activated as full payroll logic before enrollment density supports specialist utilization.",
     badge: "Mature density",
     variant: "purple",
   },
@@ -594,8 +604,8 @@ const HighSchoolTab = ({ sections, setSections }: HighSchoolTabProps) => {
                     grade: "Grade 9",
                     label: "HS Launch",
                     year: "2034",
-                    offerSummary: "Portuguese / Redação, ELA, Integrated Mathematics, Natural Sciences (Bio/Chem/Physics foundations), AP-style Humanities, Pathways, Advisory, Project Mentorship, GCD/Leadership foundation",
-                    planningNote: "4-educator planning assumption pending Finance/HR validation",
+                    offerSummary: "Portuguese / Redação, ELA, Integrated Mathematics, Biology / Chemistry / Physics foundations, Brazilian Studies & Global Studies foundations, AP Human Geography, Pathways, College and Career Guidance, Advisory, Project Mentorship / Passion Project (fixed mentorship block), GCD / Leadership foundation, Innovation / Design Technologies foundation",
+                    planningNote: "Mixed educator model: new HS-capable educators for validated HS-specific domains; selected MS educators extend only where HS expertise, profile fit, and capacity are validated. Bridge staffing is not a substitute for HS hiring.",
                     color: "border-indigo-200 bg-indigo-50",
                     badge: "info" as const,
                   },
@@ -621,8 +631,8 @@ const HighSchoolTab = ({ sections, setSections }: HighSchoolTabProps) => {
                     grade: "Grade 12",
                     label: "Graduation Pathway",
                     year: "2037+",
-                    offerSummary: "Portuguese / Redação, ELA, Advanced Mathematics, Social Sciences, Natural Sciences (pathway-dependent), AP / advanced courses, Independent Study, College/Career counseling, Internships, Leadership, GCD completion, Innovation Diploma completion",
-                    planningNote: "Flat only if Finance/HR validation confirms workload model",
+                    offerSummary: "Portuguese / Redação, ELA, Advanced Mathematics, Brazilian Studies / Global Studies, Natural Sciences (pathway-dependent), AP Research (Social Sciences), AP / advanced courses, Independent Study, College/Career counseling, Internships, Leadership, GCD completion, Innovation Diploma completion",
+                    planningNote: "Flat only if Finance/HR validation confirms workload model. AP Research is the Grade 12 Social Sciences capstone — not generic ELA or generic research.",
                     color: "border-emerald-200 bg-emerald-50",
                     badge: "success" as const,
                   },
@@ -649,8 +659,9 @@ const HighSchoolTab = ({ sections, setSections }: HighSchoolTabProps) => {
                   <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wider">Strategic Logic</h4>
                 </div>
                 <div className="space-y-4">
-                  <p className="text-xs text-slate-600 leading-relaxed"><strong>G9–G10</strong> establishes the foundation with AP Seminar and advanced science foundations. Shared MS/HS bridge staffing is credible only where HS expertise is validated.</p>
-                  <p className="text-xs text-slate-600 leading-relaxed"><strong>G11–G12</strong> introduces <strong>AP Research</strong>, specialist domains, College/Career counseling, external mentorship, and capstone-like work. Generic shared staffing becomes risky by Grade 11.</p>
+                  <p className="text-xs text-slate-600 leading-relaxed"><strong>G9</strong> launches with a mixed educator model: new HS-capable educators hired for validated HS-specific domains; selected MS educators may extend only where High School expertise, profile fit, and schedule capacity are validated. Shared MS/HS staffing is a bridge mechanism — not a substitute for HS hiring.</p>
+                  <p className="text-xs text-slate-600 leading-relaxed"><strong>G10</strong> extends the G9 launch package and requires explicit HS ownership across academics, advisory, mentorship, Pathways, College and Career Guidance, and GCD within Pathways/Leadership. No separate G10 FTE step beyond the launch package without validation.</p>
+                  <p className="text-xs text-slate-600 leading-relaxed"><strong>G11–G12</strong> introduces specialist domains, <strong>AP Research</strong> (Grade 12 Social Sciences capstone — not generic ELA or research), College/Career counseling, external mentorship, and capstone-like work. Generic shared staffing becomes risky by Grade 11.</p>
                   <p className="text-xs text-slate-600 leading-relaxed"><strong>Core principle:</strong> Course offer → weekly slots per section → total instructional/contact load → educator capability → scenario fit → provisional staffing implications.</p>
                 </div>
               </Card>
@@ -737,7 +748,7 @@ const HighSchoolTab = ({ sections, setSections }: HighSchoolTabProps) => {
                     const dynamicFte = idx === 0
                       ? `${totalFteSoFar}-educator planning assumption`
                       : incrementalFte === 0
-                        ? `No new teaching FTE pending validation (${totalFteSoFar} total)`
+                        ? `No separate Grade 10 FTE step beyond the launch package, pending validation (${totalFteSoFar} total)`
                         : `Provisional +${incrementalFte} FTE (${totalFteSoFar} total)`;
 
                     return (

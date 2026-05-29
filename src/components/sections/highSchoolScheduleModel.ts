@@ -415,8 +415,8 @@ export const HIGH_SCHOOL_EDUCATOR_CAPABILITY_PROFILES: EducatorCapabilityProfile
   },
   {
     id: "hs_english_research_communication",
-    label: "HS English / Research Communication",
-    canCoverDomains: ["English Language Arts", "AP Language", "AP Literature", "research communication"],
+    label: "HS ELA / AP English / AP Capstone Capable",
+    canCoverDomains: ["English Language Arts", "AP English Language Composition", "AP English Literature", "AP Language", "AP Literature", "AP Seminar", "AP Capstone writing support", "research communication"],
     shouldNotCoverDomains: ["Portuguese", "Biology", "Chemistry", "Physics"],
     canAbsorbMentorship: true,
     canAbsorbProgramOwnership: true,
@@ -424,7 +424,7 @@ export const HIGH_SCHOOL_EDUCATOR_CAPABILITY_PROFILES: EducatorCapabilityProfile
     partTimeFeasibility: "high",
     maxMentorshipGroups: 2,
     specialistTrigger: "AP Seminar, AP Research, AP Language, or AP Literature becomes active at scale.",
-    notes: "Good fit for research communication mentorship when teaching load leaves capacity.",
+    notes: "May cover or support ELA, AP English Language Composition, AP English Literature, and AP Capstone-related writing/research where appropriate. AP Seminar and AP Research are not reducible to generic ELA — explicit capability validation is required before assigning this profile to AP Seminar or AP Research ownership.",
   },
   {
     id: "hs_mathematics_advanced_math",
@@ -480,8 +480,8 @@ export const HIGH_SCHOOL_EDUCATOR_CAPABILITY_PROFILES: EducatorCapabilityProfile
   },
   {
     id: "hs_humanities_ap_world_history",
-    label: "HS Humanities / AP World History",
-    canCoverDomains: ["Social Sciences", "History", "AP World History", "AP Human Geography", "AP Macroeconomics"],
+    label: "HS Humanities / Brazilian Studies & Global Studies",
+    canCoverDomains: ["Brazilian Studies", "Global Studies", "Geography", "History", "Social Sciences", "AP World History", "AP Human Geography", "AP Macroeconomics"],
     shouldNotCoverDomains: ["Portuguese language mechanics", "AP English composition", "Natural Sciences"],
     canAbsorbMentorship: true,
     canAbsorbProgramOwnership: true,
@@ -489,7 +489,7 @@ export const HIGH_SCHOOL_EDUCATOR_CAPABILITY_PROFILES: EducatorCapabilityProfile
     partTimeFeasibility: "high",
     maxMentorshipGroups: 2,
     specialistTrigger: "AP humanities, macro, or advanced social-science pathway demand is active.",
-    notes: "Strong fit for civic inquiry, SDG/context research, stakeholder mapping, and debate.",
+    notes: "Covers Brazilian Studies and Global Studies, including Geography and History where relevant. AP social-science pathways activate against this profile. Strong fit for civic inquiry, SDG/context research, stakeholder mapping, and debate.",
   },
   {
     id: "ap_seminar_research",
@@ -783,7 +783,7 @@ export const SAO_PAULO_REFERENCE_COURSE_LOAD_ITEMS: CourseLoadItem[] = [
     hrPayrollValidationRequired: true,
     validationRequired: true,
     notes:
-      "High load in Sao Paulo reference. AP Seminar requires the AP Seminar / AP Research profile as primary; HS English / Research Communication is supporting only if explicit AP Seminar credential is validated. The 255-minute Sao Paulo A-F reference is not a Rio weekly value.",
+      "High load in Sao Paulo reference. AP Seminar requires the AP Seminar / AP Research profile as primary; HS ELA / AP English / AP Capstone Capable is supporting only if explicit AP Seminar credential is validated. The 255-minute Sao Paulo A-F reference is not a Rio weekly value.",
   },
   {
     id: "sp_g10_ap_computer_science_principles",
