@@ -1448,6 +1448,200 @@ export interface Grade9CapacityLedgerRow {
   blockerOrCaveat: string;
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Grade 9 Capacity Ledger Rows
+// Instructional-capacity coverage planning only.
+// Not a staffing authorization. Not a hiring commitment. Not payroll.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const GRADE_9_CAPACITY_LEDGER_ROWS: readonly Grade9CapacityLedgerRow[] = [
+  {
+    id: "rio_g9_capacity_integrated_mathematics",
+    courseArea: "Integrated Mathematics",
+    loadCategory: "teaching_load",
+    weeklySlotsPerSection: null,
+    allocationType: "hs_oriented_launch_coverage",
+    requiredCapabilityProfileIds: ["hs_mathematics_advanced_math"],
+    hsOrientedLaunchCoverage: "likely",
+    hsOrientedSharedWithMsFeasibility: "plausible_pending_schedule_and_load_validation",
+    hsOrientedSharedWithMsFeasibilityNote:
+      "The HS-oriented mathematics educator may support Middle School if load, schedule, and HS mathematics expertise allow. Direction is HS-to-MS sharing, not automatic MS-to-HS bridge.",
+    msPrimaryBridgeEligibility: "eligible_if_validated",
+    msPrimaryBridgeEligibilityNote:
+      "An MS-primary mathematics educator may support Grade 9 only if HS-level mathematics expertise, remaining capacity, and schedule fit are validated.",
+    projectBlockRole: "mentor_eligible_pending_profile_fit",
+    programOwnershipRole: "not_applicable",
+    validationStatus: "covered_hs_core_assumption",
+    blockerOrCaveat:
+      "This row must not be labeled Mathematics / Quantitative Reasoning. Share direction must be explicit.",
+  },
+  {
+    id: "rio_g9_capacity_portuguese_redacao",
+    courseArea: "Portuguese / Redação",
+    loadCategory: "teaching_load",
+    weeklySlotsPerSection: null,
+    allocationType: "hs_oriented_launch_coverage",
+    requiredCapabilityProfileIds: ["hs_portuguese_redacao"],
+    hsOrientedLaunchCoverage: "likely",
+    hsOrientedSharedWithMsFeasibility: "plausible_pending_schedule_and_load_validation",
+    hsOrientedSharedWithMsFeasibilityNote:
+      "The HS-oriented Portuguese / Redação educator may support Middle School if load, schedule, and HS Redação expertise allow.",
+    msPrimaryBridgeEligibility: "not_eligible",
+    msPrimaryBridgeEligibilityNote:
+      "MS Portuguese does not automatically qualify for HS Portuguese / Redação. HS Redação capability must be explicitly validated.",
+    projectBlockRole: "mentor_eligible_pending_profile_fit",
+    programOwnershipRole: "connected_program_support",
+    validationStatus: "covered_hs_core_assumption",
+    blockerOrCaveat:
+      "Portuguese / Redação must not be treated as automatic MS Portuguese bridge coverage.",
+  },
+  {
+    id: "rio_g9_capacity_natural_sciences_bio_chem",
+    courseArea: "Natural Sciences: Biology/Chemistry foundations",
+    loadCategory: "teaching_load",
+    weeklySlotsPerSection: null,
+    allocationType: "hs_oriented_launch_coverage_pending_capability_validation",
+    requiredCapabilityProfileIds: ["biology_specialist", "chemistry_specialist"],
+    hsOrientedLaunchCoverage: "likely_pending_capability_validation",
+    hsOrientedSharedWithMsFeasibility: "plausible_pending_schedule_and_load_validation",
+    hsOrientedSharedWithMsFeasibilityNote:
+      "The HS-oriented Natural Sciences educator may support Middle School only if schedule and load allow, but Grade 9 Bio/Chem capability remains the primary validation.",
+    msPrimaryBridgeEligibility: "not_eligible",
+    msPrimaryBridgeEligibilityNote:
+      "MS Natural Sciences does not automatically qualify for Grade 9 Biology/Chemistry. Biology and Chemistry capability must be explicitly validated.",
+    projectBlockRole: "mentor_eligible_pending_profile_fit",
+    programOwnershipRole: "not_applicable",
+    validationStatus: "covered_pending_explicit_capability_validation",
+    blockerOrCaveat:
+      "This row covers Biology/Chemistry foundations only. Physics is not a Grade 9 requirement and must not appear as a blocker in this row.",
+  },
+  {
+    id: "rio_g9_capacity_brazilian_global_studies",
+    courseArea: "Brazilian Studies / Global Studies",
+    loadCategory: "teaching_load",
+    weeklySlotsPerSection: null,
+    allocationType: "hs_oriented_launch_coverage",
+    requiredCapabilityProfileIds: ["hs_humanities_ap_world_history"],
+    hsOrientedLaunchCoverage: "likely",
+    hsOrientedSharedWithMsFeasibility: "plausible_pending_schedule_and_load_validation",
+    hsOrientedSharedWithMsFeasibilityNote:
+      "The HS-oriented Brazilian Studies / Global Studies educator may support Middle School Social Sciences only if HS-level expertise, schedule, and load allow.",
+    msPrimaryBridgeEligibility: "eligible_if_validated",
+    msPrimaryBridgeEligibilityNote:
+      "An MS-primary Social Sciences educator may support Grade 9 only if HS-level Brazilian Studies / Global Studies expertise is validated.",
+    projectBlockRole: "anchor_domain_mentor",
+    programOwnershipRole: "connected_program_support",
+    validationStatus: "covered_hs_core_assumption",
+    blockerOrCaveat:
+      "The visible label must remain Brazilian Studies / Global Studies. AP Research may connect later, pending curriculum validation, but AP Research is not Grade 9 load.",
+  },
+  {
+    id: "rio_g9_capacity_english_language_arts",
+    courseArea: "English Language Arts",
+    loadCategory: "teaching_load",
+    weeklySlotsPerSection: null,
+    allocationType: "ms_primary_bridge_if_validated",
+    requiredCapabilityProfileIds: ["hs_english_research_communication"],
+    hsOrientedLaunchCoverage: "not_in_launch_core",
+    hsOrientedSharedWithMsFeasibility: "not_applicable",
+    hsOrientedSharedWithMsFeasibilityNote:
+      "Dedicated HS ELA is expected in Grade 10; Grade 9 may use validated MS ELA for the foundation layer.",
+    msPrimaryBridgeEligibility: "foundation_layer_only_if_validated",
+    msPrimaryBridgeEligibilityNote:
+      "MS ELA may teach Grade 9 English Language Arts only if HS-level ELA capability is validated. AP English, AP Seminar, and AP Research are not Grade 9 load.",
+    projectBlockRole: "mentor_eligible_pending_profile_fit",
+    programOwnershipRole: "connected_program_support",
+    validationStatus: "ms_bridge_foundation_layer_pending_validation",
+    blockerOrCaveat:
+      "The visible Grade 9 label is English Language Arts only. Do not label it AP English foundations.",
+  },
+  {
+    id: "rio_g9_capacity_college_counseling_pathways_gcd",
+    courseArea: "College Counseling / Pathways / Global Citizen Diploma",
+    loadCategory: "program_ownership_load",
+    weeklySlotsPerSection: null,
+    allocationType: "hs_program_ownership",
+    requiredCapabilityProfileIds: ["pathways_college_career"],
+    hsOrientedLaunchCoverage: "not_applicable",
+    hsOrientedSharedWithMsFeasibility: "not_applicable",
+    hsOrientedSharedWithMsFeasibilityNote:
+      "This is a Grade 9 HS program ownership function, not HS-to-MS sharing.",
+    msPrimaryBridgeEligibility: "not_applicable",
+    msPrimaryBridgeEligibilityNote:
+      "College Counseling / Pathways / Global Citizen Diploma is not an MS-primary bridge function.",
+    projectBlockRole: "not_applicable",
+    programOwnershipRole: "primary_program_ownership",
+    validationStatus: "pending_counselor_role_activation",
+    blockerOrCaveat:
+      "A guidance counselor / college counselor activates with Grade 9. GCD is embedded here and must not appear as a separate Grade 9 row.",
+  },
+  {
+    id: "rio_g9_capacity_global_expression_leadership",
+    courseArea: "Global Expression & Leadership",
+    loadCategory: "program_ownership_load",
+    weeklySlotsPerSection: null,
+    allocationType: "hs_program_ownership",
+    requiredCapabilityProfileIds: ["leadership_with_gcd_scope"],
+    hsOrientedLaunchCoverage: "not_applicable",
+    hsOrientedSharedWithMsFeasibility: "plausible_pending_schedule_and_load_validation",
+    hsOrientedSharedWithMsFeasibilityNote:
+      "This function may connect to the Brazilian Studies / Global Studies educator or the College Counseling / guidance function if load and profile fit allow.",
+    msPrimaryBridgeEligibility: "not_applicable",
+    msPrimaryBridgeEligibilityNote:
+      "This is not a default MS bridge function.",
+    projectBlockRole: "mentor_eligible_pending_profile_fit",
+    programOwnershipRole: "connected_program_support",
+    validationStatus: "hs_program_ownership_pending_assignment",
+    blockerOrCaveat:
+      "Global Expression & Leadership must not duplicate GCD, Pathways, or Advisory.",
+  },
+  {
+    id: "rio_g9_capacity_advisory",
+    courseArea: "Advisory",
+    loadCategory: "mentorship_contact_load",
+    weeklySlotsPerSection: null,
+    allocationType: "distributed_student_support_responsibility",
+    requiredCapabilityProfileIds: [],
+    hsOrientedLaunchCoverage: "distributed_across_eligible_educators",
+    hsOrientedSharedWithMsFeasibility: "not_applicable",
+    hsOrientedSharedWithMsFeasibilityNote:
+      "Advisory is distributed among Grade 9 educators and/or counseling/support roles depending on the final timetable.",
+    msPrimaryBridgeEligibility: "not_applicable",
+    msPrimaryBridgeEligibilityNote:
+      "Advisory for Grade 9 students is not an MS-primary bridge function and is not the same as MS Advisory.",
+    projectBlockRole: "not_applicable",
+    programOwnershipRole: "connected_program_support",
+    validationStatus: "distributed_pending_timetable_assignment",
+    blockerOrCaveat:
+      "Advisory is distinct from College Counseling, GCD, and Project Mentorship. It is not a separate hire and not leftover capacity.",
+  },
+  {
+    id: "rio_g9_capacity_project_mentorship_passion_project",
+    courseArea: "Project Mentorship / Passion Project",
+    loadCategory: "mentorship_contact_load",
+    weeklySlotsPerSection: null,
+    allocationType: "distributed_fixed_block",
+    requiredCapabilityProfileIds: [
+      "innovation_design_technologies_project_mentorship",
+      "hs_english_research_communication",
+      "hs_humanities_ap_world_history",
+      "pathways_college_career",
+    ],
+    hsOrientedLaunchCoverage: "distributed_across_eligible_educators",
+    hsOrientedSharedWithMsFeasibility: "not_applicable",
+    hsOrientedSharedWithMsFeasibilityNote:
+      "This is a fixed synchronized Grade 9 block and is not HS-to-MS sharing.",
+    msPrimaryBridgeEligibility: "not_applicable",
+    msPrimaryBridgeEligibilityNote:
+      "MS-primary educators may participate only if schedule fit, profile fit, and project-block availability are validated. It is not a default bridge function.",
+    projectBlockRole: "simultaneous_availability_required",
+    programOwnershipRole: "not_applicable",
+    validationStatus: "distributed_pending_timetable_assignment",
+    blockerOrCaveat:
+      "Project Mentorship / Passion Project is distributed across eligible educators, not a separate Project Mentor hire, not leftover capacity, and not Innovation Diploma. Innovation Diploma starts in Grade 11.",
+  },
+];
+
 export const RIO_WEEKLY_COURSE_LOAD_STUB: readonly RioWeeklyCourseLoadStubRow[] = [
   // ── Grade 9 ──────────────────────────────────────────────────────────────
   {
