@@ -319,6 +319,92 @@ const MiddleSchoolTab = ({ sections, setSections }: MiddleSchoolTabProps) => {
       <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-[10px] font-medium leading-relaxed text-slate-500">
         This tab translates the Middle School launch logic from the Scenario Offers architecture into instructional load, educator clusters, and program-function planning.
       </div>
+
+      <div className="space-y-5 rounded-2xl border border-blue-100 bg-blue-50 p-5">
+        <div className="flex items-center gap-2">
+          <div className="h-5 w-1 bg-blue-500 rounded-full shrink-0" />
+          <h4 className="text-sm font-bold text-slate-900">Scenario Offers Connection</h4>
+        </div>
+        <p className="text-xs text-slate-600 leading-relaxed">
+          This tab translates the Scenario Offers architecture into Middle School instructional capacity: grade activation, section progression, educator clusters, program-function load, and educator-count signals.
+        </p>
+        <p className="text-[10px] text-slate-500 leading-relaxed">
+          This pass keeps the tabs decoupled: no Scenario Offers data is imported, and no shared state is created.
+        </p>
+        <div className="space-y-1.5">
+          <p className="text-[10px] text-slate-500 leading-relaxed">
+            The educator-count summary below tests the instructional implications of the opening stages rather than approving staffing.
+          </p>
+          <p className="text-[10px] text-slate-500 leading-relaxed">
+            Grade 6 launch is the first Middle School translation layer: clusters convert the scenario stage into teachable instructional capacity.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div className="rounded-2xl border border-blue-200 bg-white p-4 space-y-2">
+            <div className="text-[9px] font-bold text-blue-500 uppercase tracking-widest">Decision layer</div>
+            <h5 className="text-xs font-bold text-slate-900">Scenario Offers decision layer</h5>
+            <p className="text-[10px] text-slate-500 leading-relaxed">Defines when Middle School activates and which grades/sections are included.</p>
+          </div>
+          <div className="rounded-2xl border border-blue-200 bg-white p-4 space-y-2">
+            <div className="text-[9px] font-bold text-blue-500 uppercase tracking-widest">Translation layer</div>
+            <h5 className="text-xs font-bold text-slate-900">Middle School translation layer</h5>
+            <p className="text-[10px] text-slate-500 leading-relaxed">Converts the scenario into Grade 6 cluster architecture, load by grade, educator-count signals, and program-function planning.</p>
+          </div>
+          <div className="rounded-2xl border border-blue-200 bg-white p-4 space-y-2">
+            <div className="text-[9px] font-bold text-blue-500 uppercase tracking-widest">Downstream layer</div>
+            <h5 className="text-xs font-bold text-slate-900">Downstream planning layer</h5>
+            <p className="text-[10px] text-slate-500 leading-relaxed">Feeds later validation work: section scaling, specialist allocation, project/advisory/pathways load, and eventual MS-to-HS bridge feasibility.</p>
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <div className="h-4 w-1 bg-blue-400 rounded-full shrink-0" />
+            <h5 className="text-xs font-bold text-slate-900">Middle School Opening Stages</h5>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div className="rounded-2xl border border-slate-100 bg-white p-4 space-y-3">
+              <div className="text-[9px] font-bold text-blue-600 uppercase tracking-widest">Grade 6 launch</div>
+              <div>
+                <div className="text-[8px] font-bold text-slate-400 uppercase mb-1">Scenario relationship</div>
+                <p className="text-[10px] text-slate-600 leading-relaxed">Middle School launch stage in Scenario Offers architecture. Scenario D activates Grade 6 and the Designers learning engine.</p>
+              </div>
+              <div>
+                <div className="text-[8px] font-bold text-slate-400 uppercase mb-1">Middle School translation</div>
+                <p className="text-[10px] text-slate-600 leading-relaxed">Grade 6 cluster architecture, 1–2 sections, educator-count signal, program-function load.</p>
+              </div>
+            </div>
+            <div className="rounded-2xl border border-slate-100 bg-white p-4 space-y-3">
+              <div className="text-[9px] font-bold text-blue-600 uppercase tracking-widest">Grades 6–7 active</div>
+              <div>
+                <div className="text-[8px] font-bold text-slate-400 uppercase mb-1">Scenario relationship</div>
+                <p className="text-[10px] text-slate-600 leading-relaxed">Middle School expansion stage within the Scenario Offers architecture.</p>
+              </div>
+              <div>
+                <div className="text-[8px] font-bold text-slate-400 uppercase mb-1">Middle School translation</div>
+                <p className="text-[10px] text-slate-600 leading-relaxed">Domain viability becomes clearer; Mathematics, Portuguese, and ELA approach viable full-load domains at 2 sections per grade.</p>
+              </div>
+            </div>
+            <div className="rounded-2xl border border-slate-100 bg-white p-4 space-y-3">
+              <div className="text-[9px] font-bold text-blue-600 uppercase tracking-widest">Grades 6–8 active</div>
+              <div>
+                <div className="text-[8px] font-bold text-slate-400 uppercase mb-1">Scenario relationship</div>
+                <p className="text-[10px] text-slate-600 leading-relaxed">Full Middle School span within the Scenario Offers architecture.</p>
+              </div>
+              <div>
+                <div className="text-[8px] font-bold text-slate-400 uppercase mb-1">Middle School translation</div>
+                <p className="text-[10px] text-slate-600 leading-relaxed">Subject-domain model strengthens; specialist/program-function allocation still requires explicit planning.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="rounded-xl border border-amber-100 bg-amber-50 px-4 py-3 text-[10px] font-medium leading-relaxed text-amber-800">
+          Scenario Offers defines the architectural stage. The Middle School tab translates that stage into instructional-capacity signals. The values here remain planning premises, not payroll authorization, final FTE, final headcount, or hiring approval.
+        </div>
+      </div>
+
       <div className="pt-4">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
