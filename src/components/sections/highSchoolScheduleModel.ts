@@ -1642,6 +1642,130 @@ export const GRADE_9_CAPACITY_LEDGER_ROWS: readonly Grade9CapacityLedgerRow[] = 
   },
 ];
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Grade 9 Capacity Ledger Constants and Helper Functions
+// Instructional-capacity planning only. Not payroll. Not FTE. Not headcount.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const G9_DEFAULT_GROUPS_PER_SECTION = 6;
+export const G9_MAX_GROUPS_PER_EDUCATOR = 4;
+export const G9_EDUCATOR_SLOT_ELIGIBILITY_THRESHOLD = 20;
+
+export function calculateProjectBlockDemand(
+  sections: number,
+  groupsPerSection = G9_DEFAULT_GROUPS_PER_SECTION,
+  maxGroupsPerEducator = G9_MAX_GROUPS_PER_EDUCATOR,
+) {
+  const s = Math.max(1, Math.floor(sections));
+  const gps = Math.max(1, Math.floor(groupsPerSection));
+  const mgpe = Math.max(1, Math.floor(maxGroupsPerEducator));
+  const totalProjectGroups = s * gps;
+  const projectEducatorsRequired = Math.ceil(totalProjectGroups / mgpe);
+  return {
+    sections: s,
+    groupsPerSection: gps,
+    totalProjectGroups,
+    projectEducatorsRequired,
+    maxGroupsPerEducator: mgpe,
+    note: "Simultaneous educator availability required in the fixed block, not a hiring count.",
+  };
+}
+
+export function buildGrade9CapacityLedger(
+  sections: number,
+  groupsPerSection = G9_DEFAULT_GROUPS_PER_SECTION,
+) {
+  return {
+    rows: [...GRADE_9_CAPACITY_LEDGER_ROWS] as readonly Grade9CapacityLedgerRow[],
+    projectBlockDemand: calculateProjectBlockDemand(sections, groupsPerSection, G9_MAX_GROUPS_PER_EDUCATOR),
+    caveats: [
+      "Instructional-capacity planning only; not payroll, final FTE, final headcount, or hiring authorization.",
+      "Weekly slot counts remain pending Rio curriculum validation.",
+      "Middle School bridge/share signals are validation inputs, not confirmed High School capacity.",
+      "Project Mentorship / Passion Project requires simultaneous educator availability in the fixed block; this is not a Project Mentor hire count.",
+      "Advisory is distinct from College Counseling, Global Citizen Diploma, and Project Mentorship.",
+    ],
+  };
+}
+
+export function classifyMsPrimaryBridgeEligibility(
+  row: Grade9CapacityLedgerRow,
+): MsPrimaryBridgeEligibility {
+  return row.msPrimaryBridgeEligibility;
+}
+
+export function classifyHsOrientedSharedWithMsFeasibility(
+  row: Grade9CapacityLedgerRow,
+): HsOrientedSharedWithMsFeasibility {
+  return row.hsOrientedSharedWithMsFeasibility;
+}
+
+export function deriveMsSurplusSignalForGrade9(
+  msRows: ReadonlyArray<{
+    domainId: string;
+    domainLabel: string;
+    remainingBeforeMax: number | null;
+    distribution?: readonly number[];
+    weeklyCoreSlots?: number;
+    activeGrades?: readonly string[];
+  }>,
+) {
+  return msRows.map((row) => {
+    let msPrimaryBridgeEligibility: MsPrimaryBridgeEligibility;
+    let sharedMsCredibility: SharedCredibility;
+    let g9BridgeLabel: string;
+
+    switch (row.domainId) {
+      case "mathematics":
+        msPrimaryBridgeEligibility = "eligible_if_validated";
+        sharedMsCredibility = "medium";
+        g9BridgeLabel =
+          "MS Mathematics surplus: planning signal only — HS-level mathematics expertise, remaining capacity, and schedule fit must be validated before Grade 9 assignment.";
+        break;
+      case "englishLanguageArts":
+        msPrimaryBridgeEligibility = "foundation_layer_only_if_validated";
+        sharedMsCredibility = "medium";
+        g9BridgeLabel =
+          "MS English Language Arts surplus: planning signal only — HS-level ELA capability must be validated; foundation layer only. AP English, AP Seminar, and AP Research are not Grade 9 load.";
+        break;
+      case "socialSciences":
+        msPrimaryBridgeEligibility = "eligible_if_validated";
+        sharedMsCredibility = "medium";
+        g9BridgeLabel =
+          "MS Social Sciences surplus: planning signal only — HS-level Brazilian Studies / Global Studies expertise must be validated before Grade 9 assignment.";
+        break;
+      case "portuguese":
+        msPrimaryBridgeEligibility = "not_eligible";
+        sharedMsCredibility = "low";
+        g9BridgeLabel =
+          "MS Portuguese surplus: not eligible — HS Portuguese / Redação capability requires explicit HS-level validation; not automatic bridge coverage.";
+        break;
+      case "naturalSciences":
+        msPrimaryBridgeEligibility = "not_eligible";
+        sharedMsCredibility = "risky";
+        g9BridgeLabel =
+          "MS Natural Sciences surplus: not eligible — MS Natural Sciences does not automatically qualify for Grade 9 Biology/Chemistry; explicit Biology and Chemistry capability validation required.";
+        break;
+      default:
+        msPrimaryBridgeEligibility = "not_applicable";
+        sharedMsCredibility = "low";
+        g9BridgeLabel = "Not an MS-primary bridge function for Grade 9.";
+        break;
+    }
+
+    return {
+      domainId: row.domainId,
+      domainLabel: row.domainLabel,
+      coreRemainingBeforeMax: row.remainingBeforeMax,
+      g9BridgeLabel,
+      msPrimaryBridgeEligibility,
+      sharedMsCredibility,
+      validationBlocker:
+        "MS surplus is a planning signal only and must not be treated as confirmed Grade 9 High School capacity. Validation of HS-level expertise, load, and schedule fit is required before any assignment.",
+    };
+  });
+}
+
 export const RIO_WEEKLY_COURSE_LOAD_STUB: readonly RioWeeklyCourseLoadStubRow[] = [
   // ── Grade 9 ──────────────────────────────────────────────────────────────
   {
