@@ -158,6 +158,36 @@ const MS_OWNERSHIP_PROGRESSION = [
   },
 ];
 
+const GRADE_6_CLUSTER_INSIGHTS = [
+  {
+    name: "STEM Cluster",
+    includes: ["Integrated Mathematics", "Natural Sciences"],
+    slotsPerSection: 10,
+    slotsAcrossTwoSections: 20,
+    contactHoursAcrossTwoSections: 15,
+    gapToMinimum: 4,
+    implication: "Near viable load; requires 4 complementary slots to reach the 24-slot minimum.",
+  },
+  {
+    name: "Humanities Cluster",
+    includes: ["Língua Portuguesa", "Social Sciences"],
+    slotsPerSection: 10,
+    slotsAcrossTwoSections: 20,
+    contactHoursAcrossTwoSections: 15,
+    gapToMinimum: 4,
+    implication: "Near viable load; requires 4 complementary slots to reach the 24-slot minimum.",
+  },
+  {
+    name: "Global Studies / ELA & Projects Cluster",
+    includes: ["English Language Arts", "Passion Project", "Pathways", "Global Expression & Leadership"],
+    slotsPerSection: 11,
+    slotsAcrossTwoSections: 22,
+    contactHoursAcrossTwoSections: 16.5,
+    gapToMinimum: 2,
+    implication: "Closest to minimum viable load; requires 2 complementary slots to reach the 24-slot minimum.",
+  },
+];
+
 type MiddleSchoolTabProps = {
   sections: number;
   setSections: (s: number) => void;
@@ -219,6 +249,9 @@ const MiddleSchoolTab = ({ sections, setSections }: MiddleSchoolTabProps) => {
 
   return (
     <div className="space-y-8">
+      <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-[10px] font-medium leading-relaxed text-slate-500">
+        This tab translates the Middle School launch logic from the Scenario Offers architecture into instructional load, educator clusters, and program-function planning.
+      </div>
       <div className="pt-4">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
@@ -235,6 +268,9 @@ const MiddleSchoolTab = ({ sections, setSections }: MiddleSchoolTabProps) => {
             </p>
             <Badge variant="info">Middle School will be launched in 2031</Badge>
           </div>
+        </div>
+        <div className="rounded-2xl border border-amber-100 bg-amber-50 px-4 py-3 mb-6 text-[10px] font-medium leading-relaxed text-amber-800">
+          Instructional-capacity planning only. These roadmap values are planning premises, not payroll authorization, final FTE, final headcount, or hiring approval.
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {MS_ROADMAP_DATA.map((stage, idx) => (
@@ -297,7 +333,7 @@ const MiddleSchoolTab = ({ sections, setSections }: MiddleSchoolTabProps) => {
             </div>
           </div>
         </Card>
-        <Card title="Staffing Evolution" icon={Users}>
+        <Card title="Educator Capacity Premise" icon={Users}>
           <div className="space-y-4">
             <div className="flex justify-between items-center p-3 bg-slate-50 rounded-xl border border-slate-100">
               <span className="text-[10px] font-bold text-slate-400 uppercase">Grade 6</span>
@@ -308,6 +344,7 @@ const MiddleSchoolTab = ({ sections, setSections }: MiddleSchoolTabProps) => {
               <Badge variant="purple">Subject Domains</Badge>
             </div>
             <p className="text-[10px] text-slate-400 italic">Cumulative ramp remains 3 FTE with Grade 6, 7 FTE when Grade 7 opens, and 10 FTE when Grade 8 opens. Project Mentorship starts as a coordinated function, not automatic payroll.</p>
+            <p className="text-[10px] text-slate-400 leading-relaxed">The ramp describes instructional-capacity assumptions. It does not replace the live load simulator and should not be read as approved FTE.</p>
           </div>
         </Card>
       </div>
@@ -456,13 +493,63 @@ const MiddleSchoolTab = ({ sections, setSections }: MiddleSchoolTabProps) => {
           </details>
 
           {grade6ClusterInsight.active && (
-            <div className="rounded-2xl border border-blue-100 bg-blue-50 p-4 text-xs font-medium leading-relaxed text-slate-600">
-              Grade 6 cluster insight: Mathematics + Natural Sciences produces {grade6ClusterInsight.combinedSlots}
-              {" "}weekly slots ({grade6ClusterInsight.mathematicsSlots} Mathematics + {grade6ClusterInsight.naturalSciencesSlots}
-              {" "}Natural Sciences), leaving a {grade6ClusterInsight.gapToMinimumLoad}-slot gap to the {minViableLoad}-slot
-              minimum viable load. This gap may be completed through Pathways, Advisory, STEAM elective,
-              Project Mentorship, scientific inquiry, documentation, or critique cycles. Project Mentorship
-              remains a coordinated function, not automatic payroll.
+            <div className="space-y-4 rounded-2xl border border-blue-100 bg-blue-50 p-4">
+              <div className="flex items-center gap-2">
+                <div className="h-5 w-1 bg-blue-500 rounded-full shrink-0" />
+                <h4 className="text-sm font-bold text-slate-900">Grade 6 Cluster Architecture</h4>
+              </div>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Grade 6 launches through three educator clusters. Each cluster combines core instructional load with complementary program functions to approach the minimum viable weekly load.
+              </p>
+              <p className="text-[10px] text-slate-500 leading-relaxed">
+                World Language is excluded from this Grade 6 model. Each slot equals 45 minutes.
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                {GRADE_6_CLUSTER_INSIGHTS.map((cluster) => (
+                  <div key={cluster.name} className="rounded-2xl border border-blue-200 bg-white p-4 space-y-3">
+                    <div>
+                      <div className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Grade 6 Cluster</div>
+                      <h5 className="text-xs font-bold text-slate-900 leading-snug">{cluster.name}</h5>
+                    </div>
+                    <div>
+                      <div className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Includes</div>
+                      <ul className="space-y-1">
+                        {cluster.includes.map((area) => (
+                          <li key={area} className="text-[10px] text-slate-600 flex items-start gap-1.5">
+                            <ChevronRight className="h-2.5 w-2.5 text-blue-300 shrink-0 mt-0.5" />
+                            {area}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="bg-slate-50 rounded-xl p-2 border border-slate-100">
+                        <div className="text-[8px] font-bold text-slate-400 uppercase mb-0.5">Slots / section</div>
+                        <div className="text-sm font-bold text-slate-900">{cluster.slotsPerSection}</div>
+                      </div>
+                      <div className="bg-slate-50 rounded-xl p-2 border border-slate-100">
+                        <div className="text-[8px] font-bold text-slate-400 uppercase mb-0.5">Slots, 2 sections</div>
+                        <div className="text-sm font-bold text-slate-900">{cluster.slotsAcrossTwoSections}</div>
+                      </div>
+                      <div className="bg-slate-50 rounded-xl p-2 border border-slate-100">
+                        <div className="text-[8px] font-bold text-slate-400 uppercase mb-0.5">Contact hrs, 2 sec.</div>
+                        <div className="text-sm font-bold text-slate-900">{cluster.contactHoursAcrossTwoSections}</div>
+                      </div>
+                      <div className="bg-amber-50 rounded-xl p-2 border border-amber-100">
+                        <div className="text-[8px] font-bold text-amber-500 uppercase mb-0.5">Gap to 24-slot min</div>
+                        <div className="text-sm font-bold text-amber-700">{cluster.gapToMinimum} slots</div>
+                      </div>
+                    </div>
+                    <p className="text-[10px] text-slate-500 leading-relaxed italic">{cluster.implication}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-[10px] font-medium text-slate-600">
+                Grade 6 total: 38 slots per section, 76 slots across 2 sections, 57 weekly contact hours.
+              </div>
+              <div className="rounded-xl border border-amber-100 bg-amber-50 px-4 py-3 text-[10px] font-medium leading-relaxed text-amber-800">
+                These are instructional-capacity planning signals, not payroll authorization, final FTE, final headcount, or hiring approval.
+              </div>
             </div>
           )}
 
@@ -483,7 +570,7 @@ const MiddleSchoolTab = ({ sections, setSections }: MiddleSchoolTabProps) => {
                     "Educators needed at max",
                     "Suggested distribution",
                     "Complementary load need",
-                    "Remaining capacity before max",
+                    "Load space",
                     "Best complementary functions",
                     "Staffing implication",
                   ].map((header) => (
@@ -506,6 +593,12 @@ const MiddleSchoolTab = ({ sections, setSections }: MiddleSchoolTabProps) => {
                 ))}
               </tbody>
             </table>
+          </div>
+          <p className="text-[10px] text-slate-400 leading-relaxed">
+            Load space is a read-only feasibility signal. It does not automatically represent Grade 9 bridge availability.
+          </p>
+          <div className="rounded-2xl border border-rose-100 bg-rose-50 px-4 py-3 text-[10px] font-medium leading-relaxed text-rose-800">
+            Middle School remaining load space is not automatic High School capacity. Any Grade 9 bridge requires subject-domain match, HS-level expertise validation, schedule fit, and remaining-capacity validation.
           </div>
 
           <div className="overflow-x-auto rounded-2xl border border-slate-100">
