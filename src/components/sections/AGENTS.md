@@ -36,7 +36,20 @@ Do not treat FTE as the source of truth.
 - New HS-capable educators are hired for validated HS-specific domains.
 - Selected Middle School educators may extend into Grade 9 only where High School expertise, profile fit, and schedule capacity are validated.
 - Shared MS/HS staffing is a bridge mechanism, not a substitute for High School hiring.
-- Grade 9 includes Portuguese/Redação, ELA, Integrated Mathematics, Biology/Chemistry/Physics foundations, Brazilian Studies / Global Studies foundations, Pathways, College and Career Guidance, Advisory, Project Mentorship / Passion Project, Global Expression & Leadership, GCD foundation, and Innovation / Design Technologies foundation.
+- Grade 9 course architecture (9 rows):
+  1. Integrated Mathematics
+  2. Portuguese / Redação
+  3. Natural Sciences: Biology and Chemistry foundations (Physics is not a Grade 9 requirement)
+  4. Brazilian Studies / Global Studies (may connect to GCD-related work and project/research mentoring; AP Research is not Grade 9 load)
+  5. English Language Arts (may be covered by a validated MS ELA educator in Grade 9; dedicated HS ELA is expected in Grade 10)
+  6. College Counseling / Pathways / Global Citizen Diploma (GCD is coordinated through this layer and does not appear as a separate Grade 9 row)
+  7. Global Expression & Leadership
+  8. Advisory (required distributed student-support/contact responsibility; not optional and not merged into College Counseling, GCD, or Project Mentorship)
+  9. Project Mentorship / Passion Project (distributed across eligible educators in a fixed synchronized block; not a separate hire)
+- Physics is not a Grade 9 requirement. It belongs to later High School grades.
+- Innovation / Design Technologies is not a Grade 9 course. Innovation Diploma replaces Passion Project starting in Grade 11.
+- GCD foundation is not a separate Grade 9 row. It is embedded within College Counseling / Pathways.
+- AP English, AP Seminar, AP Research, and AP Human Geography are not Grade 9 load requirements.
 
 #### Grade 10: High School ownership
 - Grade 10 extends the Grade 9 launch package rather than creating an automatic new FTE step.
