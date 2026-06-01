@@ -277,10 +277,10 @@ const SPECIALIST_INTEGRITY_NOTE = "The fractional FTEs (e.g., 0.25 per section) 
 
 const HS_LOAD_DATA = [
   { subject: "Portuguese", g9: 5, g10: 5, g11: 5, g12: 5 },
-  { subject: "ELA / AP Seminar / Research", g9: 5, g10: 5, g11: 10, g12: 10 },
-  { subject: "Mathematics / AP Calculus", g9: 5, g10: 5, g11: 5, g12: 5 },
+  { subject: "English Language Arts (G9) / ELA–AP Seminar pathway (G10+)", g9: 5, g10: 5, g11: 10, g12: 10 },
+  { subject: "Integrated Mathematics (G9) / AP Calculus pathway (G11+)", g9: 5, g10: 5, g11: 5, g12: 5 },
   { subject: "Brazilian Studies / Global Studies", g9: 6, g10: 5, g11: 5, g12: 5 },
-  { subject: "Sciences / AP lab sciences", g9: 6, g10: 8, g11: 8, g12: 8 },
+  { subject: "Natural Sciences: Bio/Chem (G9) / AP lab sciences (G10+)", g9: 6, g10: 8, g11: 8, g12: 8 },
 ];
 
 const HS_ROADMAP_DATA = [
@@ -1224,76 +1224,6 @@ const HighSchoolTab = ({ sections, setSections }: HighSchoolTabProps) => {
                 <Badge variant="info">Read-only preview</Badge>
               </div>
 
-              {/* Process flow */}
-              <div className="rounded-2xl border border-cyan-100 bg-cyan-50 p-4">
-                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-7">
-                  {[
-                    "Course offer",
-                    "Schedule unit",
-                    "Minutes",
-                    "Load category",
-                    "Educator capability",
-                    "Mock schedule",
-                    "Capability implication",
-                  ].map((step, idx) => (
-                    <div key={step} className="flex items-center gap-2">
-                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white text-[10px] font-bold text-cyan-700 shadow-sm">
-                        {idx + 1}
-                      </div>
-                      <div className="text-[10px] font-bold uppercase tracking-wide text-cyan-900">{step}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Rio / SP mode cards */}
-              <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
-                {HS_SCHEDULE_MODE_PREVIEW.map((mode) => (
-                  <Card key={mode.title} className="h-full">
-                    <div className="mb-4 flex items-center justify-between gap-3">
-                      <h4 className="text-base font-bold text-slate-900">{mode.title}</h4>
-                      <Badge variant={mode.variant}>{mode.badge}</Badge>
-                    </div>
-                    <ul className="space-y-2">
-                      {mode.items.map((item) => (
-                        <li key={item} className="flex gap-2 text-xs font-medium leading-relaxed text-slate-600">
-                          <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-cyan-400" />
-                          <span>{item}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </Card>
-                ))}
-              </div>
-
-              {/* SP reference warning */}
-              <div className="rounded-2xl border border-amber-100 bg-amber-50 p-4 text-xs font-semibold leading-relaxed text-amber-900">
-                São Paulo is a reference pattern, not a Rio staffing template. A-F rotation records are six-day-cycle references
-                and should not be treated as weekly Rio loads unless explicitly converted and validated.
-              </div>
-
-              {/* Fixed mentorship block rule */}
-              <div className="rounded-2xl border border-purple-100 bg-purple-50 p-4">
-                <div className="mb-2 text-[10px] font-bold uppercase tracking-widest text-purple-600">Fixed mentorship block rule</div>
-                <p className="text-xs font-semibold leading-relaxed text-purple-950">
-                  Project Mentorship, Passion Project, and Innovation Diploma happen within a fixed synchronized mentorship block.
-                  This block is protected in the timetable, so it should not conflict with regular subject teaching. It still counts
-                  toward educator workload and must be assigned based on educator profile fit, available total workload capacity,
-                  and group capacity.
-                </p>
-              </div>
-
-              {/* Conversion caution */}
-              <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-                <div className="mb-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">Conversion caution</div>
-                <p className="text-xs font-semibold leading-relaxed text-slate-600">
-                  The model supports Rio equivalents for a 255-minute A-F reference as {SP_AF_CONVERSION_PREVIEW.displaySingleBlockEquivalent}
-                  {" "}single blocks or {SP_AF_CONVERSION_PREVIEW.displayDoubleBlockEquivalent} double blocks, with validation warnings.
-                  Conversion should not be used as payroll truth without curriculum and HR validation.
-                </p>
-                <p className="mt-2 text-[10px] font-semibold leading-relaxed text-slate-400">{HIGH_SCHOOL_SCHEDULE_UNIT_COUNTING_NOTE}</p>
-              </div>
-
               {/* ── Grade 9 Mock Weekly Schedule ─────────────────────────── */}
               {(() => {
                 const G9_MOCK_BLOCK_TYPE_LABELS: Record<string, string> = {
@@ -1430,6 +1360,81 @@ const HighSchoolTab = ({ sections, setSections }: HighSchoolTabProps) => {
                   </div>
                 );
               })()}
+
+              {/* Fixed mentorship block rule — Grade 9 scope only */}
+              <div className="rounded-2xl border border-purple-100 bg-purple-50 p-4">
+                <div className="mb-2 text-[10px] font-bold uppercase tracking-widest text-purple-600">Fixed mentorship block rule</div>
+                <p className="text-xs font-semibold leading-relaxed text-purple-950">
+                  Project Mentorship / Passion Project is distributed across eligible educators within a fixed synchronized block.
+                  This block is protected in the timetable and must not conflict with regular subject teaching. It counts toward educator
+                  workload and must be assigned based on profile fit, available total workload capacity, and group capacity.
+                  It is not a separate Project Mentor hire and not leftover capacity.
+                </p>
+              </div>
+
+              {/* Schedule methodology context */}
+              <div className="space-y-4">
+                <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Schedule methodology context</div>
+
+                {/* Process flow */}
+                <div className="rounded-2xl border border-cyan-100 bg-cyan-50 p-4">
+                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-7">
+                    {[
+                      "Course offer",
+                      "Schedule unit",
+                      "Minutes",
+                      "Load category",
+                      "Educator capability",
+                      "Mock schedule",
+                      "Capability implication",
+                    ].map((step, idx) => (
+                      <div key={step} className="flex items-center gap-2">
+                        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white text-[10px] font-bold text-cyan-700 shadow-sm">
+                          {idx + 1}
+                        </div>
+                        <div className="text-[10px] font-bold uppercase tracking-wide text-cyan-900">{step}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Rio / SP mode cards */}
+                <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+                  {HS_SCHEDULE_MODE_PREVIEW.map((mode) => (
+                    <Card key={mode.title} className="h-full">
+                      <div className="mb-4 flex items-center justify-between gap-3">
+                        <h4 className="text-base font-bold text-slate-900">{mode.title}</h4>
+                        <Badge variant={mode.variant}>{mode.badge}</Badge>
+                      </div>
+                      <ul className="space-y-2">
+                        {mode.items.map((item) => (
+                          <li key={item} className="flex gap-2 text-xs font-medium leading-relaxed text-slate-600">
+                            <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-cyan-400" />
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </Card>
+                  ))}
+                </div>
+
+                {/* SP reference warning */}
+                <div className="rounded-2xl border border-amber-100 bg-amber-50 p-4 text-xs font-semibold leading-relaxed text-amber-900">
+                  São Paulo is a reference pattern, not a Rio staffing template. A-F rotation records are six-day-cycle references
+                  and should not be treated as weekly Rio loads unless explicitly converted and validated.
+                </div>
+
+                {/* Conversion caution */}
+                <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                  <div className="mb-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">Conversion caution</div>
+                  <p className="text-xs font-semibold leading-relaxed text-slate-600">
+                    The model supports Rio equivalents for a 255-minute A-F reference as {SP_AF_CONVERSION_PREVIEW.displaySingleBlockEquivalent}
+                    {" "}single blocks or {SP_AF_CONVERSION_PREVIEW.displayDoubleBlockEquivalent} double blocks, with validation warnings.
+                    Conversion should not be used as payroll truth without curriculum and HR validation.
+                  </p>
+                  <p className="mt-2 text-[10px] font-semibold leading-relaxed text-slate-400">{HIGH_SCHOOL_SCHEDULE_UNIT_COUNTING_NOTE}</p>
+                </div>
+              </div>
 
             </div>
 
