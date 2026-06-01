@@ -1374,6 +1374,80 @@ type RioWeeklyCourseLoadStubRow = Omit<
   "sections" | "totalWeeklySlots" | "totalWeeklyMinutes" | "totalWeeklyContactHours"
 >;
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Grade 9 Capacity Ledger Types
+// Instructional-capacity coverage planning only.
+// Not a staffing authorization. Not a hiring commitment.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export type G9AllocationType =
+  | "hs_oriented_launch_coverage"
+  | "hs_oriented_launch_coverage_pending_capability_validation"
+  | "hs_oriented_shared_with_ms_if_validated"
+  | "ms_primary_bridge_if_validated"
+  | "distributed_fixed_block"
+  | "distributed_student_support_responsibility"
+  | "hs_program_ownership"
+  | "specialist_or_part_time_if_required"
+  | "pending_validation";
+
+export type HsOrientedLaunchCoverage =
+  | "likely"
+  | "likely_pending_capability_validation"
+  | "distributed_across_eligible_educators"
+  | "not_in_launch_core"
+  | "not_applicable";
+
+export type HsOrientedSharedWithMsFeasibility =
+  | "plausible_pending_schedule_and_load_validation"
+  | "not_plausible"
+  | "not_applicable";
+
+export type MsPrimaryBridgeEligibility =
+  | "eligible_if_validated"
+  | "foundation_layer_only_if_validated"
+  | "not_eligible"
+  | "not_applicable";
+
+export type G9ProjectBlockRole =
+  | "anchor_domain_mentor"
+  | "mentor_eligible_pending_profile_fit"
+  | "simultaneous_availability_required"
+  | "not_applicable";
+
+export type G9ProgramOwnershipRole =
+  | "primary_program_ownership"
+  | "embedded_program_ownership"
+  | "connected_program_support"
+  | "not_applicable";
+
+export type G9LedgerValidationStatus =
+  | "covered_hs_core_assumption"
+  | "covered_pending_explicit_capability_validation"
+  | "ms_bridge_foundation_layer_pending_validation"
+  | "distributed_pending_timetable_assignment"
+  | "hs_program_ownership_pending_assignment"
+  | "pending_counselor_role_activation"
+  | "pending_rio_curriculum_validation";
+
+export interface Grade9CapacityLedgerRow {
+  id: string;
+  courseArea: string;
+  loadCategory: LoadCategory;
+  weeklySlotsPerSection: number | null;
+  allocationType: G9AllocationType;
+  requiredCapabilityProfileIds: string[];
+  hsOrientedLaunchCoverage: HsOrientedLaunchCoverage;
+  hsOrientedSharedWithMsFeasibility: HsOrientedSharedWithMsFeasibility;
+  hsOrientedSharedWithMsFeasibilityNote: string;
+  msPrimaryBridgeEligibility: MsPrimaryBridgeEligibility;
+  msPrimaryBridgeEligibilityNote: string;
+  projectBlockRole: G9ProjectBlockRole;
+  programOwnershipRole: G9ProgramOwnershipRole;
+  validationStatus: G9LedgerValidationStatus;
+  blockerOrCaveat: string;
+}
+
 export const RIO_WEEKLY_COURSE_LOAD_STUB: readonly RioWeeklyCourseLoadStubRow[] = [
   // ── Grade 9 ──────────────────────────────────────────────────────────────
   {
