@@ -247,6 +247,73 @@ const MiddleSchoolTab = ({ sections, setSections }: MiddleSchoolTabProps) => {
     [domainSlotsPerSection, minViableLoad, msSectionsByGrade],
   );
 
+  const educatorCountSummary = useMemo(() => {
+    const scenarios: Array<{
+      stage: string;
+      sectionsLabel: string;
+      config: MiddleSchoolSectionsByGrade;
+      specialistSignal: string;
+      interpretation: string;
+    }> = [
+      {
+        stage: "Grade 6 launch",
+        sectionsLabel: "1 section",
+        config: { g6: 1, g7: 0, g8: 0 },
+        specialistSignal: "Separate specialist/program allocation required",
+        interpretation: "Cluster model required; domain-row count should not be read as separate subject hires.",
+      },
+      {
+        stage: "Grade 6 launch",
+        sectionsLabel: "2 sections",
+        config: { g6: 2, g7: 0, g8: 0 },
+        specialistSignal: "Separate specialist/program allocation required",
+        interpretation: "Three-cluster launch premise becomes visible; complementary program load remains necessary.",
+      },
+      {
+        stage: "Grades 6–7 active",
+        sectionsLabel: "1 section per grade",
+        config: { g6: 1, g7: 1, g8: 0 },
+        specialistSignal: "Program-function allocation required",
+        interpretation: "Still threshold-sensitive; several domains remain below minimum viable load.",
+      },
+      {
+        stage: "Grades 6–7 active",
+        sectionsLabel: "2 sections per grade",
+        config: { g6: 2, g7: 2, g8: 0 },
+        specialistSignal: "Program-function allocation required",
+        interpretation: "Mathematics, Portuguese, and ELA approach viable full-load domains at 24 slots each.",
+      },
+      {
+        stage: "Grades 6–8 active",
+        sectionsLabel: "1 section per grade",
+        config: { g6: 1, g7: 1, g8: 1 },
+        specialistSignal: "Specialist + distributed responsibilities required",
+        interpretation: "Broader grade span improves domain stability but remains section-count sensitive.",
+      },
+      {
+        stage: "Grades 6–8 active",
+        sectionsLabel: "2 sections per grade",
+        config: { g6: 2, g7: 2, g8: 2 },
+        specialistSignal: "Specialist + distributed responsibilities required",
+        interpretation: "Subject-domain model becomes stronger; specialist/program-function load still needs explicit allocation.",
+      },
+    ];
+    return scenarios.map((scenario) => {
+      const stageActiveGrades = getActiveGrades(scenario.config);
+      const rows = deriveEducatorLoadRows({
+        activeGrades: stageActiveGrades,
+        sectionsByGrade: scenario.config,
+        domainSlotsPerSection,
+        minViableLoad,
+        maxTeachingLoad,
+      });
+      const coreEducatorsImplied = rows.reduce((sum, row) => sum + row.educatorsNeeded, 0);
+      return { ...scenario, coreEducatorsImplied };
+    });
+  }, [domainSlotsPerSection, maxTeachingLoad, minViableLoad]);
+
+  const currentCoreEducators = educatorLoadRows.reduce((sum, row) => sum + row.educatorsNeeded, 0);
+
   return (
     <div className="space-y-8">
       <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-[10px] font-medium leading-relaxed text-slate-500">
@@ -552,6 +619,52 @@ const MiddleSchoolTab = ({ sections, setSections }: MiddleSchoolTabProps) => {
               </div>
             </div>
           )}
+
+          <div className="space-y-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            <div className="flex items-center gap-2">
+              <div className="h-5 w-1 bg-blue-500 rounded-full shrink-0" />
+              <h4 className="text-sm font-bold text-slate-900">Educator Count by Opening Stage</h4>
+            </div>
+            <p className="text-xs text-slate-600 leading-relaxed">
+              These counts are model-derived instructional-capacity signals. They are not payroll authorization, final FTE, final headcount, or hiring approval.
+            </p>
+            <p className="text-[10px] text-slate-500 leading-relaxed">
+              Grade 6 launch should be read through the cluster architecture: 3 educator clusters, not automatically 3 fully loaded educators. Complementary program functions are required to approach viable load.
+            </p>
+            <p className="text-[10px] text-slate-500 leading-relaxed">
+              Domain-row count is not the same as the cluster-compressed launch premise. Specialist/program functions require explicit allocation. Distributed responsibilities — Advisory, Passion Project, Pathways — are not leftover capacity.
+            </p>
+            <div className="rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-[10px] font-medium text-blue-800">
+              Current simulator configuration: G6 = {msSectionsByGrade.g6} · G7 = {msSectionsByGrade.g7} · G8 = {msSectionsByGrade.g8}. Core educators implied by current configuration: {currentCoreEducators}.
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {educatorCountSummary.map((row) => (
+                <div key={`${row.stage}-${row.sectionsLabel}`} className="rounded-2xl border border-slate-100 bg-white p-4 space-y-3">
+                  <div>
+                    <div className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">{row.sectionsLabel}</div>
+                    <h5 className="text-xs font-bold text-slate-900 leading-snug">{row.stage}</h5>
+                    <div className="text-[9px] text-slate-400 mt-1 font-mono">
+                      G6:{row.config.g6} · G7:{row.config.g7} · G8:{row.config.g8}
+                    </div>
+                  </div>
+                  <div className="flex items-end gap-2">
+                    <div className="text-2xl font-bold text-blue-700">{row.coreEducatorsImplied}</div>
+                    <div className="text-[9px] font-bold text-slate-400 uppercase mb-1 leading-tight">Core educators<br />implied</div>
+                  </div>
+                  <div>
+                    <div className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Specialist/program load signal</div>
+                    <div className="text-[9px] font-medium text-slate-500 bg-slate-50 rounded-lg px-2 py-1.5 leading-relaxed">
+                      {row.specialistSignal}
+                    </div>
+                  </div>
+                  <p className="text-[10px] text-slate-500 leading-relaxed italic">{row.interpretation}</p>
+                </div>
+              ))}
+            </div>
+            <div className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-[10px] font-medium text-slate-600">
+              Roadmap values such as 3 / 7 / 10 remain planning premises. This panel shows model-derived instructional-capacity signals from the current load assumptions.
+            </div>
+          </div>
 
           {msSectionsByGrade.g8 > 0 && (
             <div className="rounded-2xl border border-purple-100 bg-purple-50 p-4 text-xs font-medium leading-relaxed text-slate-600">
