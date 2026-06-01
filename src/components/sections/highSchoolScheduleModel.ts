@@ -2259,3 +2259,301 @@ export function buildRioWeeklyLoadByOffer(sections: number): RioWeeklyCourseLoad
     };
   });
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Grade 9 Mock Schedule Simulation
+// Planning mockup only. Not the final timetable. Not payroll. Not FTE.
+// Not final headcount. Not hiring authorization.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export type Grade9MockScheduleBlockType =
+  | "teaching_block"
+  | "fixed_project_block"
+  | "advisory_block"
+  | "program_ownership_signal"
+  | "pending_validation";
+
+export type Grade9MockScheduleCoverageType =
+  | "hs_oriented_launch"
+  | "ms_primary_bridge_if_validated"
+  | "distributed_eligible_educators"
+  | "college_counseling_guidance"
+  | "program_ownership"
+  | "pending_validation";
+
+export interface Grade9MockScheduleBlock {
+  id: string;
+  day: "Monday" | "Tuesday" | "Wednesday" | "Thursday" | "Friday";
+  blockLabel: string;
+  courseArea: string;
+  ledgerRowId: string;
+  blockType: Grade9MockScheduleBlockType;
+  coverageType: Grade9MockScheduleCoverageType;
+  educatorAssignmentLabel: string;
+  validationStatus: G9LedgerValidationStatus;
+  caveat: string;
+}
+
+export const GRADE_9_MOCK_SCHEDULE_BLOCKS: readonly Grade9MockScheduleBlock[] = [
+  // ── Monday ───────────────────────────────────────────────────────────────
+  {
+    id: "g9_mock_mon_b1_math",
+    day: "Monday",
+    blockLabel: "Block 1",
+    courseArea: "Integrated Mathematics",
+    ledgerRowId: "rio_g9_capacity_integrated_mathematics",
+    blockType: "teaching_block",
+    coverageType: "hs_oriented_launch",
+    educatorAssignmentLabel: "HS-oriented Mathematics educator",
+    validationStatus: "covered_hs_core_assumption",
+    caveat: "May support Middle School only if load, schedule, and HS mathematics expertise allow.",
+  },
+  {
+    id: "g9_mock_mon_b2_portuguese",
+    day: "Monday",
+    blockLabel: "Block 2",
+    courseArea: "Portuguese / Redação",
+    ledgerRowId: "rio_g9_capacity_portuguese_redacao",
+    blockType: "teaching_block",
+    coverageType: "hs_oriented_launch",
+    educatorAssignmentLabel: "HS-oriented Portuguese / Redação educator",
+    validationStatus: "covered_hs_core_assumption",
+    caveat: "MS Portuguese does not automatically qualify for HS Portuguese / Redação.",
+  },
+  {
+    id: "g9_mock_mon_b3_nat_sci",
+    day: "Monday",
+    blockLabel: "Block 3",
+    courseArea: "Natural Sciences: Biology/Chemistry foundations",
+    ledgerRowId: "rio_g9_capacity_natural_sciences_bio_chem",
+    blockType: "teaching_block",
+    coverageType: "hs_oriented_launch",
+    educatorAssignmentLabel: "HS-oriented Natural Sciences educator, Bio/Chem focus",
+    validationStatus: "covered_pending_explicit_capability_validation",
+    caveat: "Covers Biology/Chemistry foundations only, pending explicit capability validation. Physics is not modeled as a Grade 9 requirement.",
+  },
+  {
+    id: "g9_mock_mon_advisory",
+    day: "Monday",
+    blockLabel: "Advisory",
+    courseArea: "Advisory",
+    ledgerRowId: "rio_g9_capacity_advisory",
+    blockType: "advisory_block",
+    coverageType: "distributed_eligible_educators",
+    educatorAssignmentLabel: "Distributed Grade 9 advisory responsibility",
+    validationStatus: "distributed_pending_timetable_assignment",
+    caveat: "Advisory is distinct from College Counseling, GCD, and Project Mentorship. Not a separate hire and not leftover capacity.",
+  },
+  // ── Tuesday ──────────────────────────────────────────────────────────────
+  {
+    id: "g9_mock_tue_b1_braz_global",
+    day: "Tuesday",
+    blockLabel: "Block 1",
+    courseArea: "Brazilian Studies / Global Studies",
+    ledgerRowId: "rio_g9_capacity_brazilian_global_studies",
+    blockType: "teaching_block",
+    coverageType: "hs_oriented_launch",
+    educatorAssignmentLabel: "HS-oriented Brazilian Studies / Global Studies educator",
+    validationStatus: "covered_hs_core_assumption",
+    caveat: "May connect to GCD-related work, project/research mentoring, and possibly AP Research later. AP Research is not Grade 9 load.",
+  },
+  {
+    id: "g9_mock_tue_b2_ela",
+    day: "Tuesday",
+    blockLabel: "Block 2",
+    courseArea: "English Language Arts",
+    ledgerRowId: "rio_g9_capacity_english_language_arts",
+    blockType: "teaching_block",
+    coverageType: "ms_primary_bridge_if_validated",
+    educatorAssignmentLabel: "Validated MS ELA bridge or HS ELA if activated early",
+    validationStatus: "ms_bridge_foundation_layer_pending_validation",
+    caveat: "Grade 9 ELA may be covered by validated MS ELA. Dedicated HS ELA is expected in Grade 10. AP English, AP Seminar, and AP Research are not Grade 9 load.",
+  },
+  {
+    id: "g9_mock_tue_b3_cc_pathways",
+    day: "Tuesday",
+    blockLabel: "Block 3",
+    courseArea: "College Counseling / Pathways / Global Citizen Diploma",
+    ledgerRowId: "rio_g9_capacity_college_counseling_pathways_gcd",
+    blockType: "program_ownership_signal",
+    coverageType: "college_counseling_guidance",
+    educatorAssignmentLabel: "Guidance / College Counseling function",
+    validationStatus: "pending_counselor_role_activation",
+    caveat: "College Counseling / Pathways / Global Citizen Diploma activates with Grade 9. GCD is embedded here, not a separate Grade 9 row.",
+  },
+  {
+    id: "g9_mock_tue_project_block",
+    day: "Tuesday",
+    blockLabel: "Fixed Project Block",
+    courseArea: "Project Mentorship / Passion Project",
+    ledgerRowId: "rio_g9_capacity_project_mentorship_passion_project",
+    blockType: "fixed_project_block",
+    coverageType: "distributed_eligible_educators",
+    educatorAssignmentLabel: "Eligible educators available simultaneously in fixed project block",
+    validationStatus: "distributed_pending_timetable_assignment",
+    caveat: "This is simultaneous educator availability, not a hiring count. Requires profile fit, group capacity, teaching-load capacity, and schedule fit.",
+  },
+  // ── Wednesday ────────────────────────────────────────────────────────────
+  {
+    id: "g9_mock_wed_b1_math",
+    day: "Wednesday",
+    blockLabel: "Block 1",
+    courseArea: "Integrated Mathematics",
+    ledgerRowId: "rio_g9_capacity_integrated_mathematics",
+    blockType: "teaching_block",
+    coverageType: "hs_oriented_launch",
+    educatorAssignmentLabel: "HS-oriented Mathematics educator",
+    validationStatus: "covered_hs_core_assumption",
+    caveat: "May support Middle School only if load, schedule, and HS mathematics expertise allow.",
+  },
+  {
+    id: "g9_mock_wed_b2_portuguese",
+    day: "Wednesday",
+    blockLabel: "Block 2",
+    courseArea: "Portuguese / Redação",
+    ledgerRowId: "rio_g9_capacity_portuguese_redacao",
+    blockType: "teaching_block",
+    coverageType: "hs_oriented_launch",
+    educatorAssignmentLabel: "HS-oriented Portuguese / Redação educator",
+    validationStatus: "covered_hs_core_assumption",
+    caveat: "MS Portuguese does not automatically qualify for HS Portuguese / Redação.",
+  },
+  {
+    id: "g9_mock_wed_b3_global_expression",
+    day: "Wednesday",
+    blockLabel: "Block 3",
+    courseArea: "Global Expression & Leadership",
+    ledgerRowId: "rio_g9_capacity_global_expression_leadership",
+    blockType: "program_ownership_signal",
+    coverageType: "program_ownership",
+    educatorAssignmentLabel: "Brazilian Studies / Global Studies educator or College Counseling / guidance function, pending assignment",
+    validationStatus: "hs_program_ownership_pending_assignment",
+    caveat: "Do not duplicate GCD, Pathways, or Advisory.",
+  },
+  {
+    id: "g9_mock_wed_advisory",
+    day: "Wednesday",
+    blockLabel: "Advisory",
+    courseArea: "Advisory",
+    ledgerRowId: "rio_g9_capacity_advisory",
+    blockType: "advisory_block",
+    coverageType: "distributed_eligible_educators",
+    educatorAssignmentLabel: "Distributed Grade 9 advisory responsibility",
+    validationStatus: "distributed_pending_timetable_assignment",
+    caveat: "Advisory is distinct from College Counseling, GCD, and Project Mentorship. Not a separate hire and not leftover capacity.",
+  },
+  // ── Thursday ─────────────────────────────────────────────────────────────
+  {
+    id: "g9_mock_thu_b1_nat_sci",
+    day: "Thursday",
+    blockLabel: "Block 1",
+    courseArea: "Natural Sciences: Biology/Chemistry foundations",
+    ledgerRowId: "rio_g9_capacity_natural_sciences_bio_chem",
+    blockType: "teaching_block",
+    coverageType: "hs_oriented_launch",
+    educatorAssignmentLabel: "HS-oriented Natural Sciences educator, Bio/Chem focus",
+    validationStatus: "covered_pending_explicit_capability_validation",
+    caveat: "Covers Biology/Chemistry foundations only, pending explicit capability validation. Physics is not modeled as a Grade 9 requirement.",
+  },
+  {
+    id: "g9_mock_thu_b2_braz_global",
+    day: "Thursday",
+    blockLabel: "Block 2",
+    courseArea: "Brazilian Studies / Global Studies",
+    ledgerRowId: "rio_g9_capacity_brazilian_global_studies",
+    blockType: "teaching_block",
+    coverageType: "hs_oriented_launch",
+    educatorAssignmentLabel: "HS-oriented Brazilian Studies / Global Studies educator",
+    validationStatus: "covered_hs_core_assumption",
+    caveat: "May connect to GCD-related work, project/research mentoring, and possibly AP Research later. AP Research is not Grade 9 load.",
+  },
+  {
+    id: "g9_mock_thu_b3_ela",
+    day: "Thursday",
+    blockLabel: "Block 3",
+    courseArea: "English Language Arts",
+    ledgerRowId: "rio_g9_capacity_english_language_arts",
+    blockType: "teaching_block",
+    coverageType: "ms_primary_bridge_if_validated",
+    educatorAssignmentLabel: "Validated MS ELA bridge or HS ELA if activated early",
+    validationStatus: "ms_bridge_foundation_layer_pending_validation",
+    caveat: "Grade 9 ELA may be covered by validated MS ELA. Dedicated HS ELA is expected in Grade 10. AP English, AP Seminar, and AP Research are not Grade 9 load.",
+  },
+  {
+    id: "g9_mock_thu_project_block",
+    day: "Thursday",
+    blockLabel: "Fixed Project Block",
+    courseArea: "Project Mentorship / Passion Project",
+    ledgerRowId: "rio_g9_capacity_project_mentorship_passion_project",
+    blockType: "fixed_project_block",
+    coverageType: "distributed_eligible_educators",
+    educatorAssignmentLabel: "Eligible educators available simultaneously in fixed project block",
+    validationStatus: "distributed_pending_timetable_assignment",
+    caveat: "This is simultaneous educator availability, not a hiring count. Requires profile fit, group capacity, teaching-load capacity, and schedule fit.",
+  },
+  // ── Friday ───────────────────────────────────────────────────────────────
+  {
+    id: "g9_mock_fri_b1_math",
+    day: "Friday",
+    blockLabel: "Block 1",
+    courseArea: "Integrated Mathematics",
+    ledgerRowId: "rio_g9_capacity_integrated_mathematics",
+    blockType: "teaching_block",
+    coverageType: "hs_oriented_launch",
+    educatorAssignmentLabel: "HS-oriented Mathematics educator",
+    validationStatus: "covered_hs_core_assumption",
+    caveat: "May support Middle School only if load, schedule, and HS mathematics expertise allow.",
+  },
+  {
+    id: "g9_mock_fri_b2_portuguese",
+    day: "Friday",
+    blockLabel: "Block 2",
+    courseArea: "Portuguese / Redação",
+    ledgerRowId: "rio_g9_capacity_portuguese_redacao",
+    blockType: "teaching_block",
+    coverageType: "hs_oriented_launch",
+    educatorAssignmentLabel: "HS-oriented Portuguese / Redação educator",
+    validationStatus: "covered_hs_core_assumption",
+    caveat: "MS Portuguese does not automatically qualify for HS Portuguese / Redação.",
+  },
+  {
+    id: "g9_mock_fri_b3_cc_pathways",
+    day: "Friday",
+    blockLabel: "Block 3",
+    courseArea: "College Counseling / Pathways / Global Citizen Diploma",
+    ledgerRowId: "rio_g9_capacity_college_counseling_pathways_gcd",
+    blockType: "program_ownership_signal",
+    coverageType: "college_counseling_guidance",
+    educatorAssignmentLabel: "Guidance / College Counseling function",
+    validationStatus: "pending_counselor_role_activation",
+    caveat: "College Counseling / Pathways / Global Citizen Diploma activates with Grade 9. GCD is embedded here, not a separate Grade 9 row.",
+  },
+  {
+    id: "g9_mock_fri_advisory",
+    day: "Friday",
+    blockLabel: "Advisory",
+    courseArea: "Advisory",
+    ledgerRowId: "rio_g9_capacity_advisory",
+    blockType: "advisory_block",
+    coverageType: "distributed_eligible_educators",
+    educatorAssignmentLabel: "Distributed Grade 9 advisory responsibility",
+    validationStatus: "distributed_pending_timetable_assignment",
+    caveat: "Advisory is distinct from College Counseling, GCD, and Project Mentorship. Not a separate hire and not leftover capacity.",
+  },
+];
+
+export function buildGrade9MockSchedule(): {
+  blocks: readonly Grade9MockScheduleBlock[];
+  caveats: string[];
+} {
+  return {
+    blocks: [...GRADE_9_MOCK_SCHEDULE_BLOCKS] as readonly Grade9MockScheduleBlock[],
+    caveats: [
+      "Mock schedule for planning only; not the final timetable.",
+      "Blocks show instructional and coordination logic, not payroll, FTE, final headcount, or hiring authorization.",
+      "Project Mentorship / Passion Project is a fixed synchronized block requiring simultaneous educator availability.",
+      "MS-primary bridge assignments require HS-level capability validation and schedule fit.",
+      "Program ownership signals may not appear as ordinary teaching blocks until Rio curriculum validation confirms scheduled student-contact time.",
+    ],
+  };
+}

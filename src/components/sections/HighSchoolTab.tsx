@@ -8,6 +8,7 @@ import {
   HIGH_SCHOOL_SCHEDULE_UNIT_COUNTING_NOTE,
   HIGH_SCHOOL_SCHEDULE_UNITS,
   buildGrade9CapacityLedger,
+  buildGrade9MockSchedule,
   buildRioWeeklyLoadByOffer,
   convertSaoPauloMinutesToRioEquivalent,
 } from "./highSchoolScheduleModel";
@@ -555,7 +556,7 @@ const highSchoolViews: Array<{ id: HighSchoolView; label: string }> = [
   { id: "course-offer",            label: "02 Course Offer" },
   { id: "weekly-load",             label: "03 Weekly Load + Capacity Ledger" },
   { id: "capability-architecture", label: "04 Capability Architecture" },
-  { id: "schedule-mentorship",     label: "05 Schedule / Mentorship Model" },
+  { id: "schedule-mentorship",     label: "05 Grade 9 Mock Schedule" },
   { id: "scenario-fit",            label: "06 Scenario Fit" },
   { id: "provisional-load",        label: "07 Provisional Load" },
   { id: "roadmap-appendix",        label: "08 Roadmap / Appendix" },
@@ -580,6 +581,7 @@ const HighSchoolTab = ({ sections, setSections }: HighSchoolTabProps) => {
 
   const weeklyRows = buildRioWeeklyLoadByOffer(sections);
   const g9LedgerOutput = buildGrade9CapacityLedger(sections);
+  const g9MockSchedule = buildGrade9MockSchedule();
 
   const viewClassName = (view: HighSchoolView) =>
     cn("hs-view-section", activeView !== view && "hs-screen-inactive");
@@ -1205,7 +1207,7 @@ const HighSchoolTab = ({ sections, setSections }: HighSchoolTabProps) => {
             </div>
 
             {/* ════════════════════════════════════════════════════════════
-                05  SCHEDULE / MENTORSHIP MODEL
+                05  GRADE 9 MOCK SCHEDULE
             ════════════════════════════════════════════════════════════ */}
             <div className={cn(viewClassName("schedule-mentorship"), "space-y-6")}>
 
@@ -1213,10 +1215,10 @@ const HighSchoolTab = ({ sections, setSections }: HighSchoolTabProps) => {
                 <div className="space-y-2">
                   <div className="flex items-center gap-3">
                     <div className="h-8 w-1 rounded-full bg-cyan-500" />
-                    <h3 className="text-2xl font-bold text-slate-900">Schedule / Mentorship Model</h3>
+                    <h3 className="text-2xl font-bold text-slate-900">Grade 9 Mock Schedule</h3>
                   </div>
                   <p className="max-w-3xl text-sm leading-relaxed text-slate-500">
-                    Read-only instructional-capacity model for translating course design into future schedule and capability questions.
+                    Limited timetable simulation showing where Grade 9 subject blocks sit in a mock weekly grid and how the corrected Grade 9 capacity ledger translates into educator coverage logic.
                   </p>
                 </div>
                 <Badge variant="info">Read-only preview</Badge>
@@ -1291,6 +1293,143 @@ const HighSchoolTab = ({ sections, setSections }: HighSchoolTabProps) => {
                 </p>
                 <p className="mt-2 text-[10px] font-semibold leading-relaxed text-slate-400">{HIGH_SCHOOL_SCHEDULE_UNIT_COUNTING_NOTE}</p>
               </div>
+
+              {/* ── Grade 9 Mock Weekly Schedule ─────────────────────────── */}
+              {(() => {
+                const G9_MOCK_BLOCK_TYPE_LABELS: Record<string, string> = {
+                  teaching_block: "Teaching block",
+                  fixed_project_block: "Fixed project block",
+                  advisory_block: "Advisory block",
+                  program_ownership_signal: "Program ownership signal",
+                  pending_validation: "Pending validation",
+                };
+                const G9_MOCK_BLOCK_TYPE_VARIANTS: Record<string, "default" | "info" | "purple" | "success" | "warning"> = {
+                  teaching_block: "info",
+                  fixed_project_block: "purple",
+                  advisory_block: "success",
+                  program_ownership_signal: "warning",
+                  pending_validation: "default",
+                };
+                const G9_MOCK_COVERAGE_TYPE_LABELS: Record<string, string> = {
+                  hs_oriented_launch: "HS-oriented launch educator",
+                  ms_primary_bridge_if_validated: "MS-primary bridge if validated",
+                  distributed_eligible_educators: "Distributed eligible educators",
+                  college_counseling_guidance: "College Counseling / guidance",
+                  program_ownership: "Program ownership",
+                  pending_validation: "Pending validation",
+                };
+                const G9_MOCK_COVERAGE_TYPE_VARIANTS: Record<string, "default" | "info" | "purple" | "success" | "warning"> = {
+                  hs_oriented_launch: "info",
+                  ms_primary_bridge_if_validated: "warning",
+                  distributed_eligible_educators: "success",
+                  college_counseling_guidance: "purple",
+                  program_ownership: "warning",
+                  pending_validation: "default",
+                };
+                const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] as const;
+                const blockCardBg: Record<string, string> = {
+                  teaching_block: "bg-white border-slate-100",
+                  fixed_project_block: "bg-purple-50 border-purple-200",
+                  advisory_block: "bg-emerald-50 border-emerald-200",
+                  program_ownership_signal: "bg-amber-50 border-amber-200",
+                  pending_validation: "bg-slate-50 border-slate-200",
+                };
+                return (
+                  <div className="space-y-4">
+                    <div className="flex flex-wrap items-center gap-3">
+                      <div className="h-8 w-1 rounded-full bg-cyan-400" />
+                      <h4 className="text-xl font-bold text-slate-900">Grade 9 Mock Weekly Schedule</h4>
+                      <Badge variant="warning">Planning mockup only</Badge>
+                    </div>
+
+                    <div className="rounded-2xl border border-amber-100 bg-amber-50 p-3 text-xs font-semibold leading-relaxed text-amber-900">
+                      This is a planning mockup, not the final timetable, not payroll, and not hiring authorization. Block positions are illustrative. Slot counts and durations remain pending Rio curriculum validation.
+                    </div>
+
+                    {/* 5-day grid */}
+                    <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-5">
+                      {DAYS.map((day) => {
+                        const dayBlocks = g9MockSchedule.blocks.filter((b) => b.day === day);
+                        return (
+                          <div key={day} className="space-y-2">
+                            <div className="rounded-xl bg-slate-900 px-3 py-2 text-center text-[10px] font-black uppercase tracking-widest text-white">
+                              {day}
+                            </div>
+                            {dayBlocks.map((block) => (
+                              <div
+                                key={block.id}
+                                className={cn(
+                                  "rounded-xl border p-3 shadow-sm",
+                                  blockCardBg[block.blockType] ?? "bg-white border-slate-100"
+                                )}
+                              >
+                                {/* Block label row */}
+                                <div className="mb-1.5 flex items-center justify-between gap-1">
+                                  <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">
+                                    {block.blockLabel}
+                                  </span>
+                                  <Badge variant={G9_MOCK_BLOCK_TYPE_VARIANTS[block.blockType] ?? "default"}>
+                                    {G9_MOCK_BLOCK_TYPE_LABELS[block.blockType] ?? block.blockType}
+                                  </Badge>
+                                </div>
+
+                                {/* Course area */}
+                                <div className="mb-2 text-[11px] font-bold leading-snug text-slate-900">
+                                  {block.courseArea}
+                                </div>
+
+                                {/* Fixed project block marker */}
+                                {block.blockType === "fixed_project_block" && (
+                                  <div className="mb-2 rounded-lg border border-purple-200 bg-purple-100 px-2 py-1.5 text-[10px] font-semibold leading-snug text-purple-900">
+                                    Fixed synchronized project block — Simultaneous educator availability, not a hiring count.
+                                  </div>
+                                )}
+
+                                {/* Advisory marker */}
+                                {block.blockType === "advisory_block" && (
+                                  <div className="mb-2 rounded-lg border border-emerald-200 bg-emerald-100 px-2 py-1.5 text-[10px] font-semibold leading-snug text-emerald-900">
+                                    Distributed student-support/contact responsibility.
+                                  </div>
+                                )}
+
+                                {/* Educator assignment */}
+                                <div className="mb-2 text-[10px] font-semibold leading-snug text-slate-600">
+                                  {block.educatorAssignmentLabel}
+                                </div>
+
+                                {/* Coverage type badge */}
+                                <div className="mb-2">
+                                  <Badge variant={G9_MOCK_COVERAGE_TYPE_VARIANTS[block.coverageType] ?? "default"}>
+                                    {G9_MOCK_COVERAGE_TYPE_LABELS[block.coverageType] ?? block.coverageType}
+                                  </Badge>
+                                </div>
+
+                                {/* Caveat */}
+                                <p className="border-t border-slate-100 pt-1.5 text-[9px] font-medium leading-relaxed text-slate-400">
+                                  {block.caveat}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Caveats */}
+                    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                      <div className="mb-2 text-[9px] font-bold uppercase tracking-widest text-slate-400">Mock schedule caveats</div>
+                      <ul className="space-y-1.5">
+                        {g9MockSchedule.caveats.map((caveat) => (
+                          <li key={caveat} className="flex gap-2 text-[10px] font-medium leading-relaxed text-slate-500">
+                            <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-slate-300" />
+                            <span>{caveat}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                );
+              })()}
 
             </div>
 
