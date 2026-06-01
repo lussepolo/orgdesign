@@ -7,6 +7,7 @@ import {
   HIGH_SCHOOL_MOCK_SCHEDULE_SCENARIOS,
   HIGH_SCHOOL_SCHEDULE_UNIT_COUNTING_NOTE,
   HIGH_SCHOOL_SCHEDULE_UNITS,
+  buildGrade9CapacityLedger,
   buildRioWeeklyLoadByOffer,
   convertSaoPauloMinutesToRioEquivalent,
 } from "./highSchoolScheduleModel";
@@ -434,6 +435,108 @@ const HS_SCENARIO_PREVIEW_COPY: Record<
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Grade 9 Capacity Ledger display maps (UI-only, not model types)
+// ─────────────────────────────────────────────────────────────────────────────
+
+const G9_LOAD_CATEGORY_LABELS: Record<string, string> = {
+  teaching_load: "Teaching load",
+  mentorship_contact_load: "Mentorship / contact load",
+  program_ownership_load: "Program ownership load",
+};
+
+const G9_LOAD_CATEGORY_VARIANTS: Record<string, "info" | "purple" | "success"> = {
+  teaching_load: "info",
+  mentorship_contact_load: "purple",
+  program_ownership_load: "success",
+};
+
+const G9_ALLOCATION_TYPE_LABELS: Record<string, string> = {
+  hs_oriented_launch_coverage: "HS-oriented launch coverage",
+  hs_oriented_launch_coverage_pending_capability_validation: "HS launch coverage, pending capability validation",
+  hs_oriented_shared_with_ms_if_validated: "HS-oriented shared with MS if validated",
+  ms_primary_bridge_if_validated: "MS-primary bridge if validated",
+  distributed_fixed_block: "Distributed fixed block",
+  distributed_student_support_responsibility: "Distributed student-support responsibility",
+  hs_program_ownership: "HS program ownership",
+  specialist_or_part_time_if_required: "Specialist/part-time support if required",
+  pending_validation: "Pending validation",
+};
+
+const G9_ALLOCATION_TYPE_VARIANTS: Record<string, "default" | "warning" | "success" | "info" | "purple" | "danger"> = {
+  hs_oriented_launch_coverage: "info",
+  hs_oriented_launch_coverage_pending_capability_validation: "warning",
+  hs_oriented_shared_with_ms_if_validated: "warning",
+  ms_primary_bridge_if_validated: "warning",
+  distributed_fixed_block: "purple",
+  distributed_student_support_responsibility: "purple",
+  hs_program_ownership: "success",
+  specialist_or_part_time_if_required: "default",
+  pending_validation: "warning",
+};
+
+const G9_HS_LAUNCH_COVERAGE_LABELS: Record<string, string> = {
+  likely: "Likely",
+  likely_pending_capability_validation: "Likely, pending capability validation",
+  distributed_across_eligible_educators: "Distributed across eligible educators",
+  not_in_launch_core: "Not in launch core",
+  not_applicable: "Not applicable",
+};
+
+const G9_HS_SHARED_WITH_MS_LABELS: Record<string, string> = {
+  plausible_pending_schedule_and_load_validation: "Plausible, pending schedule/load validation",
+  not_plausible: "Not plausible",
+  not_applicable: "Not applicable",
+};
+
+const G9_MS_BRIDGE_LABELS: Record<string, string> = {
+  eligible_if_validated: "Eligible if validated",
+  foundation_layer_only_if_validated: "Foundation layer only if validated",
+  not_eligible: "Not eligible",
+  not_applicable: "Not applicable",
+};
+
+const G9_MS_BRIDGE_VARIANTS: Record<string, "default" | "warning" | "success" | "info" | "purple" | "danger"> = {
+  eligible_if_validated: "success",
+  foundation_layer_only_if_validated: "warning",
+  not_eligible: "danger",
+  not_applicable: "default",
+};
+
+const G9_PROJECT_BLOCK_ROLE_LABELS: Record<string, string> = {
+  anchor_domain_mentor: "Anchor domain mentor",
+  mentor_eligible_pending_profile_fit: "Mentor eligible, pending profile fit",
+  simultaneous_availability_required: "Simultaneous availability required",
+  not_applicable: "Not applicable",
+};
+
+const G9_PROGRAM_OWNERSHIP_LABELS: Record<string, string> = {
+  primary_program_ownership: "Primary program ownership",
+  embedded_program_ownership: "Embedded program ownership",
+  connected_program_support: "Connected program support",
+  not_applicable: "Not applicable",
+};
+
+const G9_VALIDATION_STATUS_LABELS: Record<string, string> = {
+  covered_hs_core_assumption: "Covered by HS-core assumption",
+  covered_pending_explicit_capability_validation: "Covered, pending explicit capability validation",
+  ms_bridge_foundation_layer_pending_validation: "MS bridge foundation layer, pending validation",
+  distributed_pending_timetable_assignment: "Distributed, pending timetable assignment",
+  hs_program_ownership_pending_assignment: "HS program ownership, pending assignment",
+  pending_counselor_role_activation: "Pending counselor role activation",
+  pending_rio_curriculum_validation: "Pending Rio curriculum validation",
+};
+
+const G9_VALIDATION_STATUS_VARIANTS: Record<string, "default" | "warning" | "success" | "info" | "purple" | "danger"> = {
+  covered_hs_core_assumption: "success",
+  covered_pending_explicit_capability_validation: "warning",
+  ms_bridge_foundation_layer_pending_validation: "warning",
+  distributed_pending_timetable_assignment: "default",
+  hs_program_ownership_pending_assignment: "default",
+  pending_counselor_role_activation: "warning",
+  pending_rio_curriculum_validation: "warning",
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Subnavigation
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -450,7 +553,7 @@ type HighSchoolView =
 const highSchoolViews: Array<{ id: HighSchoolView; label: string }> = [
   { id: "decision-summary",        label: "01 Decision Summary" },
   { id: "course-offer",            label: "02 Course Offer" },
-  { id: "weekly-load",             label: "03 Weekly Load by Offer" },
+  { id: "weekly-load",             label: "03 Weekly Load + Capacity Ledger" },
   { id: "capability-architecture", label: "04 Capability Architecture" },
   { id: "schedule-mentorship",     label: "05 Schedule / Mentorship Model" },
   { id: "scenario-fit",            label: "06 Scenario Fit" },
@@ -476,6 +579,7 @@ const HighSchoolTab = ({ sections, setSections }: HighSchoolTabProps) => {
   const efficiency = (totalHS / (specialists * 27)) * 100;
 
   const weeklyRows = buildRioWeeklyLoadByOffer(sections);
+  const g9LedgerOutput = buildGrade9CapacityLedger(sections);
 
   const viewClassName = (view: HighSchoolView) =>
     cn("hs-view-section", activeView !== view && "hs-screen-inactive");
@@ -901,6 +1005,135 @@ const HighSchoolTab = ({ sections, setSections }: HighSchoolTabProps) => {
                   </div>
                 );
               })}
+
+              {/* ═══════════════════════════════════════════════════════════
+                  Grade 9 Capacity Ledger
+                  Instructional-capacity planning only. Not payroll. Not FTE.
+              ═══════════════════════════════════════════════════════════ */}
+              <div className="space-y-4">
+
+                <div className="flex flex-wrap items-center gap-3">
+                  <div className="h-8 w-1 rounded-full bg-indigo-400" />
+                  <h4 className="text-xl font-bold text-slate-900">Grade 9 Capacity Ledger</h4>
+                  <Badge variant="warning">Instructional-capacity planning only</Badge>
+                </div>
+
+                <div className="rounded-2xl border border-amber-100 bg-amber-50 p-3 text-xs font-semibold leading-relaxed text-amber-900">
+                  This ledger is instructional-capacity planning only. It does not authorize payroll, final FTE, final headcount, or hiring.
+                </div>
+
+                <div className="rounded-2xl border border-indigo-100 bg-indigo-50 p-3 text-xs font-medium leading-relaxed text-indigo-900">
+                  Grade 9 is treated as the High School launch layer. The ledger separates HS-oriented launch coverage, MS-primary bridge eligibility, distributed student-support responsibilities, fixed project-block responsibilities, and program ownership.
+                </div>
+
+                {/* Ledger rows */}
+                <div className="space-y-3">
+                  {g9LedgerOutput.rows.map((row) => (
+                    <div key={row.id} className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
+                      {/* Header: courseArea + load category + allocation type */}
+                      <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
+                        <span className="text-sm font-bold text-slate-900">{row.courseArea}</span>
+                        <div className="flex flex-wrap gap-1.5">
+                          <Badge variant={G9_LOAD_CATEGORY_VARIANTS[row.loadCategory] ?? "default"}>
+                            {G9_LOAD_CATEGORY_LABELS[row.loadCategory] ?? row.loadCategory}
+                          </Badge>
+                          <Badge variant={G9_ALLOCATION_TYPE_VARIANTS[row.allocationType] ?? "default"}>
+                            {G9_ALLOCATION_TYPE_LABELS[row.allocationType] ?? row.allocationType}
+                          </Badge>
+                        </div>
+                      </div>
+                      {/* Data grid */}
+                      <div className="mb-3 grid grid-cols-2 gap-2 md:grid-cols-3">
+                        {([
+                          ["HS launch coverage", G9_HS_LAUNCH_COVERAGE_LABELS[row.hsOrientedLaunchCoverage] ?? row.hsOrientedLaunchCoverage],
+                          ["HS shared w/ MS", G9_HS_SHARED_WITH_MS_LABELS[row.hsOrientedSharedWithMsFeasibility] ?? row.hsOrientedSharedWithMsFeasibility],
+                          ["MS bridge eligibility", G9_MS_BRIDGE_LABELS[row.msPrimaryBridgeEligibility] ?? row.msPrimaryBridgeEligibility],
+                          ["Project block role", G9_PROJECT_BLOCK_ROLE_LABELS[row.projectBlockRole] ?? row.projectBlockRole],
+                          ["Program ownership", G9_PROGRAM_OWNERSHIP_LABELS[row.programOwnershipRole] ?? row.programOwnershipRole],
+                          ["Validation status", G9_VALIDATION_STATUS_LABELS[row.validationStatus] ?? row.validationStatus],
+                        ] as [string, string][]).map(([label, value]) => (
+                          <div key={`${row.id}-${label}`} className="rounded-xl border border-slate-100 bg-slate-50 px-3 py-2">
+                            <div className="mb-0.5 text-[8px] font-bold uppercase tracking-wider text-slate-400">{label}</div>
+                            <div className="text-[10px] font-semibold leading-snug text-slate-700">{value}</div>
+                          </div>
+                        ))}
+                      </div>
+                      {/* Capability profile pills */}
+                      <div className="mb-3 flex flex-wrap gap-1.5">
+                        {row.requiredCapabilityProfileIds.length > 0
+                          ? row.requiredCapabilityProfileIds.map((pid) => (
+                              <span key={`${row.id}-${pid}`} className="rounded-full border border-indigo-100 bg-indigo-50 px-2.5 py-1 text-[10px] font-semibold text-indigo-700">
+                                {getHsProfileLabel(pid)}
+                              </span>
+                            ))
+                          : (
+                              <span className="rounded-full border border-slate-100 bg-slate-50 px-2.5 py-1 text-[10px] font-medium italic text-slate-400">
+                                No explicit profile yet
+                              </span>
+                            )
+                        }
+                      </div>
+                      {/* MS bridge eligibility badge */}
+                      <div className="mb-3 flex flex-wrap gap-1.5">
+                        <Badge variant={G9_MS_BRIDGE_VARIANTS[row.msPrimaryBridgeEligibility] ?? "default"}>
+                          MS bridge: {G9_MS_BRIDGE_LABELS[row.msPrimaryBridgeEligibility] ?? row.msPrimaryBridgeEligibility}
+                        </Badge>
+                        <Badge variant={G9_VALIDATION_STATUS_VARIANTS[row.validationStatus] ?? "default"}>
+                          {G9_VALIDATION_STATUS_LABELS[row.validationStatus] ?? row.validationStatus}
+                        </Badge>
+                      </div>
+                      {/* Blocker / caveat */}
+                      {row.blockerOrCaveat && (
+                        <p className="border-t border-slate-50 pt-2 text-[10px] font-medium leading-relaxed text-slate-500">
+                          {row.blockerOrCaveat}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                {/* Project-block demand panel */}
+                <div className="rounded-2xl border border-purple-100 bg-purple-50 p-4">
+                  <div className="mb-3 flex items-center justify-between gap-2">
+                    <div className="text-[10px] font-black uppercase tracking-widest text-purple-600">Project block demand</div>
+                    <Badge variant="purple">Fixed block</Badge>
+                  </div>
+                  <p className="mb-3 text-xs font-semibold leading-relaxed text-purple-950">
+                    This is simultaneous educator availability in the fixed project block, not a hiring count.
+                  </p>
+                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                    {([
+                      ["Sections", String(g9LedgerOutput.projectBlockDemand.sections)],
+                      ["Groups per section", String(g9LedgerOutput.projectBlockDemand.groupsPerSection)],
+                      ["Total project groups", String(g9LedgerOutput.projectBlockDemand.totalProjectGroups)],
+                      ["Simultaneous educators required", String(g9LedgerOutput.projectBlockDemand.projectEducatorsRequired)],
+                      ["Max groups per educator", String(g9LedgerOutput.projectBlockDemand.maxGroupsPerEducator)],
+                    ] as [string, string][]).map(([label, value]) => (
+                      <div key={label} className="rounded-xl border border-purple-100 bg-white px-3 py-2">
+                        <div className="mb-0.5 text-[8px] font-bold uppercase tracking-wider text-purple-400">{label}</div>
+                        <div className="text-sm font-bold text-slate-800">{value}</div>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="mt-3 text-[10px] font-medium leading-relaxed text-purple-700">
+                    {g9LedgerOutput.projectBlockDemand.note}
+                  </p>
+                </div>
+
+                {/* Caveats */}
+                <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                  <div className="mb-2 text-[9px] font-bold uppercase tracking-widest text-slate-400">Planning caveats</div>
+                  <ul className="space-y-1.5">
+                    {g9LedgerOutput.caveats.map((caveat) => (
+                      <li key={caveat} className="flex gap-2 text-[10px] font-medium leading-relaxed text-slate-500">
+                        <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-slate-300" />
+                        <span>{caveat}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+              </div>
 
             </div>
 
