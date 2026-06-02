@@ -121,12 +121,6 @@ const MS_ROADMAP_DATA = [
   }
 ];
 
-const MIDDLE_SCHOOL_DATA = [
-  { grade: "Grade 6", focus: "Designers Launch", model: "3 cluster educators + coordinated project functions", ratio: "1:12.5", max: 50 },
-  { grade: "Grade 7", focus: "Hybrid Specialization", model: "Mathematics, Portuguese, ELA, Natural Sciences, Social Sciences + aligned program functions", ratio: "1:10", max: 50 },
-  { grade: "Grade 8", focus: "High School Readiness", model: "Core-subject specialist model + Babson EPIC and program functions", ratio: "1:10", max: 50 },
-];
-
 const MS_OWNERSHIP_PROGRESSION = [
   {
     stage: "Grade 6",
@@ -1028,22 +1022,6 @@ const MiddleSchoolTab = ({ sections, setSections }: MiddleSchoolTabProps) => {
         </div>
       </Card>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {MIDDLE_SCHOOL_DATA.map((item, idx) => (
-          <motion.div key={item.grade} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: idx * 0.05 }}>
-            <Card className="h-full border-t-4 border-blue-400">
-              <div className="text-[10px] font-bold text-slate-400 uppercase mb-1">Middle School</div>
-              <h3 className="text-lg font-bold text-slate-900 mb-3">{item.grade}</h3>
-              <div className="space-y-3">
-                <div><div className="text-[9px] font-bold text-slate-400 uppercase mb-1">Total Learners, 2 Sections</div><div className="text-xs font-bold text-blue-600">{item.max} Learners</div></div>
-                <div><div className="text-[9px] font-bold text-slate-400 uppercase mb-1">Learners Per Section</div><div className="text-xs font-bold text-slate-600">{item.max / 2} Learners</div></div>
-                <div><div className="text-[9px] font-bold text-slate-400 uppercase mb-1">Ratio</div><div className="text-xs font-bold text-slate-600">{item.ratio}</div></div>
-                <div><div className="text-[9px] font-bold text-slate-400 uppercase mb-1">Instructional Model</div><div className="text-[10px] font-medium text-slate-500">{item.model}</div></div>
-              </div>
-            </Card>
-          </motion.div>
-        ))}
-      </div>
     </div>
   );
 };
