@@ -188,6 +188,11 @@ const GRADE_6_CLUSTER_INSIGHTS = [
   },
 ];
 
+const PROJECT_GROUPS_PER_SECTION_DEFAULT = 6;
+const PROJECT_GROUPS_PER_SECTION_MIN = 4;
+const PROJECT_GROUPS_PER_SECTION_MAX = 8;
+const PROJECT_MAX_GROUPS_PER_EDUCATOR = 4;
+
 type MiddleSchoolTabProps = {
   sections: number;
   setSections: (s: number) => void;
@@ -313,6 +318,26 @@ const MiddleSchoolTab = ({ sections, setSections }: MiddleSchoolTabProps) => {
   }, [domainSlotsPerSection, maxTeachingLoad, minViableLoad]);
 
   const currentCoreEducators = educatorLoadRows.reduce((sum, row) => sum + row.educatorsNeeded, 0);
+
+  const projectBlockDemand = useMemo(() => {
+    const totalActiveSections = msSectionsByGrade.g6 + msSectionsByGrade.g7 + msSectionsByGrade.g8;
+    const totalProjectGroups = totalActiveSections * PROJECT_GROUPS_PER_SECTION_DEFAULT;
+    const minimumProjectGroups = totalActiveSections * PROJECT_GROUPS_PER_SECTION_MIN;
+    const maximumProjectGroups = totalActiveSections * PROJECT_GROUPS_PER_SECTION_MAX;
+    return {
+      totalActiveSections,
+      groupsPerSectionDefault: PROJECT_GROUPS_PER_SECTION_DEFAULT,
+      groupsPerSectionMin: PROJECT_GROUPS_PER_SECTION_MIN,
+      groupsPerSectionMax: PROJECT_GROUPS_PER_SECTION_MAX,
+      maxGroupsPerEducator: PROJECT_MAX_GROUPS_PER_EDUCATOR,
+      totalProjectGroups,
+      simultaneousEducatorsRequired: Math.ceil(totalProjectGroups / PROJECT_MAX_GROUPS_PER_EDUCATOR),
+      minimumProjectGroups,
+      maximumProjectGroups,
+      minimumSimultaneousEducatorsRequired: Math.ceil(minimumProjectGroups / PROJECT_MAX_GROUPS_PER_EDUCATOR),
+      maximumSimultaneousEducatorsRequired: Math.ceil(maximumProjectGroups / PROJECT_MAX_GROUPS_PER_EDUCATOR),
+    };
+  }, [msSectionsByGrade]);
 
   return (
     <div className="space-y-8">
@@ -867,6 +892,107 @@ const MiddleSchoolTab = ({ sections, setSections }: MiddleSchoolTabProps) => {
           </p>
           <div className="rounded-2xl border border-rose-100 bg-rose-50 px-4 py-3 text-[10px] font-medium leading-relaxed text-rose-800">
             Middle School remaining load space is not automatic High School capacity. Any Grade 9 bridge requires subject-domain match, HS-level expertise validation, schedule fit, and remaining-capacity validation.
+          </div>
+
+          <div className="space-y-4 rounded-2xl border border-purple-100 bg-purple-50 p-5">
+            <div className="flex items-center gap-2">
+              <div className="h-5 w-1 bg-purple-400 rounded-full shrink-0" />
+              <h4 className="text-sm font-bold text-slate-900">Project / Advisory / Pathways Demand</h4>
+            </div>
+            <p className="text-xs text-slate-600 leading-relaxed">
+              Project, advisory, and pathways load must be explicitly allocated. These functions are not leftover capacity.
+            </p>
+            <p className="text-[10px] text-slate-500 leading-relaxed">
+              The educator-count summary counts core subject educators separately; this panel makes the distributed project/advisory/pathways demand visible.
+            </p>
+            <p className="text-[10px] text-slate-500 leading-relaxed">
+              Project/advisory/pathways commitments must be checked before interpreting load space as Grade 9 bridge/share feasibility.
+            </p>
+
+            {projectBlockDemand.totalActiveSections === 0 ? (
+              <div className="rounded-xl border border-amber-100 bg-amber-50 px-4 py-3 text-[10px] font-medium text-amber-800">
+                No active Middle School sections selected.
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <div className="bg-white rounded-xl border border-slate-100 p-3">
+                    <div className="text-[8px] font-bold text-slate-400 uppercase mb-0.5">Active Middle School sections</div>
+                    <div className="text-xl font-bold text-slate-900">{projectBlockDemand.totalActiveSections}</div>
+                  </div>
+                  <div className="bg-white rounded-xl border border-slate-100 p-3">
+                    <div className="text-[8px] font-bold text-slate-400 uppercase mb-0.5">Default groups per section</div>
+                    <div className="text-xl font-bold text-slate-900">{projectBlockDemand.groupsPerSectionDefault}</div>
+                  </div>
+                  <div className="bg-white rounded-xl border border-slate-100 p-3">
+                    <div className="text-[8px] font-bold text-slate-400 uppercase mb-0.5">Range of groups per section</div>
+                    <div className="text-xl font-bold text-slate-900">{projectBlockDemand.groupsPerSectionMin}–{projectBlockDemand.groupsPerSectionMax}</div>
+                  </div>
+                  <div className="bg-white rounded-xl border border-slate-100 p-3">
+                    <div className="text-[8px] font-bold text-slate-400 uppercase mb-0.5">Max groups per educator</div>
+                    <div className="text-xl font-bold text-slate-900">{projectBlockDemand.maxGroupsPerEducator}</div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="bg-white rounded-xl border border-purple-200 p-4">
+                    <div className="text-[9px] font-bold text-purple-500 uppercase tracking-widest mb-3">Default demand</div>
+                    <div className="flex gap-6 flex-wrap">
+                      <div>
+                        <div className="text-[8px] font-bold text-slate-400 uppercase mb-0.5">Total project groups</div>
+                        <div className="text-2xl font-bold text-slate-900">{projectBlockDemand.totalProjectGroups}</div>
+                      </div>
+                      <div>
+                        <div className="text-[8px] font-bold text-slate-400 uppercase mb-0.5">Simultaneous educators required</div>
+                        <div className="text-2xl font-bold text-purple-700">{projectBlockDemand.simultaneousEducatorsRequired}</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="bg-white rounded-xl border border-slate-100 p-4">
+                    <div className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-3">Demand range</div>
+                    <div className="flex gap-6 flex-wrap">
+                      <div>
+                        <div className="text-[8px] font-bold text-slate-400 uppercase mb-0.5">Min groups / simultaneous</div>
+                        <div className="text-lg font-bold text-slate-700">{projectBlockDemand.minimumProjectGroups} / {projectBlockDemand.minimumSimultaneousEducatorsRequired}</div>
+                      </div>
+                      <div>
+                        <div className="text-[8px] font-bold text-slate-400 uppercase mb-0.5">Max groups / simultaneous</div>
+                        <div className="text-lg font-bold text-slate-700">{projectBlockDemand.maximumProjectGroups} / {projectBlockDemand.maximumSimultaneousEducatorsRequired}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <p className="text-[10px] text-slate-500 leading-relaxed">
+                  This is simultaneous educator availability in a fixed or coordinated project block, not a hiring count.
+                </p>
+              </>
+            )}
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="rounded-xl border border-slate-100 bg-white p-3 space-y-1.5">
+                <div className="text-[9px] font-bold text-slate-700">Passion Project / Project Mentorship</div>
+                <p className="text-[10px] text-slate-500 leading-relaxed">Requires group capacity, profile fit, and schedule fit. It is not a separate mentor hire by default.</p>
+              </div>
+              <div className="rounded-xl border border-slate-100 bg-white p-3 space-y-1.5">
+                <div className="text-[9px] font-bold text-slate-700">Pathways</div>
+                <p className="text-[10px] text-slate-500 leading-relaxed">Requires explicit student-contact or coordination allocation. It should not be treated as leftover capacity.</p>
+              </div>
+              <div className="rounded-xl border border-slate-100 bg-white p-3 space-y-1.5">
+                <div className="text-[9px] font-bold text-slate-700">Advisory</div>
+                <p className="text-[10px] text-slate-500 leading-relaxed">Distributed student-support/contact responsibility. It is distinct from Passion Project and Pathways.</p>
+              </div>
+            </div>
+
+            <p className="text-[10px] text-slate-500 leading-relaxed">
+              {msSectionsByGrade.g8 > 0
+                ? "In Grade 8, Babson EPIC replaces Passion Project. The project-demand logic remains a planning signal for coordinated project/advisory load."
+                : "When Grade 8 becomes active, Babson EPIC replaces Passion Project; project-demand logic remains a planning signal for coordinated project/advisory load."}
+            </p>
+
+            <div className="rounded-xl border border-amber-100 bg-amber-50 px-4 py-3 text-[10px] font-medium leading-relaxed text-amber-800">
+              Instructional-capacity planning only. Distributed responsibilities are not leftover capacity. These values are not payroll authorization, final FTE, final headcount, or hiring approval.
+            </div>
           </div>
 
           <div className="overflow-x-auto rounded-2xl border border-slate-100">
