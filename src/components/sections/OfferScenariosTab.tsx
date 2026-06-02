@@ -1391,16 +1391,16 @@ budgetPlaceholder: true,
 export default function OfferScenariosTab() {
   const [selectedEcosystemLayer, setSelectedEcosystemLayer] = useState("all");
   const [activeView, setActiveView] = useState<OfferScenarioView>("brief");
-  const [selectedScenarioTitle, setSelectedScenarioTitle] = useState("Scenario D");
+  const [selectedScenarioTitle, setSelectedScenarioTitle] = useState<string | null>(null);
   const [specialistFinalGrade, setSpecialistFinalGrade] = useState<SpecialistFinalGrade>("Grade 3");
   const [specialistSectionsPerGrade, setSpecialistSectionsPerGrade] = useState<SpecialistSectionsPerGrade>(1);
   const [specialistBlocksPerGrade, setSpecialistBlocksPerGrade] = useState<SpecialistBlocksPerGrade>(2);
   const [specialistBlockDuration, setSpecialistBlockDuration] = useState<SpecialistBlockDuration>(45);
   const [specialistCapacityThreshold, setSpecialistCapacityThreshold] = useState<SpecialistCapacityThreshold>(26);
 
-  const selectedScenario =
-    pedagogicalOfferScenarios.find((scenario) => scenario.title === selectedScenarioTitle) ??
-    pedagogicalOfferScenarios[3];
+  const selectedScenario = selectedScenarioTitle
+    ? (pedagogicalOfferScenarios.find((scenario) => scenario.title === selectedScenarioTitle) ?? null)
+    : null;
   const specialistGradeLevelCount = specialistPillarGradeSequence.indexOf(specialistFinalGrade) + 1;
   const specialistBlocksPerPillar =
     specialistGradeLevelCount * specialistSectionsPerGrade * specialistBlocksPerGrade;
@@ -2550,34 +2550,34 @@ export default function OfferScenariosTab() {
                             setActiveView("scenario");
                           }}
                           className={cn(
-                            "group flex min-h-[360px] flex-col rounded-[2rem] p-5 text-left transition-all hover:-translate-y-1 hover:shadow-xl",
-                            scenario.id === "D" ? "bg-[#4b254b] text-white" : "bg-white text-slate-950"
+                            "group flex min-h-[360px] flex-col rounded-[2rem] p-5 text-left transition-all hover:-translate-y-1 hover:shadow-xl bg-white text-slate-950",
+                            scenario.id === "D" ? "border-2 border-purple-200" : ""
                           )}
                         >
                           <div className="flex items-start justify-between">
                             <div className="text-6xl font-black leading-none tracking-tight">{scenario.id}</div>
-                            <div className={cn("rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-wider", scenario.id === "D" ? "bg-white/15 text-white" : "bg-[#f5f0e7] text-slate-500")}>
+                            <div className={cn("rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-wider", scenario.id === "D" ? "bg-purple-50 text-purple-600" : "bg-[#f5f0e7] text-slate-500")}>
                               {String(index + 1).padStart(2, "0")}
                             </div>
                           </div>
                           <div className="mt-8 text-xl font-black leading-tight">{scenario.identity}</div>
-                          <div className={cn("mt-3 text-sm font-semibold leading-relaxed", scenario.id === "D" ? "text-white/75" : "text-slate-600")}>
+                          <div className="mt-3 text-sm font-semibold leading-relaxed text-slate-600">
                             {scenarioData.gradeCeiling}
                           </div>
-                          <div className={cn("mt-5 rounded-2xl p-4 text-sm font-bold leading-relaxed", scenario.id === "D" ? "bg-white/10 text-white" : "bg-[#eef3f7] text-[#214B74]")}>
+                          <div className={cn("mt-5 rounded-2xl p-4 text-sm font-bold leading-relaxed", scenario.id === "D" ? "bg-purple-50 text-[#4b254b]" : "bg-[#eef3f7] text-[#214B74]")}>
                             {scenario.delta}
                           </div>
                           <div className="mt-auto pt-6">
                             <div className="h-1.5 overflow-hidden rounded-full bg-black/10">
                               <div
-                                className={cn("h-full rounded-full", scenario.id === "D" ? "bg-white" : "bg-[#214B74]")}
+                                className={cn("h-full rounded-full", scenario.id === "D" ? "bg-purple-400" : "bg-[#214B74]")}
                                 style={{ width: `${(index + 1) * 25}%` }}
                               />
                             </div>
-                            <div className={cn("mt-4 text-xs font-black uppercase tracking-wider", scenario.id === "D" ? "text-white/80" : "text-slate-500")}>
+                            <div className="mt-4 text-xs font-black uppercase tracking-wider text-slate-500">
                               {scenarioData.targetEnrollment} · {scenarioData.modeledCapacity} · {scenarioData.impliedOccupancy}
                             </div>
-                            <div className={cn("mt-2 text-xs font-bold leading-relaxed", scenario.id === "D" ? "text-white/70" : "text-slate-500")}>
+                            <div className="mt-2 text-xs font-bold leading-relaxed text-slate-500">
                               {decision?.budget}
                             </div>
                           </div>
@@ -2598,7 +2598,7 @@ export default function OfferScenariosTab() {
                             onClick={() => setSelectedScenarioTitle(scenario.title)}
                             className={cn(
                               "rounded-full px-3 py-2 text-[10px] font-black uppercase tracking-wider transition-all",
-                              selectedScenario.title === scenario.title
+                              selectedScenarioTitle === scenario.title
                                 ? "bg-white text-[#16334f]"
                                 : "bg-white/10 text-white/70 hover:bg-white/15 hover:text-white"
                             )}
@@ -2610,66 +2610,78 @@ export default function OfferScenariosTab() {
                       <div className="mt-10 text-[10px] font-black uppercase tracking-[0.28em] text-blue-100/70">
                         Cenário selecionado
                       </div>
-                      <h3 className="mt-4 text-4xl font-black leading-none tracking-tight">
-                        {selectedScenario.title}
-                      </h3>
-                      <p className="mt-4 text-2xl font-black leading-tight text-blue-50">
-                        {selectedScenario.strategicIdentity}
-                      </p>
-                      <p className="mt-4 text-sm font-semibold leading-relaxed text-blue-50/75">
-                        {selectedScenario.boardSentence}
-                      </p>
-                      {selectedScenario.mainClaim && (
-                        <div className="mt-6 rounded-[1.5rem] bg-white/10 p-4 text-sm font-bold leading-relaxed text-white">
-                          {selectedScenario.mainClaim}
-                        </div>
+                      {selectedScenario ? (
+                        <>
+                          <h3 className="mt-4 text-4xl font-black leading-none tracking-tight">
+                            {selectedScenario.title}
+                          </h3>
+                          <p className="mt-4 text-2xl font-black leading-tight text-blue-50">
+                            {selectedScenario.strategicIdentity}
+                          </p>
+                          <p className="mt-4 text-sm font-semibold leading-relaxed text-blue-50/75">
+                            {selectedScenario.boardSentence}
+                          </p>
+                          {selectedScenario.mainClaim && (
+                            <div className="mt-6 rounded-[1.5rem] bg-white/10 p-4 text-sm font-bold leading-relaxed text-white">
+                              {selectedScenario.mainClaim}
+                            </div>
+                          )}
+                        </>
+                      ) : (
+                        <p className="mt-4 text-sm font-semibold leading-relaxed text-blue-50/75">
+                          Select a scenario to inspect its operating implications.
+                        </p>
                       )}
                     </div>
 
                     <div className="space-y-4">
-                      <div className="grid gap-3 sm:grid-cols-4">
-                        {[
-                          ["Limite", selectedScenario.gradeCeiling],
-                          ["Matrícula-alvo", selectedScenario.targetEnrollment],
-                          ["Capacidade", selectedScenario.modeledCapacity],
-                          ["Ocupação", selectedScenario.impliedOccupancy],
-                        ].map(([label, value]) => (
-                          <div key={label} className="rounded-[1.5rem] bg-white p-4">
-                            <div className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">{label}</div>
-                            <div className="mt-2 text-sm font-black text-slate-950">{value}</div>
+                      {selectedScenario && (
+                        <>
+                          <div className="grid gap-3 sm:grid-cols-4">
+                            {[
+                              ["Limite", selectedScenario.gradeCeiling],
+                              ["Matrícula-alvo", selectedScenario.targetEnrollment],
+                              ["Capacidade", selectedScenario.modeledCapacity],
+                              ["Ocupação", selectedScenario.impliedOccupancy],
+                            ].map(([label, value]) => (
+                              <div key={label} className="rounded-[1.5rem] bg-white p-4">
+                                <div className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">{label}</div>
+                                <div className="mt-2 text-sm font-black text-slate-950">{value}</div>
+                              </div>
+                            ))}
                           </div>
-                        ))}
-                      </div>
-                      <div className="grid gap-4 lg:grid-cols-2">
-                        {[
-                          ["Promessa operacional", selectedScenario.classroomPackage],
-                          ["Sistemas ativos", selectedScenario.signaturePrograms],
-                          ["Ainda não ativo", selectedScenario.notActiveYet],
-                          ["Suporte recomendado", selectedScenario.roles],
-                        ].map(([label, values]) => (
-                          <div key={label as string} className="rounded-[2rem] bg-white p-5">
-                            <div className="text-[10px] font-black uppercase tracking-[0.24em] text-[#214B74]">
-                              {label as string}
+                          <div className="grid gap-4 lg:grid-cols-2">
+                            {[
+                              ["Promessa operacional", selectedScenario.classroomPackage],
+                              ["Sistemas ativos", selectedScenario.signaturePrograms],
+                              ["Ainda não ativo", selectedScenario.notActiveYet],
+                              ["Suporte recomendado", selectedScenario.roles],
+                            ].map(([label, values]) => (
+                              <div key={label as string} className="rounded-[2rem] bg-white p-5">
+                                <div className="text-[10px] font-black uppercase tracking-[0.24em] text-[#214B74]">
+                                  {label as string}
+                                </div>
+                                <ul className="mt-4 space-y-2 text-sm font-semibold leading-relaxed text-slate-600">
+                                  {(values as string[]).map((value) => (
+                                    <li key={value} className="flex gap-2">
+                                      <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#214B74]" />
+                                      <span>{value}</span>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            ))}
+                          </div>
+                          <div className="rounded-[2rem] bg-[#fff1f1] p-5">
+                            <div className="text-[10px] font-black uppercase tracking-[0.24em] text-rose-700">
+                              Risco crítico
                             </div>
-                            <ul className="mt-4 space-y-2 text-sm font-semibold leading-relaxed text-slate-600">
-                              {(values as string[]).map((value) => (
-                                <li key={value} className="flex gap-2">
-                                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#214B74]" />
-                                  <span>{value}</span>
-                                </li>
-                              ))}
-                            </ul>
+                            <p className="mt-3 text-sm font-semibold leading-relaxed text-slate-700">
+                              {selectedScenario.risk}
+                            </p>
                           </div>
-                        ))}
-                      </div>
-                      <div className="rounded-[2rem] bg-[#fff1f1] p-5">
-                        <div className="text-[10px] font-black uppercase tracking-[0.24em] text-rose-700">
-                          Risco crítico
-                        </div>
-                        <p className="mt-3 text-sm font-semibold leading-relaxed text-slate-700">
-                          {selectedScenario.risk}
-                        </p>
-                      </div>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>

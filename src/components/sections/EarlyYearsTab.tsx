@@ -93,7 +93,7 @@ const EarlyYearsTab = () => (
           </div>
         </div>
       </Card>
-      <Card title="Staffing Model" icon={Users}>
+      <Card title="Classroom Package" icon={Users}>
         <div className="space-y-4">
           <div className="flex justify-between items-center p-3 bg-slate-50 rounded-xl border border-slate-100">
             <span className="text-[10px] font-bold text-slate-400 uppercase">Reference Educator</span>
@@ -108,6 +108,7 @@ const EarlyYearsTab = () => (
             <Badge variant="success">1 Monitor</Badge>
           </div>
           <p className="text-[10px] text-slate-400 italic">High-touch 3-educator model (Lead + Assistant + Monitor) for all Early Years grade levels.</p>
+          <p className="text-[10px] text-amber-700 leading-relaxed border-t border-slate-100 pt-3 mt-3">These are planning premises only. Adult-to-learner ratios and classroom package structures are instructional-capacity planning assumptions, not payroll authorization, final FTE, final headcount, or hiring approval.</p>
         </div>
       </Card>
     </div>

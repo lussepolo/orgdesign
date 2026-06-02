@@ -136,7 +136,7 @@ const HS_YEAR_DATA: HSYearData[] = [
       "Global Expression & Leadership",
       "Innovation Diploma & Design Technologies"
     ],
-    description: "Grade 11 is the next provisional expansion point for AP Capstone Research, advanced mathematics, and deeper STEM and humanities specialization."
+    description: "Grade 11 is the next provisional expansion point for AP Seminar / AP Capstone preparation, advanced mathematics, and deeper STEM and humanities specialization."
   },
   {
     year: "Grade 12",
@@ -726,7 +726,7 @@ const HighSchoolTab = ({ sections, setSections }: HighSchoolTabProps) => {
                     grade: "Grade 11",
                     label: "Specialist Density",
                     year: "2036",
-                    offerSummary: "Portuguese / Redação, ELA / advanced, AP Precalculus / AP Calculus pathway, AP Biology, AP Chemistry, AP Seminar / AP Research, Brazilian Studies, Global Studies, College/Career counseling, External mentors, GCD/Leadership, Innovation / Design Technologies",
+                    offerSummary: "Portuguese / Redação, ELA / advanced, AP Precalculus / AP Calculus pathway, AP Biology, AP Chemistry, AP Seminar / AP Capstone preparation, Brazilian Studies, Global Studies, College/Career counseling, External mentors, GCD/Leadership, Innovation / Design Technologies",
                     planningNote: "Provisional expansion — specialist domains or strong part-time specialists",
                     color: "border-cyan-200 bg-cyan-50",
                     badge: "success" as const,
@@ -1450,6 +1450,10 @@ const HighSchoolTab = ({ sections, setSections }: HighSchoolTabProps) => {
 
               <div className="rounded-2xl border border-amber-100 bg-amber-50 p-4 text-xs font-semibold leading-relaxed text-amber-900">
                 Scenario fit is instructional-capacity planning only and does not authorize payroll. High School scenarios are A, B, and C only.
+              </div>
+
+              <div className="rounded-2xl border border-indigo-100 bg-indigo-50 p-3 text-xs font-semibold leading-relaxed text-indigo-900">
+                Note: High School Scenarios A, B, and C are educator-model scenarios for High School launch. They are distinct from Offer Scenarios A–D, which define grade-ceiling thresholds.
               </div>
 
               <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
