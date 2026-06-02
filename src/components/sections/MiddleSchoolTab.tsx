@@ -372,6 +372,8 @@ const MiddleSchoolTab = (_props: MiddleSchoolTabProps) => {
 
   return (
     <div className="space-y-8">
+
+      {/* ── 1. SCENARIO OFFERS CONNECTION ─────────────────────────────────── */}
       <div className="space-y-5 rounded-2xl border border-blue-100 bg-blue-50 p-5">
         <div className="flex items-center gap-2">
           <div className="h-5 w-1 bg-blue-500 rounded-full shrink-0" />
@@ -457,6 +459,7 @@ const MiddleSchoolTab = (_props: MiddleSchoolTabProps) => {
         </div>
       </div>
 
+      {/* ── 2. CORE EDUCATOR BUILD-UP BY GRADE STAGE ──────────────────────── */}
       <div className="space-y-5 pt-4">
         <div className="flex items-center gap-3">
           <div className="h-8 w-1 bg-blue-500 rounded-full" />
@@ -475,6 +478,7 @@ const MiddleSchoolTab = (_props: MiddleSchoolTabProps) => {
           {coreEducatorBuildUp.map((stage) => (
             <Card key={stage.stage} className="h-full border border-slate-100 shadow-sm">
               <div className="space-y-4">
+                {/* Stage identifier */}
                 <div>
                   <div className="text-[9px] font-bold uppercase tracking-widest text-blue-600">{stage.stage}</div>
                   <div className="mt-2 text-[10px] font-medium text-slate-500">
@@ -487,6 +491,13 @@ const MiddleSchoolTab = (_props: MiddleSchoolTabProps) => {
                     G6:{stage.config.g6} · G7:{stage.config.g7} · G8:{stage.config.g8}
                   </div>
                 </div>
+                {/* Core educators implied — visually dominant, positioned before slot math */}
+                <div className="rounded-xl border border-blue-100 bg-blue-50 p-3">
+                  <div className="text-[8px] font-bold uppercase tracking-widest text-blue-500">Core educators implied</div>
+                  <div className="mt-1 text-3xl font-bold text-blue-800">{stage.coreEducatorsImplied} core educators</div>
+                  <div className="text-[10px] font-medium text-blue-600 mt-0.5">instructional-capacity signal only</div>
+                </div>
+                {/* Domain slot rows — supporting evidence */}
                 <div>
                   <div className="mb-2 text-[9px] font-bold uppercase tracking-widest text-slate-400">Core teaching slots by domain</div>
                   <div className="space-y-1.5">
@@ -498,10 +509,7 @@ const MiddleSchoolTab = (_props: MiddleSchoolTabProps) => {
                     ))}
                   </div>
                 </div>
-                <div className="rounded-xl border border-blue-100 bg-blue-50 p-3">
-                  <div className="text-[8px] font-bold uppercase tracking-widest text-blue-500">Core educators implied</div>
-                  <div className="mt-1 text-2xl font-bold text-blue-800">{stage.coreEducatorsImplied} core educators</div>
-                </div>
+                {/* Program-function load and distributed responsibilities */}
                 <div>
                   <div className="mb-1.5 text-[9px] font-bold uppercase tracking-widest text-slate-400">Possible program-function load and distributed responsibilities</div>
                   <ul className="space-y-1">
@@ -513,7 +521,8 @@ const MiddleSchoolTab = (_props: MiddleSchoolTabProps) => {
                     ))}
                   </ul>
                 </div>
-                <div>
+                {/* Interpretation — visually separated */}
+                <div className="border-t border-slate-100 pt-3">
                   <div className="mb-1.5 text-[9px] font-bold uppercase tracking-widest text-slate-400">Interpretation</div>
                   <div className="space-y-1.5">
                     {stage.interpretation.map((item) => (
@@ -530,45 +539,308 @@ const MiddleSchoolTab = (_props: MiddleSchoolTabProps) => {
         </div>
       </div>
 
-      <div>
-        <Card title="Middle School: The Bridge" icon={Database}>
-          <div className="space-y-6">
-            <p className="text-sm text-slate-500 leading-relaxed">
-              Middle School at Concept is the transition from Lower School Researchers into the Designers learning engine. Grade 6 is not one more Lower School grade: it activates Passion Projects, advisory, Creative Hub access, MUN, academic electives, documentation, portfolio evidence, critique cycles, and Project Mentorship as a coordinated function. A dedicated Project Mentor is conditional on validated cluster educator capacity.
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="p-4 rounded-2xl bg-blue-50 border border-blue-100">
-                <div className="flex items-center gap-2 mb-2"><Cpu className="h-4 w-4 text-blue-500" /><h4 className="text-xs font-bold text-slate-900">Mathematics / Natural Sciences</h4></div>
-                <p className="text-[10px] text-slate-500 leading-relaxed">Grade 6 integrates Mathematics and Natural Sciences foundations; from Grade 7 onward, Natural Sciences becomes a dedicated domain.</p>
-              </div>
-              <div className="p-4 rounded-2xl bg-amber-50 border border-amber-100">
-                <div className="flex items-center gap-2 mb-2"><BookOpen className="h-4 w-4 text-amber-500" /><h4 className="text-xs font-bold text-slate-900">Humanities / Project Design</h4></div>
-                <p className="text-[10px] text-slate-500 leading-relaxed">Portuguese remains connected to Social Sciences through literacy, argumentation, civic and historical inquiry, while ELA / Global Studies carries the project-design language function.</p>
-              </div>
+      {/* ── 3. GRADE 6 CLUSTER ARCHITECTURE ───────────────────────────────── */}
+      {/* Shown when the simulator is set to Grade 6 only (g6 > 0, g7 = 0, g8 = 0) */}
+      {grade6ClusterInsight.active && (
+        <div className="space-y-5 rounded-2xl border border-blue-100 bg-blue-50 p-5">
+          <div className="flex items-center gap-3">
+            <div className="h-8 w-1 bg-blue-500 rounded-full shrink-0" />
+            <div>
+              <div className="text-[9px] font-bold uppercase tracking-widest text-blue-600 mb-0.5">Grade 6 Launch Architecture · visible when Grade 6 only is active</div>
+              <h3 className="text-xl font-bold text-slate-900">Grade 6 Cluster Architecture</h3>
             </div>
           </div>
-        </Card>
+          <p className="text-xs text-slate-600 leading-relaxed">
+            Grade 6 can be organized through 3 educator clusters, but these are not automatically 3 fully loaded educators. Each cluster still has a gap to the 24-slot minimum, so complementary program-function load or explicit allocation is required.
+          </p>
+          <p className="text-[10px] text-slate-500 leading-relaxed">
+            Grade 6 has two valid planning lenses: 5 core subject-domain rows in the simulator and 3 educator clusters in the launch architecture. The domain rows capture per-subject load; the clusters capture how Grade 6 instruction can be organized before subject specialization deepens.
+          </p>
+          <p className="text-[10px] text-slate-500 leading-relaxed">
+            World Language is excluded from this Grade 6 model. Each slot equals 45 minutes.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {GRADE_6_CLUSTER_INSIGHTS.map((cluster) => (
+              <div key={cluster.name} className="rounded-2xl border border-blue-200 bg-white p-4 space-y-3">
+                <div>
+                  <div className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Grade 6 Cluster</div>
+                  <h5 className="text-xs font-bold text-slate-900 leading-snug">{cluster.name}</h5>
+                </div>
+                <div>
+                  <div className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Includes</div>
+                  <ul className="space-y-1">
+                    {cluster.includes.map((area) => (
+                      <li key={area} className="text-[10px] text-slate-600 flex items-start gap-1.5">
+                        <ChevronRight className="h-2.5 w-2.5 text-blue-300 shrink-0 mt-0.5" />
+                        {area}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-[10px] font-mono font-medium text-slate-700 bg-slate-50 rounded-lg px-2 py-1.5 leading-relaxed">{cluster.slotFormula}</p>
+                  <p className="text-[10px] font-mono font-medium text-slate-600 bg-slate-50 rounded-lg px-2 py-1.5 leading-relaxed">{cluster.sectionFormula}</p>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="bg-slate-50 rounded-xl p-2 border border-slate-100">
+                    <div className="text-[8px] font-bold text-slate-400 uppercase mb-0.5">Slots / section</div>
+                    <div className="text-sm font-bold text-slate-900">{cluster.slotsPerSection}</div>
+                  </div>
+                  <div className="bg-slate-50 rounded-xl p-2 border border-slate-100">
+                    <div className="text-[8px] font-bold text-slate-400 uppercase mb-0.5">Slots, 2 sections</div>
+                    <div className="text-sm font-bold text-slate-900">{cluster.slotsAcrossTwoSections}</div>
+                  </div>
+                  <div className="bg-blue-50 rounded-xl p-2 border border-blue-100">
+                    <div className="text-[8px] font-bold text-blue-500 uppercase mb-0.5">Min viable load</div>
+                    <div className="text-sm font-bold text-blue-700">24 slots</div>
+                  </div>
+                  <div className="bg-amber-50 rounded-xl p-2 border border-amber-100">
+                    <div className="text-[8px] font-bold text-amber-500 uppercase mb-0.5">Gap to min</div>
+                    <div className="text-sm font-bold text-amber-700">{cluster.gapToMinimum} slots</div>
+                  </div>
+                </div>
+                <p className="text-[10px] text-slate-500 leading-relaxed italic">{cluster.implication}</p>
+              </div>
+            ))}
+          </div>
+          <div className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-[10px] font-medium text-slate-600">
+            Grade 6 total: 38 slots per section, 76 slots across 2 sections, 57 weekly contact hours.
+          </div>
+          <div className="rounded-xl border border-amber-100 bg-amber-50 px-4 py-3 text-[10px] font-medium leading-relaxed text-amber-800">
+            These are instructional-capacity planning signals, not payroll authorization, final FTE, final headcount, or hiring approval.
+          </div>
+        </div>
+      )}
+
+      {/* ── 4. PROJECT / ADVISORY / PATHWAYS DEMAND ───────────────────────── */}
+      <div className="space-y-5 rounded-2xl border border-purple-100 bg-purple-50 p-5">
+        <div className="flex items-center gap-3">
+          <div className="h-8 w-1 bg-purple-400 rounded-full shrink-0" />
+          <div>
+            <div className="text-[9px] font-bold uppercase tracking-widest text-purple-600 mb-0.5">Program-Function Load</div>
+            <h3 className="text-xl font-bold text-slate-900">Project / Advisory / Pathways Demand</h3>
+          </div>
+        </div>
+        <p className="text-xs text-slate-600 leading-relaxed">
+          Project, advisory, and pathways load must be explicitly allocated. These functions are not leftover capacity.
+        </p>
+        <p className="text-[10px] text-slate-500 leading-relaxed">
+          The educator-count summary counts core subject educators separately; this panel makes the distributed project/advisory/pathways demand visible.
+        </p>
+        <p className="text-[10px] text-slate-500 leading-relaxed">
+          Project/advisory/pathways commitments must be checked before interpreting load space as Grade 9 bridge/share feasibility.
+        </p>
+
+        {projectBlockDemand.totalActiveSections === 0 ? (
+          <div className="rounded-xl border border-amber-100 bg-amber-50 px-4 py-3 text-[10px] font-medium text-amber-800">
+            No active Middle School sections selected.
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="bg-white rounded-xl border border-slate-100 p-3">
+                <div className="text-[8px] font-bold text-slate-400 uppercase mb-0.5">Active Middle School sections</div>
+                <div className="text-xl font-bold text-slate-900">{projectBlockDemand.totalActiveSections}</div>
+              </div>
+              <div className="bg-white rounded-xl border border-slate-100 p-3">
+                <div className="text-[8px] font-bold text-slate-400 uppercase mb-0.5">Default groups per section</div>
+                <div className="text-xl font-bold text-slate-900">{projectBlockDemand.groupsPerSectionDefault}</div>
+              </div>
+              <div className="bg-white rounded-xl border border-slate-100 p-3">
+                <div className="text-[8px] font-bold text-slate-400 uppercase mb-0.5">Range of groups per section</div>
+                <div className="text-xl font-bold text-slate-900">{projectBlockDemand.groupsPerSectionMin}–{projectBlockDemand.groupsPerSectionMax}</div>
+              </div>
+              <div className="bg-white rounded-xl border border-slate-100 p-3">
+                <div className="text-[8px] font-bold text-slate-400 uppercase mb-0.5">Max groups per educator</div>
+                <div className="text-xl font-bold text-slate-900">{projectBlockDemand.maxGroupsPerEducator}</div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="bg-white rounded-xl border border-purple-200 p-4">
+                <div className="text-[9px] font-bold text-purple-500 uppercase tracking-widest mb-3">Default demand</div>
+                <div className="flex gap-6 flex-wrap">
+                  <div>
+                    <div className="text-[8px] font-bold text-slate-400 uppercase mb-0.5">Total project groups</div>
+                    <div className="text-2xl font-bold text-slate-900">{projectBlockDemand.totalProjectGroups}</div>
+                  </div>
+                  <div>
+                    <div className="text-[8px] font-bold text-slate-400 uppercase mb-0.5">Simultaneous educators required</div>
+                    <div className="text-2xl font-bold text-purple-700">{projectBlockDemand.simultaneousEducatorsRequired}</div>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-white rounded-xl border border-slate-100 p-4">
+                <div className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-3">Demand range</div>
+                <div className="flex gap-6 flex-wrap">
+                  <div>
+                    <div className="text-[8px] font-bold text-slate-400 uppercase mb-0.5">Min groups / simultaneous</div>
+                    <div className="text-lg font-bold text-slate-700">{projectBlockDemand.minimumProjectGroups} / {projectBlockDemand.minimumSimultaneousEducatorsRequired}</div>
+                  </div>
+                  <div>
+                    <div className="text-[8px] font-bold text-slate-400 uppercase mb-0.5">Max groups / simultaneous</div>
+                    <div className="text-lg font-bold text-slate-700">{projectBlockDemand.maximumProjectGroups} / {projectBlockDemand.maximumSimultaneousEducatorsRequired}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <p className="text-[10px] text-slate-500 leading-relaxed">
+              This is simultaneous educator availability in a fixed or coordinated project block, not a hiring count.
+            </p>
+          </>
+        )}
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="rounded-xl border border-slate-100 bg-white p-3 space-y-1.5">
+            <div className="text-[9px] font-bold text-slate-700">Passion Project / Project Mentorship</div>
+            <p className="text-[10px] text-slate-500 leading-relaxed">Requires group capacity, profile fit, and schedule fit. It is not a separate mentor hire by default.</p>
+          </div>
+          <div className="rounded-xl border border-slate-100 bg-white p-3 space-y-1.5">
+            <div className="text-[9px] font-bold text-slate-700">Pathways</div>
+            <p className="text-[10px] text-slate-500 leading-relaxed">Requires explicit student-contact or coordination allocation. It should not be treated as leftover capacity.</p>
+          </div>
+          <div className="rounded-xl border border-slate-100 bg-white p-3 space-y-1.5">
+            <div className="text-[9px] font-bold text-slate-700">Advisory</div>
+            <p className="text-[10px] text-slate-500 leading-relaxed">Distributed student-support/contact responsibility. It is distinct from Passion Project and Pathways.</p>
+          </div>
+        </div>
+
+        <p className="text-[10px] text-slate-500 leading-relaxed">
+          {msSectionsByGrade.g8 > 0
+            ? "In Grade 8, Babson EPIC replaces Passion Project. The project-demand logic remains a planning signal for coordinated project/advisory load."
+            : "When Grade 8 becomes active, Babson EPIC replaces Passion Project; project-demand logic remains a planning signal for coordinated project/advisory load."}
+        </p>
+
+        <div className="rounded-xl border border-amber-100 bg-amber-50 px-4 py-3 text-[10px] font-medium leading-relaxed text-amber-800">
+          Instructional-capacity planning only. Distributed responsibilities are not leftover capacity. These values are not payroll authorization, final FTE, final headcount, or hiring approval.
+        </div>
       </div>
 
-      <Card title="Instructional Ownership Progression" icon={BookOpen}>
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-          {MS_OWNERSHIP_PROGRESSION.map((stage) => (
-            <div key={stage.stage} className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
-              <div className="text-[10px] font-bold uppercase tracking-widest text-blue-600">{stage.stage}</div>
-              <h4 className="mt-2 text-sm font-bold text-slate-900">{stage.model}</h4>
-              <ul className="mt-3 space-y-2 text-[10px] leading-relaxed text-slate-500">
-                {stage.details.map((detail) => (
-                  <li key={`${stage.stage}-${detail}`} className="flex gap-2">
-                    <ChevronRight className="mt-0.5 h-3 w-3 shrink-0 text-blue-300" />
-                    <span>{detail}</span>
-                  </li>
-                ))}
-              </ul>
+      {/* ── 5. SCENARIO COMPARISON: CORE EDUCATORS BY SECTION COUNT ──────── */}
+      <div className="space-y-4 rounded-2xl border border-slate-200 bg-slate-50 p-5">
+        <div className="flex items-center gap-3">
+          <div className="h-8 w-1 bg-slate-400 rounded-full shrink-0" />
+          <div>
+            <div className="text-[9px] font-bold uppercase tracking-widest text-slate-500 mb-0.5">Sensitivity Layer</div>
+            <h3 className="text-xl font-bold text-slate-900">Scenario Comparison: Core Educators by Section Count</h3>
+          </div>
+        </div>
+        <p className="text-xs text-slate-600 leading-relaxed">
+          These counts are model-derived instructional-capacity signals. They are not payroll authorization, final FTE, final headcount, or hiring approval.
+        </p>
+        <p className="text-[10px] text-slate-500 leading-relaxed">
+          Grade 6 launch should be read through the cluster architecture: 3 educator clusters, not automatically 3 fully loaded educators. Complementary program functions are required to approach viable load.
+        </p>
+        <p className="text-[10px] text-slate-500 leading-relaxed">
+          Domain-row count is not the same as the cluster-compressed launch premise. Specialist/program functions require explicit allocation. Distributed responsibilities — Advisory, Passion Project, Pathways — are not leftover capacity.
+        </p>
+        <div className="rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-[10px] font-medium text-blue-800">
+          Current simulator configuration: G6 = {msSectionsByGrade.g6} · G7 = {msSectionsByGrade.g7} · G8 = {msSectionsByGrade.g8}. Core educators implied by current configuration: {currentCoreEducators}.
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {educatorCountSummary.map((row) => (
+            <div key={`${row.stage}-${row.sectionsLabel}`} className="rounded-2xl border border-slate-100 bg-white p-4 space-y-3">
+              <div>
+                <div className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">{row.sectionsLabel}</div>
+                <h5 className="text-xs font-bold text-slate-900 leading-snug">{row.stage}</h5>
+                <div className="text-[9px] text-slate-400 mt-1 font-mono">
+                  G6:{row.config.g6} · G7:{row.config.g7} · G8:{row.config.g8}
+                </div>
+              </div>
+              <div className="flex items-end gap-2">
+                <div className="text-2xl font-bold text-blue-700">{row.coreEducatorsImplied}</div>
+                <div className="text-[9px] font-bold text-slate-400 uppercase mb-1 leading-tight">Core educators<br />implied</div>
+              </div>
+              <div>
+                <div className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Specialist/program load signal</div>
+                <div className="text-[9px] font-medium text-slate-500 bg-slate-50 rounded-lg px-2 py-1.5 leading-relaxed">
+                  {row.specialistSignal}
+                </div>
+              </div>
+              <p className="text-[10px] text-slate-500 leading-relaxed italic">{row.interpretation}</p>
             </div>
           ))}
         </div>
-      </Card>
+        <div className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-[10px] font-medium text-slate-600">
+          This broader comparison shows model-derived instructional-capacity signals for 1-section and 2-section scenarios under the current load assumptions.
+        </div>
+      </div>
 
+      {/* ── 6. MS EDUCATOR POOL → GRADE 9 BRIDGE FEASIBILITY ─────────────── */}
+      <div className="space-y-5 rounded-2xl border border-rose-200 bg-white p-5">
+        <div className="flex items-center gap-3">
+          <div className="h-8 w-1 bg-rose-400 rounded-full shrink-0" />
+          <div>
+            <div className="text-[9px] font-bold uppercase tracking-widest text-rose-500 mb-0.5">Boundary Condition</div>
+            <h3 className="text-xl font-bold text-slate-900">MS Educator Pool → Grade 9 Bridge Feasibility</h3>
+          </div>
+        </div>
+        <p className="text-xs text-slate-600 leading-relaxed">
+          Middle School load space can inform Grade 9 bridge/share feasibility, but it is not automatic High School capacity.
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4 space-y-2">
+            <div className="text-[9px] font-bold text-rose-500 uppercase tracking-widest">Read-only feasibility signal</div>
+            <p className="text-[10px] text-slate-600 leading-relaxed">Load space shows whether a Middle School educator may have room below the maximum teaching threshold. It does not confirm availability for Grade 9.</p>
+          </div>
+          <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4 space-y-2">
+            <div className="text-[9px] font-bold text-rose-500 uppercase tracking-widest">MS-primary bridge, if validated</div>
+            <p className="text-[10px] text-slate-600 leading-relaxed">An MS-primary educator may support Grade 9 only if the domain match, HS-level expertise, schedule fit, and remaining-capacity validation all hold.</p>
+          </div>
+          <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4 space-y-2">
+            <div className="text-[9px] font-bold text-rose-500 uppercase tracking-widest">HS-oriented shared with MS, if validated</div>
+            <p className="text-[10px] text-slate-600 leading-relaxed">An HS-oriented launch educator may also support Middle School only if load, schedule, and expertise allow. This is the reverse direction from MS-primary bridge.</p>
+          </div>
+          <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4 space-y-2">
+            <div className="text-[9px] font-bold text-rose-500 uppercase tracking-widest">Not automatic capacity</div>
+            <p className="text-[10px] text-slate-600 leading-relaxed">Remaining load space must not be treated as confirmed Grade 9 coverage, approved staffing, payroll FTE, final headcount, or hiring authorization.</p>
+          </div>
+        </div>
+        <div className="space-y-2">
+          <div className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Bridge validation requirements</div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+            {[
+              "Subject-domain match",
+              "HS-level expertise validation",
+              "Schedule fit",
+              "Remaining-capacity validation",
+              "Advisory, project, and program-function conflicts checked",
+              "Grade 9 Capacity Ledger alignment",
+            ].map((item) => (
+              <div key={item} className="flex items-start gap-1.5 text-[10px] text-slate-600">
+                <ChevronRight className="h-2.5 w-2.5 text-rose-300 shrink-0 mt-0.5" />
+                {item}
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="space-y-2">
+          <div className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Domain examples</div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <div className="rounded-xl border border-slate-100 bg-slate-50 p-3 space-y-1">
+              <div className="text-[9px] font-bold text-slate-700">ELA</div>
+              <p className="text-[10px] text-slate-500 leading-relaxed">MS ELA may support Grade 9 English Language Arts only if HS-level ELA expectations and schedule fit are validated. Dedicated HS ELA is still expected as High School expands.</p>
+            </div>
+            <div className="rounded-xl border border-slate-100 bg-slate-50 p-3 space-y-1">
+              <div className="text-[9px] font-bold text-slate-700">Natural Sciences</div>
+              <p className="text-[10px] text-slate-500 leading-relaxed">MS Natural Sciences does not automatically qualify for Grade 9 Biology/Chemistry foundations; capability validation is required.</p>
+            </div>
+            <div className="rounded-xl border border-slate-100 bg-slate-50 p-3 space-y-1">
+              <div className="text-[9px] font-bold text-slate-700">Portuguese / Redação</div>
+              <p className="text-[10px] text-slate-500 leading-relaxed">MS Portuguese does not automatically qualify for HS Portuguese / Redação; HS writing expectations must be validated.</p>
+            </div>
+          </div>
+        </div>
+        <p className="text-[10px] text-slate-500 leading-relaxed">
+          Use the High School tab's Grade 9 Capacity Ledger and Grade 9 Mock Schedule to validate any bridge/share hypothesis.
+        </p>
+        <div className="rounded-xl border border-amber-100 bg-amber-50 px-4 py-3 text-[10px] font-medium leading-relaxed text-amber-800">
+          Bridge/share signals are instructional-capacity planning inputs only, not payroll authorization, final FTE, final headcount, or hiring approval.
+        </div>
+      </div>
+
+      {/* ── 7. EDUCATOR LOAD LOGIC BY OPENING STAGE ───────────────────────── */}
       <Card title="Educator Load Logic by Opening Stage" icon={Users}>
         <div className="space-y-4">
           <p className="text-xs font-medium leading-relaxed text-slate-500">
@@ -693,193 +965,6 @@ const MiddleSchoolTab = (_props: MiddleSchoolTabProps) => {
             )}
           </details>
 
-          <p className="text-[10px] text-slate-500 leading-relaxed">
-            Grade 6 Cluster Architecture appears when the simulator is set to Grade 6 only.
-          </p>
-
-          {grade6ClusterInsight.active && (
-            <div className="space-y-4 rounded-2xl border border-blue-100 bg-blue-50 p-4">
-              <div className="flex items-center gap-2">
-                <div className="h-5 w-1 bg-blue-500 rounded-full shrink-0" />
-                <h4 className="text-sm font-bold text-slate-900">Grade 6 Cluster Architecture</h4>
-              </div>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                Grade 6 can be organized through 3 educator clusters, but these are not automatically 3 fully loaded educators. Each cluster still has a gap to the 24-slot minimum, so complementary program-function load or explicit allocation is required.
-              </p>
-              <p className="text-[10px] text-slate-500 leading-relaxed">
-                Grade 6 has two valid planning lenses: 5 core subject-domain rows in the simulator and 3 educator clusters in the launch architecture. The domain rows capture per-subject load; the clusters capture how Grade 6 instruction can be organized before subject specialization deepens.
-              </p>
-              <p className="text-[10px] text-slate-500 leading-relaxed">
-                World Language is excluded from this Grade 6 model. Each slot equals 45 minutes.
-              </p>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                {GRADE_6_CLUSTER_INSIGHTS.map((cluster) => (
-                  <div key={cluster.name} className="rounded-2xl border border-blue-200 bg-white p-4 space-y-3">
-                    <div>
-                      <div className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Grade 6 Cluster</div>
-                      <h5 className="text-xs font-bold text-slate-900 leading-snug">{cluster.name}</h5>
-                    </div>
-                    <div>
-                      <div className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Includes</div>
-                      <ul className="space-y-1">
-                        {cluster.includes.map((area) => (
-                          <li key={area} className="text-[10px] text-slate-600 flex items-start gap-1.5">
-                            <ChevronRight className="h-2.5 w-2.5 text-blue-300 shrink-0 mt-0.5" />
-                            {area}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-[10px] font-mono font-medium text-slate-700 bg-slate-50 rounded-lg px-2 py-1.5 leading-relaxed">{cluster.slotFormula}</p>
-                      <p className="text-[10px] font-mono font-medium text-slate-600 bg-slate-50 rounded-lg px-2 py-1.5 leading-relaxed">{cluster.sectionFormula}</p>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <div className="bg-slate-50 rounded-xl p-2 border border-slate-100">
-                        <div className="text-[8px] font-bold text-slate-400 uppercase mb-0.5">Slots / section</div>
-                        <div className="text-sm font-bold text-slate-900">{cluster.slotsPerSection}</div>
-                      </div>
-                      <div className="bg-slate-50 rounded-xl p-2 border border-slate-100">
-                        <div className="text-[8px] font-bold text-slate-400 uppercase mb-0.5">Slots, 2 sections</div>
-                        <div className="text-sm font-bold text-slate-900">{cluster.slotsAcrossTwoSections}</div>
-                      </div>
-                      <div className="bg-blue-50 rounded-xl p-2 border border-blue-100">
-                        <div className="text-[8px] font-bold text-blue-500 uppercase mb-0.5">Min viable load</div>
-                        <div className="text-sm font-bold text-blue-700">24 slots</div>
-                      </div>
-                      <div className="bg-amber-50 rounded-xl p-2 border border-amber-100">
-                        <div className="text-[8px] font-bold text-amber-500 uppercase mb-0.5">Gap to min</div>
-                        <div className="text-sm font-bold text-amber-700">{cluster.gapToMinimum} slots</div>
-                      </div>
-                    </div>
-                    <p className="text-[10px] text-slate-500 leading-relaxed italic">{cluster.implication}</p>
-                  </div>
-                ))}
-              </div>
-              <div className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-[10px] font-medium text-slate-600">
-                Grade 6 total: 38 slots per section, 76 slots across 2 sections, 57 weekly contact hours.
-              </div>
-              <div className="rounded-xl border border-amber-100 bg-amber-50 px-4 py-3 text-[10px] font-medium leading-relaxed text-amber-800">
-                These are instructional-capacity planning signals, not payroll authorization, final FTE, final headcount, or hiring approval.
-              </div>
-            </div>
-          )}
-
-          <div className="space-y-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-            <div className="flex items-center gap-2">
-              <div className="h-5 w-1 bg-blue-500 rounded-full shrink-0" />
-              <h4 className="text-sm font-bold text-slate-900">Scenario Comparison: Core Educators by Section Count</h4>
-            </div>
-            <p className="text-xs text-slate-600 leading-relaxed">
-              These counts are model-derived instructional-capacity signals. They are not payroll authorization, final FTE, final headcount, or hiring approval.
-            </p>
-            <p className="text-[10px] text-slate-500 leading-relaxed">
-              Grade 6 launch should be read through the cluster architecture: 3 educator clusters, not automatically 3 fully loaded educators. Complementary program functions are required to approach viable load.
-            </p>
-            <p className="text-[10px] text-slate-500 leading-relaxed">
-              Domain-row count is not the same as the cluster-compressed launch premise. Specialist/program functions require explicit allocation. Distributed responsibilities — Advisory, Passion Project, Pathways — are not leftover capacity.
-            </p>
-            <div className="rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-[10px] font-medium text-blue-800">
-              Current simulator configuration: G6 = {msSectionsByGrade.g6} · G7 = {msSectionsByGrade.g7} · G8 = {msSectionsByGrade.g8}. Core educators implied by current configuration: {currentCoreEducators}.
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {educatorCountSummary.map((row) => (
-                <div key={`${row.stage}-${row.sectionsLabel}`} className="rounded-2xl border border-slate-100 bg-white p-4 space-y-3">
-                  <div>
-                    <div className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">{row.sectionsLabel}</div>
-                    <h5 className="text-xs font-bold text-slate-900 leading-snug">{row.stage}</h5>
-                    <div className="text-[9px] text-slate-400 mt-1 font-mono">
-                      G6:{row.config.g6} · G7:{row.config.g7} · G8:{row.config.g8}
-                    </div>
-                  </div>
-                  <div className="flex items-end gap-2">
-                    <div className="text-2xl font-bold text-blue-700">{row.coreEducatorsImplied}</div>
-                    <div className="text-[9px] font-bold text-slate-400 uppercase mb-1 leading-tight">Core educators<br />implied</div>
-                  </div>
-                  <div>
-                    <div className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Specialist/program load signal</div>
-                    <div className="text-[9px] font-medium text-slate-500 bg-slate-50 rounded-lg px-2 py-1.5 leading-relaxed">
-                      {row.specialistSignal}
-                    </div>
-                  </div>
-                  <p className="text-[10px] text-slate-500 leading-relaxed italic">{row.interpretation}</p>
-                </div>
-              ))}
-            </div>
-            <div className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-[10px] font-medium text-slate-600">
-              This broader comparison shows model-derived instructional-capacity signals for 1-section and 2-section scenarios under the current load assumptions.
-            </div>
-          </div>
-
-          <div className="space-y-5 rounded-2xl border border-rose-100 bg-rose-50 p-5">
-            <div className="flex items-center gap-2">
-              <div className="h-5 w-1 bg-rose-400 rounded-full shrink-0" />
-              <h4 className="text-sm font-bold text-slate-900">MS Educator Pool → Grade 9 Bridge Feasibility</h4>
-            </div>
-            <p className="text-xs text-slate-600 leading-relaxed">
-              Middle School load space can inform Grade 9 bridge/share feasibility, but it is not automatic High School capacity.
-            </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="rounded-2xl border border-rose-200 bg-white p-4 space-y-2">
-                <div className="text-[9px] font-bold text-rose-500 uppercase tracking-widest">Read-only feasibility signal</div>
-                <p className="text-[10px] text-slate-600 leading-relaxed">Load space shows whether a Middle School educator may have room below the maximum teaching threshold. It does not confirm availability for Grade 9.</p>
-              </div>
-              <div className="rounded-2xl border border-rose-200 bg-white p-4 space-y-2">
-                <div className="text-[9px] font-bold text-rose-500 uppercase tracking-widest">MS-primary bridge, if validated</div>
-                <p className="text-[10px] text-slate-600 leading-relaxed">An MS-primary educator may support Grade 9 only if the domain match, HS-level expertise, schedule fit, and remaining-capacity validation all hold.</p>
-              </div>
-              <div className="rounded-2xl border border-rose-200 bg-white p-4 space-y-2">
-                <div className="text-[9px] font-bold text-rose-500 uppercase tracking-widest">HS-oriented shared with MS, if validated</div>
-                <p className="text-[10px] text-slate-600 leading-relaxed">An HS-oriented launch educator may also support Middle School only if load, schedule, and expertise allow. This is the reverse direction from MS-primary bridge.</p>
-              </div>
-              <div className="rounded-2xl border border-rose-200 bg-white p-4 space-y-2">
-                <div className="text-[9px] font-bold text-rose-500 uppercase tracking-widest">Not automatic capacity</div>
-                <p className="text-[10px] text-slate-600 leading-relaxed">Remaining load space must not be treated as confirmed Grade 9 coverage, approved staffing, payroll FTE, final headcount, or hiring authorization.</p>
-              </div>
-            </div>
-            <div className="space-y-2">
-              <div className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Bridge validation requirements</div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-                {[
-                  "Subject-domain match",
-                  "HS-level expertise validation",
-                  "Schedule fit",
-                  "Remaining-capacity validation",
-                  "Advisory, project, and program-function conflicts checked",
-                  "Grade 9 Capacity Ledger alignment",
-                ].map((item) => (
-                  <div key={item} className="flex items-start gap-1.5 text-[10px] text-slate-600">
-                    <ChevronRight className="h-2.5 w-2.5 text-rose-300 shrink-0 mt-0.5" />
-                    {item}
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="space-y-2">
-              <div className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Domain examples</div>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                <div className="rounded-xl border border-slate-100 bg-white p-3 space-y-1">
-                  <div className="text-[9px] font-bold text-slate-700">ELA</div>
-                  <p className="text-[10px] text-slate-500 leading-relaxed">MS ELA may support Grade 9 English Language Arts only if HS-level ELA expectations and schedule fit are validated. Dedicated HS ELA is still expected as High School expands.</p>
-                </div>
-                <div className="rounded-xl border border-slate-100 bg-white p-3 space-y-1">
-                  <div className="text-[9px] font-bold text-slate-700">Natural Sciences</div>
-                  <p className="text-[10px] text-slate-500 leading-relaxed">MS Natural Sciences does not automatically qualify for Grade 9 Biology/Chemistry foundations; capability validation is required.</p>
-                </div>
-                <div className="rounded-xl border border-slate-100 bg-white p-3 space-y-1">
-                  <div className="text-[9px] font-bold text-slate-700">Portuguese / Redação</div>
-                  <p className="text-[10px] text-slate-500 leading-relaxed">MS Portuguese does not automatically qualify for HS Portuguese / Redação; HS writing expectations must be validated.</p>
-                </div>
-              </div>
-            </div>
-            <p className="text-[10px] text-slate-500 leading-relaxed">
-              Use the High School tab's Grade 9 Capacity Ledger and Grade 9 Mock Schedule to validate any bridge/share hypothesis.
-            </p>
-            <div className="rounded-xl border border-amber-100 bg-amber-50 px-4 py-3 text-[10px] font-medium leading-relaxed text-amber-800">
-              Bridge/share signals are instructional-capacity planning inputs only, not payroll authorization, final FTE, final headcount, or hiring approval.
-            </div>
-          </div>
-
           {msSectionsByGrade.g8 > 0 && (
             <div className="rounded-2xl border border-purple-100 bg-purple-50 p-4 text-xs font-medium leading-relaxed text-slate-600">
               Grade 8 is not cluster-based. Babson EPIC Certificate replaces Passion Projects as the
@@ -927,108 +1012,12 @@ const MiddleSchoolTab = (_props: MiddleSchoolTabProps) => {
           <div className="rounded-2xl border border-rose-100 bg-rose-50 px-4 py-3 text-[10px] font-medium leading-relaxed text-rose-800">
             Middle School remaining load space is not automatic High School capacity. Any Grade 9 bridge requires subject-domain match, HS-level expertise validation, schedule fit, and remaining-capacity validation.
           </div>
+        </div>
+      </Card>
 
-          <div className="space-y-4 rounded-2xl border border-purple-100 bg-purple-50 p-5">
-            <div className="flex items-center gap-2">
-              <div className="h-5 w-1 bg-purple-400 rounded-full shrink-0" />
-              <h4 className="text-sm font-bold text-slate-900">Project / Advisory / Pathways Demand</h4>
-            </div>
-            <p className="text-xs text-slate-600 leading-relaxed">
-              Project, advisory, and pathways load must be explicitly allocated. These functions are not leftover capacity.
-            </p>
-            <p className="text-[10px] text-slate-500 leading-relaxed">
-              The educator-count summary counts core subject educators separately; this panel makes the distributed project/advisory/pathways demand visible.
-            </p>
-            <p className="text-[10px] text-slate-500 leading-relaxed">
-              Project/advisory/pathways commitments must be checked before interpreting load space as Grade 9 bridge/share feasibility.
-            </p>
-
-            {projectBlockDemand.totalActiveSections === 0 ? (
-              <div className="rounded-xl border border-amber-100 bg-amber-50 px-4 py-3 text-[10px] font-medium text-amber-800">
-                No active Middle School sections selected.
-              </div>
-            ) : (
-              <>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  <div className="bg-white rounded-xl border border-slate-100 p-3">
-                    <div className="text-[8px] font-bold text-slate-400 uppercase mb-0.5">Active Middle School sections</div>
-                    <div className="text-xl font-bold text-slate-900">{projectBlockDemand.totalActiveSections}</div>
-                  </div>
-                  <div className="bg-white rounded-xl border border-slate-100 p-3">
-                    <div className="text-[8px] font-bold text-slate-400 uppercase mb-0.5">Default groups per section</div>
-                    <div className="text-xl font-bold text-slate-900">{projectBlockDemand.groupsPerSectionDefault}</div>
-                  </div>
-                  <div className="bg-white rounded-xl border border-slate-100 p-3">
-                    <div className="text-[8px] font-bold text-slate-400 uppercase mb-0.5">Range of groups per section</div>
-                    <div className="text-xl font-bold text-slate-900">{projectBlockDemand.groupsPerSectionMin}–{projectBlockDemand.groupsPerSectionMax}</div>
-                  </div>
-                  <div className="bg-white rounded-xl border border-slate-100 p-3">
-                    <div className="text-[8px] font-bold text-slate-400 uppercase mb-0.5">Max groups per educator</div>
-                    <div className="text-xl font-bold text-slate-900">{projectBlockDemand.maxGroupsPerEducator}</div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="bg-white rounded-xl border border-purple-200 p-4">
-                    <div className="text-[9px] font-bold text-purple-500 uppercase tracking-widest mb-3">Default demand</div>
-                    <div className="flex gap-6 flex-wrap">
-                      <div>
-                        <div className="text-[8px] font-bold text-slate-400 uppercase mb-0.5">Total project groups</div>
-                        <div className="text-2xl font-bold text-slate-900">{projectBlockDemand.totalProjectGroups}</div>
-                      </div>
-                      <div>
-                        <div className="text-[8px] font-bold text-slate-400 uppercase mb-0.5">Simultaneous educators required</div>
-                        <div className="text-2xl font-bold text-purple-700">{projectBlockDemand.simultaneousEducatorsRequired}</div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="bg-white rounded-xl border border-slate-100 p-4">
-                    <div className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-3">Demand range</div>
-                    <div className="flex gap-6 flex-wrap">
-                      <div>
-                        <div className="text-[8px] font-bold text-slate-400 uppercase mb-0.5">Min groups / simultaneous</div>
-                        <div className="text-lg font-bold text-slate-700">{projectBlockDemand.minimumProjectGroups} / {projectBlockDemand.minimumSimultaneousEducatorsRequired}</div>
-                      </div>
-                      <div>
-                        <div className="text-[8px] font-bold text-slate-400 uppercase mb-0.5">Max groups / simultaneous</div>
-                        <div className="text-lg font-bold text-slate-700">{projectBlockDemand.maximumProjectGroups} / {projectBlockDemand.maximumSimultaneousEducatorsRequired}</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <p className="text-[10px] text-slate-500 leading-relaxed">
-                  This is simultaneous educator availability in a fixed or coordinated project block, not a hiring count.
-                </p>
-              </>
-            )}
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div className="rounded-xl border border-slate-100 bg-white p-3 space-y-1.5">
-                <div className="text-[9px] font-bold text-slate-700">Passion Project / Project Mentorship</div>
-                <p className="text-[10px] text-slate-500 leading-relaxed">Requires group capacity, profile fit, and schedule fit. It is not a separate mentor hire by default.</p>
-              </div>
-              <div className="rounded-xl border border-slate-100 bg-white p-3 space-y-1.5">
-                <div className="text-[9px] font-bold text-slate-700">Pathways</div>
-                <p className="text-[10px] text-slate-500 leading-relaxed">Requires explicit student-contact or coordination allocation. It should not be treated as leftover capacity.</p>
-              </div>
-              <div className="rounded-xl border border-slate-100 bg-white p-3 space-y-1.5">
-                <div className="text-[9px] font-bold text-slate-700">Advisory</div>
-                <p className="text-[10px] text-slate-500 leading-relaxed">Distributed student-support/contact responsibility. It is distinct from Passion Project and Pathways.</p>
-              </div>
-            </div>
-
-            <p className="text-[10px] text-slate-500 leading-relaxed">
-              {msSectionsByGrade.g8 > 0
-                ? "In Grade 8, Babson EPIC replaces Passion Project. The project-demand logic remains a planning signal for coordinated project/advisory load."
-                : "When Grade 8 becomes active, Babson EPIC replaces Passion Project; project-demand logic remains a planning signal for coordinated project/advisory load."}
-            </p>
-
-            <div className="rounded-xl border border-amber-100 bg-amber-50 px-4 py-3 text-[10px] font-medium leading-relaxed text-amber-800">
-              Instructional-capacity planning only. Distributed responsibilities are not leftover capacity. These values are not payroll authorization, final FTE, final headcount, or hiring approval.
-            </div>
-          </div>
-
+      {/* ── 8. PROGRAM FUNCTION LOAD TABLE ────────────────────────────────── */}
+      <Card title="Program Function Load" icon={BookOpen}>
+        <div className="space-y-4">
           <div className="overflow-x-auto rounded-2xl border border-slate-100">
             <table className="min-w-[820px] w-full text-left">
               <thead>
@@ -1051,7 +1040,6 @@ const MiddleSchoolTab = (_props: MiddleSchoolTabProps) => {
               </tbody>
             </table>
           </div>
-
           <div className="rounded-2xl border border-blue-100 bg-blue-50 p-4 text-xs font-medium leading-relaxed text-slate-600">
             By Grade 8, educator need is no longer driven by cluster coverage. It is driven by
             subject-slot load and aligned program ownership. Domains with 36 weekly slots require
@@ -1059,6 +1047,46 @@ const MiddleSchoolTab = (_props: MiddleSchoolTabProps) => {
             slots per educator, completed through domain-aligned program functions such as Babson
             EPIC, electives, portfolio evidence, and critique cycles.
           </div>
+        </div>
+      </Card>
+
+      {/* ── SUPPLEMENTARY CONTEXT ─────────────────────────────────────────── */}
+      <div>
+        <Card title="Middle School: The Bridge" icon={Database}>
+          <div className="space-y-6">
+            <p className="text-sm text-slate-500 leading-relaxed">
+              Middle School at Concept is the transition from Lower School Researchers into the Designers learning engine. Grade 6 is not one more Lower School grade: it activates Passion Projects, advisory, Creative Hub access, MUN, academic electives, documentation, portfolio evidence, critique cycles, and Project Mentorship as a coordinated function. A dedicated Project Mentor is conditional on validated cluster educator capacity.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="p-4 rounded-2xl bg-blue-50 border border-blue-100">
+                <div className="flex items-center gap-2 mb-2"><Cpu className="h-4 w-4 text-blue-500" /><h4 className="text-xs font-bold text-slate-900">Mathematics / Natural Sciences</h4></div>
+                <p className="text-[10px] text-slate-500 leading-relaxed">Grade 6 integrates Mathematics and Natural Sciences foundations; from Grade 7 onward, Natural Sciences becomes a dedicated domain.</p>
+              </div>
+              <div className="p-4 rounded-2xl bg-amber-50 border border-amber-100">
+                <div className="flex items-center gap-2 mb-2"><BookOpen className="h-4 w-4 text-amber-500" /><h4 className="text-xs font-bold text-slate-900">Humanities / Project Design</h4></div>
+                <p className="text-[10px] text-slate-500 leading-relaxed">Portuguese remains connected to Social Sciences through literacy, argumentation, civic and historical inquiry, while ELA / Global Studies carries the project-design language function.</p>
+              </div>
+            </div>
+          </div>
+        </Card>
+      </div>
+
+      <Card title="Instructional Ownership Progression" icon={BookOpen}>
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+          {MS_OWNERSHIP_PROGRESSION.map((stage) => (
+            <div key={stage.stage} className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
+              <div className="text-[10px] font-bold uppercase tracking-widest text-blue-600">{stage.stage}</div>
+              <h4 className="mt-2 text-sm font-bold text-slate-900">{stage.model}</h4>
+              <ul className="mt-3 space-y-2 text-[10px] leading-relaxed text-slate-500">
+                {stage.details.map((detail) => (
+                  <li key={`${stage.stage}-${detail}`} className="flex gap-2">
+                    <ChevronRight className="mt-0.5 h-3 w-3 shrink-0 text-blue-300" />
+                    <span>{detail}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
       </Card>
 
