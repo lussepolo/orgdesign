@@ -207,6 +207,7 @@ const PROJECT_MAX_GROUPS_PER_EDUCATOR = 4;
 // ─────────────────────────────────────────────────────────────────────────────
 
 type MiddleSchoolView =
+  | "executive-view"
   | "decision-frame"
   | "core-build-up"
   | "grade-6-cluster"
@@ -218,15 +219,16 @@ type MiddleSchoolView =
   | "supporting-context";
 
 const middleSchoolViews: Array<{ id: MiddleSchoolView; label: string }> = [
-  { id: "decision-frame",      label: "01 Decision Frame" },
-  { id: "core-build-up",       label: "02 Core Build-Up" },
-  { id: "grade-6-cluster",     label: "03 Grade 6 Cluster" },
-  { id: "program-load",        label: "04 Program Load" },
-  { id: "scenario-comparison", label: "05 Scenario Comparison" },
-  { id: "ms-hs-boundary",      label: "06 MS-to-HS Boundary" },
-  { id: "load-logic",          label: "07 Load Logic" },
-  { id: "program-table",       label: "08 Program Table" },
-  { id: "supporting-context",  label: "09 Supporting Context" },
+  { id: "executive-view",      label: "01 Executive View" },
+  { id: "decision-frame",      label: "02 Decision Frame" },
+  { id: "core-build-up",       label: "03 Core Build-Up" },
+  { id: "grade-6-cluster",     label: "04 Grade 6 Cluster" },
+  { id: "program-load",        label: "05 Program Load" },
+  { id: "scenario-comparison", label: "06 Scenario Comparison" },
+  { id: "ms-hs-boundary",      label: "07 MS-to-HS Boundary" },
+  { id: "load-logic",          label: "08 Load Logic" },
+  { id: "program-table",       label: "09 Program Table" },
+  { id: "supporting-context",  label: "10 Supporting Context" },
 ];
 
 type MiddleSchoolTabProps = {
@@ -245,7 +247,7 @@ const MiddleSchoolTab = (_props: MiddleSchoolTabProps) => {
     createDefaultProgramSlotsPerSection,
   );
   const [advancedAssumptionsOpen, setAdvancedAssumptionsOpen] = useState(false);
-  const [activeView, setActiveView] = useState<MiddleSchoolView>("decision-frame");
+  const [activeView, setActiveView] = useState<MiddleSchoolView>("executive-view");
 
   const viewClassName = (view: MiddleSchoolView) =>
     cn("ms-view-section", activeView !== view && "ms-screen-inactive");
@@ -486,7 +488,232 @@ const MiddleSchoolTab = (_props: MiddleSchoolTabProps) => {
             </div>
 
             {/* ════════════════════════════════════════════════════════
-                01  DECISION FRAME
+                01  EXECUTIVE VIEW
+                Sustainable Middle School Growth Model
+            ════════════════════════════════════════════════════════ */}
+            <div className={cn(viewClassName("executive-view"), "space-y-6")}>
+
+              {/* Section 1: Executive claim */}
+              <div className="space-y-4">
+                <div>
+                  <div className="text-[9px] font-bold uppercase tracking-[0.3em] text-blue-500">
+                    Middle School · Executive View
+                  </div>
+                  <h2 className="mt-2 text-2xl font-black leading-tight tracking-tight text-slate-900">
+                    Executive View: Sustainable Middle School Growth Model
+                  </h2>
+                </div>
+                <div className="rounded-2xl border border-blue-100 bg-blue-50 p-5 space-y-3">
+                  <p className="text-sm font-bold text-slate-900 leading-relaxed">
+                    Middle School sustainability comes from designing educator functions before formalizing staffing roles.
+                  </p>
+                  <p className="text-xs text-slate-600 leading-relaxed">
+                    The model does not begin with job titles. It begins with instructional functions: core subject load, cluster viability, signature Middle School experiences, advisory/pathways ownership, and bridge constraints.
+                  </p>
+                </div>
+              </div>
+
+              {/* Section 2: Grade 6 operating logic */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="h-6 w-1 bg-blue-500 rounded-full shrink-0" />
+                  <h3 className="text-lg font-bold text-slate-900">Grade 6 operating logic</h3>
+                </div>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  <div className="rounded-2xl border border-slate-200 bg-white p-5 space-y-3">
+                    <div className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Five core subject-domain loads</div>
+                    <p className="text-xs text-slate-600 leading-relaxed">
+                      Grade 6 has five core subject-domain loads:
+                    </p>
+                    <ul className="space-y-1.5">
+                      {["Integrated Mathematics", "Natural Sciences", "Língua Portuguesa", "Social Sciences", "English Language Arts"].map((domain) => (
+                        <li key={domain} className="flex items-center gap-2 text-[11px] font-medium text-slate-700">
+                          <div className="h-1.5 w-1.5 rounded-full bg-blue-400 shrink-0" />
+                          {domain}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div className="rounded-2xl border border-slate-200 bg-white p-5 space-y-3">
+                    <div className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Three educator clusters for launch</div>
+                    <p className="text-xs text-slate-600 leading-relaxed">
+                      For launch, these five core subject-domain loads are organized through three educator clusters:
+                    </p>
+                    <ul className="space-y-2">
+                      {[
+                        { name: "STEM", detail: "Integrated Mathematics + Natural Sciences" },
+                        { name: "Humanities", detail: "Língua Portuguesa + Social Sciences" },
+                        { name: "Global Studies / ELA & Projects", detail: "English Language Arts + Passion Project + Pathways + Global Expression & Leadership" },
+                      ].map((cluster) => (
+                        <li key={cluster.name} className="rounded-xl bg-slate-50 border border-slate-100 px-3 py-2 space-y-0.5">
+                          <div className="text-[10px] font-bold text-slate-800">{cluster.name}</div>
+                          <div className="text-[10px] text-slate-500 leading-relaxed">{cluster.detail}</div>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+                <div className="rounded-xl border border-amber-100 bg-amber-50 px-4 py-3 text-[10px] font-medium leading-relaxed text-amber-800">
+                  This does not mean three fully loaded educators. The cluster model organizes instructional responsibility, while the slot math still shows gaps to the 24-slot minimum.
+                </div>
+              </div>
+
+              {/* Section 3: Stage implications */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="h-6 w-1 bg-blue-500 rounded-full shrink-0" />
+                  <h3 className="text-lg font-bold text-slate-900">Stage implications</h3>
+                </div>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                  <div className="rounded-2xl border border-blue-200 bg-blue-50 p-5 space-y-4">
+                    <div>
+                      <div className="text-[9px] font-bold uppercase tracking-widest text-blue-600 mb-1">Stage</div>
+                      <div className="text-sm font-black text-slate-900">Grade 6 launch</div>
+                    </div>
+                    <div>
+                      <div className="text-[8px] font-bold text-slate-400 uppercase mb-0.5">Core educator signal</div>
+                      <div className="text-lg font-black text-slate-900">5 core subject-domain rows</div>
+                      <div className="text-[9px] text-slate-500 mt-0.5">in the simulator (2 sections, Grade 6 only)</div>
+                    </div>
+                    <div className="space-y-2">
+                      <div>
+                        <div className="text-[8px] font-bold text-slate-400 uppercase mb-0.5">Operating design</div>
+                        <p className="text-[10px] text-slate-700 leading-relaxed">Five domain loads organized through three clusters.</p>
+                      </div>
+                      <div>
+                        <div className="text-[8px] font-bold text-slate-400 uppercase mb-0.5">Sustainability logic</div>
+                        <p className="text-[10px] text-slate-600 leading-relaxed">Signature functions begin as part of educator role design, not as leftover work.</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="rounded-2xl border border-indigo-200 bg-indigo-50 p-5 space-y-4">
+                    <div>
+                      <div className="text-[9px] font-bold uppercase tracking-widest text-indigo-600 mb-1">Stage</div>
+                      <div className="text-sm font-black text-slate-900">Grades 6–7 active</div>
+                    </div>
+                    <div>
+                      <div className="text-[8px] font-bold text-slate-400 uppercase mb-0.5">Core educator signal</div>
+                      <div className="text-lg font-black text-slate-900">5 core educators</div>
+                      <div className="text-[9px] text-slate-500 mt-0.5">core subject-domain signal at 2 sections per grade</div>
+                    </div>
+                    <div className="space-y-2">
+                      <div>
+                        <div className="text-[8px] font-bold text-slate-400 uppercase mb-0.5">Operating design</div>
+                        <p className="text-[10px] text-slate-700 leading-relaxed">Math, Portuguese, and ELA approach viable load; Natural Sciences and Social Sciences remain threshold-sensitive.</p>
+                      </div>
+                      <div>
+                        <div className="text-[8px] font-bold text-slate-400 uppercase mb-0.5">Sustainability logic</div>
+                        <p className="text-[10px] text-slate-600 leading-relaxed">Program-function allocation remains explicit as the division expands.</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="rounded-2xl border border-purple-200 bg-purple-50 p-5 space-y-4">
+                    <div>
+                      <div className="text-[9px] font-bold uppercase tracking-widest text-purple-600 mb-1">Stage</div>
+                      <div className="text-sm font-black text-slate-900">Grades 6–8 active</div>
+                    </div>
+                    <div>
+                      <div className="text-[8px] font-bold text-slate-400 uppercase mb-0.5">Core educator signal</div>
+                      <div className="text-lg font-black text-slate-900">8 core educators</div>
+                      <div className="text-[9px] text-slate-500 mt-0.5">core subject-domain signal at 2 sections per grade</div>
+                    </div>
+                    <div className="space-y-2">
+                      <div>
+                        <div className="text-[8px] font-bold text-slate-400 uppercase mb-0.5">Operating design</div>
+                        <p className="text-[10px] text-slate-700 leading-relaxed">Full Middle School core subject-domain model across two sections per grade.</p>
+                      </div>
+                      <div>
+                        <div className="text-[8px] font-bold text-slate-400 uppercase mb-0.5">Sustainability logic</div>
+                        <p className="text-[10px] text-slate-600 leading-relaxed">Stronger division structure, but still not automatic High School capacity.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Section 4: Why this is sustainable */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="h-6 w-1 bg-blue-500 rounded-full shrink-0" />
+                  <h3 className="text-lg font-bold text-slate-900">Why this can be sustainable</h3>
+                </div>
+                <div className="rounded-2xl border border-slate-200 bg-white p-5 space-y-4">
+                  <p className="text-sm font-semibold text-slate-700 leading-relaxed">
+                    The sustainability logic is not lean staffing by subtraction. It is function-first educator design.
+                  </p>
+                  <p className="text-xs text-slate-600 leading-relaxed">
+                    In Grade 6, educators are not only subject deliverers. Their roles are intentionally distributed to include ownership of the experiences that define the Middle School culture: Passion Projects, Pathways, Advisory, Global Expression, documentation, and student-facing routines.
+                  </p>
+                  <p className="text-xs text-slate-600 leading-relaxed">
+                    This creates a balance between premium service and financial discipline: the model protects the signature learner experience without multiplying narrow roles before section count and grade progression justify them.
+                  </p>
+                  <div className="rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-[10px] font-medium leading-relaxed text-blue-800">
+                    Inspired by São Paulo's operating logic, the Rio model prioritizes educator function before role multiplication: domain teaching, signature-program ownership, advisory/pathways routines, documentation, and bridge constraints are designed together before assumptions become staffing.
+                  </div>
+                </div>
+              </div>
+
+              {/* Section 5: What still requires explicit allocation */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="h-6 w-1 bg-purple-400 rounded-full shrink-0" />
+                  <h3 className="text-lg font-bold text-slate-900">What still requires explicit allocation</h3>
+                </div>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  These are not leftover tasks. They are program-function responsibilities that require explicit allocation and schedule validation.
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {[
+                    "Passion Projects / Project Mentorship",
+                    "Pathways",
+                    "Advisory",
+                    "Global Expression & Leadership",
+                    "Body & Movement",
+                    "Electives / Creative Hub",
+                    "Learning documentation and student-facing routines",
+                    "Babson EPIC when Grade 8 is active",
+                    "Any MS-to-HS bridge/share arrangement",
+                  ].map((item) => (
+                    <div key={item} className="rounded-xl border border-slate-100 bg-white px-3 py-2.5 flex items-start gap-2">
+                      <ChevronRight className="h-3 w-3 text-purple-300 shrink-0 mt-0.5" />
+                      <span className="text-[11px] font-medium text-slate-700 leading-relaxed">{item}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Section 6: Boundary conditions */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="h-6 w-1 bg-amber-400 rounded-full shrink-0" />
+                  <h3 className="text-lg font-bold text-slate-900">Boundary conditions</h3>
+                </div>
+                <div className="rounded-2xl border border-amber-100 bg-amber-50 p-5">
+                  <ul className="space-y-2">
+                    {[
+                      "These are instructional-capacity signals only.",
+                      "Not payroll authorization.",
+                      "Not final FTE.",
+                      "Not final headcount.",
+                      "Not hiring approval.",
+                      "Three Grade 6 clusters are not automatically three fully loaded educators.",
+                      "Program-function load is not automatically absorbed into core educator count.",
+                      "Middle School load space is not automatic High School capacity.",
+                      "Any Grade 9 bridge/share requires validation through the Grade 9 Capacity Ledger and Grade 9 Mock Schedule.",
+                    ].map((item) => (
+                      <li key={item} className="flex items-start gap-2 text-[10px] font-medium text-amber-900 leading-relaxed">
+                        <div className="h-1.5 w-1.5 rounded-full bg-amber-400 shrink-0 mt-1" />
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+            </div>
+
+            {/* ════════════════════════════════════════════════════════
+                02  DECISION FRAME
                 Scenario Offers Connection
             ════════════════════════════════════════════════════════ */}
             <div className={cn(viewClassName("decision-frame"))}>
