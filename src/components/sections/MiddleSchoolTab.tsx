@@ -752,6 +752,75 @@ const MiddleSchoolTab = ({ sections, setSections }: MiddleSchoolTabProps) => {
             </div>
           </div>
 
+          <div className="space-y-5 rounded-2xl border border-rose-100 bg-rose-50 p-5">
+            <div className="flex items-center gap-2">
+              <div className="h-5 w-1 bg-rose-400 rounded-full shrink-0" />
+              <h4 className="text-sm font-bold text-slate-900">MS Educator Pool → Grade 9 Bridge Feasibility</h4>
+            </div>
+            <p className="text-xs text-slate-600 leading-relaxed">
+              Middle School load space can inform Grade 9 bridge/share feasibility, but it is not automatic High School capacity.
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="rounded-2xl border border-rose-200 bg-white p-4 space-y-2">
+                <div className="text-[9px] font-bold text-rose-500 uppercase tracking-widest">Read-only feasibility signal</div>
+                <p className="text-[10px] text-slate-600 leading-relaxed">Load space shows whether a Middle School educator may have room below the maximum teaching threshold. It does not confirm availability for Grade 9.</p>
+              </div>
+              <div className="rounded-2xl border border-rose-200 bg-white p-4 space-y-2">
+                <div className="text-[9px] font-bold text-rose-500 uppercase tracking-widest">MS-primary bridge, if validated</div>
+                <p className="text-[10px] text-slate-600 leading-relaxed">An MS-primary educator may support Grade 9 only if the domain match, HS-level expertise, schedule fit, and remaining-capacity validation all hold.</p>
+              </div>
+              <div className="rounded-2xl border border-rose-200 bg-white p-4 space-y-2">
+                <div className="text-[9px] font-bold text-rose-500 uppercase tracking-widest">HS-oriented shared with MS, if validated</div>
+                <p className="text-[10px] text-slate-600 leading-relaxed">An HS-oriented launch educator may also support Middle School only if load, schedule, and expertise allow. This is the reverse direction from MS-primary bridge.</p>
+              </div>
+              <div className="rounded-2xl border border-rose-200 bg-white p-4 space-y-2">
+                <div className="text-[9px] font-bold text-rose-500 uppercase tracking-widest">Not automatic capacity</div>
+                <p className="text-[10px] text-slate-600 leading-relaxed">Remaining load space must not be treated as confirmed Grade 9 coverage, approved staffing, payroll FTE, final headcount, or hiring authorization.</p>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <div className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Bridge validation requirements</div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                {[
+                  "Subject-domain match",
+                  "HS-level expertise validation",
+                  "Schedule fit",
+                  "Remaining-capacity validation",
+                  "Advisory, project, and program-function conflicts checked",
+                  "Grade 9 Capacity Ledger alignment",
+                ].map((item) => (
+                  <div key={item} className="flex items-start gap-1.5 text-[10px] text-slate-600">
+                    <ChevronRight className="h-2.5 w-2.5 text-rose-300 shrink-0 mt-0.5" />
+                    {item}
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="space-y-2">
+              <div className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Domain examples</div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                <div className="rounded-xl border border-slate-100 bg-white p-3 space-y-1">
+                  <div className="text-[9px] font-bold text-slate-700">ELA</div>
+                  <p className="text-[10px] text-slate-500 leading-relaxed">MS ELA may support Grade 9 English Language Arts only if HS-level ELA expectations and schedule fit are validated. Dedicated HS ELA is still expected as High School expands.</p>
+                </div>
+                <div className="rounded-xl border border-slate-100 bg-white p-3 space-y-1">
+                  <div className="text-[9px] font-bold text-slate-700">Natural Sciences</div>
+                  <p className="text-[10px] text-slate-500 leading-relaxed">MS Natural Sciences does not automatically qualify for Grade 9 Biology/Chemistry foundations; capability validation is required.</p>
+                </div>
+                <div className="rounded-xl border border-slate-100 bg-white p-3 space-y-1">
+                  <div className="text-[9px] font-bold text-slate-700">Portuguese / Redação</div>
+                  <p className="text-[10px] text-slate-500 leading-relaxed">MS Portuguese does not automatically qualify for HS Portuguese / Redação; HS writing expectations must be validated.</p>
+                </div>
+              </div>
+            </div>
+            <p className="text-[10px] text-slate-500 leading-relaxed">
+              Use the High School tab's Grade 9 Capacity Ledger and Grade 9 Mock Schedule to validate any bridge/share hypothesis.
+            </p>
+            <div className="rounded-xl border border-amber-100 bg-amber-50 px-4 py-3 text-[10px] font-medium leading-relaxed text-amber-800">
+              Bridge/share signals are instructional-capacity planning inputs only, not payroll authorization, final FTE, final headcount, or hiring approval.
+            </div>
+          </div>
+
           {msSectionsByGrade.g8 > 0 && (
             <div className="rounded-2xl border border-purple-100 bg-purple-50 p-4 text-xs font-medium leading-relaxed text-slate-600">
               Grade 8 is not cluster-based. Babson EPIC Certificate replaces Passion Projects as the
@@ -794,7 +863,7 @@ const MiddleSchoolTab = ({ sections, setSections }: MiddleSchoolTabProps) => {
             </table>
           </div>
           <p className="text-[10px] text-slate-400 leading-relaxed">
-            Load space is a read-only feasibility signal. It does not automatically represent Grade 9 bridge availability.
+            The Load space column below is a planning indicator only; it does not assign educators to Grade 9. See the MS Educator Pool → Grade 9 Bridge Feasibility section above.
           </p>
           <div className="rounded-2xl border border-rose-100 bg-rose-50 px-4 py-3 text-[10px] font-medium leading-relaxed text-rose-800">
             Middle School remaining load space is not automatic High School capacity. Any Grade 9 bridge requires subject-domain match, HS-level expertise validation, schedule fit, and remaining-capacity validation.
