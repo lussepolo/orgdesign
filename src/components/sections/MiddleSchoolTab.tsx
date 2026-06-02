@@ -335,10 +335,6 @@ const MiddleSchoolTab = ({ sections, setSections }: MiddleSchoolTabProps) => {
 
   return (
     <div className="space-y-8">
-      <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-[10px] font-medium leading-relaxed text-slate-500">
-        This tab translates the Middle School launch logic from the Scenario Offers architecture into instructional load, educator clusters, and program-function planning.
-      </div>
-
       <div className="space-y-5 rounded-2xl border border-blue-100 bg-blue-50 p-5">
         <div className="flex items-center gap-2">
           <div className="h-5 w-1 bg-blue-500 rounded-full shrink-0" />
@@ -467,6 +463,7 @@ const MiddleSchoolTab = ({ sections, setSections }: MiddleSchoolTabProps) => {
                   <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
                     <div className="text-[8px] font-bold text-slate-400 uppercase mb-1">FTE</div>
                     <div className="text-lg font-bold text-slate-900">{stage.fte}</div>
+                    <div className="text-[8px] font-medium text-amber-600 mt-1">Planning premise</div>
                   </div>
                 </div>
                 <div className="space-y-2 mt-auto">
@@ -515,7 +512,7 @@ const MiddleSchoolTab = ({ sections, setSections }: MiddleSchoolTabProps) => {
               <span className="text-[10px] font-bold text-slate-400 uppercase">Grade 7-8</span>
               <Badge variant="purple">Subject Domains</Badge>
             </div>
-            <p className="text-[10px] text-slate-400 italic">Cumulative ramp remains 3 FTE with Grade 6, 7 FTE when Grade 7 opens, and 10 FTE when Grade 8 opens. Project Mentorship starts as a coordinated function, not automatic payroll.</p>
+            <p className="text-[10px] text-slate-400 italic">Planning ramp premise: 3 / 7 / 10 educators by opening stage. Project Mentorship starts as a coordinated function, not automatic payroll.</p>
             <p className="text-[10px] text-slate-400 leading-relaxed">The ramp describes instructional-capacity assumptions. It does not replace the live load simulator and should not be read as approved FTE.</p>
           </div>
         </Card>
@@ -663,6 +660,10 @@ const MiddleSchoolTab = ({ sections, setSections }: MiddleSchoolTabProps) => {
               </div>
             )}
           </details>
+
+          <p className="text-[10px] text-slate-500 leading-relaxed">
+            Grade 6 Cluster Architecture appears when the simulator is set to Grade 6 only.
+          </p>
 
           {grade6ClusterInsight.active && (
             <div className="space-y-4 rounded-2xl border border-blue-100 bg-blue-50 p-4">
@@ -882,7 +883,7 @@ const MiddleSchoolTab = ({ sections, setSections }: MiddleSchoolTabProps) => {
             </table>
           </div>
           <p className="text-[10px] text-slate-400 leading-relaxed">
-            The Load space column below is a planning indicator only; it does not assign educators to Grade 9. See the MS Educator Pool → Grade 9 Bridge Feasibility section above.
+            The Load space column above is a planning indicator only; it does not assign educators to Grade 9. See the MS Educator Pool → Grade 9 Bridge Feasibility section above.
           </p>
           <div className="rounded-2xl border border-rose-100 bg-rose-50 px-4 py-3 text-[10px] font-medium leading-relaxed text-rose-800">
             Middle School remaining load space is not automatic High School capacity. Any Grade 9 bridge requires subject-domain match, HS-level expertise validation, schedule fit, and remaining-capacity validation.
