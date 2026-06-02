@@ -156,6 +156,8 @@ const GRADE_6_CLUSTER_INSIGHTS = [
   {
     name: "STEM Cluster",
     includes: ["Integrated Mathematics", "Natural Sciences"],
+    slotFormula: "Math 6 + Natural Sciences 4 = 10 slots / section",
+    sectionFormula: "10 × 2 sections = 20 slots",
     slotsPerSection: 10,
     slotsAcrossTwoSections: 20,
     contactHoursAcrossTwoSections: 15,
@@ -165,6 +167,8 @@ const GRADE_6_CLUSTER_INSIGHTS = [
   {
     name: "Humanities Cluster",
     includes: ["Língua Portuguesa", "Social Sciences"],
+    slotFormula: "Portuguese 6 + Social Sciences 4 = 10 slots / section",
+    sectionFormula: "10 × 2 sections = 20 slots",
     slotsPerSection: 10,
     slotsAcrossTwoSections: 20,
     contactHoursAcrossTwoSections: 15,
@@ -174,6 +178,8 @@ const GRADE_6_CLUSTER_INSIGHTS = [
   {
     name: "Global Studies / ELA & Projects Cluster",
     includes: ["English Language Arts", "Passion Project", "Pathways", "Global Expression & Leadership"],
+    slotFormula: "ELA 6 + Passion Project 2 + Pathways 1 + Global Expression 2 = 11 slots / section",
+    sectionFormula: "11 × 2 sections = 22 slots",
     slotsPerSection: 11,
     slotsAcrossTwoSections: 22,
     contactHoursAcrossTwoSections: 16.5,
@@ -672,7 +678,10 @@ const MiddleSchoolTab = ({ sections, setSections }: MiddleSchoolTabProps) => {
                 <h4 className="text-sm font-bold text-slate-900">Grade 6 Cluster Architecture</h4>
               </div>
               <p className="text-xs text-slate-600 leading-relaxed">
-                Grade 6 launches through three educator clusters. Each cluster combines core instructional load with complementary program functions to approach the minimum viable weekly load.
+                Grade 6 can be organized through 3 educator clusters, but these are not automatically 3 fully loaded educators. Each cluster still has a gap to the 24-slot minimum, so complementary program-function load or explicit allocation is required.
+              </p>
+              <p className="text-[10px] text-slate-500 leading-relaxed">
+                Grade 6 has two valid planning lenses: 5 core subject-domain rows in the simulator and 3 educator clusters in the launch architecture. The domain rows capture per-subject load; the clusters capture how Grade 6 instruction can be organized before subject specialization deepens.
               </p>
               <p className="text-[10px] text-slate-500 leading-relaxed">
                 World Language is excluded from this Grade 6 model. Each slot equals 45 minutes.
@@ -695,6 +704,10 @@ const MiddleSchoolTab = ({ sections, setSections }: MiddleSchoolTabProps) => {
                         ))}
                       </ul>
                     </div>
+                    <div className="space-y-1">
+                      <p className="text-[10px] font-mono font-medium text-slate-700 bg-slate-50 rounded-lg px-2 py-1.5 leading-relaxed">{cluster.slotFormula}</p>
+                      <p className="text-[10px] font-mono font-medium text-slate-600 bg-slate-50 rounded-lg px-2 py-1.5 leading-relaxed">{cluster.sectionFormula}</p>
+                    </div>
                     <div className="grid grid-cols-2 gap-2">
                       <div className="bg-slate-50 rounded-xl p-2 border border-slate-100">
                         <div className="text-[8px] font-bold text-slate-400 uppercase mb-0.5">Slots / section</div>
@@ -704,12 +717,12 @@ const MiddleSchoolTab = ({ sections, setSections }: MiddleSchoolTabProps) => {
                         <div className="text-[8px] font-bold text-slate-400 uppercase mb-0.5">Slots, 2 sections</div>
                         <div className="text-sm font-bold text-slate-900">{cluster.slotsAcrossTwoSections}</div>
                       </div>
-                      <div className="bg-slate-50 rounded-xl p-2 border border-slate-100">
-                        <div className="text-[8px] font-bold text-slate-400 uppercase mb-0.5">Contact hrs, 2 sec.</div>
-                        <div className="text-sm font-bold text-slate-900">{cluster.contactHoursAcrossTwoSections}</div>
+                      <div className="bg-blue-50 rounded-xl p-2 border border-blue-100">
+                        <div className="text-[8px] font-bold text-blue-500 uppercase mb-0.5">Min viable load</div>
+                        <div className="text-sm font-bold text-blue-700">24 slots</div>
                       </div>
                       <div className="bg-amber-50 rounded-xl p-2 border border-amber-100">
-                        <div className="text-[8px] font-bold text-amber-500 uppercase mb-0.5">Gap to 24-slot min</div>
+                        <div className="text-[8px] font-bold text-amber-500 uppercase mb-0.5">Gap to min</div>
                         <div className="text-sm font-bold text-amber-700">{cluster.gapToMinimum} slots</div>
                       </div>
                     </div>

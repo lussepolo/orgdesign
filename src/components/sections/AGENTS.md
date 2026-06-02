@@ -150,3 +150,57 @@ Preferred High School subviews:
 - Preserve fixed mentorship block logic.
 - Do not use user-facing portfolio evidence, documentation workflow, or evidence curation language.
 - Technical identifiers such as EvidenceLevel or slotEvidenceLevel may remain if they refer to source reliability.
+
+---
+
+## Middle School Grade 6 Cluster Architecture
+
+### Two valid planning lenses
+
+Grade 6 has two valid planning lenses and both must be preserved:
+
+1. **Domain-row simulator lens** — 5 core subject-domain rows:
+   - Integrated Mathematics
+   - Natural Sciences
+   - Língua Portuguesa
+   - Social Sciences
+   - English Language Arts
+
+2. **Cluster launch lens** — 3 educator clusters:
+   - STEM Cluster: Integrated Mathematics + Natural Sciences
+   - Humanities Cluster: Língua Portuguesa + Social Sciences
+   - Global Studies / ELA & Projects Cluster: English Language Arts + Passion Project + Pathways + Global Expression & Leadership
+
+Do not collapse these lenses. Do not treat the domain-row count as the cluster-educator count, or vice versa.
+
+### Cluster load rules
+
+- World Language is excluded from the Grade 6 model.
+- Each slot equals 45 minutes.
+- 3 educator clusters must not be interpreted as 3 fully loaded educators.
+- The minimum viable teaching load is 24 slots per week.
+- Each cluster still has a gap to the 24-slot minimum; complementary program-function load or explicit allocation is required.
+- Program-function load and distributed responsibilities are not leftover capacity.
+
+### Slot math — Grade 6, 2 sections
+
+| Cluster | Formula | Slots / section | Slots, 2 sections | Gap to 24-slot min |
+|---|---|---|---|---|
+| STEM Cluster | Math 6 + Natural Sciences 4 | 10 | 20 | 4 slots |
+| Humanities Cluster | Portuguese 6 + Social Sciences 4 | 10 | 20 | 4 slots |
+| Global Studies / ELA & Projects Cluster | ELA 6 + Passion Project 2 + Pathways 1 + Global Expression 2 | 11 | 22 | 2 slots |
+
+Grade 6 total: 38 slots per section, 76 slots across 2 sections, 57 weekly contact hours.
+
+### Planning premise caveats
+
+These are instructional-capacity planning signals only. They are not payroll authorization, final FTE, final headcount, or hiring approval.
+
+### Forbidden claims
+
+Do not claim:
+- 3 clusters equals 3 fully loaded educators
+- 3 clusters equals approved staffing, final FTE, payroll, or headcount
+- Complementary load is automatic or guaranteed
+- Program-function load or distributed responsibilities are leftover capacity
+- The domain-row educator count from the simulator equals the cluster-educator count
