@@ -1,6 +1,5 @@
 import React, { useMemo, useState } from "react";
 import { BookOpen, ChevronRight, Cpu, Database, Users } from "lucide-react";
-import { motion } from "motion/react";
 import { cn } from "../../lib/utils";
 import {
   BLOCK_OPTIONS,
@@ -66,61 +65,6 @@ const Card = ({
   </div>
 );
 
-const Badge = ({
-  children,
-  variant = "info",
-}: {
-  children: React.ReactNode;
-  variant?: "default" | "warning" | "success" | "info" | "purple" | "danger";
-}) => {
-  const variants = {
-    default: "bg-slate-100 text-slate-600 border-slate-200",
-    warning: "bg-amber-50 text-amber-700 border-amber-100",
-    success: "bg-emerald-50 text-emerald-700 border-emerald-100",
-    info: "bg-blue-50 text-blue-700 border-blue-100",
-    purple: "bg-purple-50 text-purple-700 border-purple-100",
-    danger: "bg-rose-50 text-rose-700 border-rose-100",
-  };
-  return (
-    <span className={cn("px-2 py-0.5 rounded-full text-[8px] md:text-[10px] font-bold uppercase tracking-widest border", variants[variant])}>
-      {children}
-    </span>
-  );
-};
-
-const MS_ROADMAP_DATA = [
-  {
-    year: "2031", phase: "Grade 6 Launch", sections: "1-2 Sections", students: 50, fte: 3,
-    description: "Grade 6 is the category shift into the Designers engine: cluster educators launch Passion Projects, advisory, documentation, critique cycles, and Project Mentorship as a coordinated function.",
-    clusters: [
-      { name: "Mathematics + Natural Sciences foundations", type: "MS" },
-      { name: "Humanities / Portuguese & Social Sciences", type: "MS" },
-      { name: "English Language Arts / Global Studies / Project Design coordination", type: "MS" },
-    ]
-  },
-  {
-    year: "2032", phase: "Grade 6-7 Growth", sections: "2-4 Sections", students: 100, fte: 7,
-    description: "Grade 7 strengthens subject specialization while project-based learning coordination remains a function, not an automatic dedicated payroll role.",
-    clusters: [
-      { name: "Mathematics specialization", type: "MS" },
-      { name: "Portuguese + Social Sciences inquiry", type: "MS" },
-      { name: "Dedicated Natural Sciences domain", type: "MS" },
-      { name: "English Language Arts / Global Studies / Project Design coordination", type: "MS" },
-    ]
-  },
-  {
-    year: "2033", phase: "Grade 6-8 Full MS", sections: "6 Sections", students: 150, fte: 10,
-    description: "Grade 8 completes the Middle School readiness model with clearer subject domains, portfolio evidence, rubrics, and High School transition routines.",
-    clusters: [
-      { name: "Mathematics", type: "MS" },
-      { name: "ELA / Global Studies", type: "MS" },
-      { name: "Portuguese + Social Sciences", type: "MS" },
-      { name: "Dedicated Natural Sciences", type: "MS" },
-      { name: "Learning Experience / Teaching & Learning support", type: "SHARED" }
-    ]
-  }
-];
-
 const MS_OWNERSHIP_PROGRESSION = [
   {
     stage: "Grade 6",
@@ -151,6 +95,71 @@ const MS_OWNERSHIP_PROGRESSION = [
     ],
   },
 ];
+
+const CORE_EDUCATOR_BUILD_UP_STAGES: Array<{
+  stage: string;
+  config: MiddleSchoolSectionsByGrade;
+  interpretation: string[];
+  programFunctions: string[];
+}> = [
+  {
+    stage: "Grade 6 launch",
+    config: { g6: 2, g7: 0, g8: 0 },
+    interpretation: [
+      "Grade 6 has two valid planning lenses: 5 core subject-domain rows in the simulator and 3 educator clusters in the launch architecture.",
+      "The 3 clusters are not automatically 3 fully loaded educators. See the Grade 6 Cluster Architecture slot-gap explanation below.",
+    ],
+    programFunctions: [
+      "Passion Project / Project Mentorship",
+      "Pathways",
+      "Advisory",
+      "Global Expression & Leadership",
+      "Body & Movement",
+      "Electives / Creative Hub",
+    ],
+  },
+  {
+    stage: "Grades 6–7 active",
+    config: { g6: 2, g7: 2, g8: 0 },
+    interpretation: [
+      "Mathematics, Portuguese, and ELA reach the 24-slot minimum threshold at 2 sections per grade.",
+      "Natural Sciences and Social Sciences still require complementary load or explicit allocation. This remains threshold-sensitive.",
+    ],
+    programFunctions: [
+      "Passion Project / Project Mentorship",
+      "Pathways",
+      "Advisory",
+      "Global Expression & Leadership",
+      "Body & Movement",
+      "Electives / Creative Hub",
+    ],
+  },
+  {
+    stage: "Grades 6–8 active",
+    config: { g6: 2, g7: 2, g8: 2 },
+    interpretation: [
+      "Full Middle School core subject-domain model implies 8 core educators at 2 sections per grade. This is the primary model-derived number for core subject educators.",
+      "It is not payroll authorization, final FTE, final headcount, or hiring approval. It does not automatically include program-function load or distributed responsibilities.",
+    ],
+    programFunctions: [
+      "Babson EPIC replacing Passion Project in Grade 8",
+      "Pathways",
+      "Advisory",
+      "Global Expression & Leadership",
+      "Body & Movement",
+      "Electives / Creative Hub",
+      "Project/advisory/pathways commitments",
+    ],
+  },
+];
+
+const CORE_DOMAIN_LEADERSHIP_LABELS: Record<string, string> = {
+  Mathematics: "Integrated Mathematics",
+  "Natural Sciences": "Natural Sciences",
+  Portuguese: "Língua Portuguesa",
+  "Social Sciences": "Social Sciences",
+  "English Language Arts": "English Language Arts",
+};
 
 const GRADE_6_CLUSTER_INSIGHTS = [
   {
@@ -198,7 +207,7 @@ type MiddleSchoolTabProps = {
   setSections: (s: number) => void;
 };
 
-const MiddleSchoolTab = ({ sections, setSections }: MiddleSchoolTabProps) => {
+const MiddleSchoolTab = (_props: MiddleSchoolTabProps) => {
   const [msSectionsByGrade, setMsSectionsByGrade] = useState<MiddleSchoolSectionsByGrade>(DEFAULT_MS_SECTIONS_BY_GRADE);
   const [minViableLoad, setMinViableLoad] = useState(DEFAULT_MIN_VIABLE_LOAD);
   const [maxTeachingLoad, setMaxTeachingLoad] = useState(DEFAULT_MAX_TEACHING_LOAD);
@@ -251,6 +260,28 @@ const MiddleSchoolTab = ({ sections, setSections }: MiddleSchoolTabProps) => {
     }),
     [domainSlotsPerSection, minViableLoad, msSectionsByGrade],
   );
+
+  const coreEducatorBuildUp = useMemo(() => (
+    CORE_EDUCATOR_BUILD_UP_STAGES.map((stage) => {
+      const stageActiveGrades = getActiveGrades(stage.config);
+      const coreDomainRows = deriveEducatorLoadRows({
+        activeGrades: stageActiveGrades,
+        sectionsByGrade: stage.config,
+        domainSlotsPerSection,
+        minViableLoad,
+        maxTeachingLoad,
+      }).map((row) => ({
+        ...row,
+        domain: CORE_DOMAIN_LEADERSHIP_LABELS[row.domain] ?? row.domain,
+      }));
+      return {
+        ...stage,
+        activeGrades: stageActiveGrades,
+        coreDomainRows,
+        coreEducatorsImplied: coreDomainRows.reduce((sum, row) => sum + row.educatorsNeeded, 0),
+      };
+    })
+  ), [domainSlotsPerSection, maxTeachingLoad, minViableLoad]);
 
   const educatorCountSummary = useMemo(() => {
     const scenarios: Array<{
@@ -426,72 +457,81 @@ const MiddleSchoolTab = ({ sections, setSections }: MiddleSchoolTabProps) => {
         </div>
       </div>
 
-      <div className="pt-4">
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-3">
-            <div className="h-8 w-1 bg-blue-500 rounded-full" />
-            <h3 className="text-2xl font-bold text-slate-900">Strategic Roadmap</h3>
-          </div>
-          <div className="flex flex-col items-start gap-2 sm:items-end">
-            <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200 shrink-0">
-              <button onClick={() => setSections(1)} className={cn("px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase transition-all", sections === 1 ? "bg-white text-slate-900 shadow-sm" : "text-slate-400 hover:text-slate-600")}>1 section · 25 learners/grade</button>
-              <button onClick={() => setSections(2)} className={cn("px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase transition-all", sections === 2 ? "bg-white text-slate-900 shadow-sm" : "text-slate-400 hover:text-slate-600")}>2 sections · 50 learners/grade</button>
-            </div>
-            <p className="max-w-sm text-left text-[10px] font-medium leading-relaxed text-slate-400 sm:text-right">
-              Roadmap values are planning premises; section view does not recalculate FTE.
+      <div className="space-y-5 pt-4">
+        <div className="flex items-center gap-3">
+          <div className="h-8 w-1 bg-blue-500 rounded-full" />
+          <div>
+            <h3 className="text-2xl font-bold text-slate-900">Core Educator Build-Up by Grade Stage</h3>
+            <p className="mt-1 max-w-4xl text-xs leading-relaxed text-slate-500">
+              This section replaces the hardcoded roadmap premise with model-derived core educator logic. Counts are based on core subject-domain teaching slots and the current teaching-load thresholds.
             </p>
-            <Badge variant="info">Middle School will be launched in 2031</Badge>
           </div>
         </div>
-        <div className="rounded-2xl border border-amber-100 bg-amber-50 px-4 py-3 mb-6 text-[10px] font-medium leading-relaxed text-amber-800">
-          Instructional-capacity planning only. These roadmap values are planning premises, not payroll authorization, final FTE, final headcount, or hiring approval.
+        <div className="space-y-2 rounded-2xl border border-amber-100 bg-amber-50 px-4 py-3 text-[10px] font-medium leading-relaxed text-amber-800">
+          <p>Core educators implied are instructional-capacity signals only. They are not payroll authorization, final FTE, final headcount, or hiring approval.</p>
+          <p>Program-function load and distributed responsibilities require explicit allocation and are not automatically absorbed into core educator count.</p>
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {MS_ROADMAP_DATA.map((stage, idx) => (
-            <motion.div key={stage.phase} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.1 }}>
-              <Card className="h-full flex flex-col p-6 border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
-                <div className="flex justify-between items-start mb-4">
-                  <div className="flex flex-col">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{stage.year}</span>
-                      <span className="text-[8px] font-bold px-1.5 py-0.5 bg-blue-100 text-blue-600 rounded uppercase tracking-tighter">Middle School</span>
-                    </div>
-                    <h4 className="text-xl font-bold text-slate-900 leading-tight">{stage.phase}</h4>
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+          {coreEducatorBuildUp.map((stage) => (
+            <Card key={stage.stage} className="h-full border border-slate-100 shadow-sm">
+              <div className="space-y-4">
+                <div>
+                  <div className="text-[9px] font-bold uppercase tracking-widest text-blue-600">{stage.stage}</div>
+                  <div className="mt-2 text-[10px] font-medium text-slate-500">
+                    Active grades: {stage.activeGrades.map((grade) => MS_GRADE_LABELS[grade]).join(", ")}
                   </div>
-                  <span className="text-[9px] font-bold px-2 py-1 bg-blue-50 text-blue-700 rounded-full border border-blue-100 uppercase tracking-tight">{stage.sections}</span>
-                </div>
-                <p className="text-xs text-slate-500 leading-relaxed mb-6 whitespace-normal">{stage.description}</p>
-                <div className="grid grid-cols-2 gap-3 mb-6">
-                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
-                    <div className="text-[8px] font-bold text-slate-400 uppercase mb-1">Students</div>
-                    <div className="text-lg font-bold text-slate-900">{stage.students}</div>
+                  <div className="mt-1 text-[10px] font-medium text-slate-500">
+                    Section scenario: 2 sections per active grade
                   </div>
-                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
-                    <div className="text-[8px] font-bold text-slate-400 uppercase mb-1">FTE</div>
-                    <div className="text-lg font-bold text-slate-900">{stage.fte}</div>
-                    <div className="text-[8px] font-medium text-amber-600 mt-1">Planning premise</div>
+                  <div className="mt-1 text-[9px] font-mono text-slate-400">
+                    G6:{stage.config.g6} · G7:{stage.config.g7} · G8:{stage.config.g8}
                   </div>
                 </div>
-                <div className="space-y-2 mt-auto">
-                  <div className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-2">Core Clusters</div>
-                  {stage.clusters.map((cluster) => (
-                    <div key={cluster.name} className="flex items-center justify-between p-2 bg-white border border-slate-50 rounded-lg shadow-sm group hover:border-blue-200 transition-colors">
-                      <div className="flex items-center gap-2 min-w-0">
-                        <ChevronRight className="h-3 w-3 text-slate-300 group-hover:text-blue-400 transition-colors" />
-                        <span className="text-[10px] font-medium text-slate-600 whitespace-normal">{cluster.name}</span>
+                <div>
+                  <div className="mb-2 text-[9px] font-bold uppercase tracking-widest text-slate-400">Core teaching slots by domain</div>
+                  <div className="space-y-1.5">
+                    {stage.coreDomainRows.map((row) => (
+                      <div key={`${stage.stage}-${row.domain}`} className="flex items-start justify-between gap-3 rounded-lg bg-slate-50 px-2 py-1.5 text-[10px] leading-relaxed">
+                        <span className="font-medium text-slate-600">{row.domain}: {row.weeklyCoreSlots} slots</span>
+                        <span className="shrink-0 font-bold text-blue-700">→ {row.educatorsNeeded} educator{row.educatorsNeeded === 1 ? "" : "s"}</span>
                       </div>
-                      <span className={cn("text-[7px] font-bold px-1.5 py-0.5 rounded uppercase tracking-tighter shrink-0", cluster.type === "SHARED" ? "bg-slate-100 text-slate-500" : "bg-blue-50 text-blue-500")}>{cluster.type}</span>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              </Card>
-            </motion.div>
+                <div className="rounded-xl border border-blue-100 bg-blue-50 p-3">
+                  <div className="text-[8px] font-bold uppercase tracking-widest text-blue-500">Core educators implied</div>
+                  <div className="mt-1 text-2xl font-bold text-blue-800">{stage.coreEducatorsImplied} core educators</div>
+                </div>
+                <div>
+                  <div className="mb-1.5 text-[9px] font-bold uppercase tracking-widest text-slate-400">Possible program-function load and distributed responsibilities</div>
+                  <ul className="space-y-1">
+                    {stage.programFunctions.map((programFunction) => (
+                      <li key={`${stage.stage}-${programFunction}`} className="flex items-start gap-1.5 text-[10px] leading-relaxed text-slate-500">
+                        <ChevronRight className="mt-0.5 h-2.5 w-2.5 shrink-0 text-blue-300" />
+                        {programFunction}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div>
+                  <div className="mb-1.5 text-[9px] font-bold uppercase tracking-widest text-slate-400">Interpretation</div>
+                  <div className="space-y-1.5">
+                    {stage.interpretation.map((item) => (
+                      <p key={`${stage.stage}-${item}`} className="text-[10px] leading-relaxed text-slate-500">{item}</p>
+                    ))}
+                  </div>
+                </div>
+                <p className="rounded-xl border border-amber-100 bg-amber-50 px-3 py-2 text-[10px] font-medium leading-relaxed text-amber-800">
+                  These responsibilities require explicit allocation and are not leftover capacity.
+                </p>
+              </div>
+            </Card>
           ))}
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className="lg:col-span-2" title="Middle School: The Bridge" icon={Database}>
+      <div>
+        <Card title="Middle School: The Bridge" icon={Database}>
           <div className="space-y-6">
             <p className="text-sm text-slate-500 leading-relaxed">
               Middle School at Concept is the transition from Lower School Researchers into the Designers learning engine. Grade 6 is not one more Lower School grade: it activates Passion Projects, advisory, Creative Hub access, MUN, academic electives, documentation, portfolio evidence, critique cycles, and Project Mentorship as a coordinated function. A dedicated Project Mentor is conditional on validated cluster educator capacity.
@@ -506,20 +546,6 @@ const MiddleSchoolTab = ({ sections, setSections }: MiddleSchoolTabProps) => {
                 <p className="text-[10px] text-slate-500 leading-relaxed">Portuguese remains connected to Social Sciences through literacy, argumentation, civic and historical inquiry, while ELA / Global Studies carries the project-design language function.</p>
               </div>
             </div>
-          </div>
-        </Card>
-        <Card title="Educator Capacity Premise" icon={Users}>
-          <div className="space-y-4">
-            <div className="flex justify-between items-center p-3 bg-slate-50 rounded-xl border border-slate-100">
-              <span className="text-[10px] font-bold text-slate-400 uppercase">Grade 6</span>
-              <Badge variant="info">Designers Cluster Launch</Badge>
-            </div>
-            <div className="flex justify-between items-center p-3 bg-slate-50 rounded-xl border border-slate-100">
-              <span className="text-[10px] font-bold text-slate-400 uppercase">Grade 7-8</span>
-              <Badge variant="purple">Subject Domains</Badge>
-            </div>
-            <p className="text-[10px] text-slate-400 italic">Planning ramp premise: 3 / 7 / 10 educators by opening stage. Project Mentorship starts as a coordinated function, not automatic payroll.</p>
-            <p className="text-[10px] text-slate-400 leading-relaxed">The ramp describes instructional-capacity assumptions. It does not replace the live load simulator and should not be read as approved FTE.</p>
           </div>
         </Card>
       </div>
@@ -742,7 +768,7 @@ const MiddleSchoolTab = ({ sections, setSections }: MiddleSchoolTabProps) => {
           <div className="space-y-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
             <div className="flex items-center gap-2">
               <div className="h-5 w-1 bg-blue-500 rounded-full shrink-0" />
-              <h4 className="text-sm font-bold text-slate-900">Educator Count by Opening Stage</h4>
+              <h4 className="text-sm font-bold text-slate-900">Scenario Comparison: Core Educators by Section Count</h4>
             </div>
             <p className="text-xs text-slate-600 leading-relaxed">
               These counts are model-derived instructional-capacity signals. They are not payroll authorization, final FTE, final headcount, or hiring approval.
@@ -781,7 +807,7 @@ const MiddleSchoolTab = ({ sections, setSections }: MiddleSchoolTabProps) => {
               ))}
             </div>
             <div className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-[10px] font-medium text-slate-600">
-              Roadmap values such as 3 / 7 / 10 remain planning premises. This panel shows model-derived instructional-capacity signals from the current load assumptions.
+              This broader comparison shows model-derived instructional-capacity signals for 1-section and 2-section scenarios under the current load assumptions.
             </div>
           </div>
 
