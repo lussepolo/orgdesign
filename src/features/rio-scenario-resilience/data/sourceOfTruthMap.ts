@@ -6,6 +6,7 @@ export type SourceOfTruthCategory =
 
 export type SourceOfTruthCurrentStatus =
   | "blocked_source_contract_created"
+  | "source_contract_created_pending_payroll_wiring"
   | "confirmed_in_scaffold"
   | "existing_app_source_found"
   | "existing_app_logic_to_map"
@@ -85,10 +86,15 @@ export const sourceOfTruthMap: SourceOfTruthMapItem[] = [
     itemId: "org_design_structure",
     label: "Org Design Structure",
     category: "decision_lever",
-    currentStatus: "blocked_source_contract_created",
+    currentStatus: "source_contract_created_pending_payroll_wiring",
     existingSourceFiles: [
       "src/features/rio-scenario-resilience/data/orgDesignStructure.ts",
+      "src/features/rio-scenario-resilience/data/orgDesignScenarioExtensions.ts",
+      "src/features/rio-scenario-resilience/docs/orgDesignLogic.md",
       "src/components/sections/OfferScenariosTab.tsx",
+      "src/components/sections/MiddleSchoolTab.tsx",
+      "src/components/sections/middleSchoolLoadModel.ts",
+      "src/components/sections/HighSchoolTab.tsx",
       "src/components/sections/highSchoolScheduleModel.ts",
     ],
     existingSourceFieldsOrFunctions: [
@@ -98,15 +104,18 @@ export const sourceOfTruthMap: SourceOfTruthMapItem[] = [
       "baselineRoleSet",
       "additionalRoleIds",
       "financialStatus",
+      "orgDesignScenarioExtensionRoles",
+      "uses_existing_tab_logic",
+      "source_contract_created_pending_payroll_wiring",
     ],
     shouldReuseExistingLogic: true,
     shouldDuplicateLogic: false,
     integrationRisk:
-      "Requested structural options exist as blocked shells because Scenario Offer role activation data is narrative UI copy, not normalized records.",
+      "Requested structural options, Product Owner role decisions, and the MS/HS educator tab-source rule are captured in a typed source contract, but no payroll adapter wiring exists yet.",
     missingData:
-      "No machine-readable Scenario Offer role activation mapping exists yet.",
+      "Payroll activation is not wired. Scenario-extension roles still need a separate payroll integration task before costs can flow into totals.",
     nextAction:
-      "Create normalized role activation records before mapping any org-design option to display roles, compensation aliases, or finance outputs.",
+      "Review the source contract, then map approved scenario-extension roles into the payroll engine in a separate task without duplicating MS/HS tab logic.",
   },
   {
     itemId: "tuition",
@@ -250,6 +259,10 @@ export const sourceOfTruthMap: SourceOfTruthMapItem[] = [
     currentStatus: "existing_app_source_found",
     existingSourceFiles: [
       "src/constants/teaching.ts",
+      "src/components/sections/MiddleSchoolTab.tsx",
+      "src/components/sections/middleSchoolLoadModel.ts",
+      "src/components/sections/HighSchoolTab.tsx",
+      "src/components/sections/highSchoolScheduleModel.ts",
       "src/hooks/useStaffingLogic.ts",
       "src/lib/payroll/domain.ts",
       "src/lib/payroll/core.ts",
@@ -258,19 +271,22 @@ export const sourceOfTruthMap: SourceOfTruthMapItem[] = [
       "EDUCATOR_LEVELS",
       "LEARNING_ASSISTANT_DETAIL",
       "LEARNING_MONITOR_DETAIL",
-      "HS_FTE_RATIO",
-      "getTeachingLeadFteForGrade",
+      "deriveEducatorLoadRows",
+      "deriveProgramFunctionRows",
+      "buildHighSchoolScenarioCapabilityReport",
+      "buildGrade9CapacityLedger",
+      "buildRioWeeklyLoadByOffer",
       "getAnnualTeachingCost",
       "getMonthlyTeachingCost",
     ],
     shouldReuseExistingLogic: true,
     shouldDuplicateLogic: false,
     integrationRisk:
-      "Teaching economics already drive staffing and revenue logic; duplicating them would fork the model.",
+      "Teaching economics already drive staffing and revenue logic, but MS/HS educator staffing must reference the existing tabs/models rather than prior hardcoded FTE assumptions.",
     missingData:
-      "No separate teaching-economics source should be created.",
+      "No separate teaching-economics source should be created. MS/HS payroll integration still needs a mapping layer that reuses tab-derived staffing logic.",
     nextAction:
-      "Map this existing teaching/staffing layer into the future lever model without changing the formulas.",
+      "Map this existing teaching/staffing layer into the future lever model without changing formulas or duplicating MS/HS tab logic.",
   },
   {
     itemId: "grade_level_enrollment_distribution",
