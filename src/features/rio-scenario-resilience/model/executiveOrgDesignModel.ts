@@ -102,6 +102,8 @@ const orgDesignScenarioOptionById = {
 const existingPayrollRoleSourceLabel = "Existing role headcount progression";
 const fixedSourceContractLabel = "Org-design source contract";
 const readinessLayerSourceLabel = "MS/HS readiness layer";
+const hsCounselorSourceLabel =
+  "User-authorized canonical Executive Org Design rule; same pay-scheme assumption as MS Counselor.";
 
 function getExistingRole(roleId: string) {
   return [
@@ -195,6 +197,10 @@ function getFixedExtensionHeadcount(
 
 function getCounselorHeadcount() {
   return sourceBackedHeadcount(1, "Org-design logic");
+}
+
+function getHsCounselorHeadcount() {
+  return sourceBackedHeadcount(1, hsCounselorSourceLabel);
 }
 
 function getMiddleSchoolHeadcount(
@@ -546,12 +552,20 @@ function buildAcademicDivisionsBranch(year: ExecutiveOrgYear): OrgTreeNode {
   }
 
   if (isHighSchoolActive(year)) {
-    children.push({
-      id: "hs-principal",
-      label: "High School Principal",
-      variant: "yearBased",
-      ...getExistingRoleHeadcount("hs_principal", year),
-    });
+    children.push(
+      {
+        id: "hs-principal",
+        label: "High School Principal",
+        variant: "yearBased",
+        ...getExistingRoleHeadcount("hs_principal", year),
+      },
+      {
+        id: "hs-counselor",
+        label: "HS Counselor",
+        variant: "yearBased",
+        ...getHsCounselorHeadcount(),
+      },
+    );
   }
 
   children.push({
