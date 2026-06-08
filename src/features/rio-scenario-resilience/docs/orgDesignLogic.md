@@ -34,6 +34,15 @@ The org-design model contains three experience scenarios:
 - Learning Experience Designer should use the existing encoded role if present. Do not alias it to another archetype unless the app proves there is no existing role.
 - Security Coordinator should be added only as a supervisory role in Balanced and Premium Experience. Do not add extra Security / Clerks headcount.
 
+## Classroom Educator Package Composition Source Trace
+
+| Package | Org-design canonical composition rule |
+|---|---|
+| Early Years Educator Package | Reference Educator + Assistant + Monitor |
+| Lower School Educator Package | Reference Educator + Assistant |
+
+These package rules describe staffing composition per section/classroom package. Numeric package HC depends on source-backed section counts per grade level and should not be inferred from the composition rule alone.
+
 ## Product Owner Decisions Added After Audit
 
 | Decision Area | Product Owner Rule |

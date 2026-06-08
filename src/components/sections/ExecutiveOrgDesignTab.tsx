@@ -27,6 +27,11 @@ const badgeVariantClasses: Record<OrgTreeNodeVariant, string> = {
   dottedLine: "border-slate-300 bg-white text-slate-500",
 };
 
+const headcountBadgeClasses = {
+  "source-backed": "border-slate-300 bg-slate-900 text-white",
+  "source-pending": "border-amber-200 bg-amber-50 text-amber-700",
+} as const;
+
 const primaryBranchIds = new Set([
   "operations",
   "academic-divisions",
@@ -34,6 +39,27 @@ const primaryBranchIds = new Set([
   "community-library",
   "future-divisions",
 ]);
+
+function HeadcountBadge({ node }: { node: OrgTreeNode }) {
+  if (!node.headcountStatus || node.headcountStatus === "not-applicable") return null;
+
+  const label =
+    node.headcountStatus === "source-backed" && typeof node.headcountValue === "number"
+      ? `HC ${node.headcountValue}`
+      : "HC source pending";
+
+  return (
+    <span
+      title={node.headcountSourceLabel}
+      className={cn(
+        "shrink-0 rounded border px-1.5 py-0.5 text-[9px] font-bold leading-4",
+        headcountBadgeClasses[node.headcountStatus],
+      )}
+    >
+      {label}
+    </span>
+  );
+}
 
 function TreeNode({ node, depth = 0 }: { node: OrgTreeNode; depth?: number }) {
   const variant = node.variant ?? "base";
@@ -50,18 +76,27 @@ function TreeNode({ node, depth = 0 }: { node: OrgTreeNode; depth?: number }) {
       >
         <div className="flex min-w-0 items-start justify-between gap-2">
           <p className="text-[12px] font-bold leading-4 text-slate-900">{node.label}</p>
-          {node.badge && (
-            <span
-              className={cn(
-                "shrink-0 rounded border px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider",
-                badgeVariantClasses[variant],
-              )}
-            >
-              {node.badge}
-            </span>
-          )}
+          <div className="flex shrink-0 flex-wrap justify-end gap-1">
+            {node.badge && (
+              <span
+                className={cn(
+                  "shrink-0 rounded border px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider",
+                  badgeVariantClasses[variant],
+                )}
+              >
+                {node.badge}
+              </span>
+            )}
+            <HeadcountBadge node={node} />
+          </div>
         </div>
         {node.note && <p className="mt-1 text-[11px] font-semibold leading-4 text-slate-500">{node.note}</p>}
+        {node.headcountBasisNote && (
+          <p className="mt-1 text-[10px] font-semibold leading-4 text-slate-500">{node.headcountBasisNote}</p>
+        )}
+        {node.packageBasisNote && (
+          <p className="mt-1 text-[10px] font-semibold leading-4 text-slate-500">{node.packageBasisNote}</p>
+        )}
       </div>
 
       {hasChildren && (
@@ -142,8 +177,15 @@ const ExecutiveOrgDesignTab = () => {
       <section className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_260px]">
         <div className="min-h-[70vh] rounded-md border border-slate-200 bg-slate-50 p-3 shadow-sm md:p-4">
           <div className="mx-auto mb-4 max-w-sm rounded-md border border-slate-800 bg-slate-950 px-4 py-3 text-center text-white shadow-md">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-300">{viewModel.root.badge}</p>
-            <h4 className="text-lg font-bold">{viewModel.root.label}</h4>
+            <div className="mb-1 flex items-center justify-center gap-2">
+              {viewModel.root.badge && (
+                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-300">
+                  {viewModel.root.badge}
+                </p>
+              )}
+              <HeadcountBadge node={viewModel.root} />
+            </div>
+            <h4 className="text-lg font-bold leading-6">{viewModel.root.label}</h4>
           </div>
 
           {directRootNodes.length > 0 && (

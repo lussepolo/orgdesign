@@ -1,3 +1,5 @@
+import { BACKOFFICE_CONFIG, LEADERSHIP_CONFIG, SPECIALISTS_CONFIG } from "../../../constants/leadership";
+import { orgDesignScenarioExtensionRoles } from "../data/orgDesignScenarioExtensions";
 import { getMsHsStaffingReadinessSummary } from "./msHsStaffingReadiness";
 
 export type ExecutiveOrgScenario = "minimum" | "balanced" | "premium";
@@ -21,6 +23,11 @@ export type OrgTreeNodeVariant =
   | "guardrail"
   | "dottedLine";
 
+export type OrgTreeNodeHeadcountStatus =
+  | "source-backed"
+  | "source-pending"
+  | "not-applicable";
+
 export interface OrgTreeNode {
   id: string;
   label: string;
@@ -28,6 +35,11 @@ export interface OrgTreeNode {
   note?: string;
   children?: OrgTreeNode[];
   variant?: OrgTreeNodeVariant;
+  headcountValue?: number | null;
+  headcountStatus?: OrgTreeNodeHeadcountStatus;
+  headcountSourceLabel?: string;
+  headcountBasisNote?: string;
+  packageBasisNote?: string;
 }
 
 export interface ExecutiveOrgScenarioOption {
@@ -81,6 +93,41 @@ const scenarioPostureById: Record<ExecutiveOrgScenario, string> = {
   premium: "Academic Coherence Model",
 };
 
+const orgDesignScenarioOptionById = {
+  minimum: "minimum_experience",
+  balanced: "balanced_experience",
+  premium: "premium_experience",
+} as const;
+
+const existingPayrollRoleSourceLabel = "Existing role headcount progression";
+const fixedSourceContractLabel = "Org-design source contract";
+const readinessLayerSourceLabel = "MS/HS readiness layer";
+
+const pendingHeadcount = (
+  sourceLabel = "Source-backed composition incomplete",
+): Pick<OrgTreeNode, "headcountValue" | "headcountStatus" | "headcountSourceLabel"> => ({
+  headcountValue: null,
+  headcountStatus: "source-pending",
+  headcountSourceLabel: sourceLabel,
+});
+
+const notApplicableHeadcount = (): Pick<
+  OrgTreeNode,
+  "headcountValue" | "headcountStatus"
+> => ({
+  headcountValue: null,
+  headcountStatus: "not-applicable",
+});
+
+const sourceBackedHeadcount = (
+  headcountValue: number,
+  sourceLabel: string,
+): Pick<OrgTreeNode, "headcountValue" | "headcountStatus" | "headcountSourceLabel"> => ({
+  headcountValue,
+  headcountStatus: "source-backed",
+  headcountSourceLabel: sourceLabel,
+});
+
 function formatGrades(grades: readonly string[]) {
   if (grades.length === 0) return "Inactive";
   if (grades.length === 1) return `${grades[0].toUpperCase()} active`;
@@ -88,17 +135,68 @@ function formatGrades(grades: readonly string[]) {
   return `${grades[0].toUpperCase()}-${grades[grades.length - 1].toUpperCase()} active`;
 }
 
-function formatMsNote(year: ExecutiveOrgYear) {
-  const summary = getMsHsStaffingReadinessSummary({ year }).middleSchool;
-  if (summary.activeGrades.length === 0) return "Inactive";
-  if (summary.coreEducators === null) return "HC pending";
-  return `HC ${summary.coreEducators}`;
+function getExistingRoleHeadcount(
+  roleId: string,
+  year: ExecutiveOrgYear,
+): Pick<OrgTreeNode, "headcountValue" | "headcountStatus" | "headcountSourceLabel"> {
+  const role = [
+    ...LEADERSHIP_CONFIG,
+    ...BACKOFFICE_CONFIG,
+    ...SPECIALISTS_CONFIG,
+  ].find((candidate) => candidate.id === roleId);
+
+  if (!role) return pendingHeadcount("Existing role mapping unresolved");
+
+  return sourceBackedHeadcount(
+    role.headcount[year] ?? 0,
+    existingPayrollRoleSourceLabel,
+  );
 }
 
-function formatHsNote(year: ExecutiveOrgYear) {
+function getFixedExtensionHeadcount(
+  roleId: string,
+  scenario: ExecutiveOrgScenario,
+  year: ExecutiveOrgYear,
+): Pick<OrgTreeNode, "headcountValue" | "headcountStatus" | "headcountSourceLabel"> {
+  const role = orgDesignScenarioExtensionRoles.find((candidate) => candidate.id === roleId);
+  const scenarioOption = orgDesignScenarioOptionById[scenario];
+
+  if (!role || !role.activeIn.includes(scenarioOption)) {
+    return notApplicableHeadcount();
+  }
+
+  if (
+    role.headcountSource === "fixed" &&
+    typeof role.headcount === "number" &&
+    typeof role.activationYear === "number" &&
+    year >= role.activationYear
+  ) {
+    return sourceBackedHeadcount(role.headcount, fixedSourceContractLabel);
+  }
+
+  return pendingHeadcount(fixedSourceContractLabel);
+}
+
+function getCounselorHeadcount() {
+  return sourceBackedHeadcount(1, "Org-design logic");
+}
+
+function getMiddleSchoolHeadcount(
+  year: ExecutiveOrgYear,
+): Pick<OrgTreeNode, "headcountValue" | "headcountStatus" | "headcountSourceLabel"> {
+  const summary = getMsHsStaffingReadinessSummary({ year }).middleSchool;
+  if (summary.activeGrades.length === 0) return notApplicableHeadcount();
+  if (summary.coreEducators === null) return pendingHeadcount(readinessLayerSourceLabel);
+  return sourceBackedHeadcount(summary.coreEducators, readinessLayerSourceLabel);
+}
+
+function getHighSchoolHeadcount(
+  year: ExecutiveOrgYear,
+): Pick<OrgTreeNode, "headcountValue" | "headcountStatus" | "headcountSourceLabel"> {
   const summary = getMsHsStaffingReadinessSummary({ year }).highSchool;
-  if (summary.activeGrades.length === 0) return "Inactive";
-  return `HC ${summary.coreEducators ?? 0}`;
+  if (summary.activeGrades.length === 0) return notApplicableHeadcount();
+  if (summary.coreEducators === null) return pendingHeadcount(readinessLayerSourceLabel);
+  return sourceBackedHeadcount(summary.coreEducators, readinessLayerSourceLabel);
 }
 
 function getYearSignal(year: ExecutiveOrgYear) {
@@ -113,21 +211,25 @@ function futureDivisionNodes(year: ExecutiveOrgYear): OrgTreeNode[] {
   const summary = getMsHsStaffingReadinessSummary({ year });
   const msGrades = formatGrades(summary.middleSchool.activeGrades);
   const hsGrades = formatGrades(summary.highSchool.activeGrades);
+  const middleSchoolActive = summary.middleSchool.activeGrades.length > 0;
+  const highSchoolActive = summary.highSchool.activeGrades.length > 0;
 
   return [
     {
       id: "middle-school-core-educators",
       label: "Middle School Core Educators",
-      badge: formatMsNote(year),
+      badge: middleSchoolActive ? "Readiness layer" : "Inactive",
       note: msGrades,
       variant: "yearBased",
+      ...getMiddleSchoolHeadcount(year),
     },
     {
       id: "high-school-core-educators",
       label: "High School Core Educators",
-      badge: formatHsNote(year),
+      badge: highSchoolActive ? "Readiness layer" : "Inactive",
       note: hsGrades,
       variant: "yearBased",
+      ...getHighSchoolHeadcount(year),
     },
     {
       id: "hs-pool-excluded",
@@ -135,17 +237,27 @@ function futureDivisionNodes(year: ExecutiveOrgYear): OrgTreeNode[] {
       badge: "Guardrail",
       note: "Excluded from HS totals",
       variant: "guardrail",
+      ...notApplicableHeadcount(),
     },
   ];
 }
 
-function buildOperationsBranch(scenario: ExecutiveOrgScenario): OrgTreeNode {
+function buildOperationsBranch(
+  scenario: ExecutiveOrgScenario,
+  year: ExecutiveOrgYear,
+): OrgTreeNode {
   const children: OrgTreeNode[] = [
-    { id: "operations-coordinator", label: "Operations Coordinator", variant: "base" },
+    {
+      id: "operations-coordinator",
+      label: "Operations Coordinator",
+      variant: "base",
+      ...getExistingRoleHeadcount("ops", year),
+    },
     {
       id: "secretary",
       label: "Secretary",
       variant: "base",
+      ...getExistingRoleHeadcount("secretary", year),
       children: [
         {
           id: "secretary-family-dotted",
@@ -153,11 +265,22 @@ function buildOperationsBranch(scenario: ExecutiveOrgScenario): OrgTreeNode {
           badge: "Dotted line",
           note: "To Family Services",
           variant: "dottedLine",
+          ...notApplicableHeadcount(),
         },
       ],
     },
-    { id: "nurse-intern", label: "Nurse Intern", variant: "base" },
-    { id: "security-clerks", label: "Security / Clerks", variant: "base" },
+    {
+      id: "nurse-intern",
+      label: "Nurse Intern",
+      variant: "base",
+      ...getExistingRoleHeadcount("nursing_intern", year),
+    },
+    {
+      id: "security-clerks",
+      label: "Security / Clerks",
+      variant: "base",
+      ...getExistingRoleHeadcount("clerk", year),
+    },
   ];
 
   if (scenario !== "minimum") {
@@ -167,24 +290,56 @@ function buildOperationsBranch(scenario: ExecutiveOrgScenario): OrgTreeNode {
       badge: "Scenario addition",
       note: "Functional line to Clerks",
       variant: "scenarioAddition",
+      ...getFixedExtensionHeadcount("security_coordinator", scenario, year),
       children: [
         {
           id: "security-functional-line",
           label: "Security / Clerks",
           badge: "Functional line",
           variant: "dottedLine",
+          ...notApplicableHeadcount(),
         },
       ],
     });
   }
 
   children.push(
-    { id: "maintenance", label: "Maintenance", variant: "base" },
-    { id: "marketing-analyst", label: "Marketing Analyst", variant: "base" },
-    { id: "events-assistant", label: "Events Assistant", variant: "base" },
-    { id: "financial-analyst", label: "Financial Analyst", variant: "base" },
-    { id: "financial-assistant", label: "Financial Assistant", variant: "base" },
-    { id: "hr-analyst", label: "HR Analyst", variant: "base" },
+    {
+      id: "maintenance",
+      label: "Maintenance",
+      variant: "base",
+      ...getExistingRoleHeadcount("maintenance", year),
+    },
+    {
+      id: "marketing-analyst",
+      label: "Marketing Analyst",
+      variant: "base",
+      ...getExistingRoleHeadcount("marketing", year),
+    },
+    {
+      id: "events-assistant",
+      label: "Events Assistant",
+      variant: "base",
+      ...getFixedExtensionHeadcount("events_assistant", scenario, year),
+    },
+    {
+      id: "financial-analyst",
+      label: "Financial Analyst",
+      variant: "base",
+      ...getExistingRoleHeadcount("finance", year),
+    },
+    {
+      id: "financial-assistant",
+      label: "Financial Assistant",
+      variant: "base",
+      ...getExistingRoleHeadcount("finance_assistant", year),
+    },
+    {
+      id: "hr-analyst",
+      label: "HR Analyst",
+      variant: "base",
+      ...getExistingRoleHeadcount("hr", year),
+    },
   );
 
   return {
@@ -195,10 +350,23 @@ function buildOperationsBranch(scenario: ExecutiveOrgScenario): OrgTreeNode {
   };
 }
 
-function buildLearningEcosystemBranch(scenario: ExecutiveOrgScenario): OrgTreeNode {
+function buildLearningEcosystemBranch(
+  scenario: ExecutiveOrgScenario,
+  year: ExecutiveOrgYear,
+): OrgTreeNode {
   const children: OrgTreeNode[] = [
-    { id: "learning-experience-designer", label: "Learning Experience Designer", variant: "base" },
-    { id: "language-acquisition-coach", label: "Language Acquisition Coach", variant: "base" },
+    {
+      id: "learning-experience-designer",
+      label: "Learning Experience Designer",
+      variant: "base",
+      ...getExistingRoleHeadcount("led", year),
+    },
+    {
+      id: "language-acquisition-coach",
+      label: "Language Acquisition Coach",
+      variant: "base",
+      ...getFixedExtensionHeadcount("language_acquisition_coach", scenario, year),
+    },
   ];
 
   if (scenario !== "minimum") {
@@ -209,6 +377,7 @@ function buildLearningEcosystemBranch(scenario: ExecutiveOrgScenario): OrgTreeNo
         badge: "Functional grouping",
         note: "Balanced and Premium",
         variant: "scenarioAddition",
+        ...notApplicableHeadcount(),
       },
       {
         id: "personalized-learning-associate",
@@ -216,15 +385,36 @@ function buildLearningEcosystemBranch(scenario: ExecutiveOrgScenario): OrgTreeNo
         badge: "Scenario addition",
         note: "Balanced and Premium",
         variant: "scenarioAddition",
+        ...getFixedExtensionHeadcount("personalized_learning_associate_educator", scenario, year),
       },
     );
   }
 
   children.push(
-    { id: "edtech-coordinator", label: "EdTech Coordinator", variant: "base" },
-    { id: "it-technician", label: "IT Technician", variant: "base" },
-    { id: "maker-space-assistant", label: "Maker Space Assistant", variant: "base" },
-    { id: "after-school-coordinator", label: "After School Coordinator", variant: "base" },
+    {
+      id: "edtech-coordinator",
+      label: "EdTech Coordinator",
+      variant: "base",
+      ...getExistingRoleHeadcount("edtech", year),
+    },
+    {
+      id: "it-technician",
+      label: "IT Technician",
+      variant: "base",
+      ...getExistingRoleHeadcount("it", year),
+    },
+    {
+      id: "maker-space-assistant",
+      label: "Maker Space Assistant",
+      variant: "base",
+      ...getFixedExtensionHeadcount("maker_space_assistant", scenario, year),
+    },
+    {
+      id: "after-school-coordinator",
+      label: "After School Coordinator",
+      variant: "base",
+      ...getExistingRoleHeadcount("after_school", year),
+    },
   );
 
   return {
@@ -248,6 +438,7 @@ export function buildExecutiveOrgDesignTree(
             badge: "Scenario addition",
             note: "Premium only",
             variant: "scenarioAddition",
+            ...getFixedExtensionHeadcount("curriculum_and_assessment_designer", scenario, year),
           },
         ]
       : [];
@@ -256,31 +447,56 @@ export function buildExecutiveOrgDesignTree(
     id: "head-of-school",
     label: "Head of School",
     badge: "Root",
+    ...getExistingRoleHeadcount("hos", year),
     children: [
       ...premiumChildren,
-      buildOperationsBranch(scenario),
+      buildOperationsBranch(scenario, year),
       {
         id: "academic-divisions",
         label: "Academic Divisions",
         variant: "base",
         children: [
-          { id: "ey-principal", label: "Early Years Principal", variant: "base" },
-          { id: "ey-counselor", label: "EY Counselor", variant: "base" },
+          {
+            id: "ey-principal",
+            label: "Early Years Principal",
+            variant: "base",
+            ...getExistingRoleHeadcount("ey_principal", year),
+          },
+          {
+            id: "ey-counselor",
+            label: "EY Counselor",
+            variant: "base",
+            ...getCounselorHeadcount(),
+          },
           {
             id: "ey-educator-package",
             label: "Early Years Educator Package",
-            badge: "HC source pending",
             note: "Educator + Assistant + Monitor",
             variant: "base",
+            headcountBasisNote: "Section-driven HC: depends on sections per grade level.",
+            packageBasisNote: "Package basis: Reference Educator + Assistant + Monitor.",
+            ...pendingHeadcount("Package composition incomplete"),
           },
-          { id: "ls-principal", label: "Lower School Principal", variant: "base" },
-          { id: "ls-counselor", label: "LS Counselor", variant: "base" },
+          {
+            id: "ls-principal",
+            label: "Lower School Principal",
+            variant: "base",
+            ...getExistingRoleHeadcount("ls_principal", year),
+          },
+          {
+            id: "ls-counselor",
+            label: "LS Counselor",
+            variant: "base",
+            ...getCounselorHeadcount(),
+          },
           {
             id: "ls-educator-package",
             label: "Lower School Educator Package",
-            badge: "HC source pending",
             note: "Educator + Assistant",
             variant: "base",
+            headcountBasisNote: "Section-driven HC: depends on sections per grade level.",
+            packageBasisNote: "Package basis: Reference Educator + Assistant.",
+            ...pendingHeadcount("Package composition incomplete"),
           },
           {
             id: "specialist-educators",
@@ -288,30 +504,49 @@ export function buildExecutiveOrgDesignTree(
             badge: "Dotted line",
             note: "To EY and LS Principals",
             variant: "dottedLine",
+            headcountBasisNote: "Aggregate node: individual specialist roles source separately.",
+            ...pendingHeadcount("Aggregate specialist composition unresolved"),
           },
         ],
       },
-      buildLearningEcosystemBranch(scenario),
+      buildLearningEcosystemBranch(scenario, year),
       {
         id: "community-library",
         label: "Community & Library",
         variant: "base",
         children: [
-          { id: "enrollment-family-services", label: "Enrollment & Family Services Coordinator", variant: "base" },
-          { id: "family-engagement-analyst", label: "Family Engagement Analyst", variant: "base" },
+          {
+            id: "enrollment-family-services",
+            label: "Enrollment & Family Services Coordinator",
+            variant: "base",
+            ...pendingHeadcount("Existing payroll role mapping unresolved"),
+          },
+          {
+            id: "family-engagement-analyst",
+            label: "Family Engagement Analyst",
+            variant: "base",
+            ...getExistingRoleHeadcount("family", year),
+          },
           {
             id: "secretary-dotted-support",
             label: "Secretary dotted-line support",
             badge: "Dotted line",
             variant: "dottedLine",
+            ...notApplicableHeadcount(),
           },
-          { id: "librarian", label: "Librarian", variant: "base" },
+          {
+            id: "librarian",
+            label: "Librarian",
+            variant: "base",
+            ...getExistingRoleHeadcount("library", year),
+          },
           {
             id: "librarian-principal-support",
             label: "Librarian principal support",
             badge: "Dotted line",
             note: "To EY and LS",
             variant: "dottedLine",
+            ...notApplicableHeadcount(),
           },
         ],
       },
@@ -346,8 +581,8 @@ export function buildExecutiveOrgDesignTree(
       },
       {
         label: "Source guardrails",
-        value: "MS/HS from readiness layer",
-        note: "HS pool excluded; packages pending totalizer",
+        value: "HC shown only where source-backed; incomplete packages remain marked as HC source pending.",
+        note: "Educator package HC is section-driven; numeric HC appears only when section counts and package composition are fully source-backed.",
       },
     ],
   };
