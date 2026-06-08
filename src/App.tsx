@@ -21,6 +21,7 @@ import {
   ArrowLeft,
   ArrowRight,
   DollarSign,
+  GitBranch,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { clsx, type ClassValue } from 'clsx';
@@ -35,6 +36,7 @@ import HiringProfileCardsTab from "./components/sections/HiringProfileCardsTab";
 import PayrollProjectionTab from "./components/sections/PayrollProjectionTab";
 import ViabilitySimulatorTab from "./components/sections/ViabilitySimulatorTab";
 import OfferScenariosTab from "./components/sections/OfferScenariosTab";
+import ExecutiveOrgDesignTab from "./components/sections/ExecutiveOrgDesignTab";
 import EarlyYearsTab from "./components/sections/EarlyYearsTab";
 import LowerSchoolTab from "./components/sections/LowerSchoolTab";
 import MiddleSchoolTab from "./components/sections/MiddleSchoolTab";
@@ -44,12 +46,13 @@ import LoadTab from "./components/sections/LoadTab";
 import AboutModal from "./components/sections/AboutModal";
 
 // --- Types ---
-export type TabId = "cover" | "staffing" | "offer-scenarios" | "hr" | "early-years" | "lower-school" | "ms" | "hs" | "load" | "payroll" | "viability";
+export type TabId = "cover" | "staffing" | "offer-scenarios" | "executive-org-design" | "hr" | "early-years" | "lower-school" | "ms" | "hs" | "load" | "payroll" | "viability";
 
 const APP_TAB_ORDER: TabId[] = [
   "cover",
   "staffing",
   "offer-scenarios",
+  "executive-org-design",
   "hr",
   "early-years",
   "lower-school",
@@ -191,6 +194,7 @@ export default function App() {
             <TabButton active={activeTab === "cover"} onClick={() => setActiveTab("cover")} label="Cover" icon={LayoutDashboard} />
             <TabButton active={activeTab === "staffing"} onClick={() => setActiveTab("staffing")} label="Staffing Model" icon={Calculator} />
             <TabButton active={activeTab === "offer-scenarios"} onClick={() => setActiveTab("offer-scenarios")} label="Cenários da Oferta" icon={Layers} />
+            <TabButton active={activeTab === "executive-org-design"} onClick={() => setActiveTab("executive-org-design")} label="Executive Org Design" icon={GitBranch} />
             <TabButton active={activeTab === "hr"} onClick={() => setActiveTab("hr")} label="Hiring Profile Cards" icon={FileText} />
             <TabButton active={activeTab === "early-years"} onClick={() => setActiveTab("early-years")} label="Early Years" icon={Baby} />
             <TabButton active={activeTab === "lower-school"} onClick={() => setActiveTab("lower-school")} label="Lower School" icon={School} />
@@ -238,6 +242,7 @@ export default function App() {
               {activeTab === "ms" && "Middle School Transition"}
               {activeTab === "staffing" && "Staffing Capacity & Growth"}
               {activeTab === "offer-scenarios" && "Cenários da Oferta"}
+              {activeTab === "executive-org-design" && "Executive Org Design"}
               {activeTab === "hs" && "High School Expansion Strategy"}
               {activeTab === "payroll" && "Payroll Projection & Cost Stack"}
               {activeTab === "viability" && "Viability Decision Simulator"}
@@ -250,6 +255,7 @@ export default function App() {
               {activeTab === "ms" && "Strategic transition from cluster-based to specialist-led instruction."}
               {activeTab === "staffing" && "A dynamic model mapping enrollment density to pedagogical caliber and budget impact."}
               {activeTab === "offer-scenarios" && "Board-facing scenario architecture: grade ceiling, capacity, target enrollment, academic ecosystem, and signature-program maturity."}
+              {activeTab === "executive-org-design" && "Full Rio organization tree by scenario and year."}
               {activeTab === "hs" && "Strategic roadmap for Grades 9-12, transitioning to dedicated specialists."}
               {activeTab === "payroll" && "Board view of class-driven staffing cost, revenue less modeled FOPAG, and payroll coverage across the approved scenarios."}
               {activeTab === "viability" && "Board-facing baseline plus directional sensitivity and threshold planning signals; not a final financial model."}
@@ -267,6 +273,7 @@ export default function App() {
             {activeTab === "ms" && <MiddleSchoolTab sections={msSections} setSections={setMsSections} />}
             {activeTab === "staffing" && (<StaffingTab setActiveTab={setActiveTab} onShowAbout={() => setShowAboutModal(true)} selectedYear={selectedYear} setSelectedYear={setSelectedYear} />)}
             {activeTab === "offer-scenarios" && <OfferScenariosTab />}
+            {activeTab === "executive-org-design" && <ExecutiveOrgDesignTab />}
             {activeTab === "hs" && <HighSchoolTab sections={hsSections} setSections={setHsSections} />}
             {activeTab === "payroll" && <PayrollProjectionTab />}
             {activeTab === "viability" && <ViabilitySimulatorTab />}
