@@ -43,6 +43,10 @@ The org-design model contains three experience scenarios:
 
 These package rules describe staffing composition per section/classroom package. Numeric package HC depends on source-backed section counts per grade level and should not be inferred from the composition rule alone.
 
+## Executive Static Tree Year Rendering Rule
+
+Executive Org Design renders the active organization for the selected year. Source-backed zero-HC roles are suppressed until their first source-backed positive-HC activation year; future activation is intended to be shown through year progression rather than static-card density.
+
 ## Product Owner Decisions Added After Audit
 
 | Decision Area | Product Owner Rule |

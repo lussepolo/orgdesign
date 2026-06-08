@@ -103,6 +103,14 @@ const existingPayrollRoleSourceLabel = "Existing role headcount progression";
 const fixedSourceContractLabel = "Org-design source contract";
 const readinessLayerSourceLabel = "MS/HS readiness layer";
 
+function getExistingRole(roleId: string) {
+  return [
+    ...LEADERSHIP_CONFIG,
+    ...BACKOFFICE_CONFIG,
+    ...SPECIALISTS_CONFIG,
+  ].find((candidate) => candidate.id === roleId);
+}
+
 const pendingHeadcount = (
   sourceLabel = "Source-backed composition incomplete",
 ): Pick<OrgTreeNode, "headcountValue" | "headcountStatus" | "headcountSourceLabel"> => ({
@@ -139,11 +147,7 @@ function getExistingRoleHeadcount(
   roleId: string,
   year: ExecutiveOrgYear,
 ): Pick<OrgTreeNode, "headcountValue" | "headcountStatus" | "headcountSourceLabel"> {
-  const role = [
-    ...LEADERSHIP_CONFIG,
-    ...BACKOFFICE_CONFIG,
-    ...SPECIALISTS_CONFIG,
-  ].find((candidate) => candidate.id === roleId);
+  const role = getExistingRole(roleId);
 
   if (!role) return pendingHeadcount("Existing role mapping unresolved");
 
@@ -151,6 +155,18 @@ function getExistingRoleHeadcount(
     role.headcount[year] ?? 0,
     existingPayrollRoleSourceLabel,
   );
+}
+
+function shouldRenderExistingRoleForYear(roleId: string, year: ExecutiveOrgYear) {
+  const role = getExistingRole(roleId);
+  if (!role) return true;
+
+  const currentHeadcount = role.headcount[year] ?? 0;
+  const hasLaterPositiveHeadcount = EXECUTIVE_ORG_YEARS.some(
+    (option) => option.year > year && (role.headcount[option.year] ?? 0) > 0,
+  );
+
+  return currentHeadcount > 0 || !hasLaterPositiveHeadcount;
 }
 
 function getFixedExtensionHeadcount(
@@ -328,12 +344,18 @@ function buildOperationsBranch(
       variant: "base",
       ...getExistingRoleHeadcount("finance", year),
     },
-    {
+  );
+
+  if (shouldRenderExistingRoleForYear("finance_assistant", year)) {
+    children.push({
       id: "financial-assistant",
       label: "Financial Assistant",
       variant: "base",
       ...getExistingRoleHeadcount("finance_assistant", year),
-    },
+    });
+  }
+
+  children.push(
     {
       id: "hr-analyst",
       label: "HR Analyst",
