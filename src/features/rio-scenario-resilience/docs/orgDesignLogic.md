@@ -26,6 +26,7 @@ The org-design model contains three experience scenarios:
 - EY has one Counselor.
 - LS has one Counselor.
 - MS Counselor activates through existing payroll-tab logic when Middle School opens.
+- HS Counselor is not rendered as a separate Executive Org Design node until a division-specific source rule is confirmed. Existing counselor HC is aggregate and should not be interpreted as an HS-specific allocation without governance approval.
 - IT Technician reports directly to EdTech Coordinator.
 - Language Acquisition and Performance Coach is not a separate role. It is the same role as Language Acquisition Coach.
 - Security / Clerks normalize to the existing Clerk / Portaria payroll role and use existing system headcount.

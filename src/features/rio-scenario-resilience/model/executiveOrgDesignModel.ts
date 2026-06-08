@@ -562,6 +562,26 @@ function buildAcademicDivisionsBranch(year: ExecutiveOrgYear): OrgTreeNode {
     variant: "dottedLine",
     headcountBasisNote: "Aggregate node: individual specialist roles source separately.",
     ...pendingHeadcount("Aggregate specialist composition unresolved"),
+    children: [
+      {
+        id: "arts-educator",
+        label: "Arts Educator",
+        variant: "base",
+        ...getExistingRoleHeadcount("arts", year),
+      },
+      {
+        id: "body-movement-educator",
+        label: "Body & Movement Educator",
+        variant: "base",
+        ...getExistingRoleHeadcount("body", year),
+      },
+      {
+        id: "music-educator",
+        label: "Music Educator",
+        variant: "base",
+        ...getExistingRoleHeadcount("music", year),
+      },
+    ],
   });
 
   return {
