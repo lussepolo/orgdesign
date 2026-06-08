@@ -215,6 +215,30 @@ function getHighSchoolHeadcount(
   return sourceBackedHeadcount(summary.coreEducators, readinessLayerSourceLabel);
 }
 
+function getIncrementalExistingRoleHeadcount(
+  roleId: string,
+  baselineYear: ExecutiveOrgYear,
+  year: ExecutiveOrgYear,
+  sourceLabel: string,
+): Pick<OrgTreeNode, "headcountValue" | "headcountStatus" | "headcountSourceLabel"> {
+  const role = getExistingRole(roleId);
+
+  if (!role) return pendingHeadcount("Existing role mapping unresolved");
+
+  return sourceBackedHeadcount(
+    Math.max(0, (role.headcount[year] ?? 0) - (role.headcount[baselineYear] ?? 0)),
+    sourceLabel,
+  );
+}
+
+function isMiddleSchoolActive(year: ExecutiveOrgYear) {
+  return getMsHsStaffingReadinessSummary({ year }).middleSchool.activeGrades.length > 0;
+}
+
+function isHighSchoolActive(year: ExecutiveOrgYear) {
+  return getMsHsStaffingReadinessSummary({ year }).highSchool.activeGrades.length > 0;
+}
+
 function getYearSignal(year: ExecutiveOrgYear) {
   if (year < 2031) return `${year}: Base opening structure`;
   if (year < 2033) return `${year}: MS begins, HC pending`;
@@ -290,6 +314,12 @@ function buildOperationsBranch(
       label: "Nurse Intern",
       variant: "base",
       ...getExistingRoleHeadcount("nursing_intern", year),
+    },
+    {
+      id: "nurse-technician",
+      label: "Nurse Technician",
+      variant: "base",
+      ...getExistingRoleHeadcount("nurse", year),
     },
     {
       id: "security-clerks",
@@ -447,6 +477,101 @@ function buildLearningEcosystemBranch(
   };
 }
 
+function buildAcademicDivisionsBranch(year: ExecutiveOrgYear): OrgTreeNode {
+  const children: OrgTreeNode[] = [
+    {
+      id: "ey-principal",
+      label: "Early Years Principal",
+      variant: "base",
+      ...getExistingRoleHeadcount("ey_principal", year),
+    },
+    {
+      id: "ey-counselor",
+      label: "EY Counselor",
+      variant: "base",
+      ...getCounselorHeadcount(),
+    },
+    {
+      id: "ey-educator-package",
+      label: "Early Years Educator Package",
+      note: "Educator + Assistant + Monitor",
+      variant: "base",
+      headcountBasisNote: "Section-driven HC: depends on sections per grade level.",
+      packageBasisNote: "Package basis: Reference Educator + Assistant + Monitor.",
+      ...pendingHeadcount("Package composition incomplete"),
+    },
+    {
+      id: "ls-principal",
+      label: "Lower School Principal",
+      variant: "base",
+      ...getExistingRoleHeadcount("ls_principal", year),
+    },
+    {
+      id: "ls-counselor",
+      label: "LS Counselor",
+      variant: "base",
+      ...getCounselorHeadcount(),
+    },
+    {
+      id: "ls-educator-package",
+      label: "Lower School Educator Package",
+      note: "Educator + Assistant",
+      variant: "base",
+      headcountBasisNote: "Section-driven HC: depends on sections per grade level.",
+      packageBasisNote: "Package basis: Reference Educator + Assistant.",
+      ...pendingHeadcount("Package composition incomplete"),
+    },
+  ];
+
+  if (isMiddleSchoolActive(year)) {
+    children.push(
+      {
+        id: "ms-principal",
+        label: "Middle School Principal",
+        variant: "yearBased",
+        ...getExistingRoleHeadcount("ms_principal", year),
+      },
+      {
+        id: "ms-counselor",
+        label: "MS Counselor",
+        variant: "yearBased",
+        ...getIncrementalExistingRoleHeadcount(
+          "counselor",
+          2028,
+          year,
+          "Existing counselor progression",
+        ),
+      },
+    );
+  }
+
+  if (isHighSchoolActive(year)) {
+    children.push({
+      id: "hs-principal",
+      label: "High School Principal",
+      variant: "yearBased",
+      ...getExistingRoleHeadcount("hs_principal", year),
+    });
+  }
+
+  children.push({
+    id: "specialist-educators",
+    label: "Specialist Educators",
+    badge: "Dotted line",
+    note: "To EY and LS Principals",
+    variant: "dottedLine",
+    headcountBasisNote: "Aggregate node: individual specialist roles source separately.",
+    ...pendingHeadcount("Aggregate specialist composition unresolved"),
+  });
+
+  return {
+    id: "academic-divisions",
+    label: "Academic Divisions",
+    variant: "base",
+    children,
+  };
+}
+
 export function buildExecutiveOrgDesignTree(
   scenario: ExecutiveOrgScenario,
   year: ExecutiveOrgYear,
@@ -473,64 +598,7 @@ export function buildExecutiveOrgDesignTree(
     children: [
       ...premiumChildren,
       buildOperationsBranch(scenario, year),
-      {
-        id: "academic-divisions",
-        label: "Academic Divisions",
-        variant: "base",
-        children: [
-          {
-            id: "ey-principal",
-            label: "Early Years Principal",
-            variant: "base",
-            ...getExistingRoleHeadcount("ey_principal", year),
-          },
-          {
-            id: "ey-counselor",
-            label: "EY Counselor",
-            variant: "base",
-            ...getCounselorHeadcount(),
-          },
-          {
-            id: "ey-educator-package",
-            label: "Early Years Educator Package",
-            note: "Educator + Assistant + Monitor",
-            variant: "base",
-            headcountBasisNote: "Section-driven HC: depends on sections per grade level.",
-            packageBasisNote: "Package basis: Reference Educator + Assistant + Monitor.",
-            ...pendingHeadcount("Package composition incomplete"),
-          },
-          {
-            id: "ls-principal",
-            label: "Lower School Principal",
-            variant: "base",
-            ...getExistingRoleHeadcount("ls_principal", year),
-          },
-          {
-            id: "ls-counselor",
-            label: "LS Counselor",
-            variant: "base",
-            ...getCounselorHeadcount(),
-          },
-          {
-            id: "ls-educator-package",
-            label: "Lower School Educator Package",
-            note: "Educator + Assistant",
-            variant: "base",
-            headcountBasisNote: "Section-driven HC: depends on sections per grade level.",
-            packageBasisNote: "Package basis: Reference Educator + Assistant.",
-            ...pendingHeadcount("Package composition incomplete"),
-          },
-          {
-            id: "specialist-educators",
-            label: "Specialist Educators",
-            badge: "Dotted line",
-            note: "To EY and LS Principals",
-            variant: "dottedLine",
-            headcountBasisNote: "Aggregate node: individual specialist roles source separately.",
-            ...pendingHeadcount("Aggregate specialist composition unresolved"),
-          },
-        ],
-      },
+      buildAcademicDivisionsBranch(year),
       buildLearningEcosystemBranch(scenario, year),
       {
         id: "community-library",

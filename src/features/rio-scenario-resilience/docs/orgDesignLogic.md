@@ -47,6 +47,12 @@ These package rules describe staffing composition per section/classroom package.
 
 Executive Org Design renders the active organization for the selected year. Source-backed zero-HC roles are suppressed until their first source-backed positive-HC activation year; future activation is intended to be shown through year progression rather than static-card density.
 
+## Year Progression View Rule
+
+Year progression animates the selected-year model state. It does not introduce separate staffing assumptions; active roles, suppressed zero-HC roles, pending packages, and readiness-layer outputs remain governed by the Executive Org Design model.
+
+Year progression re-renders the selected-year active organization. Roles appear when their source-backed HC or readiness-layer activation becomes active; source-backed zero-HC future roles remain suppressed until positive-HC activation.
+
 ## Product Owner Decisions Added After Audit
 
 | Decision Area | Product Owner Rule |

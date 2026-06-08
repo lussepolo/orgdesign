@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { CheckCircle2, GitBranch, Layers3 } from "lucide-react";
 import { cn } from "../../lib/utils";
 import {
@@ -40,6 +40,10 @@ const primaryBranchIds = new Set([
   "future-divisions",
 ]);
 
+const firstProgressionYear = EXECUTIVE_ORG_YEARS[0].year;
+const finalProgressionYear = EXECUTIVE_ORG_YEARS[EXECUTIVE_ORG_YEARS.length - 1].year;
+const progressionIntervalMs = 1000;
+
 function HeadcountBadge({ node }: { node: OrgTreeNode }) {
   if (!node.headcountStatus || node.headcountStatus === "not-applicable") return null;
 
@@ -66,10 +70,10 @@ function TreeNode({ node, depth = 0 }: { node: OrgTreeNode; depth?: number }) {
   const hasChildren = Boolean(node.children?.length);
 
   return (
-    <div className={cn(depth > 0 && "pl-3")}>
+    <div className={cn("motion-safe:animate-[executiveOrgCardFade_220ms_ease-out]", depth > 0 && "pl-3")}>
       <div
         className={cn(
-          "relative rounded-md border px-3 py-2 shadow-sm",
+          "relative rounded-md border px-3 py-2 shadow-sm transition-[opacity,box-shadow] duration-200 ease-out",
           depth > 0 && "before:absolute before:-left-3 before:top-1/2 before:h-px before:w-3 before:bg-slate-300",
           nodeVariantClasses[variant],
         )}
@@ -124,14 +128,50 @@ function BranchColumn({ node }: { node: OrgTreeNode }) {
 const ExecutiveOrgDesignTab = () => {
   const [scenario, setScenario] = useState<ExecutiveOrgScenario>("balanced");
   const [year, setYear] = useState<ExecutiveOrgYear>(2028);
+  const [isProgressionPlaying, setIsProgressionPlaying] = useState(false);
 
   const viewModel = useMemo(() => buildExecutiveOrgDesignTree(scenario, year), [scenario, year]);
   const rootChildren = viewModel.root.children ?? [];
   const directRootNodes = rootChildren.filter((node) => !primaryBranchIds.has(node.id));
   const branchNodes = rootChildren.filter((node) => primaryBranchIds.has(node.id));
 
+  useEffect(() => {
+    if (!isProgressionPlaying) return undefined;
+
+    const intervalId = window.setInterval(() => {
+      setYear((currentYear) => {
+        if (currentYear >= finalProgressionYear) {
+          setIsProgressionPlaying(false);
+          return currentYear;
+        }
+
+        return (currentYear + 1) as ExecutiveOrgYear;
+      });
+    }, progressionIntervalMs);
+
+    return () => window.clearInterval(intervalId);
+  }, [isProgressionPlaying]);
+
+  const handleProgressionToggle = () => {
+    if (isProgressionPlaying) {
+      setIsProgressionPlaying(false);
+      return;
+    }
+
+    setYear(firstProgressionYear);
+    setIsProgressionPlaying(true);
+  };
+
   return (
     <div className="space-y-4">
+      <style>
+        {`
+          @keyframes executiveOrgCardFade {
+            from { opacity: 0.72; }
+            to { opacity: 1; }
+          }
+        `}
+      </style>
       <header className="flex flex-col gap-3 border-b border-slate-200 pb-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <div className="flex items-center gap-2">
@@ -157,20 +197,45 @@ const ExecutiveOrgDesignTab = () => {
             </select>
           </label>
 
-          <label className="flex flex-col gap-1">
+          <div className="flex flex-col gap-1">
             <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Year</span>
-            <select
-              value={year}
-              onChange={(event) => setYear(Number(event.target.value) as ExecutiveOrgYear)}
-              className="h-10 rounded-md border border-slate-300 bg-white px-3 text-sm font-bold text-slate-800 shadow-sm"
-            >
-              {EXECUTIVE_ORG_YEARS.map((option) => (
-                <option key={option.year} value={option.year}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </label>
+            <div className="flex gap-2">
+              <select
+                value={year}
+                onChange={(event) => {
+                  setIsProgressionPlaying(false);
+                  setYear(Number(event.target.value) as ExecutiveOrgYear);
+                }}
+                className="h-10 rounded-md border border-slate-300 bg-white px-3 text-sm font-bold text-slate-800 shadow-sm"
+              >
+                {EXECUTIVE_ORG_YEARS.map((option) => (
+                  <option key={option.year} value={option.year}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              <button
+                type="button"
+                onClick={handleProgressionToggle}
+                className="h-10 rounded-md border border-slate-300 bg-white px-3 text-xs font-bold text-slate-700 shadow-sm transition-colors hover:bg-slate-100"
+              >
+                {isProgressionPlaying ? "Pause" : "Play 2028-2037"}
+              </button>
+              {isProgressionPlaying && (
+                <button
+                  type="button"
+                  onClick={() => setIsProgressionPlaying(false)}
+                  className="h-10 rounded-md border border-slate-200 bg-slate-50 px-3 text-xs font-bold text-slate-500 transition-colors hover:bg-slate-100"
+                >
+                  Stop
+                </button>
+              )}
+            </div>
+            <p className="max-w-xs text-[11px] font-semibold leading-4 text-slate-500">
+              Showing active organization for {year}.
+              {isProgressionPlaying && " Progression view: active roles appear as their source-backed HC activates."}
+            </p>
+          </div>
         </div>
       </header>
 
