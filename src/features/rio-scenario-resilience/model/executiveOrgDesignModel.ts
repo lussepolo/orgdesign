@@ -699,16 +699,17 @@ export function buildExecutiveOrgDesignTree(
       {
         label: "Year signal",
         value: getYearSignal(year),
+        note: "Active selected-year structure. Use progression to see roles activate over time.",
       },
       {
         label: "HC status",
         value: "Partial source-backed HC",
-        note: "No complete total yet",
+        note: "Scenario-wide count is not shown.",
       },
       {
         label: "Source guardrails",
-        value: "HC shown only where source-backed; incomplete packages remain marked as HC source pending.",
-        note: "Educator package HC is section-driven; numeric HC appears only when section counts and package composition are fully source-backed.",
+        value: "HC appears only where source-backed or canonically authorized.",
+        note: "Section-driven packages remain pending until inputs fully resolve. Hubs, support lines, aggregates, and guardrails are explanatory, not additional HC roles.",
       },
     ],
   };

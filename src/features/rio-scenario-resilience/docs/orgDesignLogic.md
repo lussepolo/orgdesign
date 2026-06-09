@@ -58,6 +58,8 @@ Year progression animates the selected-year model state. It does not introduce s
 
 Year progression re-renders the selected-year active organization. Roles appear when their source-backed HC or readiness-layer activation becomes active; source-backed zero-HC future roles remain suppressed until positive-HC activation.
 
+The Executive Org Design right rail must explain that the tree is the active selected-year structure, progression shows role activation over time, HC appears only where source-backed or canonically authorized, and hubs, support lines, aggregates, and guardrails are explanatory structures rather than additional HC roles.
+
 ## Product Owner Decisions Added After Audit
 
 | Decision Area | Product Owner Rule |
