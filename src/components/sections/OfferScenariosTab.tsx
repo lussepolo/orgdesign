@@ -1391,7 +1391,9 @@ budgetPlaceholder: true,
 export default function OfferScenariosTab() {
   const [selectedEcosystemLayer, setSelectedEcosystemLayer] = useState("all");
   const [activeView, setActiveView] = useState<OfferScenarioView>("brief");
-  const [selectedScenarioTitle, setSelectedScenarioTitle] = useState<string | null>(null);
+  const [selectedScenarioTitle, setSelectedScenarioTitle] = useState<string>(
+    pedagogicalOfferScenarios[0]?.title ?? "",
+  );
   const [specialistFinalGrade, setSpecialistFinalGrade] = useState<SpecialistFinalGrade>("Grade 3");
   const [specialistSectionsPerGrade, setSpecialistSectionsPerGrade] = useState<SpecialistSectionsPerGrade>(1);
   const [specialistBlocksPerGrade, setSpecialistBlocksPerGrade] = useState<SpecialistBlocksPerGrade>(2);
@@ -1399,8 +1401,17 @@ export default function OfferScenariosTab() {
   const [specialistCapacityThreshold, setSpecialistCapacityThreshold] = useState<SpecialistCapacityThreshold>(26);
 
   const selectedScenario = selectedScenarioTitle
-    ? (pedagogicalOfferScenarios.find((scenario) => scenario.title === selectedScenarioTitle) ?? null)
-    : null;
+    ? (pedagogicalOfferScenarios.find((scenario) => scenario.title === selectedScenarioTitle) ?? pedagogicalOfferScenarios[0])
+    : pedagogicalOfferScenarios[0];
+
+  if (!selectedScenario) {
+    return (
+      <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm font-semibold leading-6 text-amber-900">
+        Cenários da Oferta data is unavailable. Confirm the offer scenario source before using this tab.
+      </div>
+    );
+  }
+
   const specialistGradeLevelCount = specialistPillarGradeSequence.indexOf(specialistFinalGrade) + 1;
   const specialistBlocksPerPillar =
     specialistGradeLevelCount * specialistSectionsPerGrade * specialistBlocksPerGrade;
