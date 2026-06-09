@@ -371,6 +371,7 @@ function buildOperationsBranch(
     {
       id: "events-assistant",
       label: "Events Assistant",
+      badge: "New addition",
       variant: "base",
       ...getFixedExtensionHeadcount("events_assistant", scenario, year),
     },
@@ -432,7 +433,7 @@ function buildLearningEcosystemBranch(
       {
         id: "learning-design-experience",
         label: "Learning Design Experience",
-        badge: "Functional grouping",
+        badge: "Functional hub",
         note: "Balanced and Premium",
         variant: "scenarioAddition",
         ...notApplicableHeadcount(),
@@ -464,6 +465,7 @@ function buildLearningEcosystemBranch(
     {
       id: "maker-space-assistant",
       label: "Maker Space Assistant",
+      badge: "New addition",
       variant: "base",
       ...getFixedExtensionHeadcount("maker_space_assistant", scenario, year),
     },
@@ -666,9 +668,9 @@ export function buildExecutiveOrgDesignTree(
           },
           {
             id: "librarian-principal-support",
-            label: "Librarian principal support",
+            label: "Principal support line",
             badge: "Dotted line",
-            note: "To EY and LS",
+            note: "Supports EY and LS",
             variant: "dottedLine",
             ...notApplicableHeadcount(),
           },

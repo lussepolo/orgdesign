@@ -29,6 +29,10 @@ The org-design model contains three experience scenarios:
 - HS Counselor is a user-authorized canonical Executive Org Design role, active from High School readiness activation. It uses the same counselor pay-scheme assumption as MS Counselor and renders as HC 1 from 2034 onward. This Executive Org Design rule does not modify payroll, DRE, compensation-engine, or source-data logic.
 - IT Technician reports directly to EdTech Coordinator.
 - Language Acquisition and Performance Coach is not a separate role. It is the same role as Language Acquisition Coach.
+- Language Acquisition Coach is active in all three Executive Org Design scenarios.
+- Learning Design Experience is a Balanced and Premium functional hub, not an individual HC-bearing role.
+- Maker Space Assistant and Events Assistant are new additions in Executive Org Design and remain active across all scenarios.
+- Community & Library distinguishes HC-bearing roles from dotted-line support relationships. Librarian is one HC-bearing role; principal support is a non-HC support relationship and must not be counted as a second librarian.
 - Security / Clerks normalize to the existing Clerk / Portaria payroll role and use existing system headcount.
 - Events Assistant is a new scenario-extension role and uses Learning Monitor compensation.
 - Compensation aliases do not activate roles. They only define which existing archetype should be used if a role is later activated.
