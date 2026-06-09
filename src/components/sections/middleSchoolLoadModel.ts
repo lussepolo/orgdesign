@@ -6,7 +6,6 @@ export type ProgramFunctionId =
   | "babsonEpic"
   | "pathways"
   | "advisory"
-  | "bodyMovement"
   | "electives"
   | "globalExpressionLeadership";
 
@@ -37,12 +36,14 @@ export const CORE_DOMAIN_ASSUMPTIONS: Array<{
   label: string;
   defaultSlotsPerSection: number;
   complementaryFunctions: string[];
+  grade8ComplementaryFunctions?: string[];
 }> = [
   {
     id: "mathematics",
     label: "Mathematics",
     defaultSlotsPerSection: 6,
-    complementaryFunctions: ["STEAM elective", "Babson EPIC metrics", "market sizing", "financial modeling", "data analysis", "impact measurement"],
+    complementaryFunctions: ["STEAM elective", "market sizing", "financial modeling", "data analysis", "impact measurement"],
+    grade8ComplementaryFunctions: ["Babson EPIC metrics"],
   },
   {
     id: "naturalSciences",
@@ -54,19 +55,22 @@ export const CORE_DOMAIN_ASSUMPTIONS: Array<{
     id: "portuguese",
     label: "Portuguese",
     defaultSlotsPerSection: 6,
-    complementaryFunctions: ["Babson EPIC writing", "stakeholder interview scripts", "argumentation", "reflection journals", "portfolio evidence", "public communication in Portuguese"],
+    complementaryFunctions: ["stakeholder interview scripts", "argumentation practice", "public communication in Portuguese"],
+    grade8ComplementaryFunctions: ["Babson EPIC writing"],
   },
   {
     id: "socialSciences",
     label: "Social Sciences",
     defaultSlotsPerSection: 4,
-    complementaryFunctions: ["Babson EPIC social impact framing", "SDG/context research", "stakeholder mapping", "MUN", "civic inquiry", "Pathways", "ethical impact analysis"],
+    complementaryFunctions: ["SDG/context research", "stakeholder mapping", "MUN", "civic inquiry", "Pathways", "ethical impact analysis"],
+    grade8ComplementaryFunctions: ["Babson EPIC social impact framing"],
   },
   {
     id: "englishLanguageArts",
     label: "English Language Arts",
     defaultSlotsPerSection: 6,
-    complementaryFunctions: ["Babson EPIC pitch coaching", "research communication", "external-facing documentation", "presentation support", "mentor communication", "portfolio evidence in English"],
+    complementaryFunctions: ["research communication", "presentation support", "mentor communication"],
+    grade8ComplementaryFunctions: ["Babson EPIC pitch coaching"],
   },
 ];
 
@@ -80,7 +84,7 @@ export const PROGRAM_FUNCTION_ASSUMPTIONS: Array<{
 }> = [
   {
     id: "passionProjects",
-    label: "Passion Projects",
+    label: "Project Mentorship / Passion Projects",
     defaultSlotsPerSection: 2,
     activeGrades: ["g6", "g7"],
     ownerDomains: "English Language Arts, Global Studies, domain mentors",
@@ -88,11 +92,11 @@ export const PROGRAM_FUNCTION_ASSUMPTIONS: Array<{
   },
   {
     id: "babsonEpic",
-    label: "Babson EPIC Certificate",
+    label: "Babson EPIC",
     defaultSlotsPerSection: 2,
     activeGrades: ["g8"],
     ownerDomains: "Mathematics, Portuguese, English Language Arts, Social Sciences",
-    notes: "Grade 8 project-based entrepreneurship anchor; replaces Passion Projects in Grade 8.",
+    notes: "Grade 8 program anchor / credential function; replaces Passion Projects in Grade 8.",
   },
   {
     id: "pathways",
@@ -100,7 +104,7 @@ export const PROGRAM_FUNCTION_ASSUMPTIONS: Array<{
     defaultSlotsPerSection: 1,
     activeGrades: ["g6", "g7", "g8"],
     ownerDomains: "Portuguese, Social Sciences, advisory",
-    notes: "Supports readiness, reflection, portfolio evidence, and transition routines.",
+    notes: "Supports readiness conversations and transition planning.",
   },
   {
     id: "advisory",
@@ -108,27 +112,19 @@ export const PROGRAM_FUNCTION_ASSUMPTIONS: Array<{
     defaultSlotsPerSection: 1,
     activeGrades: ["g6", "g7", "g8"],
     ownerDomains: "Cluster educators, Social Sciences, division team",
-    notes: "Belonging, routines, learner agency, and documentation touchpoint.",
-  },
-  {
-    id: "bodyMovement",
-    label: "Body & Movement",
-    defaultSlotsPerSection: 2,
-    activeGrades: ["g6", "g7", "g8"],
-    ownerDomains: "Body & Movement specialist",
-    notes: "Specialist pillar load; not part of core subject educator load.",
+    notes: "Belonging, learner agency, and student-support contact.",
   },
   {
     id: "electives",
-    label: "Electives",
+    label: "Electives / Creative Hub",
     defaultSlotsPerSection: 4,
     activeGrades: ["g6", "g7", "g8"],
     ownerDomains: "Domain-aligned specialists or MS educators",
-    notes: "Complements subject load when tied to a domain, not random filler.",
+    notes: "Domain-aligned electives and Creative Hub programming; schedule validation required.",
   },
   {
     id: "globalExpressionLeadership",
-    label: "Global Expression / Leadership",
+    label: "Global Expression & Leadership",
     defaultSlotsPerSection: 2,
     activeGrades: ["g6", "g7", "g8"],
     ownerDomains: "English Language Arts, Global Studies, Social Sciences",
@@ -226,6 +222,9 @@ export const deriveEducatorLoadRows = ({
   minViableLoad: number;
   maxTeachingLoad: number;
 }) => CORE_DOMAIN_ASSUMPTIONS.map((domain) => {
+  const complementaryFunctions = activeGrades.includes("g8")
+    ? [...domain.complementaryFunctions, ...(domain.grade8ComplementaryFunctions ?? [])]
+    : domain.complementaryFunctions;
   const weeklyCoreSlots = activeGrades.reduce(
     (total, grade) => total + (sectionsByGrade[grade] * domainSlotsPerSection[domain.id]),
     0,
@@ -250,7 +249,7 @@ export const deriveEducatorLoadRows = ({
     distribution,
     complementaryLoadNeed: weeklyCoreSlots === 0 ? "Not active" : remainingToMin.every((slots) => slots === 0) ? `0 to reach ${minViableLoad}` : `${formatSlotList(remainingToMin)} slots to reach ${minViableLoad}`,
     remainingCapacity: weeklyCoreSlots === 0 ? "Not active" : `${formatSlotList(remainingBeforeMax)} slots before ${maxTeachingLoad}`,
-    complementaryFunctions: domain.complementaryFunctions.join(", "),
+    complementaryFunctions: complementaryFunctions.join(", "),
     status,
   };
 });
@@ -258,20 +257,22 @@ export const deriveEducatorLoadRows = ({
 export const deriveProgramFunctionRows = (
   sectionsByGrade: MiddleSchoolSectionsByGrade,
   programSlotsPerSection: ProgramSlotsPerSection,
-) => PROGRAM_FUNCTION_ASSUMPTIONS.map((program) => {
+) => PROGRAM_FUNCTION_ASSUMPTIONS.flatMap((program) => {
   const activeProgramGrades = program.activeGrades.filter((grade) => sectionsByGrade[grade] > 0);
+  if (!activeProgramGrades.length) return [];
+
   const weeklySlots = activeProgramGrades.reduce(
     (total, grade) => total + (sectionsByGrade[grade] * programSlotsPerSection[program.id]),
     0,
   );
 
-  return {
+  return [{
     functionName: program.label,
-    activeGrades: activeProgramGrades.length ? activeProgramGrades.map((grade) => MS_GRADE_LABELS[grade]).join(", ") : "Not active",
+    activeGrades: activeProgramGrades.map((grade) => MS_GRADE_LABELS[grade]).join(", "),
     weeklySlots,
     ownerDomains: program.ownerDomains,
     notes: program.notes,
-  };
+  }];
 });
 
 export const deriveGrade6ClusterInsight = ({

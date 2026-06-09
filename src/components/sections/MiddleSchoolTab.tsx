@@ -71,7 +71,7 @@ const MS_OWNERSHIP_PROGRESSION = [
     model: "Cluster launch with explicit subject ownership.",
     details: [
       "Some domains may be combined for load viability.",
-      "Mathematics + Natural Sciences can be combined if complemented by Pathways, Advisory, STEAM elective, Project Mentorship, scientific inquiry, documentation, or critique cycles.",
+      "Mathematics + Natural Sciences can be combined if complemented by Pathways, Advisory, STEAM elective, Project Mentorship, or scientific inquiry.",
       "Passion Projects begin in Grade 6; Project Mentorship is a coordinated function, not automatic payroll.",
     ],
   },
@@ -91,7 +91,7 @@ const MS_OWNERSHIP_PROGRESSION = [
       "Babson EPIC Certificate replaces Passion Projects as the main Grade 8 project-based entrepreneurship experience.",
       "Mathematics, Portuguese, and English Language Arts each require two balanced educators in the two-section Grades 6-8 model.",
       "Natural Sciences and Social Sciences each become viable one-educator subject-specialist loads.",
-      "Program functions continue: Babson EPIC, Pathways, Advisory, Electives, documentation, portfolio evidence, critique cycles, and external-facing presentation routines.",
+      "Program functions continue: Babson EPIC, Pathways, Advisory, Electives, Creative Hub, and Global Expression & Leadership.",
     ],
   },
 ];
@@ -110,11 +110,10 @@ const CORE_EDUCATOR_BUILD_UP_STAGES: Array<{
       "The 3 clusters are not automatically 3 fully loaded educators. See the Grade 6 Cluster Architecture slot-gap explanation below.",
     ],
     programFunctions: [
-      "Passion Project / Project Mentorship",
+      "Project Mentorship / Passion Projects",
       "Pathways",
       "Advisory",
       "Global Expression & Leadership",
-      "Body & Movement",
       "Electives / Creative Hub",
     ],
   },
@@ -123,14 +122,13 @@ const CORE_EDUCATOR_BUILD_UP_STAGES: Array<{
     config: { g6: 2, g7: 2, g8: 0 },
     interpretation: [
       "Mathematics, Portuguese, and ELA reach the 24-slot minimum threshold at 2 sections per grade.",
-      "Natural Sciences and Social Sciences still require complementary load or explicit allocation. This remains threshold-sensitive.",
+      "Natural Sciences and Social Sciences still require complementary load or schedule validation. This remains threshold-sensitive.",
     ],
     programFunctions: [
-      "Passion Project / Project Mentorship",
+      "Project Mentorship / Passion Projects",
       "Pathways",
       "Advisory",
       "Global Expression & Leadership",
-      "Body & Movement",
       "Electives / Creative Hub",
     ],
   },
@@ -142,15 +140,37 @@ const CORE_EDUCATOR_BUILD_UP_STAGES: Array<{
       "It is not payroll authorization, final FTE, final headcount, or hiring approval. It does not automatically include program-function load or distributed responsibilities.",
     ],
     programFunctions: [
-      "Babson EPIC replacing Passion Project in Grade 8",
+      "Babson EPIC",
       "Pathways",
       "Advisory",
       "Global Expression & Leadership",
-      "Body & Movement",
       "Electives / Creative Hub",
-      "Project/advisory/pathways commitments",
+      "Project Mentorship / Passion Projects in Grades 6-7",
     ],
   },
+];
+
+const SPECIALIST_LOAD_ITEMS = [
+  {
+    label: "Body & Movement",
+    detail: "Specialist instructional load; not a program-function allocation item.",
+  },
+];
+
+const EMBEDDED_EDUCATOR_ROUTINES = [
+  "Documentation",
+  "Portfolio evidence",
+  "Learner-facing routines",
+  "Reflection cycles",
+];
+
+const BASE_PROGRAM_FUNCTIONS_REQUIRING_SCHEDULE_VALIDATION = [
+  "Project Mentorship / Passion Projects",
+  "Global Expression & Leadership",
+  "Pathways",
+  "Advisory",
+  "Electives",
+  "Creative Hub",
 ];
 
 const CORE_DOMAIN_LEADERSHIP_LABELS: Record<string, string> = {
@@ -223,11 +243,11 @@ const middleSchoolViews: Array<{ id: MiddleSchoolView; label: string }> = [
   { id: "decision-frame",      label: "02 Decision Frame" },
   { id: "core-build-up",       label: "03 Core Build-Up" },
   { id: "grade-6-cluster",     label: "04 Grade 6 Cluster" },
-  { id: "program-load",        label: "05 Program Load" },
+  { id: "program-load",        label: "05 Program-Function Allocation" },
   { id: "scenario-comparison", label: "06 Scenario Comparison" },
   { id: "ms-hs-boundary",      label: "07 MS-to-HS Boundary" },
   { id: "load-logic",          label: "08 Load Logic" },
-  { id: "program-table",       label: "09 Program Table" },
+  { id: "program-table",       label: "09 Schedule Validation" },
   { id: "supporting-context",  label: "10 Supporting Context" },
 ];
 
@@ -255,6 +275,15 @@ const MiddleSchoolTab = (_props: MiddleSchoolTabProps) => {
   const activeGrades = useMemo(
     () => getActiveGrades(msSectionsByGrade),
     [msSectionsByGrade],
+  );
+  const grade8Active = activeGrades.includes("g8");
+  const programFunctionsRequiringScheduleValidation = useMemo(
+    () => (
+      grade8Active
+        ? [...BASE_PROGRAM_FUNCTIONS_REQUIRING_SCHEDULE_VALIDATION, "Babson EPIC"]
+        : BASE_PROGRAM_FUNCTIONS_REQUIRING_SCHEDULE_VALIDATION
+    ),
+    [grade8Active],
   );
   const totalMiddleSchoolSections = getTotalMiddleSchoolSections(activeGrades, msSectionsByGrade);
   const validationWarnings = useMemo(
@@ -328,28 +357,28 @@ const MiddleSchoolTab = (_props: MiddleSchoolTabProps) => {
         stage: "Grade 6 launch",
         sectionsLabel: "1 section",
         config: { g6: 1, g7: 0, g8: 0 },
-        specialistSignal: "Separate specialist/program allocation required",
+        specialistSignal: "Separate specialist load and program allocation required",
         interpretation: "Cluster model required; domain-row count should not be read as separate subject hires.",
       },
       {
         stage: "Grade 6 launch",
         sectionsLabel: "2 sections",
         config: { g6: 2, g7: 0, g8: 0 },
-        specialistSignal: "Separate specialist/program allocation required",
+        specialistSignal: "Separate specialist load and program allocation required",
         interpretation: "Three-cluster launch premise becomes visible; complementary program load remains necessary.",
       },
       {
         stage: "Grades 6–7 active",
         sectionsLabel: "1 section per grade",
         config: { g6: 1, g7: 1, g8: 0 },
-        specialistSignal: "Program-function allocation required",
+        specialistSignal: "Specialist load and program-function allocation required",
         interpretation: "Still threshold-sensitive; several domains remain below minimum viable load.",
       },
       {
         stage: "Grades 6–7 active",
         sectionsLabel: "2 sections per grade",
         config: { g6: 2, g7: 2, g8: 0 },
-        specialistSignal: "Program-function allocation required",
+        specialistSignal: "Specialist load and program-function allocation required",
         interpretation: "Mathematics, Portuguese, and ELA approach viable full-load domains at 24 slots each.",
       },
       {
@@ -364,7 +393,7 @@ const MiddleSchoolTab = (_props: MiddleSchoolTabProps) => {
         sectionsLabel: "2 sections per grade",
         config: { g6: 2, g7: 2, g8: 2 },
         specialistSignal: "Specialist + distributed responsibilities required",
-        interpretation: "Subject-domain model becomes stronger; specialist/program-function load still needs explicit allocation.",
+        interpretation: "Subject-domain model becomes stronger; specialist load and program-function allocation still need schedule validation.",
       },
     ];
     return scenarios.map((scenario) => {
@@ -582,7 +611,7 @@ const MiddleSchoolTab = (_props: MiddleSchoolTabProps) => {
                       </div>
                       <div>
                         <div className="text-[8px] font-bold text-slate-400 uppercase mb-0.5">Sustainability logic</div>
-                        <p className="text-[10px] text-slate-600 leading-relaxed">Signature functions begin as part of educator role design, not as leftover work.</p>
+                        <p className="text-[10px] text-slate-600 leading-relaxed">Signature functions begin through available slot capacity after core subject-domain teaching load.</p>
                       </div>
                     </div>
                   </div>
@@ -642,38 +671,78 @@ const MiddleSchoolTab = (_props: MiddleSchoolTabProps) => {
                     The sustainability logic is not lean staffing by subtraction. It is function-first educator design.
                   </p>
                   <p className="text-xs text-slate-600 leading-relaxed">
-                    In Grade 6, educators are not only subject deliverers. Their roles are intentionally distributed to include ownership of the experiences that define the Middle School culture: Passion Projects, Pathways, Advisory, Global Expression, documentation, and student-facing routines.
+                    In Grade 6, educators are not only subject deliverers. Their roles are intentionally distributed to include ownership of the experiences that define the Middle School culture: Passion Projects, Pathways, Advisory, Global Expression, Electives, and Creative Hub.
                   </p>
                   <p className="text-xs text-slate-600 leading-relaxed">
                     This creates a balance between premium service and financial discipline: the model protects the signature learner experience without multiplying narrow roles before section count and grade progression justify them.
                   </p>
                   <div className="rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-[10px] font-medium leading-relaxed text-blue-800">
-                    Inspired by São Paulo's operating logic, the Rio model prioritizes educator function before role multiplication: domain teaching, signature-program ownership, advisory/pathways routines, documentation, and bridge constraints are designed together before assumptions become staffing.
+                    Inspired by São Paulo's operating logic, the Rio model prioritizes educator function before role multiplication: domain teaching, signature-program ownership, advisory/pathways allocation, embedded educator routines, and bridge constraints are designed together before assumptions become staffing.
                   </div>
                 </div>
               </div>
 
-              {/* Section 5: What still requires explicit allocation */}
+              {/* Section 5: Specialist Load */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="h-6 w-1 bg-teal-400 rounded-full shrink-0" />
+                  <h3 className="text-lg font-bold text-slate-900">Specialist Load</h3>
+                </div>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  Specialist instructional load is tracked separately from core subject-domain teaching load and program-function allocation.
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {SPECIALIST_LOAD_ITEMS.map((item) => (
+                    <div key={item.label} className="rounded-xl border border-teal-100 bg-white px-3 py-2.5 flex items-start gap-2">
+                      <ChevronRight className="h-3 w-3 text-teal-300 shrink-0 mt-0.5" />
+                      <span className="text-[11px] font-medium text-slate-700 leading-relaxed">
+                        <span className="font-bold text-slate-900">{item.label}</span>: {item.detail}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Section 6: Program-Function Allocation */}
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
                   <div className="h-6 w-1 bg-purple-400 rounded-full shrink-0" />
-                  <h3 className="text-lg font-bold text-slate-900">What still requires explicit allocation</h3>
+                  <h3 className="text-lg font-bold text-slate-900">Program-Function Allocation</h3>
                 </div>
                 <p className="text-xs text-slate-600 leading-relaxed">
-                  These are not leftover tasks. They are program-function responsibilities that require explicit allocation and schedule validation.
+                  Program functions are distributed to educators through available slot capacity after core subject-domain teaching load.
+                </p>
+              </div>
+
+              {/* Section 7: Embedded Educator Routines */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="h-6 w-1 bg-slate-400 rounded-full shrink-0" />
+                  <h3 className="text-lg font-bold text-slate-900">Embedded Educator Routines</h3>
+                </div>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  These routines are expected across educator practice. They are not program-function allocation items or separate headcount drivers.
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                  {EMBEDDED_EDUCATOR_ROUTINES.map((routine) => (
+                    <div key={routine} className="rounded-xl border border-slate-100 bg-white px-3 py-2.5 text-[11px] font-medium text-slate-700">
+                      {routine}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Section 8: Program functions requiring schedule validation */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="h-6 w-1 bg-purple-400 rounded-full shrink-0" />
+                  <h3 className="text-lg font-bold text-slate-900">Program functions requiring schedule validation</h3>
+                </div>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  These program-function responsibilities require schedule validation and allocation through available slot capacity after core subject-domain teaching load.
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {[
-                    "Passion Projects / Project Mentorship",
-                    "Pathways",
-                    "Advisory",
-                    "Global Expression & Leadership",
-                    "Body & Movement",
-                    "Electives / Creative Hub",
-                    "Learning documentation and student-facing routines",
-                    "Babson EPIC when Grade 8 is active",
-                    "Any MS-to-HS bridge/share arrangement",
-                  ].map((item) => (
+                  {programFunctionsRequiringScheduleValidation.map((item) => (
                     <div key={item} className="rounded-xl border border-slate-100 bg-white px-3 py-2.5 flex items-start gap-2">
                       <ChevronRight className="h-3 w-3 text-purple-300 shrink-0 mt-0.5" />
                       <span className="text-[11px] font-medium text-slate-700 leading-relaxed">{item}</span>
@@ -723,7 +792,7 @@ const MiddleSchoolTab = (_props: MiddleSchoolTabProps) => {
                   <h4 className="text-sm font-bold text-slate-900">Scenario Offers Connection</h4>
                 </div>
                 <p className="text-xs text-slate-600 leading-relaxed">
-                  This tab translates the Scenario Offers architecture into Middle School instructional capacity: grade activation, section progression, educator clusters, program-function load, and educator-count signals.
+                  This tab translates the Scenario Offers architecture into Middle School instructional capacity: grade activation, section progression, educator clusters, specialist load, program-function allocation, embedded routines, and educator-count signals.
                 </p>
                 <p className="text-[10px] text-slate-500 leading-relaxed">
                   This pass keeps the tabs decoupled: no Scenario Offers data is imported, and no shared state is created.
@@ -746,7 +815,7 @@ const MiddleSchoolTab = (_props: MiddleSchoolTabProps) => {
                   <div className="rounded-2xl border border-blue-200 bg-white p-4 space-y-2">
                     <div className="text-[9px] font-bold text-blue-500 uppercase tracking-widest">Translation layer</div>
                     <h5 className="text-xs font-bold text-slate-900">Middle School translation layer</h5>
-                    <p className="text-[10px] text-slate-500 leading-relaxed">Converts the scenario into Grade 6 cluster architecture, load by grade, educator-count signals, and program-function planning.</p>
+                    <p className="text-[10px] text-slate-500 leading-relaxed">Converts the scenario into Grade 6 cluster architecture, load by grade, educator-count signals, specialist load, and program-function planning.</p>
                   </div>
                   <div className="rounded-2xl border border-blue-200 bg-white p-4 space-y-2">
                     <div className="text-[9px] font-bold text-blue-500 uppercase tracking-widest">Downstream layer</div>
@@ -769,7 +838,7 @@ const MiddleSchoolTab = (_props: MiddleSchoolTabProps) => {
                       </div>
                       <div>
                         <div className="text-[8px] font-bold text-slate-400 uppercase mb-1">Middle School translation</div>
-                        <p className="text-[10px] text-slate-600 leading-relaxed">Grade 6 cluster architecture, 1–2 sections, educator-count signal, program-function load.</p>
+                        <p className="text-[10px] text-slate-600 leading-relaxed">Grade 6 cluster architecture, 1–2 sections, educator-count signal, specialist load, and program-function allocation.</p>
                       </div>
                     </div>
                     <div className="rounded-2xl border border-slate-100 bg-white p-4 space-y-3">
@@ -791,7 +860,7 @@ const MiddleSchoolTab = (_props: MiddleSchoolTabProps) => {
                       </div>
                       <div>
                         <div className="text-[8px] font-bold text-slate-400 uppercase mb-1">Middle School translation</div>
-                        <p className="text-[10px] text-slate-600 leading-relaxed">Subject-domain model strengthens; specialist/program-function allocation still requires explicit planning.</p>
+                        <p className="text-[10px] text-slate-600 leading-relaxed">Subject-domain model strengthens; specialist load and program-function allocation still require schedule validation.</p>
                       </div>
                     </div>
                   </div>
@@ -819,7 +888,7 @@ const MiddleSchoolTab = (_props: MiddleSchoolTabProps) => {
               </div>
               <div className="space-y-2 rounded-2xl border border-amber-100 bg-amber-50 px-4 py-3 text-[10px] font-medium leading-relaxed text-amber-800">
                 <p>Core educators implied are instructional-capacity signals only. They are not payroll authorization, final FTE, final headcount, or hiring approval.</p>
-                <p>Program-function load and distributed responsibilities require explicit allocation and are not automatically absorbed into core educator count.</p>
+                <p>Program-function load and distributed responsibilities require schedule validation and are not automatically absorbed into core educator count.</p>
               </div>
               <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
                 {coreEducatorBuildUp.map((stage) => (
@@ -858,9 +927,11 @@ const MiddleSchoolTab = (_props: MiddleSchoolTabProps) => {
                       </div>
                       {/* Program-function load and distributed responsibilities */}
                       <div>
-                        <div className="mb-1.5 text-[9px] font-bold uppercase tracking-widest text-slate-400">Possible program-function load and distributed responsibilities</div>
+                        <div className="mb-1.5 text-[9px] font-bold uppercase tracking-widest text-slate-400">Program functions for schedule validation</div>
                         <ul className="space-y-1">
-                          {stage.programFunctions.map((programFunction) => (
+                          {stage.programFunctions
+                            .filter((programFunction) => grade8Active || !programFunction.includes("Babson"))
+                            .map((programFunction) => (
                             <li key={`${stage.stage}-${programFunction}`} className="flex items-start gap-1.5 text-[10px] leading-relaxed text-slate-500">
                               <ChevronRight className="mt-0.5 h-2.5 w-2.5 shrink-0 text-blue-300" />
                               {programFunction}
@@ -878,7 +949,7 @@ const MiddleSchoolTab = (_props: MiddleSchoolTabProps) => {
                         </div>
                       </div>
                       <p className="rounded-xl border border-amber-100 bg-amber-50 px-3 py-2 text-[10px] font-medium leading-relaxed text-amber-800">
-                        These responsibilities require explicit allocation and are not leftover capacity.
+                        These responsibilities require schedule validation through available slot capacity after core subject-domain teaching load.
                       </p>
                     </div>
                   </Card>
@@ -902,7 +973,7 @@ const MiddleSchoolTab = (_props: MiddleSchoolTabProps) => {
                     </div>
                   </div>
                   <p className="text-xs text-slate-600 leading-relaxed">
-                    Grade 6 can be organized through 3 educator clusters, but these are not automatically 3 fully loaded educators. Each cluster still has a gap to the 24-slot minimum, so complementary program-function load or explicit allocation is required.
+                    Grade 6 can be organized through 3 educator clusters, but these are not automatically 3 fully loaded educators. Each cluster still has a gap to the 24-slot minimum, so complementary program-function load or schedule validation is required.
                   </p>
                   <p className="text-[10px] text-slate-500 leading-relaxed">
                     Grade 6 has two valid planning lenses: 5 core subject-domain rows in the simulator and 3 educator clusters in the launch architecture. The domain rows capture per-subject load; the clusters capture how Grade 6 instruction can be organized before subject specialization deepens.
@@ -981,23 +1052,23 @@ const MiddleSchoolTab = (_props: MiddleSchoolTabProps) => {
             </div>
 
             {/* ════════════════════════════════════════════════════════
-                04  PROGRAM LOAD
-                Project / Advisory / Pathways Demand
+                04  PROGRAM-FUNCTION ALLOCATION
+                Program-Function Allocation
             ════════════════════════════════════════════════════════ */}
             <div className={cn(viewClassName("program-load"))}>
               <div className="space-y-5 rounded-2xl border border-purple-100 bg-purple-50 p-5">
                 <div className="flex items-center gap-3">
                   <div className="h-8 w-1 bg-purple-400 rounded-full shrink-0" />
                   <div>
-                    <div className="text-[9px] font-bold uppercase tracking-widest text-purple-600 mb-0.5">Program-Function Load</div>
-                    <h3 className="text-xl font-bold text-slate-900">Project / Advisory / Pathways Demand</h3>
+                    <div className="text-[9px] font-bold uppercase tracking-widest text-purple-600 mb-0.5">Program-Function Allocation</div>
+                    <h3 className="text-xl font-bold text-slate-900">Program-Function Allocation</h3>
                   </div>
                 </div>
                 <p className="text-xs text-slate-600 leading-relaxed">
-                  Project, advisory, and pathways load must be explicitly allocated. These functions are not leftover capacity.
+                  Program functions must be validated through available slot capacity after core subject-domain teaching load.
                 </p>
                 <p className="text-[10px] text-slate-500 leading-relaxed">
-                  The educator-count summary counts core subject educators separately; this panel makes the distributed project/advisory/pathways demand visible.
+                  The educator-count summary counts core subject educators separately; this panel makes distributed program-function demand visible.
                 </p>
                 <p className="text-[10px] text-slate-500 leading-relaxed">
                   Project/advisory/pathways commitments must be checked before interpreting load space as Grade 9 bridge/share feasibility.
@@ -1070,7 +1141,7 @@ const MiddleSchoolTab = (_props: MiddleSchoolTabProps) => {
                   </div>
                   <div className="rounded-xl border border-slate-100 bg-white p-3 space-y-1.5">
                     <div className="text-[9px] font-bold text-slate-700">Pathways</div>
-                    <p className="text-[10px] text-slate-500 leading-relaxed">Requires explicit student-contact or coordination allocation. It should not be treated as leftover capacity.</p>
+                    <p className="text-[10px] text-slate-500 leading-relaxed">Requires explicit student-contact or coordination allocation through available slot capacity after core subject-domain teaching load.</p>
                   </div>
                   <div className="rounded-xl border border-slate-100 bg-white p-3 space-y-1.5">
                     <div className="text-[9px] font-bold text-slate-700">Advisory</div>
@@ -1078,14 +1149,14 @@ const MiddleSchoolTab = (_props: MiddleSchoolTabProps) => {
                   </div>
                 </div>
 
-                <p className="text-[10px] text-slate-500 leading-relaxed">
-                  {msSectionsByGrade.g8 > 0
-                    ? "In Grade 8, Babson EPIC replaces Passion Project. The project-demand logic remains a planning signal for coordinated project/advisory load."
-                    : "When Grade 8 becomes active, Babson EPIC replaces Passion Project; project-demand logic remains a planning signal for coordinated project/advisory load."}
-                </p>
+                {grade8Active && (
+                  <p className="text-[10px] text-slate-500 leading-relaxed">
+                    In Grade 8, Babson EPIC is the program anchor / credential function. The project-demand logic remains a planning signal for coordinated project/advisory load.
+                  </p>
+                )}
 
                 <div className="rounded-xl border border-amber-100 bg-amber-50 px-4 py-3 text-[10px] font-medium leading-relaxed text-amber-800">
-                  Instructional-capacity planning only. Distributed responsibilities are not leftover capacity. These values are not payroll authorization, final FTE, final headcount, or hiring approval.
+                  Instructional-capacity planning only. Distributed responsibilities use available slot capacity after core subject-domain teaching load. These values are not payroll authorization, final FTE, final headcount, or hiring approval.
                 </div>
               </div>
             </div>
@@ -1110,7 +1181,7 @@ const MiddleSchoolTab = (_props: MiddleSchoolTabProps) => {
                   Grade 6 launch should be read through the cluster architecture: 3 educator clusters, not automatically 3 fully loaded educators. Complementary program functions are required to approach viable load.
                 </p>
                 <p className="text-[10px] text-slate-500 leading-relaxed">
-                  Domain-row count is not the same as the cluster-compressed launch premise. Specialist/program functions require explicit allocation. Distributed responsibilities — Advisory, Passion Project, Pathways — are not leftover capacity.
+                  Domain-row count is not the same as the cluster-compressed launch premise. Specialist load and program functions require schedule validation. Distributed responsibilities use available slot capacity after core subject-domain teaching load.
                 </p>
                 <div className="rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-[10px] font-medium text-blue-800">
                   Current simulator configuration: G6 = {msSectionsByGrade.g6} · G7 = {msSectionsByGrade.g7} · G8 = {msSectionsByGrade.g8}. Core educators implied by current configuration: {currentCoreEducators}.
@@ -1352,10 +1423,10 @@ const MiddleSchoolTab = (_props: MiddleSchoolTabProps) => {
                     )}
                   </details>
 
-                  {msSectionsByGrade.g8 > 0 && (
+                  {grade8Active && (
                     <div className="rounded-2xl border border-purple-100 bg-purple-50 p-4 text-xs font-medium leading-relaxed text-slate-600">
-                      Grade 8 is not cluster-based. Babson EPIC Certificate replaces Passion Projects as the
-                      Grade 8 project-based entrepreneurship anchor, while subject-slot load drives educator need.
+                      Grade 8 is not cluster-based. Babson EPIC is the Grade 8 program anchor / credential function,
+                      while subject-slot load drives educator need.
                     </div>
                   )}
 
@@ -1404,11 +1475,11 @@ const MiddleSchoolTab = (_props: MiddleSchoolTabProps) => {
             </div>
 
             {/* ════════════════════════════════════════════════════════
-                08  PROGRAM TABLE
-                Program Function Load
+                08  SCHEDULE VALIDATION
+                Program Functions Requiring Schedule Validation
             ════════════════════════════════════════════════════════ */}
             <div className={cn(viewClassName("program-table"))}>
-              <Card title="Program Function Load" icon={BookOpen}>
+              <Card title="Program Functions Requiring Schedule Validation" icon={BookOpen}>
                 <div className="space-y-4">
                   <div className="overflow-x-auto rounded-2xl border border-slate-100">
                     <table className="min-w-[820px] w-full text-left">
@@ -1432,13 +1503,20 @@ const MiddleSchoolTab = (_props: MiddleSchoolTabProps) => {
                       </tbody>
                     </table>
                   </div>
-                  <div className="rounded-2xl border border-blue-100 bg-blue-50 p-4 text-xs font-medium leading-relaxed text-slate-600">
-                    By Grade 8, educator need is no longer driven by cluster coverage. It is driven by
-                    subject-slot load and aligned program ownership. Domains with 36 weekly slots require
-                    two educators at a 28-slot maximum, but the preferred distribution is balanced: 18 core
-                    slots per educator, completed through domain-aligned program functions such as Babson
-                    EPIC, electives, portfolio evidence, and critique cycles.
-                  </div>
+                  {grade8Active ? (
+                    <div className="rounded-2xl border border-blue-100 bg-blue-50 p-4 text-xs font-medium leading-relaxed text-slate-600">
+                      By Grade 8, educator need is no longer driven by cluster coverage. It is driven by
+                      subject-slot load and aligned program ownership. Domains with 36 weekly slots require
+                      two educators at a 28-slot maximum, but the preferred distribution is balanced: 18 core
+                      slots per educator, completed through Grade 8 program ownership such as Babson EPIC,
+                      electives, and Creative Hub.
+                    </div>
+                  ) : (
+                    <div className="rounded-2xl border border-blue-100 bg-blue-50 p-4 text-xs font-medium leading-relaxed text-slate-600">
+                      Before Grade 8 is active, schedule validation focuses on Project Mentorship / Passion Projects,
+                      Global Expression & Leadership, Pathways, Advisory, Electives, and Creative Hub.
+                    </div>
+                  )}
                 </div>
               </Card>
             </div>
@@ -1452,7 +1530,7 @@ const MiddleSchoolTab = (_props: MiddleSchoolTabProps) => {
                 <Card title="Middle School: The Bridge" icon={Database}>
                   <div className="space-y-6">
                     <p className="text-sm text-slate-500 leading-relaxed">
-                      Middle School at Concept is the transition from Lower School Researchers into the Designers learning engine. Grade 6 is not one more Lower School grade: it activates Passion Projects, advisory, Creative Hub access, MUN, academic electives, documentation, portfolio evidence, critique cycles, and Project Mentorship as a coordinated function. A dedicated Project Mentor is conditional on validated cluster educator capacity.
+                      Middle School at Concept is the transition from Lower School Researchers into the Designers learning engine. Grade 6 is not one more Lower School grade: it activates Passion Projects, advisory, Creative Hub access, MUN, academic electives, Global Expression & Leadership, and Project Mentorship as coordinated program functions. Documentation, portfolio evidence, critique cycles, and learner-facing routines remain embedded educator routines.
                     </p>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="p-4 rounded-2xl bg-blue-50 border border-blue-100">
@@ -1470,7 +1548,9 @@ const MiddleSchoolTab = (_props: MiddleSchoolTabProps) => {
 
               <Card title="Instructional Ownership Progression" icon={BookOpen}>
                 <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-                  {MS_OWNERSHIP_PROGRESSION.map((stage) => (
+                  {MS_OWNERSHIP_PROGRESSION
+                    .filter((stage) => grade8Active || stage.stage !== "Grade 8")
+                    .map((stage) => (
                     <div key={stage.stage} className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
                       <div className="text-[10px] font-bold uppercase tracking-widest text-blue-600">{stage.stage}</div>
                       <h4 className="mt-2 text-sm font-bold text-slate-900">{stage.model}</h4>
