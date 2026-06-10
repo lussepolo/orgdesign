@@ -41,6 +41,7 @@ type BudgetRowStatus =
   | "Scenario driver"
   | "Potential increment"
   | "Conditional increment"
+  | "Governance placeholder"
   | "Not active";
 
 type BudgetComparisonRow = {
@@ -63,10 +64,13 @@ const offerScenarioViews: Array<{ id: OfferScenarioView; label: string }> = [
   { id: "brief", label: "01 Síntese executiva" },
   { id: "ladder", label: "02 Escada de cenários" },
   { id: "scenario", label: "03 Cenário selecionado" },
-  { id: "budget", label: "04 Comparativo orçamentário" },
+  { id: "budget", label: "04 Implicações de recursos" },
   { id: "architecture", label: "05 Arquitetura acadêmica" },
   { id: "appendix", label: "06 Premissas operacionais" },
 ];
+
+const OFFER_SCENARIO_GOVERNANCE_BOUNDARY =
+  "A-D are offer/narrative scenarios. They describe pedagogical thresholds and implementation implications; they do not authorize headcount, payroll, budget, final staffing, or final implementation.";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // OFFER SCENARIOS TAB — board-facing scenario architecture only
@@ -105,8 +109,8 @@ middleSchoolLogic: "Not active",
 recommendedPathway: "Coached Foundation",
 roles: [
 "Teaching & Learning Coach: recommended",
-"Language & Academic Performance Coach: strongly recommended",
-"Learning Experience Design function: required — supports project quality, documentation, and educator planning",
+"Language & Academic Performance Coach: recommended for validation",
+"Learning Experience Design function: indicated — supports project quality, documentation, and educator planning",
 "Curriculum & Assessment Designer: optional/shared",
 ],
 risk:
@@ -148,7 +152,7 @@ middleSchoolLogic: "Not active",
 recommendedPathway: "Academic Progression",
 roles: [
 "Teaching & Learning Coach: recommended",
-"Language & Academic Performance Coach: strongly recommended",
+"Language & Academic Performance Coach: recommended for validation",
 "Curriculum & Assessment Designer: recommended/shared",
 "Learning Experience Design function: more important as documentation, academic evidence, and research routines deepen; Project Mentorship is not active yet",
 ],
@@ -191,9 +195,9 @@ middleSchoolLogic: "Preparation only",
 recommendedPathway: "Transition Readiness",
 roles: [
 "Teaching & Learning Coach: recommended",
-"Language & Academic Performance Coach: required / strongly recommended",
+"Language & Academic Performance Coach: recommended for validation",
 "Curriculum & Assessment Designer: recommended",
-"Learning Experience Design function: strongly recommended — strongest pre-Middle School PDJ coordination",
+"Learning Experience Design function: recommended for validation — strongest pre-Middle School PDJ coordination",
 "Project Mentorship: not active yet",
 ],
 risk:
@@ -253,11 +257,11 @@ notActiveYet: [
 middleSchoolLogic: "Active",
 recommendedPathway: "Middle School Signature Launch",
 roles: [
-"Teaching & Learning Coach: strongly recommended",
-"Curriculum & Assessment Designer: strongly recommended",
-"Language & Academic Performance Coach: required",
+"Teaching & Learning Coach: recommended for validation",
+"Curriculum & Assessment Designer: recommended for validation",
+"Language & Academic Performance Coach: indicated for validation",
 "Signature Programs / Project Design Lead: recommended",
-"Project Mentors: coordinated function, not necessarily full dedicated FTE in year one",
+"Project mentorship support: coordinated function, not an automatically authorized dedicated role in year one",
 ],
 risk:
 "If Grade 6 opens with only classroom coverage, the Middle School offer may be underpowered. The school may claim electives, Passion Project, advisory, and project mentorship without the adult ecosystem to sustain them.",
@@ -346,7 +350,7 @@ const middleSchoolClusters = [
 ["Grade 6 STEM launch profile", "Mathematics + Natural Sciences foundations", "Grade 6 launch profile only; viable when complemented by Pathways, Advisory, STEAM elective, Project Mentorship, scientific inquiry, documentation, or critique cycles"],
 ["Grade 7 hybrid specialization", "Mathematics, Portuguese, and English Language Arts become stronger full-load domains; Natural Sciences and Social Sciences become dedicated domains with aligned complementary functions", "Hybrid specialization stage; not a cluster-only model"],
 ["Humanities coordination", "Portuguese and Social Sciences remain academically connected through argumentation, civic inquiry, academic language, and evidence routines", "Portuguese does not need Social Sciences for load viability once Grades 6-7 have two sections"],
-["English Language Arts / Global Studies coordination", "ELA, communication, documentation, early pathways, and project-based learning routines", "Coordinated function, not a default project-design payroll role"],
+["English Language Arts / Global Studies coordination", "ELA, communication, documentation, early pathways, and project-based learning routines", "Coordinated function, not a default project-design role authorization"],
 ["Shared specialist ecosystem", "Body & Movement, Sound Exploration / Music, Artistic Design / Atelier, and Design Technologies / Learning Experience Designer", "Distinct capacity domains; not one generic specialist pool"],
 ["Grade 8 program transition", "Grades 6-7 use Passion Projects as the project-based learning structure", "Grade 8 transitions to Babson EPIC Certificate as the entrepreneurship and external-facing evidence experience"],
 		  ];
@@ -674,13 +678,13 @@ type: "Baseline adjusted by age band",
 },
 {
 system: "Specialist access",
-why: "Concept's experience depends on Body & Movement, Sound Exploration / Music, Artistic Design / Atelier, and Design Technologies / Learning Experience Designer. Design Technologies represents the Learning Experience Designer's classroom-facing capacity, not a separate specialist payroll role.",
+why: "Concept's experience depends on Body & Movement, Sound Exploration / Music, Artistic Design / Atelier, and Design Technologies / Learning Experience Designer. Design Technologies represents the Learning Experience Designer's classroom-facing capacity, not a separate specialist role authorization.",
 type: "Shared specialist ecosystem",
 },
 {
 system: "Academic performance and language acquisition",
 why: "MAP from Grade 1, the bilingual model, Science of Reading alignment, language monitoring, intervention, enrichment, and family-facing evidence work together to make academic progress visible.",
-type: "Recommended from launch; required as complexity grows",
+type: "Recommended from launch; increasingly important as complexity grows",
 guardrail: "Do not present Language & Academic Performance Coach as a late-stage add-on.",
 },
 {
@@ -786,8 +790,8 @@ budgetSlot: "R$ ________",
 {
 decision: "Signature Programs / Project Design Lead",
 trigger: "Scenario D",
-status: "Add-on",
-requiredDecision: "Aprovar liderança de programas autorais/MS.",
+status: "Governance placeholder",
+requiredDecision: "Validar escopo de liderança de programas autorais/MS.",
 budgetSlot: "R$ ________",
 },
 {
@@ -801,7 +805,7 @@ budgetSlot: "R$ ________",
 decision: "Additional cluster educator capacity",
 trigger: "Scenario D",
 status: "Conditional add-on",
-requiredDecision: "Aprovar somente se carga exceder premissa.",
+requiredDecision: "Validar somente se carga exceder premissa.",
 budgetSlot: "R$ ________",
 },
 ];
@@ -850,7 +854,7 @@ area: "After School role mapping",
 status: "Mapping validation",
 originallyBudgeted: "After School Educator, HC 1 from 2028. Coordinator scope not confirmed.",
 currentRecommendation: "Add or validate After School Coordinator scope.",
-incrementalBudgetImpact: "No increment only if existing After School Educator covers coordinator scope. Otherwise, validate coordinator increment with Finance/HR.",
+incrementalBudgetImpact: "No increment only if existing After School Educator covers coordinator scope. Otherwise, keep coordinator scope as a source-validation item.",
 whyNecessary: "Confirm whether coordinator scope is baseline, a scope upgrade, or a reclassification.",
 },
 {
@@ -879,9 +883,9 @@ whyNecessary: "Keeps Scenario A as the basic offer path while preserving the nee
 {
 area: "Language Acquisition Coach / academic-language support",
 status: "Potential increment",
-originallyBudgeted: "Not found in payroll role basis; validate with Finance/HR.",
-currentRecommendation: "LAP Coach / academic-language support strongly recommended.",
-incrementalBudgetImpact: "Increment unless Finance/HR confirms this support was already budgeted.",
+originallyBudgeted: "Not found in role-basis mapping; keep as source-validation item.",
+currentRecommendation: "LAP Coach / academic-language support recommended for validation.",
+incrementalBudgetImpact: "Scenario implication only unless a separate implementation process validates scope and cost.",
 whyNecessary: "Supports MAP, bilingual monitoring, intervention, enrichment, and family-facing evidence.",
 },
 {
@@ -910,9 +914,9 @@ whyNecessary: "Keeps specialist coverage viable as Grade 4 adds inquiry, documen
 {
 area: "Language Acquisition Coach / academic-language support",
 status: "Potential increment",
-originallyBudgeted: "Not found in payroll role basis; validate with Finance/HR.",
-currentRecommendation: "LAP Coach / academic-language support strongly recommended.",
-incrementalBudgetImpact: "Increment unless Finance/HR confirms this support was already budgeted.",
+originallyBudgeted: "Not found in role-basis mapping; keep as source-validation item.",
+currentRecommendation: "LAP Coach / academic-language support recommended for validation.",
+incrementalBudgetImpact: "Scenario implication only unless a separate implementation process validates scope and cost.",
 whyNecessary: "Supports stronger MAP cycles, intervention routines, and academic evidence.",
 },
 {
@@ -941,15 +945,15 @@ whyNecessary: "Prevents Pathways and transition readiness from overloading the s
 {
 area: "Language Acquisition Coach / academic-language support",
 status: "Potential increment",
-originallyBudgeted: "Not found in payroll role basis; validate with Finance/HR.",
-currentRecommendation: "LAP Coach / academic-language support required / strongly recommended.",
-incrementalBudgetImpact: "Increment unless Finance/HR confirms this support was already budgeted.",
+originallyBudgeted: "Not found in role-basis mapping; keep as source-validation item.",
+currentRecommendation: "LAP Coach / academic-language support recommended for validation.",
+incrementalBudgetImpact: "Scenario implication only unless a separate implementation process validates scope and cost.",
 whyNecessary: "Supports Grade 5 monitoring, intervention, enrichment, and transition evidence.",
 },
 {
 area: "Grade 5 Pathways and transition protocols",
 status: "Scenario driver",
-originallyBudgeted: "Grade 5 Pathways coordination not confirmed in payroll basis.",
+originallyBudgeted: "Grade 5 Pathways coordination not confirmed in role-basis mapping.",
 currentRecommendation: "Activate Grade 5 Pathways, transition protocols, portfolio evidence, and readiness routines.",
 incrementalBudgetImpact: "Only if Pathways requires added FTE, role allocation, specialist capacity, or external cost.",
 whyNecessary: "Completes Lower School and builds the Middle School bridge.",
@@ -988,15 +992,15 @@ whyNecessary: "Grade 6 adds a Middle School rhythm, spaces, schedules, and progr
 {
 area: "Language Acquisition Coach / academic-language support",
 status: "Potential increment",
-originallyBudgeted: "Not found in payroll role basis; validate with Finance/HR.",
-currentRecommendation: "LAP Coach / academic-language support required / strongly recommended.",
-incrementalBudgetImpact: "Increment unless Finance/HR confirms this support was already budgeted.",
+originallyBudgeted: "Not found in role-basis mapping; keep as source-validation item.",
+currentRecommendation: "LAP Coach / academic-language support indicated for validation.",
+incrementalBudgetImpact: "Scenario implication only unless a separate implementation process validates scope and cost.",
 whyNecessary: "Supports bilingual monitoring, intervention, enrichment, and MS-facing academic evidence.",
 },
 {
 area: "Project Mentorship / Passion Projects",
 status: "Scenario driver",
-originallyBudgeted: "Not active before Grade 6. No dedicated Project Mentor payroll role currently modeled.",
+originallyBudgeted: "Not active before Grade 6. No dedicated Project Mentor role authorization currently modeled.",
 currentRecommendation: "Activate Project Mentorship as a coordinated function for Grade 6 Passion Projects. First allocate to cluster educators if timetable capacity allows.",
 incrementalBudgetImpact: "No automatic increment for the function itself.",
 whyNecessary: "Passion Projects require adult mentorship for learner agency, feedback cycles, documentation, critique, and public presentation quality.",
@@ -1007,14 +1011,14 @@ status: "Mapping validation",
 originallyBudgeted: "Grade 6 / Grade 7 cluster educator capacity exists in the model, but unused mentorship capacity is not calculated.",
 currentRecommendation: "Validate timetable capacity after teaching, advisory, Passion Projects, Creative Hub, MUN, electives, documentation, critique, and planning.",
 incrementalBudgetImpact: "No increment if mentorship can be absorbed by cluster educators.",
-whyNecessary: "Prevents Project Mentorship from being treated as a dedicated payroll role before load is validated.",
+whyNecessary: "Prevents Project Mentorship from being treated as a dedicated role authorization before load is validated.",
 },
 {
 area: "Dedicated Project Mentor",
 status: "Conditional increment",
-originallyBudgeted: "No dedicated Project Mentor payroll role currently modeled.",
-currentRecommendation: "Add dedicated or partial Project Mentor FTE only if validated mentorship load exceeds available cluster educator capacity.",
-incrementalBudgetImpact: "Conditional payroll increment; salary band, FTE, and annualized cost to be validated with Finance/HR.",
+originallyBudgeted: "No dedicated Project Mentor role authorization currently modeled.",
+currentRecommendation: "Flag dedicated or partial project-mentorship support only if validated mentorship load exceeds available cluster educator capacity.",
+incrementalBudgetImpact: "Conditional resource implication only; no staffing or payroll authorization in this view.",
 whyNecessary: "Keeps Scenario D neutral while preserving the staffing trigger for Passion Project fidelity.",
 },
 ],
@@ -1022,9 +1026,9 @@ whyNecessary: "Keeps Scenario D neutral while preserving the staffing trigger fo
 ];
 const budgetComparisonValidationNotes = [
 "Use repo salary basis where roles already exist; do not create new salary values inside this view.",
-"If a role mapping is ambiguous, validate salary band, FTE, monthly cost, and annualized cost with Finance/HR.",
+"If a role mapping is ambiguous, keep it as a source-validation item before any staffing or cost interpretation.",
 "Confirm whether After School Educator and After School Coordinator are the same role; if not, classify the coordinator as a new role, scope upgrade, or reclassification.",
-"Validate missing increments as R$ ___ monthly, R$ ___ annualized, FTE ___.",
+"Keep missing increments as governance placeholders until a separate implementation process validates scope and cost.",
 ];
 const budgetStatusClassName: Record<BudgetRowStatus, string> = {
 "Baseline control": "bg-emerald-50 text-emerald-700 border-emerald-100",
@@ -1032,13 +1036,14 @@ const budgetStatusClassName: Record<BudgetRowStatus, string> = {
 "Scenario driver": "bg-blue-50 text-[#214B74] border-blue-100",
 "Potential increment": "bg-purple-50 text-[#4b254b] border-purple-100",
 "Conditional increment": "bg-rose-50 text-rose-700 border-rose-100",
+"Governance placeholder": "bg-indigo-50 text-indigo-700 border-indigo-100",
 "Not active": "bg-slate-50 text-slate-500 border-slate-200",
 };
 const governanceQuestions = [
 "Which scenario becomes the business-plan baseline?",
-"Which adult ecosystem roles are approved as baseline?",
+"Which adult ecosystem roles are confirmed as baseline?",
 "Which roles remain add-on budget slots?",
-"Is Scenario D approved as a Middle School operating launch, or only as a future pathway?",
+"Is Scenario D being read as a Middle School operating launch scenario, or only as a future pathway?",
 ];
 const roadmapPrintPhases = [
 {
@@ -1174,7 +1179,7 @@ classroom: "A estrutura de sala permanece como baseline; o avanço dos cenários
 specialists: "Especialistas funcionam como ecossistema compartilhado; o risco é subcontar carga, espaço e conexão com programas autorais.",
 signature: "Programas autorais amadurecem por limiares: PDJ como framework de sala EY–Grade 5, Pathways em Grade 5, Passion Projects e Creative Hub apenas em Grade 6.",
 "ms-hs": "A prontidão secundária evolui de cultura e ponte formal para lançamento real de Middle School em Grade 6.",
-budget: "Add-ons permanecem placeholders de governança; nenhum valor é integrado a payroll nesta leitura.",
+budget: "Add-ons permanecem placeholders de governança; nenhum valor é integrado a cálculo de custo nesta leitura.",
 };
 const ecosystemDecisionLayers = {
 classroom: {
@@ -1219,7 +1224,7 @@ rows: [
 scenario: "Scenario A",
 status: "Investimento recomendado",
 commitment: "Early evidence starts because Grade 1 is active.",
-adult: "Language & Academic Performance Coach strongly recommended.",
+adult: "Language & Academic Performance Coach recommended for validation.",
 budget: "Recommended from launch, not late add-on.",
 },
 {
@@ -1233,15 +1238,15 @@ budget: "Shared Curriculum & Assessment support may be needed.",
 scenario: "Scenario C",
 status: "Necessário para transição",
 commitment: "Academic monitoring supports Grade 5 Pathways.",
-adult: "Language & Academic Performance Coach required/strongly recommended.",
+adult: "Language & Academic Performance Coach recommended for validation.",
 budget: "Stronger intervention and enrichment cycles.",
 },
 {
 scenario: "Scenario D",
 status: "Necessário",
 commitment: "Evidence supports the first MS operating rhythm.",
-adult: "LAP Coach required to sustain MS complexity.",
-budget: "Required academic infrastructure, not optional enhancement.",
+adult: "LAP Coach indicated for validation to sustain MS complexity.",
+budget: "Academic infrastructure signal, not implementation approval.",
 },
 ],
 },
@@ -1287,8 +1292,8 @@ rows: [
 scenario: "Scenario A",
 status: "Estrutura básica",
 commitment: "PDJ operates through full-class experiential projects embedded in classroom routines; Learning Experience Design supports project quality and documentation.",
-adult: "Learning Experience Design function required; no dedicated Project Mentor.",
-budget: "Baseline includes Learning Experience Design; no dedicated Project Mentor.",
+adult: "Learning Experience Design function indicated; no dedicated Project Mentor.",
+budget: "Baseline includes Learning Experience Design; no dedicated Project Mentor authorization.",
 },
 {
 scenario: "Scenario B",
@@ -1309,7 +1314,7 @@ scenario: "Scenario D",
 status: "Ativo + add-on potencial",
 commitment: "Grade 6 signature-program layer activates.",
 adult: "Signature Programs / Project Design Lead recommended.",
-budget: "Acréscimo ao orçamento, se aprovado: R$ ________",
+budget: "Placeholder de recurso para validação: R$ ________",
 budgetPlaceholder: true,
 },
 ],
@@ -1350,14 +1355,14 @@ budget: "Possible incremental MS infrastructure.",
 budget: {
 title: "Add-ons orçamentários",
 guardrail:
-"Budget add-ons remain placeholders only. This view does not connect any assumption to payroll.",
+"Resource add-ons remain governance placeholders only. This view does not connect any assumption to cost calculation.",
 rows: [
 {
 scenario: "Scenario A",
 status: "Add-on potencial",
 commitment: "Learning Experience Design is baseline; LAP Coach recommended from launch.",
 adult: "Validate incremental coaching, documentation support beyond baseline, and academic performance scope.",
-budget: "Acréscimo ao orçamento, se aprovado: R$ ________",
+budget: "Placeholder de recurso para validação: R$ ________",
 budgetPlaceholder: true,
 },
 {
@@ -1365,7 +1370,7 @@ scenario: "Scenario B",
 status: "Add-on potencial",
 commitment: "Shared C&A Designer; expanded performance routines; documentation / portfolio culture support.",
 adult: "Validate shared curriculum, assessment, intervention, and evidence routines.",
-budget: "Acréscimo ao orçamento, se aprovado: R$ ________",
+budget: "Placeholder de recurso para validação: R$ ________",
 budgetPlaceholder: true,
 },
 {
@@ -1373,7 +1378,7 @@ scenario: "Scenario C",
 status: "Add-on potencial",
 commitment: "Shared Pathways / Signature Programs coordination; expanded Design Technologies; transition readiness support.",
 adult: "Validate Pathways coordination, project support, and Design Technologies load.",
-budget: "Acréscimo ao orçamento, se aprovado: R$ ________",
+budget: "Placeholder de recurso para validação: R$ ________",
 budgetPlaceholder: true,
 },
 {
@@ -1381,7 +1386,7 @@ scenario: "Scenario D",
 status: "Add-on potencial",
 commitment: "Signature Programs / Project Design Lead; mentorship coordination; Creative Hub support; additional specialist or cluster capacity.",
 adult: "Validate MS launch structure, project mentorship, Creative Hub, specialists, and cluster load.",
-budget: "Acréscimo ao orçamento, se aprovado: R$ ________",
+budget: "Placeholder de recurso para validação: R$ ________",
 budgetPlaceholder: true,
 },
 ],
@@ -1749,10 +1754,10 @@ export default function OfferScenariosTab() {
           </div>
           <div className="offer-scenarios-print-blue-panel p-6">
             <p className="text-base leading-relaxed text-white">
-              Full strategic dossier. Not a payroll calculation.
+              Full strategic dossier. Offer and narrative scenarios only.
             </p>
             <p className="mt-3 text-sm leading-relaxed text-blue-50/80">
-              Baseline = what must exist. Scenario adjustments = what changes beyond the baseline.
+              {OFFER_SCENARIO_GOVERNANCE_BOUNDARY}
             </p>
           </div>
         </section>
@@ -1786,7 +1791,7 @@ export default function OfferScenariosTab() {
               {[
                 ["Promessa", "O que a escola pode sustentar para famílias e estudantes."],
                 ["Limiar", "O que muda quando o cenário avança."],
-                ["Exposição", "Quais papéis, sistemas ou rotinas passam a pressionar orçamento."],
+                ["Exposição", "Quais papéis, sistemas ou rotinas criam implicações de recursos para validação posterior."],
                 ["Prova", "Quais premissas acadêmicas e operacionais sustentam a decisão."],
               ].map(([label, detail]) => (
                 <div key={`print-definition-${label}`} className="offer-scenarios-print-soft-panel p-5">
@@ -1815,7 +1820,7 @@ export default function OfferScenariosTab() {
                     <div className="mt-5 space-y-2 text-xs leading-relaxed text-slate-600">
                       <p><span className="text-slate-900">Grade ceiling:</span> {scenario?.gradeCeiling}</p>
                       <p><span className="text-slate-900">Signal:</span> {item.signal}</p>
-                      <p><span className="text-slate-900">Budget signal:</span> {item.budget}</p>
+                      <p><span className="text-slate-900">Resource signal:</span> {item.budget}</p>
                     </div>
                   </div>
                 );
@@ -1896,7 +1901,7 @@ export default function OfferScenariosTab() {
               <h2 className="mt-3 text-3xl text-slate-950">Mapa de Ajustes da Oferta e do Ecossistema</h2>
               <p className="mt-3 max-w-4xl text-sm leading-relaxed text-slate-600">
                 O baseline permanece; o que muda é a maturidade da oferta, a intensidade da infraestrutura
-                adulta e a pressão orçamentária potencial.
+                adulta e a implicação potencial de recursos.
               </p>
             </div>
             <div className="space-y-4">
@@ -1942,8 +1947,8 @@ export default function OfferScenariosTab() {
               <div className="offer-scenarios-print-blue-panel p-6">
                 <h2 className="text-3xl leading-tight">Decisão necessária para avançar</h2>
                 <p className="mt-4 text-sm leading-relaxed text-blue-50/85">
-                  Estas perguntas organizam governança antes de qualquer conversão para orçamento ou
-                  modelagem de payroll.
+                  Estas perguntas organizam governança antes de qualquer conversão para orçamento,
+                  staffing, custo ou implementação final.
                 </p>
               </div>
               <div className="grid grid-cols-1 gap-3">
@@ -2013,7 +2018,7 @@ export default function OfferScenariosTab() {
               <div className="offer-scenarios-print-label text-sm text-[#214B74]">
                 Mínimo Operacional da Experiência Acadêmica
               </div>
-              <h2 className="mt-3 text-3xl text-slate-950">Systems required for consistency</h2>
+              <h2 className="mt-3 text-3xl text-slate-950">Systems indicated for consistency</h2>
             </div>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
               {minimumAcademicOperationGroups.map((group) => (
@@ -2134,13 +2139,13 @@ export default function OfferScenariosTab() {
                   Secondary validation slots
                 </div>
                 <p className="mt-1 text-xs leading-relaxed text-slate-600">
-                  Decisões que podem abrir orçamento quando Finance/HR confirmar escopo, FTE e faixa.
+                  Decisões que permanecem como placeholders até que um processo separado valide escopo, custo e implementação.
                 </p>
               </div>
               <table className="w-full text-left">
                 <thead>
                   <tr>
-                    {["Decisão", "Gatilho", "Status", "Decisão necessária", "Slot orçamentário"].map((header) => (
+                    {["Decisão", "Gatilho", "Status", "Validação necessária", "Placeholder de recurso"].map((header) => (
                       <th key={`print-budget-${header}`} className="px-4 py-3">{header}</th>
                     ))}
                   </tr>
@@ -2470,14 +2475,17 @@ export default function OfferScenariosTab() {
                         Comece pela decisão, não pelo inventário.
                       </h3>
                       <p className="mt-4 text-sm font-semibold leading-relaxed text-slate-600">
-                        O tab separa promessa acadêmica, limiar operacional, exposição orçamentária e prova de viabilidade para que a conversa de liderança não vire uma lista de cargos.
+                        O tab separa promessa acadêmica, limiar operacional, implicações de recursos e prova de viabilidade para que a conversa de liderança não vire uma lista de cargos.
                       </p>
+                      <div className="mt-5 rounded-2xl border border-amber-100 bg-amber-50 px-4 py-3 text-xs font-bold leading-relaxed text-amber-900">
+                        {OFFER_SCENARIO_GOVERNANCE_BOUNDARY}
+                      </div>
                     </div>
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                       {[
                         ["Promessa", "O que a escola pode sustentar para famílias e estudantes."],
                         ["Limiar", "O que muda quando o cenário avança."],
-                        ["Exposição", "Quais papéis, sistemas ou rotinas passam a pressionar orçamento."],
+                        ["Exposição", "Quais papéis, sistemas ou rotinas criam implicações de recursos para validação posterior."],
                         ["Prova", "Quais premissas acadêmicas e operacionais sustentam a decisão."],
                       ].map(([label, detail]) => (
                         <div key={label} className="rounded-[1.75rem] bg-white p-5">
@@ -2637,6 +2645,9 @@ export default function OfferScenariosTab() {
                               {selectedScenario.mainClaim}
                             </div>
                           )}
+                          <div className="mt-6 rounded-[1.5rem] border border-white/10 bg-white/10 p-4 text-xs font-semibold leading-relaxed text-blue-50/85">
+                            {OFFER_SCENARIO_GOVERNANCE_BOUNDARY}
+                          </div>
                         </>
                       ) : (
                         <p className="mt-4 text-sm font-semibold leading-relaxed text-blue-50/75">
@@ -2700,7 +2711,7 @@ export default function OfferScenariosTab() {
                 <div className={cn(viewClassName("budget"), "space-y-6")}>
                   <div className="rounded-[2rem] bg-white p-6">
                     <div className="text-[10px] font-black uppercase tracking-[0.28em] text-slate-400">
-                      Comparativo orçamentário
+                      Implicações de recursos
                     </div>
                     <h3 className="mt-3 text-3xl font-black tracking-tight text-slate-950">
                       O que já estava orçado, o que muda e por quê
@@ -2713,8 +2724,8 @@ export default function OfferScenariosTab() {
                   <div className="grid gap-3 rounded-[2rem] bg-white p-5 lg:grid-cols-3">
                     {[
                       ["Baseline confirmado", "Pacote de sala EY/LS, liderança divisional, Learning Experience Design e 1 Body & Movement + 1 Arts + 1 Music."],
-                      ["Validar mapeamento", "After School Educator existe no payroll; escopo de Coordinator ainda precisa confirmação."],
-                      ["Incremento real", "Somente o delta além da base original entra como impacto orçamentário incremental."],
+                      ["Validar mapeamento", "After School Educator existe no mapeamento de papéis; escopo de Coordinator ainda precisa confirmação."],
+                      ["Incremento real", "Somente o delta além da base original vira implicação de recurso para validação posterior."],
                     ].map(([label, detail]) => (
                       <div key={`budget-rule-${label}`} className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
                         <div className="text-[10px] font-black uppercase tracking-widest text-[#214B74]">{label}</div>
@@ -2729,7 +2740,7 @@ export default function OfferScenariosTab() {
                       </div>
                       <h4 className="mt-1 text-xl font-black text-slate-950">Baseline / Governance Controls</h4>
                       <p className="mt-1 text-xs font-bold leading-relaxed text-slate-500">
-                        Linhas de base renderizadas uma vez para preservar rastreabilidade Finance/HR sem repetir controles genéricos dentro de cada cenário.
+                        Linhas de base renderizadas uma vez para preservar rastreabilidade sem repetir controles genéricos dentro de cada cenário.
                       </p>
                     </div>
                     <div className="overflow-x-auto">
@@ -2802,7 +2813,7 @@ export default function OfferScenariosTab() {
                   ))}
                   <div className="rounded-[2rem] bg-white p-5">
                     <div className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-400">
-                      Finance/HR validation note
+                      Governance validation note
                     </div>
                     <div className="mt-3 grid gap-2 md:grid-cols-2">
                       {budgetComparisonValidationNotes.map((note) => (
@@ -2818,7 +2829,7 @@ export default function OfferScenariosTab() {
                         Secondary validation slots
                       </div>
                       <p className="mt-1 text-xs font-semibold leading-relaxed text-slate-600">
-                        Decisões que podem abrir orçamento quando Finance/HR confirmar escopo, FTE e faixa.
+                        Decisões que permanecem como placeholders até que um processo separado valide escopo, custo e implementação.
                       </p>
                     </div>
                     <div className="hidden grid-cols-[1.25fr_0.7fr_0.8fr_1.2fr_0.8fr] gap-4 bg-[#edf3f7] px-5 py-4 text-[10px] font-black uppercase tracking-[0.22em] text-[#214B74] lg:grid">
@@ -2826,7 +2837,7 @@ export default function OfferScenariosTab() {
                       <div>Gatilho</div>
                       <div>Status</div>
                       <div>Decisão necessária</div>
-                      <div>Slot orçamentário</div>
+                      <div>Placeholder de recurso</div>
                     </div>
                     <div className="divide-y divide-slate-100">
                       {budgetImpactDecisions.map((row) => (
@@ -3164,10 +3175,10 @@ export default function OfferScenariosTab() {
 			                Cenários da Oferta
 			              </h2>
 			              <p className="mt-5 max-w-3xl text-base font-semibold leading-relaxed text-slate-200 md:text-xl">
-			                Cada cenário redefine a promessa acadêmica, o ecossistema adulto e a pressão orçamentária.
+			                Cada cenário redefine a promessa acadêmica, o ecossistema adulto e as implicações de recursos.
 			              </p>
 			              <p className="mt-4 max-w-2xl text-sm leading-relaxed text-slate-400">
-			                Leitura board-facing para comparar capacidade modelada, matrícula-alvo, arquitetura acadêmica e decisões de investimento sem acionar payroll.
+			                Leitura board-facing para comparar capacidade modelada, matrícula-alvo, arquitetura acadêmica e implicações de recursos sem acionar staffing, cálculo de custo ou implementação final.
 			              </p>
 			            </div>
 			            <div className="border-t border-white/10 bg-white/5 p-6 lg:border-l lg:border-t-0 md:p-8">
@@ -3228,7 +3239,7 @@ export default function OfferScenariosTab() {
 			            </p>
 			          </div>
 			          <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-xs font-semibold leading-relaxed text-slate-600 lg:max-w-sm">
-			            Recommended reading: use this view for the board decision, then open the scenario ladder, selected scenario, budget exposure, architecture, and appendix only as needed.
+			            Recommended reading: use this view for the board decision, then open the scenario ladder, selected scenario, resource implications, architecture, and appendix only as needed.
 			          </div>
 			        </div>
 
@@ -3236,7 +3247,7 @@ export default function OfferScenariosTab() {
 		          {[
 		            ["Promessa", "O que a família e o estudante passam a reconhecer como experiência da escola."],
 		            ["Limiar", "O ponto em que uma nova série muda a exigência de arquitetura adulta."],
-		            ["Exposição", "Onde há pressão orçamentária potencial ainda não calculada no payroll."],
+		            ["Exposição", "Onde há implicação de recurso potencial ainda não convertida em custo ou implementação."],
 		            ["Prova", "Evidências, rotinas e dados que sustentam confiança e progressão."],
 		          ].map(([label, detail]) => (
 		            <div key={label} className="rounded-2xl border border-slate-200 bg-white p-4">
@@ -3302,7 +3313,7 @@ export default function OfferScenariosTab() {
 					          e language acquisition não são camadas tardias. Elas começam cedo porque MAP,
 					          aquisição de língua, intervenção, enriquecimento e evidências de aprendizagem
 					          precisam sustentar a confiança das famílias desde Lower School. Esta aba é
-					          UI-only, board-facing e não aciona payroll, staffing ou cálculo de custo.
+					          UI-only, board-facing e não aciona staffing, cálculo de custo ou implementação final.
 				        </div>
 				        <div className="rounded-[2rem] border border-slate-200 bg-slate-950 p-5 text-white">
 				          <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
@@ -3333,7 +3344,7 @@ export default function OfferScenariosTab() {
 				                    <div className="mt-1 text-xs font-bold leading-relaxed text-slate-700">{item.signal}</div>
 				                  </div>
 				                  <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
-				                    <div className="text-[9px] font-black uppercase tracking-widest text-slate-400">Budget signal</div>
+				                    <div className="text-[9px] font-black uppercase tracking-widest text-slate-400">Resource signal</div>
 				                    <div className="mt-1 text-xs font-bold leading-relaxed text-slate-700">{item.budget}</div>
 				                  </div>
 				                </div>
@@ -3520,7 +3531,7 @@ export default function OfferScenariosTab() {
 						        <Card
 						          className="offer-scenarios-print-page-break"
 						          title="Mapa de Ajustes da Oferta e do Ecossistema"
-					          subtitle="Compare o que muda em cada cenário: compromisso de oferta, infraestrutura adulta necessária e possíveis add-ons orçamentários."
+					          subtitle="Compare o que muda em cada cenário: compromisso de oferta, infraestrutura adulta indicada e possíveis implicações de recursos."
 				          icon={Layers}
 				        >
 				          <div className="space-y-5">
@@ -3535,13 +3546,13 @@ export default function OfferScenariosTab() {
 					                <p className="mt-2 text-sm leading-relaxed text-slate-600">
 					                  A arquitetura básica acima define o ponto de partida. Este mapa mostra os
 						                  ajustes além do baseline, separando compromisso de oferta, infraestrutura
-						                  adulta e sinal orçamentário.
+						                  adulta e sinal de recursos.
 					                </p>
 					              </div>
 					              <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs leading-relaxed text-slate-600 xl:max-w-md">
 					                <strong>Leitura executiva:</strong> o baseline permanece; o que muda é a
 					                maturidade da oferta, a intensidade da infraestrutura adulta e a pressão
-					                orçamentária potencial.
+					                de recursos potencial.
 					              </div>
 					            </div>
 
@@ -3638,11 +3649,11 @@ export default function OfferScenariosTab() {
 				                        {[
 				                          ["Compromisso de oferta", row.commitment],
 				                          ["Infraestrutura adulta", row.adult],
-				                          ["Sinal orçamentário", row.budget],
+				                          ["Sinal de recursos", row.budget],
 				                        ].map(([label, value]) => (
 				                          <div key={label} className="rounded-xl border border-slate-200 bg-white px-3 py-2">
 				                            <div className="text-[9px] font-bold uppercase tracking-widest text-slate-400">{label}</div>
-				                            {label === "Sinal orçamentário" ? (
+				                            {label === "Sinal de recursos" ? (
 				                              <div className={cn(
 				                                "mt-2 inline-flex rounded-lg border px-2 py-1 text-xs font-bold leading-relaxed",
 				                                "budgetPlaceholder" in row && row.budgetPlaceholder
@@ -3700,7 +3711,7 @@ export default function OfferScenariosTab() {
 					                            <div className="mt-2 space-y-1 text-[10px] leading-relaxed text-slate-600">
 					                              <p><strong>Oferta:</strong> {row.commitment}</p>
 					                              <p><strong>Adultos:</strong> {row.adult}</p>
-					                              <p><strong>Orçamento:</strong> {row.budget}</p>
+					                              <p><strong>Recurso:</strong> {row.budget}</p>
 					                            </div>
 					                          </div>
 					                        ))}
@@ -3724,8 +3735,8 @@ export default function OfferScenariosTab() {
                   <div className="mb-5 grid gap-3 md:grid-cols-3">
                     {[
                       ["Baseline confirmado", "Pacote de sala EY/LS, liderança divisional, Learning Experience Design e 1 Body & Movement + 1 Arts + 1 Music."],
-                      ["Validar mapeamento", "After School Educator existe no payroll; escopo de Coordinator ainda precisa confirmação."],
-                      ["Incremento real", "Somente o delta além da base original entra como impacto orçamentário incremental."],
+                      ["Validar mapeamento", "After School Educator existe no mapeamento de papéis; escopo de Coordinator ainda precisa confirmação."],
+                      ["Incremento real", "Somente o delta além da base original vira implicação de recurso para validação posterior."],
                     ].map(([label, detail]) => (
                       <div key={`legacy-budget-rule-${label}`} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
                         <div className="text-[9px] font-black uppercase tracking-widest text-slate-400">{label}</div>
@@ -3824,14 +3835,14 @@ export default function OfferScenariosTab() {
                         Secondary validation slots
                       </div>
                       <p className="mt-1 text-xs font-semibold leading-relaxed text-slate-600">
-                        Decisões que podem abrir orçamento quando Finance/HR confirmar escopo, FTE e faixa.
+                        Decisões que permanecem como placeholders até que um processo separado valide escopo, custo e implementação.
                       </p>
                     </div>
 				          <div className="overflow-x-auto rounded-2xl border border-slate-100">
 				            <table className="min-w-[860px] w-full text-left">
 				              <thead>
 				                <tr className="bg-slate-50 text-[10px] uppercase tracking-widest text-slate-400">
-				                  {["Decisão", "Gatilho", "Status", "Decisão necessária", "Slot orçamentário"].map((header) => (
+				                  {["Decisão", "Gatilho", "Status", "Validação necessária", "Placeholder de recurso"].map((header) => (
 				                    <th key={header} className="px-4 py-3">{header}</th>
 				                  ))}
 				                </tr>
@@ -4344,12 +4355,12 @@ export default function OfferScenariosTab() {
 		              </div>
 			              <div className="rounded-2xl border border-indigo-100 bg-indigo-50 px-4 py-3 text-xs leading-relaxed text-indigo-800">
 			                Grade 6 starts with a coordinated project mentorship function, not an automatic
-			                dedicated Project Mentor FTE.
+			                dedicated Project Mentor staffing commitment.
 			              </div>
 		            </div>
 		          </Card>
 
-		          <Card title="When Dedicated Project Mentors Become Justified" icon={Target}>
+		          <Card title="When Project Mentorship Support Needs Validation" icon={Target}>
 		            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
 		              {projectMentorTriggers.map((trigger) => (
 		                <div key={trigger} className="rounded-2xl border border-slate-200 bg-slate-50 p-3 text-xs leading-relaxed text-slate-600">
