@@ -314,7 +314,7 @@ export const HIGH_SCHOOL_LOAD_CATEGORY_RULES: Record<LoadCategory, string[]> = {
     "Project Mentorship, Passion Project, and Innovation Diploma are grouped under the Project Mentorship umbrella.",
   ],
   program_ownership_load: [
-    "Pathways, Leadership, GCD, and College/Career guidance map to program ownership unless scheduled as direct student-contact blocks.",
+    "College and Career Counseling maps to counseling/support load when explicitly scheduled; Pathways, Leadership, and GCD remain separate program-ownership functions unless scheduled as direct student-contact blocks.",
     "GCD sits inside Pathways or Leadership, not as a separate additive workload bucket unless validated later.",
   ],
 };
@@ -506,8 +506,8 @@ export const HIGH_SCHOOL_EDUCATOR_CAPABILITY_PROFILES: EducatorCapabilityProfile
   },
   {
     id: "pathways_college_career",
-    label: "Pathways / College-Career Guidance",
-    canCoverDomains: ["Pathways", "College/Career", "advisory", "course selection"],
+    label: "College and Career Counseling / Pathways ownership",
+    canCoverDomains: ["College and Career Counseling", "Pathways", "advisory", "course selection"],
     shouldNotCoverDomains: ["Core AP subject instruction", "lab sciences"],
     canAbsorbMentorship: true,
     canAbsorbProgramOwnership: true,
@@ -591,7 +591,7 @@ export const HIGH_SCHOOL_MENTORSHIP_LOAD_ITEMS: MentorshipLoadItem[] = [
     countsTowardMentorshipContact: true,
     requiresProfileFit: true,
     validationRequired: true,
-    notes: "Use only if Rio validates Grade 9 mentorship contact. Do not assign as leftover capacity without profile fit.",
+    notes: "Use only if Rio validates Grade 9 mentorship contact. Do not assign as available instructional capacity after required course coverage without profile fit.",
   },
   {
     id: "g11_g12_mature_project_mentorship",
@@ -1064,7 +1064,7 @@ export const HIGH_SCHOOL_MOCK_SCHEDULE_SCENARIOS: MockScheduleScenario[] = [
     unresolvedInputs: [
       "Which domains are part-time versus hybrid.",
       "Mentorship group caps by educator.",
-      "College/Career and Pathways ownership expectations.",
+      "College and Career Counseling and Pathways ownership expectations.",
     ],
   },
   {
@@ -1140,7 +1140,7 @@ export interface HighSchoolCapabilityRow {
   fixedMentorshipSupport: boolean;
   /**
    * True when the profile's canCoverDomains includes Pathways, Leadership, GCD, or
-   * College/Career scope. GCD is embedded within this profile, not a separate
+   * College and Career Counseling scope. GCD is embedded within this profile, not a separate
    * additive staffing bucket.
    */
   pathwaysLeadershipGcdScope: boolean;
@@ -1172,7 +1172,7 @@ const PATHWAYS_LEADERSHIP_GCD_DOMAIN_MARKERS = new Set([
   "Global Citizen Diploma",
   "global citizenship",
   "public contribution",
-  "College/Career",
+  "College and Career Counseling",
   "advisory",
   "course selection",
 ]);
@@ -1468,7 +1468,7 @@ export const GRADE_9_CAPACITY_LEDGER_ROWS: readonly Grade9CapacityLedgerRow[] = 
       "The HS-oriented mathematics educator may support Middle School if load, schedule, and HS mathematics expertise allow. Direction is HS-to-MS sharing, not automatic MS-to-HS bridge.",
     msPrimaryBridgeEligibility: "eligible_if_validated",
     msPrimaryBridgeEligibilityNote:
-      "An MS-primary mathematics educator may support Grade 9 only if HS-level mathematics expertise, remaining capacity, and schedule fit are validated.",
+      "An MS-primary mathematics educator may support Grade 9 only if HS-level mathematics expertise, available instructional capacity after required course coverage, and schedule fit are validated.",
     projectBlockRole: "mentor_eligible_pending_profile_fit",
     programOwnershipRole: "not_applicable",
     validationStatus: "covered_hs_core_assumption",
@@ -1557,7 +1557,7 @@ export const GRADE_9_CAPACITY_LEDGER_ROWS: readonly Grade9CapacityLedgerRow[] = 
   },
   {
     id: "rio_g9_capacity_college_counseling_pathways_gcd",
-    courseArea: "College Counseling / Pathways / Global Citizen Diploma",
+    courseArea: "College and Career Counseling / Pathways-GCD ownership",
     loadCategory: "program_ownership_load",
     weeklySlotsPerSection: null,
     allocationType: "hs_program_ownership",
@@ -1568,12 +1568,12 @@ export const GRADE_9_CAPACITY_LEDGER_ROWS: readonly Grade9CapacityLedgerRow[] = 
       "This is a Grade 9 HS program ownership function, not HS-to-MS sharing.",
     msPrimaryBridgeEligibility: "not_applicable",
     msPrimaryBridgeEligibilityNote:
-      "College Counseling / Pathways / Global Citizen Diploma is not an MS-primary bridge function.",
+      "College and Career Counseling and Pathways/GCD ownership are not MS-primary bridge functions.",
     projectBlockRole: "not_applicable",
     programOwnershipRole: "primary_program_ownership",
     validationStatus: "pending_counselor_role_activation",
     blockerOrCaveat:
-      "A guidance counselor / college counselor activates with Grade 9. GCD is embedded here and must not appear as a separate Grade 9 row.",
+      "College and Career Counseling is a support function. A dedicated HS Counselor / College Counselor is a role signal only if explicitly activated by the selected model. GCD remains embedded in Pathways/Leadership and must not appear as a separate Grade 9 row.",
   },
   {
     id: "rio_g9_capacity_global_expression_leadership",
@@ -1585,7 +1585,7 @@ export const GRADE_9_CAPACITY_LEDGER_ROWS: readonly Grade9CapacityLedgerRow[] = 
     hsOrientedLaunchCoverage: "not_applicable",
     hsOrientedSharedWithMsFeasibility: "plausible_pending_schedule_and_load_validation",
     hsOrientedSharedWithMsFeasibilityNote:
-      "This function may connect to the Brazilian Studies / Global Studies educator or the College Counseling / guidance function if load and profile fit allow.",
+      "This function may connect to the Brazilian Studies / Global Studies educator or the College and Career Counseling function if load and profile fit allow.",
     msPrimaryBridgeEligibility: "not_applicable",
     msPrimaryBridgeEligibilityNote:
       "This is not a default MS bridge function.",
@@ -1613,7 +1613,7 @@ export const GRADE_9_CAPACITY_LEDGER_ROWS: readonly Grade9CapacityLedgerRow[] = 
     programOwnershipRole: "connected_program_support",
     validationStatus: "distributed_pending_timetable_assignment",
     blockerOrCaveat:
-      "Advisory is distinct from College Counseling, GCD, and Project Mentorship. It is not a separate hire and not leftover capacity.",
+      "Advisory is distinct from College and Career Counseling, GCD, and Project Mentorship. It is not a separate hire and not available instructional capacity after required course coverage.",
   },
   {
     id: "rio_g9_capacity_project_mentorship_passion_project",
@@ -1638,7 +1638,7 @@ export const GRADE_9_CAPACITY_LEDGER_ROWS: readonly Grade9CapacityLedgerRow[] = 
     programOwnershipRole: "not_applicable",
     validationStatus: "distributed_pending_timetable_assignment",
     blockerOrCaveat:
-      "Project Mentorship / Passion Project is distributed across eligible educators, not a separate Project Mentor hire, not leftover capacity, and not Innovation Diploma. Innovation Diploma starts in Grade 11.",
+      "Project Mentorship / Passion Project is distributed across eligible educators, not a separate Project Mentor hire, not available instructional capacity after required course coverage, and not Innovation Diploma. Innovation Diploma starts in Grade 11.",
   },
 ];
 
@@ -1683,7 +1683,7 @@ export function buildGrade9CapacityLedger(
       "Weekly slot counts remain pending Rio curriculum validation.",
       "Middle School bridge/share signals are validation inputs, not confirmed High School capacity.",
       "Project Mentorship / Passion Project requires simultaneous educator availability in the fixed block; this is not a Project Mentor hire count.",
-      "Advisory is distinct from College Counseling, Global Citizen Diploma, and Project Mentorship.",
+      "Advisory is distinct from College and Career Counseling, Global Citizen Diploma, and Project Mentorship.",
     ],
   };
 }
@@ -1720,7 +1720,7 @@ export function deriveMsSurplusSignalForGrade9(
         msPrimaryBridgeEligibility = "eligible_if_validated";
         sharedMsCredibility = "medium";
         g9BridgeLabel =
-          "MS Mathematics surplus: planning signal only — HS-level mathematics expertise, remaining capacity, and schedule fit must be validated before Grade 9 assignment.";
+          "MS Mathematics surplus: planning signal only — HS-level mathematics expertise, available instructional capacity after required course coverage, and schedule fit must be validated before Grade 9 assignment.";
         break;
       case "englishLanguageArts":
         msPrimaryBridgeEligibility = "foundation_layer_only_if_validated";
@@ -1826,13 +1826,13 @@ export const RIO_WEEKLY_COURSE_LOAD_STUB: readonly RioWeeklyCourseLoadStubRow[] 
   {
     id: "rio_g9_college_counseling_pathways_gcd",
     grade: "g9",
-    courseArea: "College Counseling / Pathways / Global Citizen Diploma",
+    courseArea: "College and Career Counseling / Pathways-GCD ownership",
     capabilityProfileIds: ["pathways_college_career"],
     weeklySlotsPerSection: null,
     minutesPerSlot: null,
     loadCategory: "program_ownership_load",
     validationStatus: "pending_rio_curriculum_validation",
-    notes: "College Counseling / Pathways begins in Grade 9 as the High School pathway layer. Global Citizen Diploma is coordinated through this role and does not appear as a separate Grade 9 row or separate staffing bucket. Program ownership load — not a direct teaching block by default. Not payroll authorization.",
+    notes: "College and Career Counseling is the support/counseling function. Pathways/GCD ownership begins in Grade 9 as a program function and does not appear as a separate staffing bucket. Program ownership load — not a direct teaching block or dedicated role by default. Not payroll authorization.",
   },
   {
     id: "rio_g9_global_expression_leadership",
@@ -1843,7 +1843,7 @@ export const RIO_WEEKLY_COURSE_LOAD_STUB: readonly RioWeeklyCourseLoadStubRow[] 
     minutesPerSlot: null,
     loadCategory: "program_ownership_load",
     validationStatus: "pending_rio_curriculum_validation",
-    notes: "Leadership responsibility with embedded GCD scope. GCD is embedded within this role and is not a separate additive GCD staffing bucket. May connect to Brazilian Studies / Global Studies and the College Counseling / guidance function. Not merged with College Counseling / Pathways / Global Citizen Diploma.",
+    notes: "Leadership responsibility with embedded GCD scope. GCD is embedded within this program function and is not a separate additive GCD staffing bucket. May connect to Brazilian Studies / Global Studies and the College and Career Counseling function. Not merged with Pathways/GCD ownership.",
   },
   {
     id: "rio_g9_advisory",
@@ -1854,7 +1854,7 @@ export const RIO_WEEKLY_COURSE_LOAD_STUB: readonly RioWeeklyCourseLoadStubRow[] 
     minutesPerSlot: null,
     loadCategory: "program_ownership_load",
     validationStatus: "pending_rio_curriculum_validation",
-    notes: "Advisory begins in Grade 9 as part of the High School student-support and belonging structure. Distributed student-support/contact responsibility. Distinct from College Counseling, GCD, and Project Mentorship / Passion Project. Not a separate hire by default. Not optional. Not leftover capacity. Not payroll authorization.",
+    notes: "Advisory begins in Grade 9 as part of the High School student-support and belonging structure. Distributed student-support/contact responsibility. Distinct from College and Career Counseling, GCD, and Project Mentorship / Passion Project. Not a separate hire by default. Not optional. Not available instructional capacity after required course coverage. Not payroll authorization.",
   },
   {
     id: "rio_g9_project_mentorship",
@@ -1870,7 +1870,7 @@ export const RIO_WEEKLY_COURSE_LOAD_STUB: readonly RioWeeklyCourseLoadStubRow[] 
     minutesPerSlot: null,
     loadCategory: "mentorship_contact_load",
     validationStatus: "pending_rio_curriculum_validation",
-    notes: "Project Mentorship / Passion Project is distributed across eligible educators. It occurs inside a fixed synchronized mentorship block and does not conflict with regular subject teaching. Not a separate Project Mentor hire. Not leftover capacity. Requires educator teaching load, profile fit, group capacity, and schedule fit validation.",
+    notes: "Project Mentorship / Passion Project is distributed across eligible educators. It occurs inside a fixed synchronized mentorship block and does not conflict with regular subject teaching. Not a separate Project Mentor hire. Not available instructional capacity after required course coverage. Requires educator teaching load, profile fit, group capacity, and schedule fit validation.",
   },
 
   // ── Grade 10 ─────────────────────────────────────────────────────────────
@@ -1954,13 +1954,13 @@ export const RIO_WEEKLY_COURSE_LOAD_STUB: readonly RioWeeklyCourseLoadStubRow[] 
   {
     id: "rio_g10_pathways_college_career",
     grade: "g10",
-    courseArea: "Pathways / College and Career Guidance",
+    courseArea: "College and Career Counseling / Pathways ownership",
     capabilityProfileIds: ["pathways_college_career"],
     weeklySlotsPerSection: null,
     minutesPerSlot: null,
     loadCategory: "program_ownership_load",
     validationStatus: "pending_rio_curriculum_validation",
-    notes: "Requires explicit High School ownership. Program ownership load — not a direct teaching block by default.",
+    notes: "College and Career Counseling is the support/counseling function. Pathways is program ownership. Neither is a direct teaching block or dedicated role by default.",
   },
   {
     id: "rio_g10_project_mentorship",
@@ -2080,13 +2080,13 @@ export const RIO_WEEKLY_COURSE_LOAD_STUB: readonly RioWeeklyCourseLoadStubRow[] 
   {
     id: "rio_g11_college_career",
     grade: "g11",
-    courseArea: "College and Career Guidance",
+    courseArea: "College and Career Counseling",
     capabilityProfileIds: ["pathways_college_career"],
     weeklySlotsPerSection: null,
     minutesPerSlot: null,
     loadCategory: "program_ownership_load",
     validationStatus: "pending_rio_curriculum_validation",
-    notes: "Explicit ownership required. Program ownership load — not a direct teaching block by default.",
+    notes: "Support/counseling function requiring explicit ownership. Program ownership load — not a direct teaching block or dedicated role by default.",
   },
   {
     id: "rio_g11_capstone_research",
@@ -2206,13 +2206,13 @@ export const RIO_WEEKLY_COURSE_LOAD_STUB: readonly RioWeeklyCourseLoadStubRow[] 
   {
     id: "rio_g12_college_career",
     grade: "g12",
-    courseArea: "College and Career Guidance",
+    courseArea: "College and Career Counseling",
     capabilityProfileIds: ["pathways_college_career"],
     weeklySlotsPerSection: null,
     minutesPerSlot: null,
     loadCategory: "program_ownership_load",
     validationStatus: "pending_rio_curriculum_validation",
-    notes: "Graduation pathway support generates adult workload. Program ownership load — not a direct teaching block by default.",
+    notes: "Graduation pathway support generates adult workload. Program ownership load — not a direct teaching block or dedicated role by default.",
   },
   {
     id: "rio_g12_leadership_gcd",
@@ -2342,7 +2342,7 @@ export const GRADE_9_MOCK_SCHEDULE_BLOCKS: readonly Grade9MockScheduleBlock[] = 
     coverageType: "distributed_eligible_educators",
     educatorAssignmentLabel: "Distributed Grade 9 advisory responsibility",
     validationStatus: "distributed_pending_timetable_assignment",
-    caveat: "Advisory is distinct from College Counseling, GCD, and Project Mentorship. Not a separate hire and not leftover capacity.",
+    caveat: "Advisory is distinct from College and Career Counseling, GCD, and Project Mentorship. Not a separate hire and not available instructional capacity after required course coverage.",
   },
   // ── Tuesday ──────────────────────────────────────────────────────────────
   {
@@ -2373,13 +2373,13 @@ export const GRADE_9_MOCK_SCHEDULE_BLOCKS: readonly Grade9MockScheduleBlock[] = 
     id: "g9_mock_tue_b3_cc_pathways",
     day: "Tuesday",
     blockLabel: "Block 3",
-    courseArea: "College Counseling / Pathways / Global Citizen Diploma",
+    courseArea: "College and Career Counseling / Pathways-GCD ownership",
     ledgerRowId: "rio_g9_capacity_college_counseling_pathways_gcd",
     blockType: "program_ownership_signal",
     coverageType: "college_counseling_guidance",
-    educatorAssignmentLabel: "Guidance / College Counseling function",
+    educatorAssignmentLabel: "College and Career Counseling function",
     validationStatus: "pending_counselor_role_activation",
-    caveat: "College Counseling / Pathways / Global Citizen Diploma activates with Grade 9. GCD is embedded here, not a separate Grade 9 row.",
+    caveat: "College and Career Counseling is the support function. Pathways/GCD ownership is a program function, not a separate Grade 9 staffing row.",
   },
   {
     id: "g9_mock_tue_project_block",
@@ -2426,7 +2426,7 @@ export const GRADE_9_MOCK_SCHEDULE_BLOCKS: readonly Grade9MockScheduleBlock[] = 
     ledgerRowId: "rio_g9_capacity_global_expression_leadership",
     blockType: "program_ownership_signal",
     coverageType: "program_ownership",
-    educatorAssignmentLabel: "Brazilian Studies / Global Studies educator or College Counseling / guidance function, pending assignment",
+    educatorAssignmentLabel: "Brazilian Studies / Global Studies educator or College and Career Counseling function, pending assignment",
     validationStatus: "hs_program_ownership_pending_assignment",
     caveat: "Do not duplicate GCD, Pathways, or Advisory.",
   },
@@ -2440,7 +2440,7 @@ export const GRADE_9_MOCK_SCHEDULE_BLOCKS: readonly Grade9MockScheduleBlock[] = 
     coverageType: "distributed_eligible_educators",
     educatorAssignmentLabel: "Distributed Grade 9 advisory responsibility",
     validationStatus: "distributed_pending_timetable_assignment",
-    caveat: "Advisory is distinct from College Counseling, GCD, and Project Mentorship. Not a separate hire and not leftover capacity.",
+    caveat: "Advisory is distinct from College and Career Counseling, GCD, and Project Mentorship. Not a separate hire and not available instructional capacity after required course coverage.",
   },
   // ── Thursday ─────────────────────────────────────────────────────────────
   {
@@ -2520,13 +2520,13 @@ export const GRADE_9_MOCK_SCHEDULE_BLOCKS: readonly Grade9MockScheduleBlock[] = 
     id: "g9_mock_fri_b3_cc_pathways",
     day: "Friday",
     blockLabel: "Block 3",
-    courseArea: "College Counseling / Pathways / Global Citizen Diploma",
+    courseArea: "College and Career Counseling / Pathways-GCD ownership",
     ledgerRowId: "rio_g9_capacity_college_counseling_pathways_gcd",
     blockType: "program_ownership_signal",
     coverageType: "college_counseling_guidance",
-    educatorAssignmentLabel: "Guidance / College Counseling function",
+    educatorAssignmentLabel: "College and Career Counseling function",
     validationStatus: "pending_counselor_role_activation",
-    caveat: "College Counseling / Pathways / Global Citizen Diploma activates with Grade 9. GCD is embedded here, not a separate Grade 9 row.",
+    caveat: "College and Career Counseling is the support function. Pathways/GCD ownership is a program function, not a separate Grade 9 staffing row.",
   },
   {
     id: "g9_mock_fri_advisory",
@@ -2538,7 +2538,7 @@ export const GRADE_9_MOCK_SCHEDULE_BLOCKS: readonly Grade9MockScheduleBlock[] = 
     coverageType: "distributed_eligible_educators",
     educatorAssignmentLabel: "Distributed Grade 9 advisory responsibility",
     validationStatus: "distributed_pending_timetable_assignment",
-    caveat: "Advisory is distinct from College Counseling, GCD, and Project Mentorship. Not a separate hire and not leftover capacity.",
+    caveat: "Advisory is distinct from College and Career Counseling, GCD, and Project Mentorship. Not a separate hire and not available instructional capacity after required course coverage.",
   },
 ];
 

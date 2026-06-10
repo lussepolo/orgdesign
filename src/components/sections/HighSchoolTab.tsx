@@ -84,7 +84,7 @@ const HS_YEAR_DATA: HSYearData[] = [
     year: "Grade 9",
     scope: "High School Foundation",
     model: "Provisional HS Launch Faculty",
-    fte: "4 FTE",
+    fte: "4 FTE capacity signal",
     curriculum: ["AP", "BNCC", "Common Core"],
     org: [
       "Integrated Mathematics",
@@ -92,7 +92,8 @@ const HS_YEAR_DATA: HSYearData[] = [
       "Natural Sciences: Biology/Chemistry foundations",
       "Brazilian Studies / Global Studies",
       "English Language Arts",
-      "College Counseling / Pathways / Global Citizen Diploma",
+      "College and Career Counseling",
+      "Pathways / GCD program ownership",
       "Global Expression & Leadership",
       "Advisory",
       "Project Mentorship / Passion Project (fixed mentorship block)",
@@ -112,19 +113,20 @@ const HS_YEAR_DATA: HSYearData[] = [
       "Biology, Chemistry & Physics continuation",
       "AP Seminar",
       "AP Computer Science Principles",
-      "Pathways & College and Career Guidance",
+      "College and Career Counseling",
+      "Pathways / GCD program ownership",
       "Academic Advising / mentorship",
       "Project Mentorship / Passion Project (fixed mentorship block)",
       "GCD within Pathways/Leadership",
       "Innovation / Design Technologies",
     ],
-    description: "Grade 10 extends the Grade 9 launch package — not a separate FTE step without validation. It still requires explicit High School ownership across academics, advisory, mentorship, Pathways, College and Career Guidance, and GCD within Pathways/Leadership."
+    description: "Grade 10 extends the Grade 9 launch package — not a separate FTE step without validation. It still requires explicit High School ownership across academics, advisory, mentorship, College and Career Counseling, Pathways, and GCD within Pathways/Leadership."
   },
   {
     year: "Grade 11",
     scope: "High School Specialization II",
     model: "Provisional HS Specialist Capacity",
-    fte: "3 New FTE (7 Total HS)",
+    fte: "3 New FTE capacity signal (7 total HS)",
     curriculum: ["AP Seminar", "AP Calculus", "BNCC"],
     org: [
       "Língua Portuguesa III & AP Lang (ELA)",
@@ -142,7 +144,7 @@ const HS_YEAR_DATA: HSYearData[] = [
     year: "Grade 12",
     scope: "High School Graduation",
     model: "Provisional HS Specialist Capacity",
-    fte: "3 New FTE (10 Total HS)",
+    fte: "3 New FTE capacity signal (10 total HS)",
     curriculum: ["AP Research", "College Prep", "BNCC"],
     org: [
       "Língua Portuguesa IV & AP Lit (ELA)",
@@ -169,7 +171,7 @@ interface HSCourseOfferArchitecture {
 }
 
 const HS_STAFFING_VALIDATION_NOTE =
-  "The High School staffing framework shown here is instructional-capacity planning, not payroll authorization. The app currently contains both a 10-FTE High School teaching ramp and an 8-HC HS Educator Pool; Finance/HR validation is required before either becomes the payroll source of truth.";
+  "The High School staffing framework shown here is instructional-capacity planning, not payroll authorization, final FTE, final headcount, or hiring approval. The app currently contains both a 10-FTE High School teaching ramp and an 8-HC HS Educator Pool; Finance/HR validation is required before either becomes the payroll source of truth.";
 
 const HS_COURSE_OFFER_ARCHITECTURE: HSCourseOfferArchitecture[] = [
   {
@@ -185,13 +187,14 @@ const HS_COURSE_OFFER_ARCHITECTURE: HSCourseOfferArchitecture[] = [
       "No AP course layer in the Grade 9 launch; AP pathways activate from Grade 10 onward.",
     ],
     programFunctions: [
-      "College Counseling / Pathways / Global Citizen Diploma",
+      "College and Career Counseling",
+      "Pathways / GCD program ownership",
       "Global Expression & Leadership",
       "Advisory",
       "Project Mentorship / Passion Project (fixed synchronized mentorship block — distributed educator responsibility, not a separate hire by default)",
     ],
     staffingImplication:
-      "Grade 9 launches High School through HS-oriented instructional coverage in Integrated Mathematics, Portuguese / Redação, Natural Sciences (Biology/Chemistry foundations), and Brazilian Studies / Global Studies. English Language Arts may be covered by a validated MS ELA educator in Grade 9; dedicated HS ELA is expected in Grade 10. College Counseling / Pathways / Global Citizen Diploma activates with Grade 9. Advisory and Project Mentorship / Passion Project are distributed educator responsibilities, not separate hires by default. This is instructional-capacity planning, not payroll authorization.",
+      "Grade 9 launches High School through HS-oriented instructional coverage in Integrated Mathematics, Portuguese / Redação, Natural Sciences (Biology/Chemistry foundations), and Brazilian Studies / Global Studies. English Language Arts may be covered by a validated MS ELA educator in Grade 9; dedicated HS ELA is expected in Grade 10. College and Career Counseling is a support function; Pathways and GCD are program-ownership functions. Advisory and Project Mentorship / Passion Project are distributed educator responsibilities, not separate hires by default. This is instructional-capacity planning, not payroll authorization, final FTE, final headcount, or hiring approval.",
   },
   {
     grade: "Grade 10",
@@ -209,14 +212,14 @@ const HS_COURSE_OFFER_ARCHITECTURE: HSCourseOfferArchitecture[] = [
     ],
     programFunctions: [
       "Pathways",
-      "College and Career Guidance",
+      "College and Career Counseling",
       "Academic Advising / mentorship",
       "Project Mentorship / Passion Project (fixed synchronized mentorship block)",
       "GCD within Pathways/Leadership",
       "Innovation / Design Technologies",
     ],
     staffingImplication:
-      "Grade 10 extends the Grade 9 launch package. It requires explicit High School ownership across academics, advisory, mentorship, Pathways, College and Career Guidance, and GCD within Pathways/Leadership. It does not create a separate FTE step beyond the launch package unless validated.",
+      "Grade 10 extends the Grade 9 launch package. It requires explicit High School ownership across academics, advisory, mentorship, Pathways, College and Career Counseling, and GCD within Pathways/Leadership. It does not create a separate FTE step beyond the launch package unless validated.",
   },
   {
     grade: "Grade 11",
@@ -233,7 +236,7 @@ const HS_COURSE_OFFER_ARCHITECTURE: HSCourseOfferArchitecture[] = [
       "Brazilian Studies / Global Studies / AP Social Sciences",
     ],
     programFunctions: [
-      "College/Career counseling",
+      "College and Career Counseling",
       "External mentors",
       "Capstone-like research or independent work",
       "GCD within Pathways/Leadership",
@@ -258,7 +261,7 @@ const HS_COURSE_OFFER_ARCHITECTURE: HSCourseOfferArchitecture[] = [
       "Capstone-like pathway work",
     ],
     programFunctions: [
-      "College/Career counseling",
+      "College and Career Counseling",
       "Internships or external mentorship",
       "Leadership",
       "Graduation pathway support",
@@ -290,7 +293,8 @@ const HS_ROADMAP_DATA = [
     clusters: [
       { name: "HS Launch Educator Core", type: "HS" },
       { name: "Natural Sciences: Biology/Chemistry", type: "HS" },
-      { name: "College Counseling / Pathways", type: "HS" },
+      { name: "College and Career Counseling", type: "HS" },
+      { name: "Pathways / GCD ownership", type: "HS" },
       { name: "HS Transition Bridge", type: "HS" }
     ]
   },
@@ -301,7 +305,7 @@ const HS_ROADMAP_DATA = [
       { name: "Dedicated HS Specialists", type: "HS" },
       { name: "AP Research Core", type: "HS" },
       { name: "Advanced Sciences Core", type: "HS" },
-      { name: "College Advising", type: "HS" }
+      { name: "College and Career Counseling", type: "HS" }
     ]
   },
   {
@@ -375,7 +379,66 @@ const HS_LOAD_CATEGORY_PREVIEW = [
   {
     title: "Program ownership load",
     variant: "success" as const,
-    items: ["Pathways", "Leadership", "GCD within Pathways/Leadership", "College/Career guidance"],
+    items: ["Pathways", "Leadership", "GCD within Pathways/Leadership", "College and Career Counseling"],
+  },
+];
+
+const HS_LOAD_LOGIC_LAYERS = [
+  {
+    title: "Required Course Coverage",
+    badge: "Course coverage",
+    variant: "info" as const,
+    copy:
+      "Deterministic academic coverage starts with required Grade 9-12 courses, weekly slots, and validated course capability.",
+  },
+  {
+    title: "Specialist and Elective Load",
+    badge: "Offer layer",
+    variant: "purple" as const,
+    copy:
+      "AP, lab sciences, advanced humanities, design technologies, Body & Movement, and electives are separate specialist or elective demand, not core coverage by default.",
+  },
+  {
+    title: "Program-Function Allocation",
+    badge: "Function",
+    variant: "success" as const,
+    copy:
+      "Pathways, Global Citizen Diploma / IGC, advisory, project mentorship, electives, capstone, and portfolio support are program functions unless explicitly modeled as roles.",
+  },
+  {
+    title: "Counseling and Learner Support",
+    badge: "Support",
+    variant: "warning" as const,
+    copy:
+      "College and Career Counseling is a counseling/support function. It is separate from Pathways and GCD program ownership.",
+  },
+  {
+    title: "Role / Headcount Signals",
+    badge: "Signal",
+    variant: "danger" as const,
+    copy:
+      "HS Counselor / College Counselor is a role or headcount signal only when explicitly activated by the model.",
+  },
+  {
+    title: "Embedded Educator Routines",
+    badge: "Routine",
+    variant: "default" as const,
+    copy:
+      "Documentation, feedback, reflection, learner-facing guidance, and portfolio evidence are embedded routines, not standalone headcount drivers.",
+  },
+  {
+    title: "Schedule Validation",
+    badge: "Validation",
+    variant: "warning" as const,
+    copy:
+      "Mentorship blocks, advisory, program ownership, electives, and shared MS/HS bridge use require timetable validation before operational feasibility.",
+  },
+  {
+    title: "Governance Boundary",
+    badge: "Boundary",
+    variant: "default" as const,
+    copy:
+      "Visible FTE and Total HS labels are provisional instructional-capacity signals only, not payroll authorization, final FTE, final headcount, or hiring approval.",
   },
 ];
 
@@ -523,7 +586,7 @@ const G9_VALIDATION_STATUS_LABELS: Record<string, string> = {
   ms_bridge_foundation_layer_pending_validation: "MS bridge foundation layer, pending validation",
   distributed_pending_timetable_assignment: "Distributed, pending timetable assignment",
   hs_program_ownership_pending_assignment: "HS program ownership, pending assignment",
-  pending_counselor_role_activation: "Pending counselor role activation",
+  pending_counselor_role_activation: "Pending counseling role signal",
   pending_rio_curriculum_validation: "Pending Rio curriculum validation",
 };
 
@@ -640,7 +703,7 @@ const HighSchoolTab = ({ sections, setSections }: HighSchoolTabProps) => {
                   Planning status
                 </div>
                 <p className="mt-3 text-xs font-semibold leading-relaxed text-slate-100/70">
-                  Instructional-capacity planning only. Finance/HR validation required before any staffing ramp becomes payroll authorization.
+                  Instructional-capacity planning only. Validation is required before any staffing ramp is treated as payroll authorization, final FTE, final headcount, or hiring approval.
                 </p>
               </div>
             </div>
@@ -708,7 +771,7 @@ const HighSchoolTab = ({ sections, setSections }: HighSchoolTabProps) => {
                     grade: "Grade 9",
                     label: "HS Launch",
                     year: "2034",
-                    offerSummary: "Integrated Mathematics, Portuguese / Redação, Natural Sciences: Biology/Chemistry foundations, Brazilian Studies / Global Studies, English Language Arts, College Counseling / Pathways / Global Citizen Diploma, Global Expression & Leadership, Advisory, Project Mentorship / Passion Project (fixed mentorship block)",
+                    offerSummary: "Integrated Mathematics, Portuguese / Redação, Natural Sciences: Biology/Chemistry foundations, Brazilian Studies / Global Studies, English Language Arts, College and Career Counseling, Pathways / GCD program ownership, Global Expression & Leadership, Advisory, Project Mentorship / Passion Project (fixed mentorship block)",
                     planningNote: "Mixed educator model: new HS-capable educators for validated HS-specific domains; selected MS educators extend only where HS expertise, profile fit, and capacity are validated. Bridge staffing is not a substitute for HS hiring.",
                     color: "border-indigo-200 bg-indigo-50",
                     badge: "info" as const,
@@ -726,7 +789,7 @@ const HighSchoolTab = ({ sections, setSections }: HighSchoolTabProps) => {
                     grade: "Grade 11",
                     label: "Specialist Density",
                     year: "2036",
-                    offerSummary: "Portuguese / Redação, ELA / advanced, AP Precalculus / AP Calculus pathway, AP Biology, AP Chemistry, AP Seminar / AP Capstone preparation, Brazilian Studies, Global Studies, College/Career counseling, External mentors, GCD/Leadership, Innovation / Design Technologies",
+                    offerSummary: "Portuguese / Redação, ELA / advanced, AP Precalculus / AP Calculus pathway, AP Biology, AP Chemistry, AP Seminar / AP Capstone preparation, Brazilian Studies, Global Studies, College and Career Counseling, External mentors, GCD/Leadership, Innovation / Design Technologies",
                     planningNote: "Provisional expansion — specialist domains or strong part-time specialists",
                     color: "border-cyan-200 bg-cyan-50",
                     badge: "success" as const,
@@ -735,7 +798,7 @@ const HighSchoolTab = ({ sections, setSections }: HighSchoolTabProps) => {
                     grade: "Grade 12",
                     label: "Graduation Pathway",
                     year: "2037+",
-                    offerSummary: "Portuguese / Redação, ELA, Advanced Mathematics, Brazilian Studies / Global Studies, Natural Sciences (pathway-dependent), AP Research (Social Sciences), AP / advanced courses, Independent Study, College/Career counseling, Internships, Leadership, GCD completion, Innovation Diploma completion",
+                    offerSummary: "Portuguese / Redação, ELA, Advanced Mathematics, Brazilian Studies / Global Studies, Natural Sciences (pathway-dependent), AP Research (Social Sciences), AP / advanced courses, Independent Study, College and Career Counseling, Internships, Leadership, GCD completion, Innovation Diploma completion",
                     planningNote: "Flat only if Finance/HR validation confirms workload model. AP Research is the Grade 12 Social Sciences capstone — not generic ELA or generic research.",
                     color: "border-emerald-200 bg-emerald-50",
                     badge: "success" as const,
@@ -764,9 +827,30 @@ const HighSchoolTab = ({ sections, setSections }: HighSchoolTabProps) => {
                 </div>
                 <div className="space-y-4">
                   <p className="text-xs text-slate-600 leading-relaxed"><strong>G9</strong> launches with a mixed educator model: new HS-capable educators hired for validated HS-specific domains; selected MS educators may extend only where High School expertise, profile fit, and schedule capacity are validated. Shared MS/HS staffing is a bridge mechanism — not a substitute for HS hiring.</p>
-                  <p className="text-xs text-slate-600 leading-relaxed"><strong>G10</strong> extends the G9 launch package and requires explicit HS ownership across academics, advisory, mentorship, Pathways, College and Career Guidance, and GCD within Pathways/Leadership. No separate G10 FTE step beyond the launch package without validation.</p>
-                  <p className="text-xs text-slate-600 leading-relaxed"><strong>G11–G12</strong> introduces specialist domains, <strong>AP Research</strong> (Grade 12 Social Sciences capstone — not generic ELA or research), College/Career counseling, external mentorship, and capstone-like work. Generic shared staffing becomes risky by Grade 11.</p>
+                  <p className="text-xs text-slate-600 leading-relaxed"><strong>G10</strong> extends the G9 launch package and requires explicit HS ownership across academics, advisory, mentorship, Pathways, College and Career Counseling, and GCD within Pathways/Leadership. No separate G10 FTE step beyond the launch package without validation.</p>
+                  <p className="text-xs text-slate-600 leading-relaxed"><strong>G11–G12</strong> introduces specialist domains, <strong>AP Research</strong> (Grade 12 Social Sciences capstone — not generic ELA or research), College and Career Counseling, external mentorship, and capstone-like work. Generic shared staffing becomes risky by Grade 11.</p>
+                  <p className="text-xs text-slate-600 leading-relaxed"><strong>Role/function boundary:</strong> College and Career Counseling is a support function. A dedicated HS Counselor / College Counselor is a role signal only when explicitly activated by the model. Pathways, GCD, advisory, mentorship, electives, and portfolio support are program functions or embedded responsibilities unless modeled as dedicated roles.</p>
                   <p className="text-xs text-slate-600 leading-relaxed"><strong>Core principle:</strong> Course offer → weekly slots per section → total instructional/contact load → educator capability → scenario fit → provisional staffing implications.</p>
+                </div>
+              </Card>
+
+              {/* High School Load Logic — course-coverage ontology, not cluster-educator logic */}
+              <Card title="High School Load Logic" subtitle="Course coverage ontology" icon={Scale}>
+                <div className="mb-5 rounded-2xl border border-slate-100 bg-slate-50 p-4">
+                  <p className="text-xs font-semibold leading-relaxed text-slate-600">
+                    High School load starts with required course coverage, then tests specialist/elective demand, program-function ownership, counseling/support load, and timetable feasibility. It does not convert functions or routines into dedicated roles unless the model explicitly activates them.
+                  </p>
+                </div>
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
+                  {HS_LOAD_LOGIC_LAYERS.map((layer) => (
+                    <div key={layer.title} className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
+                      <div className="mb-3 flex items-start justify-between gap-2">
+                        <h4 className="text-sm font-black leading-tight text-slate-900">{layer.title}</h4>
+                        <Badge variant={layer.variant}>{layer.badge}</Badge>
+                      </div>
+                      <p className="text-[11px] font-medium leading-relaxed text-slate-500">{layer.copy}</p>
+                    </div>
+                  ))}
                 </div>
               </Card>
 
@@ -843,7 +927,7 @@ const HighSchoolTab = ({ sections, setSections }: HighSchoolTabProps) => {
                   <h3 className="text-xl font-bold text-slate-900">Grade progression detail</h3>
                 </div>
                 <p className="text-sm text-slate-500 leading-relaxed max-w-3xl">
-                  Provisional planning premise per grade. FTE figures are instructional-capacity assumptions, not payroll authorization.
+                  Provisional planning premise per grade. FTE figures are instructional-capacity signals only, not payroll authorization, final FTE, final headcount, or hiring approval.
                 </p>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   {HS_YEAR_DATA.map((year, idx) => {
@@ -1244,7 +1328,7 @@ const HighSchoolTab = ({ sections, setSections }: HighSchoolTabProps) => {
                   hs_oriented_launch: "HS-oriented launch educator",
                   ms_primary_bridge_if_validated: "MS-primary bridge if validated",
                   distributed_eligible_educators: "Distributed eligible educators",
-                  college_counseling_guidance: "College Counseling / guidance",
+                  college_counseling_guidance: "College and Career Counseling",
                   program_ownership: "Program ownership",
                   pending_validation: "Pending validation",
                 };
@@ -1368,7 +1452,7 @@ const HighSchoolTab = ({ sections, setSections }: HighSchoolTabProps) => {
                   Project Mentorship / Passion Project is distributed across eligible educators within a fixed synchronized block.
                   This block is protected in the timetable and must not conflict with regular subject teaching. It counts toward educator
                   workload and must be assigned based on profile fit, available total workload capacity, and group capacity.
-                  It is not a separate Project Mentor hire and not leftover capacity.
+                  It is not a separate Project Mentor hire and not available instructional capacity after required course coverage.
                 </p>
               </div>
 
@@ -1551,7 +1635,7 @@ const HighSchoolTab = ({ sections, setSections }: HighSchoolTabProps) => {
                     <div className="p-4 bg-indigo-50 rounded-2xl border border-indigo-100">
                       <div className="text-[10px] font-bold text-indigo-600 uppercase mb-2">Planning assumption</div>
                       <div className="text-2xl font-bold text-slate-900">{specialists}-specialist capacity view</div>
-                      <p className="mt-2 text-[10px] text-slate-400 leading-relaxed">Provisional planning premise. Not payroll authorization.</p>
+                      <p className="mt-2 text-[10px] text-slate-400 leading-relaxed">Provisional planning premise. Not payroll authorization, final FTE, final headcount, or hiring approval.</p>
                     </div>
                     <div className="space-y-3">
                       <div className="flex justify-between items-center text-[10px] font-bold text-slate-400 uppercase">
@@ -1583,7 +1667,7 @@ const HighSchoolTab = ({ sections, setSections }: HighSchoolTabProps) => {
               </div>
 
               <div className="rounded-2xl border border-amber-100 bg-amber-50 p-4 text-xs font-semibold leading-relaxed text-amber-900">
-                Roadmap values are planning premises. FTE figures are provisional instructional-capacity assumptions, not payroll authorization. Finance/HR validation is required before any ramp is treated as headcount authorization.
+                Roadmap values are planning premises. FTE figures are provisional instructional-capacity signals only, not payroll authorization, final FTE, final headcount, or hiring approval.
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
