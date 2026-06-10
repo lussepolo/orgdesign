@@ -71,7 +71,7 @@ const MS_OWNERSHIP_PROGRESSION = [
     model: "Cluster launch with explicit subject ownership.",
     details: [
       "Some domains may be combined for load viability.",
-      "Mathematics + Natural Sciences can be combined if complemented by Pathways, Advisory, STEAM elective, Project Mentorship, or scientific inquiry.",
+      "Mathematics + Natural Sciences can be combined when program functions and inquiry routines are distributed through available educator capacity.",
       "Passion Projects begin in Grade 6; Project Mentorship is a coordinated function, not automatic payroll.",
     ],
   },
@@ -205,15 +205,18 @@ const GRADE_6_CLUSTER_INSIGHTS = [
     implication: "Near viable load; requires 4 complementary slots to reach the 24-slot minimum.",
   },
   {
-    name: "Global Studies / ELA & Projects Cluster",
-    includes: ["English Language Arts", "Passion Project", "Pathways", "Global Expression & Leadership"],
-    slotFormula: "ELA 6 + Passion Project 2 + Pathways 1 + Global Expression 2 = 11 slots / section",
+    name: "ELA / Global Studies Program-Function Cluster",
+    includes: [
+      "English Language Arts core load",
+      "Cluster-owned program functions: Passion Projects, Pathways, Global Expression & Leadership",
+    ],
+    slotFormula: "ELA core 6 + program-function allocation 5 = 11 slots / section",
     sectionFormula: "11 × 2 sections = 22 slots",
     slotsPerSection: 11,
     slotsAcrossTwoSections: 22,
     contactHoursAcrossTwoSections: 16.5,
     gapToMinimum: 2,
-    implication: "Closest to minimum viable load; requires 2 complementary slots to reach the 24-slot minimum.",
+    implication: "Closest to minimum viable load; program-function slots are distributed through cluster capacity, not additional core subject-domain load.",
   },
 ];
 
@@ -572,7 +575,7 @@ const MiddleSchoolTab = (_props: MiddleSchoolTabProps) => {
                       {[
                         { name: "STEM", detail: "Integrated Mathematics + Natural Sciences" },
                         { name: "Humanities", detail: "Língua Portuguesa + Social Sciences" },
-                        { name: "Global Studies / ELA & Projects", detail: "English Language Arts + Passion Project + Pathways + Global Expression & Leadership" },
+                        { name: "ELA / Global Studies Program-Function Cluster", detail: "English Language Arts core load + cluster-owned program functions distributed through educator capacity" },
                       ].map((cluster) => (
                         <li key={cluster.name} className="rounded-xl bg-slate-50 border border-slate-100 px-3 py-2 space-y-0.5">
                           <div className="text-[10px] font-bold text-slate-800">{cluster.name}</div>
@@ -973,7 +976,7 @@ const MiddleSchoolTab = (_props: MiddleSchoolTabProps) => {
                     </div>
                   </div>
                   <p className="text-xs text-slate-600 leading-relaxed">
-                    Grade 6 can be organized through 3 educator clusters, but these are not automatically 3 fully loaded educators. Each cluster still has a gap to the 24-slot minimum, so complementary program-function load or schedule validation is required.
+                    Grade 6 can be organized through 3 educator clusters, but these are not automatically 3 fully loaded educators. Each cluster still has a gap to the 24-slot minimum, so program functions must be distributed through available educator capacity or schedule validation.
                   </p>
                   <p className="text-[10px] text-slate-500 leading-relaxed">
                     Grade 6 has two valid planning lenses: 5 core subject-domain rows in the simulator and 3 educator clusters in the launch architecture. The domain rows capture per-subject load; the clusters capture how Grade 6 instruction can be organized before subject specialization deepens.
@@ -1178,10 +1181,10 @@ const MiddleSchoolTab = (_props: MiddleSchoolTabProps) => {
                   These counts are model-derived instructional-capacity signals. They are not payroll authorization, final FTE, final headcount, or hiring approval.
                 </p>
                 <p className="text-[10px] text-slate-500 leading-relaxed">
-                  Grade 6 launch should be read through the cluster architecture: 3 educator clusters, not automatically 3 fully loaded educators. Complementary program functions are required to approach viable load.
+                  Grade 6 launch should be read through the cluster architecture: 3 educator clusters, not automatically 3 fully loaded educators. Program functions are distributed through available educator capacity to approach viable load.
                 </p>
                 <p className="text-[10px] text-slate-500 leading-relaxed">
-                  Domain-row count is not the same as the cluster-compressed launch premise. Specialist load and program functions require schedule validation. Distributed responsibilities use available slot capacity after core subject-domain teaching load.
+                  Domain-row count is not the same as the cluster-compressed launch premise. Specialist load and program functions require schedule validation. Distributed responsibilities use available slot capacity after core subject-domain teaching load and are not additional core subject-domain load.
                 </p>
                 <div className="rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-[10px] font-medium text-blue-800">
                   Current simulator configuration: G6 = {msSectionsByGrade.g6} · G7 = {msSectionsByGrade.g7} · G8 = {msSectionsByGrade.g8}. Core educators implied by current configuration: {currentCoreEducators}.
