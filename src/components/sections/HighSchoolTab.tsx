@@ -759,9 +759,32 @@ const HighSchoolTab = ({ sections, setSections }: HighSchoolTabProps) => {
                 </div>
               </div>
 
-              {/* Finance/HR validation caveat — must remain visible in Decision Summary */}
-              <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-xs font-semibold leading-relaxed text-amber-900">
-                {HS_STAFFING_VALIDATION_NOTE}
+              {/* High School Load Logic — reader key before grade implications */}
+              <Card title="High School Load Logic" subtitle="Reader key before Grade 9-12 implications" icon={Scale}>
+                <div className="mb-4 rounded-2xl border border-slate-100 bg-slate-50 p-4">
+                  <p className="text-xs font-semibold leading-relaxed text-slate-600">
+                    Use this taxonomy before reading the grade cards: course coverage drives instructional-capacity planning; functions, support, routines, and role signals remain separate unless explicitly modeled.
+                  </p>
+                </div>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                  {HS_LOAD_LOGIC_LAYERS.map((layer) => (
+                    <div key={layer.title} className="rounded-2xl border border-slate-100 bg-white p-3 shadow-sm">
+                      <div className="mb-2 flex items-start justify-between gap-2">
+                        <h4 className="text-xs font-black leading-tight text-slate-900">{layer.title}</h4>
+                        <Badge variant={layer.variant}>{layer.badge}</Badge>
+                      </div>
+                      <p className="text-[10px] font-medium leading-relaxed text-slate-500">{layer.copy}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-4 rounded-2xl border border-amber-100 bg-amber-50 p-3 text-[10px] font-semibold leading-relaxed text-amber-900">
+                  {HS_STAFFING_VALIDATION_NOTE}
+                </div>
+              </Card>
+
+              {/* Finance/HR validation caveat — compact opening reminder */}
+              <div className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-[11px] font-semibold leading-relaxed text-amber-900">
+                Instructional-capacity planning only. Visible FTE / Total HS labels are provisional and do not authorize payroll, final FTE, final headcount, or hiring.
               </div>
 
               {/* Grade-progression overview — course-offer-led tiles */}
@@ -831,26 +854,6 @@ const HighSchoolTab = ({ sections, setSections }: HighSchoolTabProps) => {
                   <p className="text-xs text-slate-600 leading-relaxed"><strong>G11–G12</strong> introduces specialist domains, <strong>AP Research</strong> (Grade 12 Social Sciences capstone — not generic ELA or research), College and Career Counseling, external mentorship, and capstone-like work. Generic shared staffing becomes risky by Grade 11.</p>
                   <p className="text-xs text-slate-600 leading-relaxed"><strong>Role/function boundary:</strong> College and Career Counseling is a support function. A dedicated HS Counselor / College Counselor is a role signal only when explicitly activated by the model. Pathways, GCD, advisory, mentorship, electives, and portfolio support are program functions or embedded responsibilities unless modeled as dedicated roles.</p>
                   <p className="text-xs text-slate-600 leading-relaxed"><strong>Core principle:</strong> Course offer → weekly slots per section → total instructional/contact load → educator capability → scenario fit → provisional staffing implications.</p>
-                </div>
-              </Card>
-
-              {/* High School Load Logic — course-coverage ontology, not cluster-educator logic */}
-              <Card title="High School Load Logic" subtitle="Course coverage ontology" icon={Scale}>
-                <div className="mb-5 rounded-2xl border border-slate-100 bg-slate-50 p-4">
-                  <p className="text-xs font-semibold leading-relaxed text-slate-600">
-                    High School load starts with required course coverage, then tests specialist/elective demand, program-function ownership, counseling/support load, and timetable feasibility. It does not convert functions or routines into dedicated roles unless the model explicitly activates them.
-                  </p>
-                </div>
-                <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
-                  {HS_LOAD_LOGIC_LAYERS.map((layer) => (
-                    <div key={layer.title} className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
-                      <div className="mb-3 flex items-start justify-between gap-2">
-                        <h4 className="text-sm font-black leading-tight text-slate-900">{layer.title}</h4>
-                        <Badge variant={layer.variant}>{layer.badge}</Badge>
-                      </div>
-                      <p className="text-[11px] font-medium leading-relaxed text-slate-500">{layer.copy}</p>
-                    </div>
-                  ))}
                 </div>
               </Card>
 
