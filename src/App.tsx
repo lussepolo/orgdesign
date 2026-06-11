@@ -22,6 +22,7 @@ import {
   ArrowRight,
   DollarSign,
   GitBranch,
+  PieChart,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { clsx, type ClassValue } from 'clsx';
@@ -44,9 +45,10 @@ import HighSchoolTab from "./components/sections/HighSchoolTab";
 import StaffingTab from "./components/sections/StaffingTab";
 import LoadTab from "./components/sections/LoadTab";
 import AboutModal from "./components/sections/AboutModal";
+import DreScenarioSimulatorTab from "./components/sections/DreScenarioSimulatorTab";
 
 // --- Types ---
-export type TabId = "cover" | "staffing" | "offer-scenarios" | "executive-org-design" | "hr" | "early-years" | "lower-school" | "ms" | "hs" | "load" | "payroll" | "viability";
+export type TabId = "cover" | "staffing" | "offer-scenarios" | "executive-org-design" | "hr" | "early-years" | "lower-school" | "ms" | "hs" | "load" | "payroll" | "viability" | "dre-scenario-simulator";
 
 const APP_TAB_ORDER: TabId[] = [
   "cover",
@@ -61,6 +63,7 @@ const APP_TAB_ORDER: TabId[] = [
   "load",
   "payroll",
   "viability",
+  "dre-scenario-simulator",
 ];
 
 // --- Components ---
@@ -203,6 +206,7 @@ export default function App() {
             <TabButton active={activeTab === "load"} onClick={() => setActiveTab("load")} label="Load Calculator" icon={Activity} />
             <TabButton active={activeTab === "payroll"} onClick={() => setActiveTab("payroll")} label="Payroll Projection" icon={DollarSign} />
             <TabButton active={activeTab === "viability"} onClick={() => setActiveTab("viability")} label="Viability Simulator" icon={Scale} />
+            <TabButton active={activeTab === "dre-scenario-simulator"} onClick={() => setActiveTab("dre-scenario-simulator")} label="DRE Scenario Simulator" icon={PieChart} />
           </nav>
 
           <div className="flex items-center gap-2 md:gap-4">
@@ -246,6 +250,7 @@ export default function App() {
               {activeTab === "hs" && "High School Expansion Strategy"}
               {activeTab === "payroll" && "Payroll Projection & Cost Stack"}
               {activeTab === "viability" && "Viability Decision Simulator"}
+              {activeTab === "dre-scenario-simulator" && "DRE Scenario Simulator"}
             </h2>
             <p className="text-slate-500 mt-2 max-w-2xl mx-auto md:mx-0">
               {activeTab === "hr" && "Detailed ownership, hiring profiles, and strategic cluster models for Middle and High School."}
@@ -259,6 +264,7 @@ export default function App() {
               {activeTab === "hs" && "Strategic roadmap for Grades 9-12, transitioning to dedicated specialists."}
               {activeTab === "payroll" && "Board view of class-driven staffing cost, revenue less modeled FOPAG, and payroll coverage across the approved scenarios."}
               {activeTab === "viability" && "Board-facing baseline plus directional sensitivity and threshold planning signals; not a final financial model."}
+              {activeTab === "dre-scenario-simulator" && "Operating scenario layer for Rio's 2028 opening model."}
             </p>
           </div>
         )}
@@ -277,6 +283,7 @@ export default function App() {
             {activeTab === "hs" && <HighSchoolTab sections={hsSections} setSections={setHsSections} />}
             {activeTab === "payroll" && <PayrollProjectionTab />}
             {activeTab === "viability" && <ViabilitySimulatorTab />}
+            {activeTab === "dre-scenario-simulator" && <DreScenarioSimulatorTab />}
 
             {activeTab !== "cover" && (
               <div className="mt-16 pt-8 border-t border-slate-200 flex flex-col md:flex-row items-center justify-between gap-4">
@@ -286,7 +293,7 @@ export default function App() {
                   </button>
                 </div>
                 <div className="flex items-center gap-4">
-                  {activeTab !== "viability" ? (
+                  {activeTab !== "dre-scenario-simulator" ? (
                     <button onClick={() => { const currentIndex = APP_TAB_ORDER.indexOf(activeTab); if (currentIndex < APP_TAB_ORDER.length - 1) setActiveTab(APP_TAB_ORDER[currentIndex + 1]); }} className="flex items-center gap-2 px-8 py-3 bg-slate-900 rounded-2xl text-sm font-bold text-white hover:bg-slate-800 transition-all shadow-lg shadow-slate-200">
                       NEXT SECTION<ArrowRight className="h-4 w-4" />
                     </button>
