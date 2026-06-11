@@ -397,3 +397,58 @@ HEAD-only checkout**, unrelated to the Phase 14B commit (`30e5570`).
   Phase 15 candidate, and to decide whether they should be deleted,
   committed, deferred, or reconnected.
 - **Phase 15A remains not started**, blocked until Phase 14D is complete.
+
+## Phase 14D-UNTRACKED-SURFACE-AUDIT — audit complete, safe cleanup executed
+
+A full audit of the working tree's 3 modified tracked files and 184
+untracked files was completed and reviewed by Luciana (2026-06-11).
+Decisions:
+
+- **Safe deletion (executed)**: the 3 root-level one-off Phase 12
+  validation scripts — `_phase12m_validate.ts`, `_phase12n_validate.ts`,
+  `_phase12n_registry_count.ts` — were untracked, not part of the build,
+  and superseded by the permanent (untracked) `*Validation.ts` modules
+  they exercised. Deleted from disk.
+- **C2 (CAPEX/payback engine files)** — preserved as Phase 15 candidates
+  (`capexEngine.ts`, `capexEngineContract.ts`, `capexEngineValidation.ts`,
+  `capexEngineValidationContract.ts`, `capexCalculationDesign.ts`,
+  `capexOptionSource.ts`, `capexScheduleSourceData.ts`,
+  `capexScheduleSourceDataContract.ts`, `opexCapexAdapterContract.ts`).
+  **Not committed.**
+- **C3 (board/governance architecture contracts)** — preserved as Phase
+  15A pre-reading candidates (`boardCalculationReadinessContract.ts`,
+  `boardResilienceCalculationArchitectureContract.ts`,
+  `calculationReadiness.ts`, `contracts.ts`, `financialOutputContract.ts`,
+  `governanceThresholdContract.ts`, `scenarioCalculationBoundaryContract.ts`).
+  **Not committed.** Phase 15A should review these before designing from
+  scratch.
+- **C5 (DecisionLevers / ScenarioFlow / ScenarioOutputs UI scaffold)** —
+  preserved as a Phase 15 UI candidate, including the top-level
+  `RioScenarioResiliencePreview.tsx` and `rio-scenario-resilience/index.ts`
+  barrels. **Not committed, not wired up.**
+- **Group B lever/data files** tied to the Phase 14C-quarantined scaffold
+  (`leverTypes.ts`, `dataStatus.ts`, `openingGrades.ts`, `outputStatus.ts`,
+  `tuitionArchitecture.ts`, `OrgDesignLever.tsx`, `data/index.ts`) —
+  preserved as Phase 15 candidates. **Not committed, remain quarantined
+  from `tsc` per Phase 14C.**
+- `capexCalculationReadinessAudit.md` and `scenarioCalculationBoundaryDesign.md`
+  — flagged as directly relevant Phase 15A pre-reading.
+- **Raw workbooks and extraction files** under
+  `src/features/rio-scenario-resilience/source/` — preserved; **no
+  deletion approved**.
+- **`src/components/sections/HighSchoolTab.tsx`** (modified, tracked) —
+  confirmed unrelated to the Rio simulator track (separate High School
+  Load Logic UI work). Must **not** be included in any Rio simulator
+  commit. Not reverted, not deleted — pending separate review on its own
+  track.
+- **`src/features/rio-scenario-resilience/data/sourceOfTruthMap.ts`** and
+  **`src/features/rio-scenario-resilience/model/inputReadinessRegistry.ts`**
+  (both modified, tracked) — encode finance/source-governance and
+  input-readiness semantics decided in earlier phases. **Require a
+  separate, focused governance review before Phase 15A** and must not be
+  committed without that review.
+- **Phase 15A remains blocked** pending: (1) the governance review of
+  `sourceOfTruthMap.ts` and `inputReadinessRegistry.ts` above, and (2) a
+  decision on the `HighSchoolTab.tsx` track. Once both are resolved,
+  Phase 15A should begin by reviewing the C3 board/governance contracts
+  and the two flagged Phase 15A pre-reading docs — not from a blank slate.
