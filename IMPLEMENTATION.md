@@ -441,14 +441,45 @@ Decisions:
   Load Logic UI work). Must **not** be included in any Rio simulator
   commit. Not reverted, not deleted — pending separate review on its own
   track.
-- **`src/features/rio-scenario-resilience/data/sourceOfTruthMap.ts`** and
-  **`src/features/rio-scenario-resilience/model/inputReadinessRegistry.ts`**
-  (both modified, tracked) — encode finance/source-governance and
-  input-readiness semantics decided in earlier phases. **Require a
-  separate, focused governance review before Phase 15A** and must not be
-  committed without that review.
 - **Phase 15A remains blocked** pending: (1) the governance review of
   `sourceOfTruthMap.ts` and `inputReadinessRegistry.ts` above, and (2) a
   decision on the `HighSchoolTab.tsx` track. Once both are resolved,
   Phase 15A should begin by reviewing the C3 board/governance contracts
   and the two flagged Phase 15A pre-reading docs — not from a blank slate.
+
+## Phase 14E-GOVERNANCE-FILE-REVIEW / RESOLUTION — OPEX governance correction
+
+- **`src/features/rio-scenario-resilience/data/sourceOfTruthMap.ts`** —
+  the `opex` ("additional baseline OPEX") entry was reviewed and approved
+  for commit. The correction marks `currentStatus` as
+  `missing_input_data`, sets `shouldReuseExistingLogic: false`, and
+  records that the viability baseline OPEX values
+  (`BASE_FIXED_OPEX_2028` etc.) are a structural reference only and must
+  not become Rio simulator OPEX truth without independent Finance
+  validation. The correction cites only **committed** governance sources:
+  `inputReadinessRegistry.ts` (HEAD — `validated_baseline_opex_inputs`
+  status=`missing_value`, sourceOwnership=`unmapped`) and
+  `projectCharter.md` (missing data must be represented explicitly as
+  missing, not inferred). An earlier draft of this entry cited an
+  untracked design doc (`docs/opexCapexAdapterDesign.md` §8) and an
+  untracked contract (`opexCapexAdapterContract.ts`); those citations were
+  removed before commit.
+- **`src/features/rio-scenario-resilience/model/inputReadinessRegistry.ts`**
+  — the working-tree diff to this file was reviewed and judged
+  **non-authoritative and unsafe to commit as-is**: the file remained part
+  of the Phase 14C TypeScript quarantine (orphaned scaffold, not reachable
+  from `App.tsx`, importing the untracked `scenarioCalculationBoundaryContract.ts`),
+  and the diff narrated a large, unreconciled "Phase 8A–13G" history
+  (including CAPEX-engine and decision-lever-catalog readiness claims that
+  fall inside the Phase 15 boundary) not reflected in this ledger's
+  committed phase history. The diff was preserved externally as
+  `/tmp/inputReadinessRegistry_phase14e_draft.patch` and the file was
+  reverted to HEAD. It remains quarantined per Phase 14C, unchanged from
+  its prior committed state.
+- A future, narrower, non-quarantined readiness-ledger module may be
+  scoped as its own planned phase if needed.
+- **Phase 15A remains blocked** until this commit (the
+  `sourceOfTruthMap.ts` OPEX correction) is completed. After this commit,
+  Phase 15A may begin only from committed governance sources and the
+  explicit Phase 15A pre-reading list above — not from the reverted
+  `inputReadinessRegistry.ts` draft.

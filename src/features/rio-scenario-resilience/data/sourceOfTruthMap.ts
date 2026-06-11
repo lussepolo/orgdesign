@@ -453,9 +453,9 @@ export const sourceOfTruthMap: SourceOfTruthMapItem[] = [
   },
   {
     itemId: "opex",
-    label: "OPEX",
+    label: "OPEX (additional baseline OPEX)",
     category: "computed_output",
-    currentStatus: "existing_app_logic_to_map",
+    currentStatus: "missing_input_data",
     existingSourceFiles: [
       "src/lib/viability/baseline.ts",
       "src/hooks/useViabilitySimulator.ts",
@@ -468,14 +468,24 @@ export const sourceOfTruthMap: SourceOfTruthMapItem[] = [
       "costScenario",
       "opexGrowthRate",
     ],
-    shouldReuseExistingLogic: true,
+    shouldReuseExistingLogic: false,
     shouldDuplicateLogic: false,
     integrationRisk:
-      "The viability model already owns OPEX and should remain the single source of truth.",
+      "IMPORTANT: the viability baseline OPEX values (BASE_FIXED_OPEX_2028 etc.) are a structural reference " +
+      "only and must not become the Rio simulator OPEX source without independent Finance validation. " +
+      "inputReadinessRegistry.ts (committed) lists validated_baseline_opex_inputs as " +
+      "status=missing_value, sourceOwnership=unmapped. Do not reuse these values directly.",
     missingData:
-      "No duplicate operating-cost model should be created.",
+      "No Finance-validated additional baseline OPEX source exists for the v1 board simulator. " +
+      "validated_baseline_opex_inputs is missing. Per projectCharter.md, missing data must be " +
+      "represented explicitly as missing, not inferred. An OPEX-inclusive EBITDA is not implementable " +
+      "until a validated source is provided. Do not default additional baseline OPEX to zero without " +
+      "explicit Finance authorization.",
     nextAction:
-      "Map the output layer to the existing OPEX baseline later.",
+      "Obtain Finance-validated baseline OPEX inputs before attempting to include them in the EBITDA calculation. " +
+      "When available, update validated_baseline_opex_inputs in inputReadinessRegistry.ts and classify " +
+      "source ownership. Do not map the viability baseline OPEX values directly — they require " +
+      "independent Finance validation for the simulator.",
   },
   {
     itemId: "capex_output",
