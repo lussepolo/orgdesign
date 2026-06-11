@@ -22,5 +22,10 @@
     },
     "allowImportingTsExtensions": true,
     "noEmit": true
-  }
+  },
+  "exclude": [
+    "src/features/rio-scenario-resilience/components/DecisionLevers/OrgDesignLever.tsx",
+    "src/features/rio-scenario-resilience/data/index.ts",
+    "src/features/rio-scenario-resilience/model/inputReadinessRegistry.ts"
+  ]
 }

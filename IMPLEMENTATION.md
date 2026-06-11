@@ -359,8 +359,41 @@ closed).
   interactive browser export PASS; programmatic XLSX parse PASS; manual
   spreadsheet-app opening waived by Luciana for this checkpoint).
 - **Phase 14B-UI-VISUAL** — approved by Luciana (above). Complete.
-- **Phase 14B-UI-QA-CLOSEOUT-AND-COMMIT-PLAN** — in progress: QA artifacts
-  deleted, commit plan prepared for Luciana's approval.
-- **Phase 15A** — not started. Not cleared until the Phase 14B commit plan is
-  approved and the checkpoint is committed or otherwise explicitly closed.
+- **Phase 14B-UI-QA-CLOSEOUT-AND-COMMIT-PLAN** — complete. Phase 14B was
+  committed as `30e5570` ("Complete Phase 14B DRE simulator UI and export
+  QA"), 60 files.
+- **Phase 15A** — not started. Blocked pending Phase 14D (below).
 - **Phase 15B–15G** — unchanged, as listed above.
+
+## Phase 14C-REPO-HYGIENE — TypeScript baseline quarantine
+
+During Phase 14B-COMMIT-MANIFEST-CORRECTION staged-only validation,
+`npm run lint` (`tsc --noEmit`) showed **6 pre-existing errors on a
+HEAD-only checkout**, unrelated to the Phase 14B commit (`30e5570`).
+
+- **Root cause**: 3 tracked scaffold files, committed in earlier phases
+  (`142a05d` and `537e659`) —
+  `src/features/rio-scenario-resilience/components/DecisionLevers/OrgDesignLever.tsx`,
+  `src/features/rio-scenario-resilience/data/index.ts`, and
+  `src/features/rio-scenario-resilience/model/inputReadinessRegistry.ts` —
+  import 6 sibling modules (`leverTypes`, `dataStatus`, `openingGrades`,
+  `outputStatus`, `tuitionArchitecture`,
+  `scenarioCalculationBoundaryContract`) that exist only as **untracked**
+  files on disk. On a clean checkout (HEAD only, no untracked files), those
+  imports fail to resolve.
+- **Reachability**: none of the 3 importing files are reachable from the
+  committed `App.tsx` / Phase 14B DRE simulator path — they are orphaned
+  tracked scaffold left over from earlier phases.
+- **Fix chosen**: a temporary quarantine via `tsconfig.json` `"exclude"`,
+  listing exactly the 3 orphaned tracked files above. This restores
+  `tsc --noEmit` to 0 errors on a HEAD-only checkout and `npm run build`
+  continues to pass. No source files, formulas, DRE/EBITDA/payroll/tuition/
+  enrollment/org-design calculation logic, or Phase 14B UI/export behavior
+  were changed.
+- **This is not the final cleanup.** The 3 quarantined files and their 6
+  missing untracked dependencies remain on disk, unresolved. **Phase
+  14D-UNTRACKED-SURFACE-AUDIT remains required** to classify the orphaned
+  scaffold files and their missing dependencies as delete / keep / defer /
+  Phase 15 candidate, and to decide whether they should be deleted,
+  committed, deferred, or reconnected.
+- **Phase 15A remains not started**, blocked until Phase 14D is complete.
