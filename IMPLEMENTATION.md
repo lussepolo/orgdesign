@@ -591,3 +591,584 @@ implementation boundary).
 - The source workbook was not edited.
 - `HighSchoolTab.tsx` remains separate, non-Rio work (see Phase 14E history
   above) and was not touched by this update.
+
+## Phase 15B-FCO-CAPEX-BRIDGE-IMPLEMENTATION
+
+Implements the capital-decision calculation bridge for `pre_ops`
+(sourceYear 2027) plus the committed 2028-2047 operating horizon, for both
+ratified CAPEX options (`capex_90m_brl` = R$90M, `capex_100m_brl` = R$100M):
+
+```
+EBITDA -> D&A -> EBIT -> financial result -> EBT -> tax/NOL -> net income
+-> add-backs -> FCO -> CAPEX -> cash flow after CAPEX
+```
+
+per `phase15CapitalDecisionArchitecture.md` §16/§17, Resolutions 1-3
+(2026-06-12 correction to the Phase 15B.1 gate recommendation).
+
+### Files created (all under `src/features/rio-scenario-resilience/model/`)
+
+- `capitalDecisionEngineContract.ts` — result shape: `CapitalDecisionResult`,
+  `CapitalDecisionPeriodResult` (21 periods: `pre_ops` + 2028-2047),
+  `CapitalDecisionSourceProvenance` (incl. `nolMethodLabel:
+  "workbook_parity_nol_method"`), `CapitalDecisionValidationStatus`,
+  `CapitalDecisionExplicitExclusions`, `CapitalDecisionEngineInput`. Also
+  defines the pure bridge-core types `CapitalDecisionBridgeCoreInput` /
+  `CapitalDecisionBridgeCoreOutput`. Also defines the readiness/parity status
+  types corrected in Phase 15B.2 below
+  (`CapitalDecisionCalculationReadinessStatus`,
+  `CapitalDecisionBridgeFormulaParityStatus`,
+  `CapitalDecisionIntegratedBaselineParityStatus`).
+- `capexScheduleEngineContract.ts` / `capexScheduleEngine.ts` — Expansion
+  CAPEX phasing (70% `pre_ops` / 20% 2030 / 10% 2031, scaled to the selected
+  option total) and Sustain CAPEX (`SustainPct(year) x ROL(year)`,
+  2%/2.5%/3%/3.5%/4% in successive 4-year bands 2028-2047), per the live
+  `PnL!292/293` formulas. Reuses `CAPEX_KNOWN_OPTION_AMOUNTS` from
+  `capexEngineValidationContract.ts` (90,000,000 / 100,000,000) — no new
+  workbook selector, per Resolution 3.
+- `ppeDepreciationEngineContract.ts` / `ppeDepreciationEngine.ts` — ports the
+  visible `PPE` sheet methodology: existing/pre-ops base
+  (`pre_ops expansion CAPEX / 15`, 2028-2042, zero residual) plus, for each
+  year's total CAPEX 2028-2047, a new 10-year vintage with half-year
+  convention (1/20 in the vintage year, 1/10 for the next 9 years, 1/20 in
+  year+10). D&A is recalculated dynamically from each option's own CAPEX
+  schedule (not a fixed table), satisfying Resolution 1.
+- `nolTaxEngineContract.ts` / `nolTaxEngine.ts` — exact port of the visible
+  `Recuperação de Prejuízos` recurrence (`workbook_parity_nol_method`): 34%
+  direct tax on positive EBT, negative EBT accumulates as NOL, 30% annual
+  compensation limit (taxable base reduced to 70% when NOL is available),
+  all-or-nothing exhaustion in the transition year (no pro-ration). Header
+  comment documents this is workbook-formula parity, not an independent
+  interpretation of Brazilian tax law, per the Tax/NOL caution.
+- `preOpsOperatingResultSourceDataContract.ts` /
+  `preOpsOperatingResultSourceData.ts` — fixed `pre_ops` (sourceYear 2027)
+  operating literals per Resolution 2: EBITDA = -17,667,521.16 BRL, D&A = 0,
+  financial result = 0, provenance to `PnL!273`/Pre-Ops sheet, not
+  scenario-derived.
+- `capitalDecisionEngine.ts` — orchestrator `calculateCapitalDecisionBridge()`
+  (calls `calculateDre()` once, read-only, for 2028-2047 EBITDA/ROL; uses the
+  fixed pre-ops literals for `pre_ops`; wires CAPEX schedule, PPE
+  depreciation, and NOL/tax into the full bridge) plus the pure
+  `computeCapitalDecisionBridgeCore()` (same bridge, EBITDA/ROL supplied by
+  the caller — used by the validation module, see below).
+- `capitalDecisionR100mParitySourceData.ts` — R$100M workbook-cached fixture
+  (read-only `data_only` extraction, no `.save()`) for all 21 periods:
+  `PnL!236` (ROL), `PnL!273` (EBITDA), `PnL!291/292/293` (CAPEX
+  total/expansion/sustain), `PnL!275` (D&A), `PnL!278-282` (EBT/tax/NOL
+  recovery/tax total/net income), `PnL!290/295/296` (FCO / FCO+CAPEX /
+  cumulative), `'Recuperação de Prejuízos'!5` (accumulated NOL).
+- `capitalDecisionEngineValidationContract.ts` /
+  `capitalDecisionEngineValidation.ts` — 25-check validation report (see
+  below).
+
+### Files edited
+
+- `IMPLEMENTATION.md` (this section).
+
+No other files were edited. `App.tsx` and `HighSchoolTab.tsx` were not
+touched. No UI, DCF/VPL/NPV/TIR/perpetuity/discounted payback/Tier
+calculations were added (Phase 15C/15D, out of scope).
+
+### Candidate files reused / not duplicated
+
+- `CapexOptionId` (`capexOptionSourceContract.ts`) and
+  `CAPEX_KNOWN_OPTION_AMOUNTS` (`capexEngineValidationContract.ts`) are
+  reused as-is. `capexEngineValidationContract.ts` (Phase 10C.1, 76 lines:
+  `CapexEngineValidationRow`/`CapexEngineValidationMatrixOutput` types plus
+  `CAPEX_KNOWN_OPTION_AMOUNTS`/`CAPEX_KNOWN_PRE_OPS_POSITIVE`/reference
+  constants) is a direct compile-time dependency of `capexScheduleEngine.ts`
+  and is included in the Phase 15B commit manifest for that reason (Phase
+  15B.2 manifest reconciliation, below) — it was not previously committed by
+  any earlier phase.
+- `capexEngine.ts` / `capexScheduleSourceData.ts` (Phase 10C.1, pre-ops
+  36.37M/40.41M phasing) are superseded by the new
+  `capexScheduleEngine.ts` for Phase 15B purposes and were left untouched
+  (no naming collisions; not deleted, since removal was not requested).
+
+### Source-provenance handling
+
+- 2028-2047 EBITDA and ROL: read-only output of `calculateDre()` (committed
+  operating engine; not recalculated).
+- `pre_ops` EBITDA: fixed literal from the visible PnL/Pre-Ops sheets
+  (Resolution 2), not scenario-derived.
+- CAPEX schedule, PPE depreciation, NOL/tax recurrence: ported from the
+  visible `PnL`/`PPE`/`Recuperação de Prejuízos` sheets per Resolution 1 and
+  the Tax/NOL caution; labeled `workbook_parity_nol_method`.
+- Financial result (`PnL!277`, Cap1-Cap8) is currently 0 for all periods, per
+  the live workbook.
+- Hidden workbook sheets were not used.
+
+### Workbook-baseline parity note (resolved by Phase 15B.2 below)
+
+While implementing the validation, `calculateDre()`'s 2028-2047
+`receita_operacional_liquida` / `ebitda` for the canonical validation
+scenario (`t1_g3` / `intermediario` / `bp1_division_differentiated` /
+`balanced_experience`) were found not to numerically match the workbook's
+cached `PnL!236`/`PnL!273` values (e.g. 2028 EBITDA: engine = -6,957,011.04
+vs. workbook = -4,233,821.32). **Phase 15B.2 traced this to a scenario
+mismatch, not a formula defect**: the workbook baseline has 246 learners in
+2028 (`PnL!221`) while the canonical simulator fixture has 228 — an
+enrollment/scenario-input difference upstream of every revenue and EBITDA
+formula. There is **no active Phase 13 formula blocker** established by this
+comparison (see Phase 15B.2 §7/§8 for the full trace and classification).
+
+**Consequence for Phase 15B**: the bridge FORMULAS (CAPEX schedule, PPE
+depreciation, NOL/tax recurrence, FCO, cash flow after CAPEX) are validated
+directly against the workbook's cached `PnL!291-296` bridge by feeding them
+the workbook's own cached `PnL!236`/`PnL!273` EBITDA/ROL
+(`computeCapitalDecisionBridgeCore()` in `capitalDecisionEngine.ts`,
+exercised by `capitalDecisionEngineValidation.ts`'s `r100m_*`/`r90m_*`
+checks) — **all 25/25 checks pass**, tolerance 0.01 BRL.
+
+The **integrated** production output of `calculateCapitalDecisionBridge()`
+(which feeds the bridge with `calculateDre()`'s current 2028-2047 EBITDA/ROL,
+as required — "Do not mutate or recalculate upstream Receita, FOPAG, or
+EBITDA") does not numerically match the workbook's cached `PnL!291-296`
+bridge for 2028-2047 for the canonical (non-baseline) validation scenario.
+For example, 2047 cumulative cash flow after CAPEX:
+
+| | Workbook-cached (R$100M) | Production / calculateDre-fed (R$100M) | Production / calculateDre-fed (R$90M) |
+|---|---|---|---|
+| 2047 cumulative FCO after CAPEX | 256,332,471.98 | 512,619,141.92 | 515,608,615.43 |
+
+This divergence is expected: different scenario inputs (228 vs. 246 learners
+in 2028, and the resulting trajectories) produce different EBITDA/ROL, and
+therefore a different FCO/CAPEX bridge — not a Phase 15B bridge-formula
+defect (the bridge formulas themselves are workbook-exact, per the 25/25
+isolated-input validation) and not a Receita/FOPAG/DRE formula defect (Phase
+15B.2 §7/§8). `calculateCapitalDecisionBridge()`'s
+`integratedBaselineParityStatus`/`integratedBaselineParityNote` (Phase 15B.2)
+report this distinction per-call from live values.
+
+### `calculationReadiness` (corrected by Phase 15B.2 below)
+
+`calculateCapitalDecisionBridge()`'s `calculationReadiness` no longer derives
+from `inputReadinessRegistry.ts`'s repo-wide `CALCULATION_CAN_BEGIN` flag
+(which tracks unrelated payroll/OPEX/CAPEX/governance layers). It is now
+`"structurally_calculated"` whenever `calculateDre()` returns finite
+2028-2047 ROL/EBITDA for the requested scenario — true for the canonical
+validation scenario today — and `"missing_upstream_inputs"` only if those
+values are genuinely absent/non-finite. `r100mWorkbookParityChecked: true` is
+retained as-is: it accurately describes that the bridge *formulas* (not the
+integrated, `calculateDre()`-fed output) have been checked against
+workbook-cached values. See Phase 15B.2 for the full corrected status model
+(`bridgeFormulaParityStatus`, `integratedBaselineParityStatus`).
+
+### Reproducible validation entry points (post-review fix)
+
+`capitalDecisionEngineValidation.ts` now exports two eagerly-evaluated
+constants, following this directory's existing convention (e.g.
+`DRE_EBITDA_BACKTEST_VALIDATION_REPORT`):
+
+- `CAPITAL_DECISION_ENGINE_VALIDATION_REPORT = runCapitalDecisionEngineValidation()`
+  — the 25/25 report below.
+- `CAPITAL_DECISION_ORCHESTRATOR_RESULTS = getValidationOrchestratorResults()`
+  — `{ r100m, r90m }`, the full `calculateCapitalDecisionBridge()` results for
+  the canonical validation scenario (both CAPEX options). This is the
+  documented vehicle for the "256.3M workbook vs. 512.6M/515.6M production"
+  comparison in "Known gap" above — re-derivable by importing this module,
+  with no ad-hoc scratch scripts required. **Superseded by Phase 15B.2
+  (below)**: each result now carries `calculationReadiness:
+  "structurally_calculated"` (not `"blocked"`) and the new
+  `bridgeFormulaParityStatus` / `integratedBaselineParityStatus` /
+  `integratedBaselineParityNote` fields.
+
+### Validation results (`runCapitalDecisionEngineValidation()`)
+
+All 25/25 checks pass, `toleranceBRL = 0.01`:
+
+- **R$100M workbook-formula parity** (bridge core fed with workbook-cached
+  `PnL!236`/`PnL!273`): pre-ops expansion CAPEX = -70,000,000; pre-ops EBITDA
+  = -17,667,521.16; pre-ops FCO after CAPEX = -87,667,521.16; 2032 direct tax
+  = -1,074,718.77; 2038 NOL recovery = 2,571,910.52; 2039 all-or-nothing NOL
+  exhaustion (recovery = 0, accumulated NOL = 0, no pro-ration); 2047
+  cumulative FCO after CAPEX = 256,332,471.98; D&A parity for all 20
+  years 2028-2047; CAPEX expansion parity for all 21 periods; Sustain CAPEX
+  parity for all 20 years; FCO parity for all 21 periods; cash flow after
+  CAPEX parity for all 21 periods.
+- **R$90M structural validation** (same workbook-cached operating inputs,
+  `capexOptionId` varied only): pre-ops expansion CAPEX = -63,000,000; 2030
+  expansion = -18,000,000; 2031 expansion = -9,000,000; total expansion =
+  -90,000,000; Sustain CAPEX identical to R$100M for all years; D&A differs
+  from R$100M (recomputed from the smaller CAPEX vintages); 2032 direct tax
+  differs from R$100M (recomputed from the R$90M EBT path); no R$100M cached
+  values leak into the R$90M result.
+- **Boundary / scope** (production orchestrator,
+  `calculateCapitalDecisionBridge()`): EBITDA identical between R$90M and
+  R$100M for all 21 periods (CAPEX never changes EBITDA); both results
+  contain exactly 21 periods; `explicitExclusions` declares working capital,
+  financing cash flows, DCF, NPV, TIR, perpetuity, discounted payback, and
+  Tier/investment interpretation as `"excluded"`; two calls with identical
+  input produce identical output (deterministic).
+
+### Build / lint / diff-check
+
+- `npm run build`: succeeds (2807 modules, no errors; pre-existing chunk-size
+  warning only).
+- `npm run lint` (`tsc --noEmit`): no errors.
+- `git diff --check`: no whitespace errors.
+- `git status --short --untracked-files=all`: only the new Phase 15B files
+  plus the pre-existing untracked Rio feature surface and the pre-existing
+  modified `HighSchoolTab.tsx` (not touched by this phase).
+
+### Phase 15B boundary / remaining work
+
+- Phase 15B delivers the calculation bridge through
+  `fcoAfterCapexBRL` / `fcoAfterCapexCumulativeBRL` (`PnL!295/296`) for both
+  CAPEX options and all 21 periods, with source provenance and validation.
+- Out of scope (Phase 15C/15D, per §17.2 and `explicitExclusions`): UI/
+  `App.tsx` integration, working capital, financing cash flows, DCF, VPL,
+  NPV, TIR, perpetuity, discounted payback, Tier/investment interpretation.
+- Remaining risk (re-classified by Phase 15B.2 below): the integrated
+  `calculateCapitalDecisionBridge()` output does not match the workbook's
+  `PnL!291-296` cache for 2028-2047. This is **not** the pre-existing Phase 13
+  `calculateDre()`/`PnL!236/273` "gap" as previously framed — Phase 15B.2
+  traced it to a scenario/enrollment-input mismatch (classification A). See
+  the Phase 15B.2 section for the corrected gate recommendation and the
+  required follow-up (a workbook-baseline scenario fixture) before Phase 15C
+  consumes integrated 2028-2047 numbers for DCF/VPL/TIR.
+
+---
+
+## Phase 15B.2-INTEGRATED-SOURCE-PARITY-AND-READINESS-CORRECTION
+
+Corrects the Phase 15B gate recommendation and the stale-readiness wiring
+identified above. **No staging, committing, or pushing was performed** — all
+changes described here are uncommitted working-tree edits, same as the rest
+of Phase 15B.
+
+**Corrected gate recommendation**: Phase 15B's prior framing — "Phase 15B
+complete; integrated output blocked by a pre-existing Phase 13 gap" — is
+replaced with: **Phase 15B bridge core validated; production integration
+requires a workbook-baseline scenario fixture before the integrated
+(`calculateDre()`-fed) output can be claimed to match the workbook.** The
+bridge core itself (CAPEX schedule, PPE depreciation, NOL/tax recurrence, FCO,
+cash flow after CAPEX) remains independently workbook-validated (25/25,
+tolerance 0.01 BRL) and is not in question.
+
+### 1. Files inspected
+
+- `src/features/rio-scenario-resilience/model/inputReadinessRegistry.ts`
+  (`CALCULATION_CAN_BEGIN`, `INPUT_READINESS_REGISTRY`, 48 records).
+- `src/features/rio-scenario-resilience/model/capitalDecisionEngine.ts` and
+  `capitalDecisionEngineContract.ts` (Phase 15B orchestrator + contract).
+- `src/features/rio-scenario-resilience/model/capitalDecisionEngineValidation.ts`
+  (25-check validation; no assertion on `calculationReadiness`'s value, only
+  comments).
+- `src/features/rio-scenario-resilience/model/capitalDecisionR100mParitySourceData.ts`
+  (`R100M_ROL_BRL`, `R100M_EBITDA_BRL`, sourced from "...vBU v8 (2).xlsx",
+  `PnL!236`/`PnL!273`).
+- `src/features/rio-scenario-resilience/model/pnlFormulaParitySourceData.ts`
+  (Phase 13D, sourced from "...vCR v7 (2).xlsx", `PnL!220/221` numero_de_turmas
+  / numero_de_alunos, and `PnL!273` EBITDA).
+- `src/features/rio-scenario-resilience/model/dreEbitdaBacktest.ts` and
+  `dreEbitdaBacktestValidation.ts` / `dreEbitdaBacktestValidationContract.ts`
+  (Phase 13B, `overallStatus: "partial_blocked"`, `diagnostic_unconfirmed_scenario`).
+- `src/features/rio-scenario-resilience/docs/phase15CapitalDecisionArchitecture.md`
+  §11 (stale-readiness audit) and §16/§17 (ratified methodology / scope).
+- Live numeric trace: `calculateDre()` run for the canonical validation
+  scenario (`t1_g3` / `intermediario` / `bp1_division_differentiated` /
+  `balanced_experience`), 2028-2032, comparing `numero_de_alunos`,
+  `receitas_com_ensino_regular`, `outras_receitas`,
+  `receita_operacional_liquida`, and `ebitda` against the workbook-cached
+  source files above.
+
+### 2. Stale-readiness dependency found
+
+`capitalDecisionEngine.ts` imported `CALCULATION_CAN_BEGIN` from
+`inputReadinessRegistry.ts` and used it as
+`calculationReadiness: CALCULATION_CAN_BEGIN ? "ready" : "blocked"`.
+`CALCULATION_CAN_BEGIN` is a single repo-wide boolean that stays `false`
+because of unrelated upstream layers (`payroll_fopag_output`, `opex_output`,
+`capex_output`, `ebitda_output` registry entries marked
+`blocked`/`structural_only`/`not_required_yet`) — §11 of
+`phase15CapitalDecisionArchitecture.md` already documents this registry as
+stale relative to the committed Phase 13A/14B/15B engines and explicitly
+defers its correction to "a later readiness-documentation cleanup phase"
+(this phase). Using it as the Phase 15B integrated-result gate conflated two
+unrelated things: (a) whether *this bridge* could be computed for the
+requested scenario (it always could — `computeCapitalDecisionBridgeCore` is
+pure and total over its inputs), and (b) the readiness of unrelated
+payroll/OPEX/CAPEX/governance model layers.
+
+### 3. Readiness correction made
+
+- Removed `import { CALCULATION_CAN_BEGIN } from "./inputReadinessRegistry"`
+  from `capitalDecisionEngine.ts`. `inputReadinessRegistry.ts` itself was
+  **not** modified — `CALCULATION_CAN_BEGIN` remains `false` and continues to
+  gate the unrelated Phase 12/13 design-only layers and their validation
+  suites (`dreEbitdaEngineReadinessValidation.ts`,
+  `dreEbitdaBacktestValidation.ts`, etc.), all of which still assert
+  `CALCULATION_CAN_BEGIN === false` and still pass.
+- `capitalDecisionEngineContract.ts`: replaced
+  `CapitalDecisionCalculationReadinessStatus = "ready" | "blocked"` with
+  `"structurally_calculated" | "missing_upstream_inputs"`, and added:
+  - `calculationReadinessReason: string`
+  - `bridgeFormulaParityStatus: "formula_validated"` (fixed property of
+    `computeCapitalDecisionBridgeCore`, independent of scenario)
+  - `integratedBaselineParityStatus: "workbook_baseline_parity_validated" |
+    "workbook_baseline_parity_not_established"`
+  - `integratedBaselineParityNote: string`
+- `capitalDecisionEngine.ts`: `calculationReadiness` is now computed locally
+  from the actual `rolByYear`/`ebitdaByYear` values returned by
+  `calculateDre()` — `"structurally_calculated"` if every 2028-2047
+  `SIMULATOR_PROJECTION_YEARS` entry is a finite number, else
+  `"missing_upstream_inputs"`. `integratedBaselineParityStatus` is computed by
+  comparing this scenario's 2028 ROL/EBITDA against the workbook-cached
+  `R100M_ROL_BRL[2028]`/`R100M_EBITDA_BRL[2028]` fixture within
+  `toleranceBRL = 0.01`. Both fields are live computations, not hardcoded
+  labels.
+
+### 4. Workbook baseline scenario identified
+
+The workbook-cached fixture used for Phase 15B parity
+(`capitalDecisionR100mParitySourceData.ts`, "...vBU v8 (2).xlsx", `PnL!236`/
+`PnL!273`, R$100M CAPEX instance, AC21 = -100,000,000) shares its `PnL!273`
+2028 EBITDA value (-4,233,821.32) exactly with `pnlFormulaParitySourceData.ts`
+("...vCR v7 (2).xlsx", `PnL!273`, sourceRow 273) — i.e. the v7 and v8 workbook
+extracts agree on this row, so v7's `PnL!220`/`PnL!221` (numero_de_turmas /
+numero_de_alunos) can be treated as describing the same underlying `PnL`
+instance as the v8 R$100M fixture for 2028. From `pnlFormulaParitySourceData.ts`:
+
+| Dimension | Workbook value (2028) |
+|---|---|
+| `numero_de_turmas` (PnL!220) | 20 |
+| `numero_de_alunos` (PnL!221) | 246 |
+| `receitas_com_ensino_regular` (PnL!225, via dreEbitdaBacktest.ts) | 24,977,416.48 |
+| `outras_receitas` (PnL!233) | 662,035.36 |
+| ROL (PnL!236) | 22,851,714.10 |
+| EBITDA (PnL!273) | -4,233,821.32 |
+
+No committed source file documents this instance's opening-package/occupancy/
+tuition/org-design/CAPEX-option *scenario selections* directly (only the
+resulting row values) — both `pnlFormulaParitySourceData.ts` and
+`capitalDecisionR100mParitySourceData.ts` are explicitly "spreadsheet baseline
+trace" extractions, not scenario-lever mappings.
+
+### 5. Simulator comparison scenario identified
+
+The Phase 15B "Known gap" comparison (and `dreEbitdaBacktest.ts` Phase 13B)
+both use the same `calculateDre()` input — the canonical
+`technical_validation_fixture`:
+
+```
+openingPackageId: "t1_g3"
+occupancyScenarioId: "intermediario"
+tuitionScenarioId: "bp1_division_differentiated"
+orgDesignOptionId: "balanced_experience"
+```
+
+This scenario is explicitly documented (Phase 13F/13G) as a technical
+validation fixture, **not board-ratified**, and **not claimed** to reproduce
+the workbook's learner trajectory.
+
+### 6. Input-by-input parity matrix (2028)
+
+| Input dimension | Workbook baseline (vCR v7/vBU v8, PnL row) | `calculateDre()` input/output (canonical fixture) | Match? | Evidence |
+|---|---|---|---|---|
+| Opening package / occupancy / tuition / org-design scenario | Not documented in any committed source as a lever mapping (only resulting row values extracted) | `t1_g3 / intermediario / bp1_division_differentiated / balanced_experience` | **Unconfirmed** | `pnlFormulaParitySourceData.ts`, `capitalDecisionR100mParitySourceData.ts` both lack lever-mapping provenance |
+| `numero_de_turmas` (PnL!220) | 20 | not produced by `calculateDre()` (`null`) | N/A | `dreEngine.ts` output has no turmas field |
+| `numero_de_alunos` (PnL!221) | 246 | 228 | **No** | live trace below |
+| `receitas_com_ensino_regular` (PnL!225) | 24,977,416.48 | 22,298,697.68 | No | live trace |
+| `outras_receitas` (PnL!233) | 662,035.36 | 586,385.46 | No | live trace |
+| ROL / `receita_operacional_liquida` (PnL!236) | 22,851,714.10 | 20,548,544.28 | No | live trace |
+| EBITDA (PnL!273) | -4,233,821.32 | -6,957,011.04 | No | live trace; matches IMPLEMENTATION.md "Known gap" figures exactly |
+
+### 7. First causal divergence
+
+Tracing in the required order (enrollment → gross tuition → discounts → net
+tuition revenue → other revenue → ROL → FOPAG → variable costs → fixed costs
+→ sales expenses → EBITDA), the **first** divergence is at the top of the
+chain, 2028:
+
+- **`numero_de_alunos`**: workbook PnL!221 = 246; `calculateDre()` output =
+  228. Delta = -18 students (-7.3%), first year of divergence = 2028 (the
+  first projection year — no earlier year exists to check).
+- This single-row divergence is **upstream of every revenue and EBITDA
+  formula** in the DRE: `receitas_com_ensino_regular`, `outras_receitas`, ROL,
+  FOPAG, fixed costs, sales expenses, and EBITDA are all computed from
+  `numero_de_alunos` (directly or via per-learner ratios), so all downstream
+  deltas (receitas -10.7%, outras_receitas -11.4%, ROL -10.1%, EBITDA
+  +64.3pp/-2,723,189.73) are consistent with — and explained by — this single
+  upstream enrollment difference, not by independent formula errors at each
+  subtotal.
+- This corroborates the Phase 13B `dreEbitdaBacktest.ts` trajectory finding
+  (engine and PnL `receitas_com_ensino_regular` growth multiples diverge and
+  cross mid-horizon — "no single occupancy/package variant can match both the
+  opening level AND the trajectory slope of the PnL baseline simultaneously").
+
+### 8. Divergence classification: **A — Scenario mismatch**
+
+The first divergence (`numero_de_alunos`, 246 vs. 228) occurs **before** any
+DRE/EBITDA formula is evaluated — it is a difference in the
+enrollment/occupancy **input**, not in a Receita/FOPAG/DRE **formula**. This
+rules out **C (formula defect)**: inputs do not match, so no formula-level
+conclusion can be drawn from the EBITDA delta. It also rules out **B
+(source-data mismatch)**, since there is no committed evidence the canonical
+fixture's `numero_de_alunos` is *intended* to equal 246 and is merely sourced
+incorrectly — no scenario-lever mapping to the workbook instance exists at
+all. **D (intentional simulator divergence)** would require positive evidence
+that the simulator's `t1_g3/intermediario` enrollment path is a deliberate,
+documented alternative to the workbook baseline; instead, Phase 13F/13G
+describe this fixture as an *unconfirmed, non-ratified* technical-validation
+scenario — an admitted gap, not a designed difference.
+
+**Classification: A — Scenario mismatch.** Correction path: identify or
+construct a `calculateDre()`-compatible scenario input (opening
+package/occupancy/tuition/org-design selections) whose `numero_de_alunos`
+trajectory reproduces PnL!221 (246 in 2028, etc.), use it as a dedicated
+"workbook-baseline scenario fixture" for integrated parity checks, and do not
+modify `dreEngine.ts`/`receitaEngine.ts`/`fopagEngine.ts` formulas to force
+the *current* canonical fixture to match — its enrollment assumptions are
+simply a different scenario.
+
+### 9. Files changed
+
+- `src/features/rio-scenario-resilience/model/capitalDecisionEngineContract.ts`
+  — new readiness/parity status types and result fields (§3 above).
+- `src/features/rio-scenario-resilience/model/capitalDecisionEngine.ts` —
+  removed `CALCULATION_CAN_BEGIN` import/usage; added local
+  `calculationReadiness`/`calculationReadinessReason`/
+  `bridgeFormulaParityStatus`/`integratedBaselineParityStatus`/
+  `integratedBaselineParityNote` computation; updated header comment and
+  `sourceProvenance.notes` to remove the "KNOWN GAP ... CALCULATION_CAN_BEGIN"
+  framing and replace it with the scenario-mismatch finding.
+- `IMPLEMENTATION.md` — this section, plus corrections to the Phase 15B
+  section's now-stale `calculationReadiness: "blocked"` / "Known gap" /
+  "remaining risk" references.
+- `src/features/rio-scenario-resilience/model/inputReadinessRegistry.ts` —
+  **not modified** (left as-is per §2/§3).
+- No staging, committing, deleting, reverting, or pushing performed.
+
+### 10. Phase 15B bridge-core validation result
+
+`CAPITAL_DECISION_ENGINE_VALIDATION_REPORT`: **25/25 pass**, `toleranceBRL =
+0.01` — unchanged by this phase. `computeCapitalDecisionBridgeCore()`, fed the
+workbook's own cached `PnL!236`/`PnL!273` (R$100M and R$90M), reproduces
+`PnL!291-296` exactly. This remains the bridge-core validation and is
+independent of the scenario-mismatch finding above.
+
+### 11. Integrated workbook-baseline parity result
+
+**Not established** for the canonical validation scenario.
+`calculateCapitalDecisionBridge()`'s `integratedBaselineParityStatus =
+"workbook_baseline_parity_not_established"` for both CAPEX options, with
+`integratedBaselineParityNote` reporting the live 2028 ROL/EBITDA deltas
+(-2,303,169.82 / -2,723,189.73) and pointing to the §8 classification
+(scenario mismatch, not a bridge defect). `calculationReadiness =
+"structurally_calculated"` for both options — the bridge **is** computed
+deterministically from this scenario's own EBITDA/ROL; it is simply not a
+workbook-baseline-parity result.
+
+### 12. Build / lint / diff-check result
+
+- `npm run build`: succeeds (2807 modules transformed, no errors; pre-existing
+  >500kB chunk-size warning only, unrelated to this change).
+- `npm run lint` (`tsc --noEmit`): no errors.
+- `git diff --check`: no whitespace errors.
+- Re-ran `CAPITAL_DECISION_ENGINE_VALIDATION_REPORT` (25/25 pass),
+  `DRE_EBITDA_BACKTEST_VALIDATION_REPORT.allPass` (true), and
+  `DRE_ENGINE_VALIDATION_REPORT.allPass` (true) after the edit — all green.
+
+### 13. Remaining risks
+
+- The workbook-baseline scenario fixture required by §8's correction path
+  does not yet exist. Until it does, **no** `calculateDre()` scenario's
+  integrated bridge output can be claimed to match `PnL!291-296` for
+  2028-2047, including the canonical validation fixture's R$100M/R$90M
+  results (2047 cumulative FCO after CAPEX: 512.6M / 515.6M production vs.
+  256.3M workbook-cached — gap now attributed to enrollment-input mismatch,
+  not a bridge-formula or DRE-formula defect, but still unresolved).
+- `pnlFormulaParitySourceData.ts` (v7) and `capitalDecisionR100mParitySourceData.ts`
+  (v8) agree on `PnL!273` (2028 EBITDA) but neither file documents the
+  scenario-lever selections that produced `numero_de_alunos = 246` — without
+  that mapping, a workbook-baseline fixture cannot be constructed from
+  committed sources alone; it requires a new Finance-confirmed scenario input
+  (Phase 13F/13G-style ratification).
+- `outras_receitas` carries an additional, separately-documented
+  `reajuste_despesas` formula gap (`outrasReceitasReajusteNote`,
+  `dreEbitdaBacktest.ts` row 233 note) that will remain even after enrollment
+  is corrected.
+
+### 14. Git status
+
+`git status --short --untracked-files=all`: `IMPLEMENTATION.md` modified
+(this section + Phase 15B corrections); `HighSchoolTab.tsx` modified
+(pre-existing, not touched by Phase 15B or 15B.2); 14 Phase 15B model files
+untracked (`capitalDecisionEngine.ts`, `capitalDecisionEngineContract.ts`,
+`capitalDecisionEngineValidation.ts`, `capitalDecisionEngineValidationContract.ts`,
+`capitalDecisionR100mParitySourceData.ts`, `capexScheduleEngine.ts`,
+`capexScheduleEngineContract.ts`, `ppeDepreciationEngine.ts`,
+`ppeDepreciationEngineContract.ts`, `nolTaxEngine.ts`, `nolTaxEngineContract.ts`,
+`preOpsOperatingResultSourceData.ts`, `preOpsOperatingResultSourceDataContract.ts`,
+plus `capexEngineValidationContract.ts` -- a Phase 10C.1 file that is a
+required compile-time dependency of `capexScheduleEngine.ts` and was never
+previously committed); plus the pre-existing untracked Rio feature surface
+(components/docs/data files predating Phase 15B). Nothing staged, committed,
+deleted, reverted, or pushed.
+
+(Note: an earlier draft of this section referred to "the five Phase 15B
+model files" -- that count covered only the `capitalDecision*` files and
+missed the CAPEX/PPE/NOL/pre-ops engine files reused from the
+implementation report. See "Phase 15B-FINAL-QA-AND-COMMIT" below for the
+reconciled manifest.)
+
+### 15. Gate recommendation (superseded by Phase 15B-FINAL-QA-AND-COMMIT below)
+
+This subsection records the recommendation as drafted during Phase 15B.2
+review. It was reviewed and overridden (see "Phase 15B-FINAL-QA-AND-COMMIT"
+below): the workbook-baseline-parity confirmation described here remains a
+useful follow-up but is not a precondition for committing Phase 15B.
+
+Original framing: **needs targeted upstream correction** (not "ready to
+commit", not "blocked by genuinely missing source data"):
+
+- The Phase 15B bridge core (CAPEX schedule, PPE depreciation, NOL/tax,
+  FCO, cash flow after CAPEX) is validated and correct (25/25,
+  workbook-exact).
+- The integrated orchestrator (`calculateCapitalDecisionBridge()`) is
+  structurally sound and deterministic for any scenario whose `calculateDre()`
+  output has finite 2028-2047 ROL/EBITDA (`calculationReadiness:
+  "structurally_calculated"`).
+- It does **not** yet produce workbook-baseline-matching numbers, because the
+  canonical validation scenario's enrollment input (`numero_de_alunos`) does
+  not match the workbook baseline (§7/§8) — a scenario-input gap, not a
+  formula defect in Receita/FOPAG/DRE/bridge code.
+- **Before Phase 15B can be accepted as workbook-baseline-parity-validated**,
+  Finance/board must confirm a scenario input (opening package, occupancy,
+  tuition, org-design selections) whose `numero_de_alunos` trajectory matches
+  `PnL!221`, and that scenario must be run through
+  `calculateCapitalDecisionBridge()` to re-check
+  `integratedBaselineParityStatus`. Until then, the bridge can be used for
+  **non-baseline scenario analysis** (where `calculationReadiness:
+  "structurally_calculated"` already holds today), but its output should not
+  be presented as matching the workbook's `PnL!291-296`.
+
+---
+
+## Phase 15B-FINAL-QA-AND-COMMIT
+
+**Gate decision (accepted, 2026-06-12)**: §15's "needs targeted upstream
+correction" framing applied to *workbook-baseline-parity validation*, which
+remains a separate, non-blocking follow-up. It does not block **committing**
+Phase 15B itself, because:
+
+- the bridge core already has workbook parity (25/25, tolerance 0.01 BRL);
+- the production orchestrator intentionally consumes simulator scenario
+  outputs, and different scenario assumptions are expected to produce
+  different results;
+- no claim of integrated workbook-baseline parity is made for the canonical
+  (mismatched) scenario — `integratedBaselineParityStatus:
+  "workbook_baseline_parity_not_established"` reports this explicitly and
+  correctly;
+- a dedicated workbook-baseline regression fixture (matching `PnL!221` = 246
+  learners in 2028) may be added later if useful, but is not a Phase 15B
+  blocker.
+
+**Phase 15B is committed.** Phase 15C is eligible to begin and may use Phase
+15B's scenario outputs (`fcoAfterCapexBRL`/`fcoAfterCapexCumulativeBRL`) for
+non-baseline scenario analysis. Phase 15C must independently validate any
+DCF/VPL/TIR/perpetuity/discounted-payback formulas it introduces against the
+workbook methodology (`phase15CapitalDecisionArchitecture.md` §16) — Phase
+15B's 25/25 bridge-core validation does not extend to those Phase 15C/15D
+calculations.
