@@ -1383,3 +1383,512 @@ modules). `phase15cInvestmentMetricsEngineValidation.ts`: 28/28 pass.
 `capitalDecisionEngineValidation.ts` (Phase 15B): 25/25 pass (unchanged).
 `dreEngineValidation.ts`: 20/20 pass (unchanged). 13 new files created, 0
 existing files modified other than this document.
+
+## Phase 15D-DISCOUNTED-PAYBACK
+
+**Boundary**: Phase 15D consumes Phase 15C's committed `Phase15CResult`
+(commit `94f2ebb`) -- specifically
+`periods[*].cumulativeDiscountedCashFlowBRL` and `npvBRL` -- as a read-only
+input and adds a single output: discounted payback (the workbook's `PnL!Z290`
+"Payback" outcome), expressed as a machine-readable status, an integer
+operating-year count (1-20) or `null`, a compact value (`"1"`..`"20"`,
+`"20+"`, `"NA"`, or `null`), and a plain-text explanatory sentence. It does
+**not** recalculate discount factors, annual/cumulative discounted cash flow,
+terminal value, VPL, TIR, or any Phase 15B figure, and does not call
+`dreEngine` / `receitaEngine` / `fopagEngine` / `capexScheduleEngine` /
+`ppeDepreciationEngine` / `nolTaxEngine` / `capitalDecisionEngine` directly.
+No UI, no `App.tsx`/workbook/`HighSchoolTab.tsx` changes.
+
+### Files created (5)
+
+1. `discountedPaybackEngineContract.ts` -- `DiscountedPaybackStatus`,
+   `DiscountedPaybackResult`, `Phase15DSourceProvenance`,
+   `Phase15DExplicitExclusions`, `DiscountedPaybackEngineInput`.
+2. `discountedPaybackEngine.ts` -- pure core (`calculateDiscountedPayback`) +
+   production entry point (`calculateDiscountedPaybackForCapitalDecision`,
+   which calls `calculatePhase15CInvestmentMetrics()`).
+3. `phase15dR100mParitySourceData.ts` -- R$100M workbook-parity fixture (PnL
+   row 307 payback-helper values and the workbook `Z290` output for this
+   scenario).
+4. `discountedPaybackEngineValidationContract.ts` /
+   `discountedPaybackEngineValidation.ts` -- 36 checks across R$100M parity,
+   R$90M structural, synthetic calculated/edge-case, technical-failure, and
+   boundary surfaces (all pass).
+
+### Visible workbook provenance
+
+`PnL` sheet: row 305 (`DCF - Anual`, annual discounted cash flow), row 306
+(`DCF - Acumulado`, cumulative discounted cash flow -- the sole input to the
+recovery search), row 307 (Payback helper: `B307=0` literal, `C307:V307 =
+IF(col306>0,0,1)`), and the workbook output cell:
+
+```
+Z290 = IF(Z289<0, "NA", IF((SUM(B307:V307)+1)>=20, "20+", SUM(B307:V307)+1))
+```
+
+`Z289` is VPL (Phase 15C `npvBRL`, includes the terminal value PV).
+
+### Inputs consumed and excluded
+
+- **Consumed**: `Phase15CResult.periods[1..20].cumulativeDiscountedCashFlowBRL`
+  (PnL row 306, the 20 operating periods 2028-2047), `Phase15CResult.npvBRL`
+  (PnL!Z289), `calculationStatus`, `capexOptionId`, and the
+  scenario-parity/provenance pass-through fields
+  (`integratedBaselineParityStatus`, `integratedBaselineParityNote`).
+- **`pre_ops` (`periods[0]`)** anchors the series but is excluded from both
+  the recovery search and the displayed operating-year count -- the
+  displayed range is exactly 2028-2047 (operating years 1-20).
+- **Terminal value** (`Phase15CResult.terminalValue`, PnL column W) is
+  excluded from recovery timing entirely. It affects only `npvBRL`, which
+  gates the `"NA"` check (§B below).
+- **No fractional/interpolated payback**: the visible workbook's row 307 is a
+  binary 0/1 indicator per period, so `discountedPaybackYears` is always an
+  integer 1-20 or `null`. Fractional payback, unrecovered-balance
+  interpolation, and recovery-period cash-flow interpolation are not
+  implemented (`Phase15DExplicitExclusions.fractionalPayback: "excluded"`).
+
+### Calculation precedence
+
+- **§A Technical readiness**: if Phase 15C `calculationStatus !==
+  "calculated"`, `npvBRL === null`, the period series is malformed (wrong
+  length/order, duplicate/missing period keys), or any
+  `cumulativeDiscountedCashFlowBRL`/`npvBRL` is non-finite ->
+  `status="blocked_missing_phase15c_inputs"` or
+  `status="invalid_cash_flow_series"`, `discountedPaybackYears=null`,
+  `compactValue=null`. Never reported as `"NA"` or `"20+"`.
+- **§B Negative VPL** (strict `< 0`): `npvBRL < 0` ->
+  `status="not_applicable_negative_npv"`, `compactValue="NA"`,
+  `discountedPaybackYears=null`. `npvBRL === 0` is **not** `"NA"`.
+- **§C Recovery search**: iterate the 20 operating periods 2028-2047
+  (`periods[1..20]`) in order; recovery = first period where
+  `cumulativeDiscountedCashFlowBRL > 0` (strict). 2028 -> `"1"`, ...,
+  2047 -> `"20"`.
+- **§D Not reached**: if `npvBRL >= 0` and no operating period has
+  `cumulativeDiscountedCashFlowBRL > 0` ->
+  `status="not_reached_within_horizon"`, `compactValue="20+"`,
+  `discountedPaybackYears=null`. This is the ratified meaning of `"20+"`:
+  payback is not achieved within the explicit 2028-2047 horizon. It is not an
+  error and does not mean payback occurs in year 20.
+
+### Workbook `>=20` edge-case discrepancy and simulator correction
+
+The Phase 15D.1 audit identified that the workbook's `Z290` formula uses
+`>=20`, which **conflates two distinct cases**: "no recovery within the
+explicit 2028-2047 horizon" (raw count = 21, mathematically the only `"20+"`
+case) and "recovery first occurs in the final operating year, 2047" (raw
+count = 20, and `20>=20` is also true). Both produce `"20+"` in the raw
+workbook formula.
+
+This conflation **conflicts with the ratified business methodology**:
+`"20+"` means discounted payback is **not** achieved within the projection
+horizon; it does **not** mean payback occurs in year 20; and recovery in 2047
+**is** recovery within the 2028-2047 horizon.
+
+**The simulator implements the ratified business meaning, not the workbook's
+`>=20` edge case**: recovery first occurring in 2047 returns `compactValue =
+"20"` (numeric), not `"20+"`. This is a documented, deliberate deviation from
+the literal workbook formula -- see
+`discountedPaybackEngineContract.ts` / `discountedPaybackEngine.ts` header
+comments and `Phase15DSourceProvenance.notes`, and the
+`phase15d_synthetic_recovery_2047_returns_20_not_20plus` validation check.
+
+The R$100M workbook-baseline parity is unaffected: that scenario does not
+recover by 2047 (`V306 = -18,153,646.635 < 0`), so it returns `"20+"` under
+**both** the raw workbook formula and the corrected ratified rule.
+
+### R$100M workbook-parity results (6/6)
+
+`discountedPaybackEngineValidation.ts`, fed `computeCapitalDecisionBridgeCore()`
+with the workbook's cached `PnL!236/273` (same inputs as Phase 15B's
+`r100m_*` and Phase 15C's `phase15c_r100m_*` checks):
+
+| Check | Result |
+| --- | --- |
+| `status` | `"not_reached_within_horizon"` |
+| `compactValue` | `"20+"` |
+| `discountedPaybackYears` | `null` |
+| `npvBRL` | 20,349,793.483 (>= 0, matches `PHASE15C_R100M_NPV_BRL`) |
+| Cumulative DCF at 2047 (V306) | -18,153,646.635 (< 0) |
+| PnL row 307 helper values | match `IF(col306>0,0,1)` for all 21 periods |
+
+### R$90M structural results (4/4)
+
+Same canonical WACC/growth source and workbook-cached ROL/EBITDA inputs,
+`capexOptionId="capex_90m_brl"`: independently derives
+`status="not_reached_within_horizon"`, `compactValue="20+"` from its own
+`Phase15CResult` (`npvBRL = 27,719,396.96`, which differs from the R$100M
+cached `npvBRL` -- no cached-output leakage); repeated calls are
+deterministic; `integratedBaselineParityStatus`/`integratedBaselineParityNote`
+are passed through unchanged. R$90M is not required to differ from R$100M in
+its final `compactValue` -- both legitimately resolve to `"20+"` here, and the
+check validates independent derivation rather than label inequality.
+
+### Synthetic calculated / edge-case validation (12/12)
+
+Recovery at 2028 (`"1"`); recovery at an intermediate year, 2037 (`"10"`);
+recovery first occurring at 2047 -> `"20"` (the corrected-rule check, not
+`"20+"`); no recovery 2028-2047 with `npvBRL >= 0` -> `"20+"`; a
+`cumulativeDiscountedCashFlowBRL === 0` period is not recovered (strict `>
+0`), recovery deferred to the next period; `cumulativeDiscountedCashFlowBRL
+=== 0` at 2047 with no prior recovery remains `"20+"`; `npvBRL < 0` ->
+`"NA"` even when the explicit series would otherwise recover; `npvBRL === 0`
+with recovery -> numeric (not `"NA"`); `npvBRL === 0` without recovery ->
+`"20+"` (not `"NA"`); positive `npvBRL` without recovery -> `"20+"`; a
+positive `pre_ops` cumulative DCF does not affect the recovery search; no
+result returns `discountedPaybackYears === 0`.
+
+### Technical-failure validation (10/10)
+
+Phase 15C `calculationStatus !== "calculated"` ->
+`"blocked_missing_phase15c_inputs"`; `calculationStatus === "calculated"` but
+`npvBRL === null` -> `"blocked_missing_phase15c_inputs"`; 20-period (not
+21-period) series, missing `pre_ops`, missing/duplicated 2047, non-finite
+`npvBRL`, and non-finite `cumulativeDiscountedCashFlowBRL` all ->
+`"invalid_cash_flow_series"` (`compactValue=null` in every case, never
+`"NA"`/`"20+"`); input `Phase15CResult` not mutated; deterministic repeated
+calls.
+
+### Boundary validation (4/4)
+
+`discountedPaybackEngine.ts` imports `calculatePhase15CInvestmentMetrics`
+only (no `discountedCashFlowEngine`/`terminalValueEngine` imports) and reads
+`periods[*].cumulativeDiscountedCashFlowBRL`/`npvBRL` as-is;
+`DiscountedPaybackResult` does not include `irrRate`/`irrStatus` and the
+engine never reads `Phase15CResult.irrRate`/`irrStatus`; the recovery search
+iterates `periods[1..20]` only and never reads `Phase15CResult.terminalValue`;
+`Phase15DExplicitExclusions` declares simple payback, fractional payback,
+working capital, financing cash flows, Tier/investment-recommendation
+interpretation, UI interpretation, and export integration as excluded.
+
+### Phase 15E / 15F boundaries
+
+`Phase15DExplicitExclusions` explicitly excludes: simple payback, fractional
+payback, working capital, financing cash flows, Tier/investment-recommendation
+interpretation, UI interpretation, and export integration. **Phase 15E** is
+expected to own TIR-versus-WACC interpretation, Tier classification, and
+board/investment recommendation, using the VPL/TIR/discounted-payback outputs
+produced by Phase 15C/15D. **Phase 15F** is expected to own UI presentation of
+these outputs (including any export integration). Neither is implemented in
+Phase 15D.
+
+### Validation / build status
+
+`npm run lint` (`tsc --noEmit`): clean. `npm run build`: succeeds (2807
+modules). `discountedPaybackEngineValidation.ts`: 36/36 pass.
+`phase15cInvestmentMetricsEngineValidation.ts` (Phase 15C): 28/28 pass
+(unchanged). `capitalDecisionEngineValidation.ts` (Phase 15B): 25/25 pass
+(unchanged). `dreEngineValidation.ts`: 20/20 pass (unchanged). 5 new files
+created, 1 existing file (`IMPLEMENTATION.md`, this section) updated.
+
+## Phase 15D.2-DECISION-LEVER-PROPAGATION-VALIDATION
+
+**Objective.** Prove that Phase 15D's production entry point
+(`calculateDiscountedPaybackForCapitalDecision`) returns outputs that are
+dynamically derived from the simulator's selected decision levers, via the
+chain `decision-lever input -> calculateDre -> calculateCapitalDecisionBridge
+-> calculatePhase15CInvestmentMetrics -> calculateDiscountedPaybackForCapitalDecision`
+-- not from the R$100M workbook fixture, cached parity values, a fixed
+canonical scenario, or fallback constants. No formula redesign, no simple
+payback, no Tier/board interpretation, no UI, and no edits to `App.tsx`,
+the workbook, or `HighSchoolTab.tsx` were made.
+
+### Step 1-2: Production input contract and decision-lever support matrix
+
+The entire chain shares one input type:
+`CapitalDecisionEngineInput extends DreEngineInput { capexOptionId: CapexOptionId }`,
+where `DreEngineInput` (`dreEngineContract.ts`) is:
+
+```ts
+interface DreEngineInput {
+  readonly openingPackageId: OpeningPackageId;     // "t1_g3" | "t1_g4" | "t1_g5" | "t1_g6"
+  readonly occupancyScenarioId: OccupancyScenarioId; // "intermediario" | "pessimista" | "otimista"
+  readonly tuitionScenarioId: TuitionScenarioId;   // "bp1_division_differentiated" | "bp2_ey_ls_unified" | "bp3_ey_to_ms_unified"
+  readonly orgDesignOptionId: string;              // "minimum_experience" | "balanced_experience" | "premium_experience"
+}
+```
+
+`calculateDre()` (`dreEngine.ts`) calls `calculateReceita({openingPackageId,
+occupancyScenarioId, tuitionScenarioId})` and `calculateFopag({openingPackageId,
+occupancyScenarioId, orgDesignOptionId})`. `calculateCapitalDecisionBridge()`
+calls `calculateDre(input)`, extracts `receita_operacional_liquida` and
+`ebitda` per year (2028-2047) as `rolByYear`/`ebitdaByYear`, and feeds them
+(plus `input.capexOptionId`) to `computeCapitalDecisionBridgeCore`.
+`calculatePhase15CInvestmentMetrics()` calls `calculateCapitalDecisionBridge(input)`.
+`calculateDiscountedPaybackForCapitalDecision()` calls
+`calculatePhase15CInvestmentMetrics(input)` then `calculateDiscountedPayback`.
+
+| Decision lever | Input field / type | Upstream adapter / engine | Affects which financial lines? | Reaches Phase 15D? |
+| --- | --- | --- | --- | --- |
+| Opening Grades | `openingPackageId: OpeningPackageId` (`t1_g3 \| t1_g4 \| t1_g5 \| t1_g6`) on `DreEngineInput` | `receitaEngine.calculateReceita` and `fopagEngine.calculateFopag` (both called by `calculateDre`) | `numero_de_alunos`, `ticket_servico`, full revenue block through `receita_operacional_liquida`, FOPAG-driven fixed-cost lines -> `ebitda` | **Yes** (confirmed: S5 vs S2 below) |
+| Occupancy | `occupancyScenarioId: OccupancyScenarioId` (`intermediario \| pessimista \| otimista`) on `DreEngineInput` | `receitaEngine.calculateReceita` and `fopagEngine.calculateFopag` | `numero_de_alunos`, revenue block, FOPAG fixed-cost lines -> `ebitda` | **Yes** (confirmed: S3, S4 vs S2) |
+| Org Design Structure | `orgDesignOptionId: string` (`minimum_experience \| balanced_experience \| premium_experience`, validated by `payrollAdapter.VALID_ORG_DESIGN_OPTIONS`) on `DreEngineInput` | `fopagEngine.calculateFopag` -> `payrollAdapter.buildPayrollAdapterInput` | `folha_de_pagamento`, `beneficios`, `total_custos_e_despesas_fixas` -> `ebitda` (revenue block / `receita_operacional_liquida` unaffected) | **Yes** (confirmed: S7, S8 vs S2) |
+| MS/HS Progression Model | `ScenarioDecisionLeverSelections.msHsProgressionModel` (`scenarioDecisionLeverContract.ts`) -- `selectedOptionId: string \| null`, `selectionStatus: "needs_mapping"`. **Not** a field of `DreEngineInput` / `CapitalDecisionEngineInput`. | None in the production chain. `msHsStaffingReadinessContract.ts` / `msHsStaffingReadiness.ts` exist as a staffing-readiness audit only and are not consumed by `calculateDre`, `calculateFopag`, or `calculateReceita`. | None | **No** |
+| Tuition | `tuitionScenarioId: TuitionScenarioId` (`bp1_division_differentiated \| bp2_ey_ls_unified \| bp3_ey_to_ms_unified`) on `DreEngineInput` | `receitaEngine.calculateReceita` | Revenue block (tuition/ticket rows) through `receita_operacional_liquida` -> `ebitda` | **Yes** (confirmed: S6 vs S2) |
+| Service Contracts | `ScenarioDecisionLeverSelections.serviceContracts` (`selectedOptionId: string \| null`, `selectionStatus: "needs_mapping"`). **Not** a field of `DreEngineInput` / `CapitalDecisionEngineInput`. `serviceContractsEngineContract.ts` documents that Service Contracts values are "invariant across all scenario dimensions in v1" (confirmed by Luciana 2026-06-04) and are folded into `DRE_ANNUAL_ASSUMPTION_SOURCE_DATA` (`dreAnnualAssumptionSourceData.ts`) as fixed annual cost rows. | `dreAnnualAssumptionSourceData.ts` fixed-cost rows -> `calculateDre`'s `total_custos_e_despesas_fixas` | Fixed-cost lines (identical value in every scenario) -> `ebitda` | Present in every scenario's EBITDA as an invariant constant, but **not a selectable lever** -- cannot be varied through the production scenario input |
+| CAPEX option | `capexOptionId: CapexOptionId` (`capex_90m_brl \| capex_100m_brl`) on `CapitalDecisionEngineInput` | `capitalDecisionEngine.computeCapitalDecisionBridgeCore` | `capexInvestmentPositiveBRL`, `fcoAfterCapexBRL`, `discountedCashFlowBRL`, `cumulativeDiscountedCashFlowBRL`, terminal value, `npvBRL`, `irrRate` | **Yes** (confirmed: S1 vs S2) |
+
+Of the 7 levers named in the directive, **5 are wired into the production
+input** (Opening Grades, Occupancy, Org Design Structure, Tuition, CAPEX
+option) and all 5 demonstrably reach Phase 15D (see Step 4). **2 are not
+wired** (MS/HS Progression Model, Service Contracts) -- see Step 7.
+
+### Step 3: Scenario matrix (8 scenarios, valid production IDs only)
+
+All scenarios use only IDs already accepted by `CapitalDecisionEngineInput`
+(no invented scenario IDs). The canonical scenario
+(`t1_g3` / `intermediario` / `bp1_division_differentiated` /
+`balanced_experience`) is the same combination used as `VALIDATION_INPUT_BASE`
+in `phase15cInvestmentMetricsEngineValidation.ts` (Phase 13F working
+scenario).
+
+| # | Label | openingPackageId | occupancyScenarioId | tuitionScenarioId | orgDesignOptionId | capexOptionId |
+| --- | --- | --- | --- | --- | --- | --- |
+| S1 | Canonical + R$90M | t1_g3 | intermediario | bp1_division_differentiated | balanced_experience | capex_90m_brl |
+| S2 | Canonical + R$100M | t1_g3 | intermediario | bp1_division_differentiated | balanced_experience | capex_100m_brl |
+| S3 | Lower occupancy | t1_g3 | pessimista | bp1_division_differentiated | balanced_experience | capex_100m_brl |
+| S4 | Higher occupancy | t1_g3 | otimista | bp1_division_differentiated | balanced_experience | capex_100m_brl |
+| S5 | Different opening package | t1_g6 | intermediario | bp1_division_differentiated | balanced_experience | capex_100m_brl |
+| S6 | Different tuition scenario | t1_g3 | intermediario | bp2_ey_ls_unified | balanced_experience | capex_100m_brl |
+| S7 | Different Org Design (premium) | t1_g3 | intermediario | bp1_division_differentiated | premium_experience | capex_100m_brl |
+| S8 | Different Org Design (minimum) | t1_g3 | intermediario | bp1_division_differentiated | minimum_experience | capex_100m_brl |
+
+Service Contracts comparison: **not produced**. As established in Step 1-2,
+Service Contracts are not currently selectable through
+`CapitalDecisionEngineInput` (`ScenarioDecisionLeverSelections.serviceContracts`
+remains `selectionStatus: "needs_mapping"`, `selectedOptionId: null`). This is
+reported as an integration gap (Step 7), not fabricated.
+
+### Step 4: Single-lever isolation (paired-scenario comparisons)
+
+All values below are actual outputs of
+`calculateDiscountedPaybackForCapitalDecision()` (and, for ROL/EBITDA/learner
+counts, of `calculateDre()`) for the listed inputs -- no fixtures.
+
+**Pair A -- CAPEX (S1 vs S2).** Lever changed: `capexOptionId`
+(`capex_90m_brl` -> `capex_100m_brl`); all other inputs identical (canonical).
+DRE outputs (ROL/EBITDA by year, 2028 `numero_de_alunos`=228) are unchanged,
+as expected (CAPEX does not feed `calculateDre`). Downstream
+`capexInvestmentPositiveBRL`, `fcoAfterCapexBRL`, discounted cash flows,
+`npvBRL`, cumulative DCF, and `irrRate` all change.
+- S1: npvBRL=106,856,536.54; irrRate=0.17062; cumulativeDCF[2047]=12,946,724.60; payback status=`calculated`, compactValue=`"19"`, recoveryYear=2046.
+- S2: npvBRL=100,550,051.64; irrRate=0.16538; cumulativeDCF[2047]=6,640,239.70; payback status=`calculated`, compactValue=`"20"`, recoveryYear=2047.
+
+**Pair B -- Occupancy, lower (S2 vs S3).** Lever changed:
+`occupancyScenarioId` (`intermediario` -> `pessimista`). 2028
+`numero_de_alunos`: 228 -> 190. ROL/EBITDA lower in every year (e.g. 2028 ROL
+20,548,544.28 -> 17,252,196.90; 2028 EBITDA -6,957,011.04 -> -9,123,683.87).
+- S3: npvBRL=30,817,266.48; irrRate=0.13241; cumulativeDCF[2047]=-40,884,367.88; payback status=`not_reached_within_horizon`, compactValue=`"20+"`, recoveryYear=null.
+
+**Pair C -- Occupancy, higher (S2 vs S4).** Lever changed:
+`occupancyScenarioId` (`intermediario` -> `otimista`). 2028
+`numero_de_alunos`: 228 -> 264. ROL/EBITDA higher in every year (e.g. 2028 ROL
+20,548,544.28 -> 23,742,339.51; 2028 EBITDA -6,957,011.04 -> -3,830,646.96).
+- S4: npvBRL=152,625,870.39; irrRate=0.18843; cumulativeDCF[2047]=41,661,092.29; payback status=`calculated`, compactValue=`"16"`, recoveryYear=2043.
+
+**Pair D -- Opening Grades (S2 vs S5).** Lever changed: `openingPackageId`
+(`t1_g3` -> `t1_g6`). 2028 `numero_de_alunos` unchanged (228), but ROL/EBITDA
+differ in every year (e.g. 2028 ROL 20,548,544.28 -> 21,255,480.44; 2028
+EBITDA -6,957,011.04 -> -6,076,132.99; 2047 ROL 280,737,239.78 ->
+260,754,390.72).
+- S5: npvBRL=68,369,728.80; irrRate=0.15222; cumulativeDCF[2047]=-11,378,763.55; payback status=`not_reached_within_horizon`, compactValue=`"20+"`, recoveryYear=null.
+
+**Pair E -- Tuition (S2 vs S6).** Lever changed: `tuitionScenarioId`
+(`bp1_division_differentiated` -> `bp2_ey_ls_unified`). 2028
+`numero_de_alunos` unchanged (228); ROL/EBITDA differ in every year (e.g.
+2028 ROL 20,548,544.28 -> 20,690,321.65; 2028 EBITDA -6,957,011.04 ->
+-6,815,233.67).
+- S6: npvBRL=59,350,472.45; irrRate=0.14785; cumulativeDCF[2047]=-18,102,053.02; payback status=`not_reached_within_horizon`, compactValue=`"20+"`, recoveryYear=null.
+
+**Pair F -- Org Design, premium (S2 vs S7).** Lever changed:
+`orgDesignOptionId` (`balanced_experience` -> `premium_experience`). 2028
+`numero_de_alunos` unchanged (228); **ROL identical in every year** (revenue
+block does not depend on org design), but EBITDA is lower in every year
+(2028 EBITDA -6,957,011.04 -> -7,283,779.25; 2037 48,332,573.06 ->
+47,780,505.05; 2047 134,825,698.26 -> 133,837,028.55).
+- S7: npvBRL=97,153,219.51; irrRate=0.16367; cumulativeDCF[2047]=3,970,714.83; payback status=`calculated`, compactValue=`"20"`, recoveryYear=2047.
+
+This pair illustrates the directive's expected case: **S2 and S7 both return
+compactValue=`"20"`** (same label), but `npvBRL` (100,550,051.64 vs
+97,153,219.51) and cumulative DCF at 2047 (6,640,239.70 vs 3,970,714.83) are
+materially different -- proving propagation without a change in the compact
+label.
+
+**Pair G -- Org Design, minimum (S2 vs S8).** Lever changed:
+`orgDesignOptionId` (`balanced_experience` -> `minimum_experience`). ROL
+identical to S2 in every year; EBITDA higher in every year (2028 EBITDA
+-6,957,011.04 -> -6,457,027.36; 2047 134,825,698.26 -> 136,338,448.60).
+- S8: npvBRL=104,512,493.75; irrRate=0.16742; cumulativeDCF[2047]=9,489,838.66; payback status=`calculated`, compactValue=`"19"`, recoveryYear=2046.
+
+**Pair H -- Org Design isolated (S7 vs S8, premium vs minimum, all other
+levers held at canonical + capex_100m_brl).** ROL identical for both. EBITDA
+materially different at every year (premium < minimum). npvBRL: 97,153,219.51
+(S7) vs 104,512,493.75 (S8); cumulativeDCF[2047]: 3,970,714.83 vs
+9,489,838.66; compactValue: `"20"` vs `"19"`. This isolates the Org Design
+lever's effect independent of any other lever change.
+
+### Step 5: Scenario payback output table
+
+All values are actual outputs of the production wrapper
+`calculateDiscountedPaybackForCapitalDecision()` / `calculatePhase15CInvestmentMetrics()`
+/ `calculateDre()` for each scenario's own input -- not parity-fixture values.
+
+| Scenario | Opening package | Occupancy | Tuition | Org design | Service Contracts | CAPEX | VPL (npvBRL) | 2047 cumulative DCF | Payback status | Compact value | Recovery year |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| S1 | t1_g3 | intermediario | bp1_division_differentiated | balanced_experience | (fixed, not selectable) | capex_90m_brl | 106,856,536.54 | 12,946,724.60 | calculated | "19" | 2046 |
+| S2 | t1_g3 | intermediario | bp1_division_differentiated | balanced_experience | (fixed, not selectable) | capex_100m_brl | 100,550,051.64 | 6,640,239.70 | calculated | "20" | 2047 |
+| S3 | t1_g3 | pessimista | bp1_division_differentiated | balanced_experience | (fixed, not selectable) | capex_100m_brl | 30,817,266.48 | -40,884,367.88 | not_reached_within_horizon | "20+" | null |
+| S4 | t1_g3 | otimista | bp1_division_differentiated | balanced_experience | (fixed, not selectable) | capex_100m_brl | 152,625,870.39 | 41,661,092.29 | calculated | "16" | 2043 |
+| S5 | t1_g6 | intermediario | bp1_division_differentiated | balanced_experience | (fixed, not selectable) | capex_100m_brl | 68,369,728.80 | -11,378,763.55 | not_reached_within_horizon | "20+" | null |
+| S6 | t1_g3 | intermediario | bp2_ey_ls_unified | balanced_experience | (fixed, not selectable) | capex_100m_brl | 59,350,472.45 | -18,102,053.02 | not_reached_within_horizon | "20+" | null |
+| S7 | t1_g3 | intermediario | bp1_division_differentiated | premium_experience | (fixed, not selectable) | capex_100m_brl | 97,153,219.51 | 3,970,714.83 | calculated | "20" | 2047 |
+| S8 | t1_g3 | intermediario | bp1_division_differentiated | minimum_experience | (fixed, not selectable) | capex_100m_brl | 104,512,493.75 | 9,489,838.66 | calculated | "19" | 2046 |
+
+For comparison only, the R$100M **workbook-parity fixture** (`phase15dR100mParitySourceData.ts`,
+built from cached workbook `PnL!ROL`/`PnL!EBITDA`, not from `calculateDre`)
+produces npvBRL=20,349,793.48, cumulativeDCF[2047]=-18,153,646.64, status=
+`not_reached_within_horizon`, compactValue=`"20+"`. None of S1-S8's
+production-derived values equal this fixture (Step 6).
+
+### Step 6: Validation results
+
+- **Dynamic derivation**: every one of S1-S8 runs through
+  `calculateDiscountedPaybackForCapitalDecision()` (the full production
+  chain). `|S1.npvBRL - fixtureNpv| > 1` and `|S2.npvBRL - fixtureNpv| > 1`
+  (checks `dynamic_canonical_90m_differs_from_r100m_fixture`,
+  `dynamic_canonical_100m_differs_from_r100m_fixture`) -- the production
+  wrapper never returns the R$100M fixture. Changing only `capexOptionId`
+  (S1 -> S2) recomputes `npvBRL`, cumulative DCF, and the compact payback
+  value (check `lever_capex_90m_vs_100m_propagates`). `integratedBaselineParityStatus`
+  is computed per-scenario and passed through `calculateCapitalDecisionBridge
+  -> calculatePhase15CInvestmentMetrics -> calculateDiscountedPaybackForCapitalDecision`
+  unchanged (check `scenario_parity_status_reflects_own_scenario`).
+- **Lever propagation**: for each of the 5 wired levers (Opening Grades,
+  Occupancy x2, Tuition, Org Design x3, CAPEX), at least one paired-scenario
+  comparison shows a changed `npvBRL` and/or cumulative DCF reaching Phase
+  15C, independently re-evaluated by Phase 15D (checks
+  `lever_capex_90m_vs_100m_propagates`, `lever_occupancy_pessimista_propagates`,
+  `lever_occupancy_otimista_propagates`, `lever_opening_grades_t1g6_propagates`,
+  `lever_tuition_bp2_propagates`,
+  `lever_org_design_premium_propagates_same_label_different_vpl`,
+  `lever_org_design_minimum_propagates`,
+  `lever_org_design_premium_vs_minimum_isolated_pair`). Per the directive, the
+  Org Design lever (S2 vs S7) demonstrates that not every lever change need
+  alter the compact label -- both return `"20"` with materially different
+  `npvBRL`/cumulative DCF.
+- **No leakage**: S1 (R$90M) and S2 (R$100M) -- same DRE scenario -- produce
+  different `npvBRL` (checks `no_leakage_90m_vs_100m_npv_differs`) and each
+  result's `capexOptionId` reflects its own input (check
+  `no_leakage_capex_option_id_passthrough`). Repeated identical-input calls
+  (S2 called twice) are deep-equal but not reference-identical -- deterministic,
+  no shared mutable cache (check `deterministic_repeated_calls`). No
+  production scenario (S1-S8) equals the R$100M fixture's `npvBRL` or
+  `compactValue` by coincidence.
+- **Technical-failure convention**: `compactValue: null` for technical
+  failures (`blocked_missing_phase15c_inputs`, `invalid_cash_flow_series`)
+  remains intact -- delegated to and confirmed by
+  `DISCOUNTED_PAYBACK_ENGINE_VALIDATION_REPORT.allPass=true` (36/36, including
+  the 10/10 technical-failure surface) (check
+  `technical_failure_compact_value_null_preserved`). Not regressed to `""`,
+  `"NA"`, or `"20+"`.
+
+All 15 checks above are implemented in
+`phase15dDecisionLeverPropagationValidation.ts` /
+`phase15dDecisionLeverPropagationValidationContract.ts` and pass
+(`PHASE15D_LEVER_PROPAGATION_VALIDATION_REPORT.allPass=true`, 15/15).
+
+### Step 7: Unsupported / inactive levers
+
+- **MS/HS Progression Model** -- classification: **contract exists but is not
+  wired**. `ScenarioDecisionLeverSelections.msHsProgressionModel`
+  (`scenarioDecisionLeverContract.ts`) defines the lever with
+  `selectionStatus: "needs_mapping"` and `selectedOptionId: string | null`,
+  but no concrete option-id type exists and `DreEngineInput` /
+  `CapitalDecisionEngineInput` have no corresponding field. The related
+  `msHsStaffingReadinessContract.ts` / `msHsStaffingReadiness.ts` are a
+  staffing-readiness audit, not a calculation input. Smallest upstream
+  correction: define a concrete `MsHsProgressionModelOptionId` type, decide
+  which `calculateReceita`/`calculateFopag` inputs it should adjust, and add a
+  field to `DreEngineInput`. This is a Phase 13/14-layer (DRE/receita/fopag
+  contract) decision and reopens enrollment/staffing methodology -- out of
+  scope for Phase 15D.2 and **not implemented**.
+- **Service Contracts** -- classification: **intentionally fixed assumption**.
+  `serviceContractsEngineContract.ts` states Service Contracts values are
+  "invariant across all scenario dimensions in v1" (confirmed by Luciana
+  2026-06-04) and are folded into `DRE_ANNUAL_ASSUMPTION_SOURCE_DATA` as fixed
+  annual cost rows feeding `total_custos_e_despesas_fixas` in every scenario.
+  `ScenarioDecisionLeverSelections.serviceContracts` also remains
+  `selectionStatus: "needs_mapping"`, `selectedOptionId: null`. Because this
+  is an explicit, dated v1 business-methodology decision (not a missing
+  wire), no upstream correction is proposed; reopening it would reopen
+  ratified methodology, which is out of scope.
+
+### Lever classification (final, gate-confirmed)
+
+Following Step 7, the final lever classification for the Phase 15D gate is:
+
+- **Currently variable and production-wired** (all five scenario-tested in
+  Step 3-6 above): Opening Grades, Occupancy, Org Design Structure, Tuition,
+  CAPEX option.
+- **Fixed approved model assumption**: Service Contracts. Service Contracts
+  are represented as ordinary DRE cost-line rows within
+  `DRE_ANNUAL_ASSUMPTION_SOURCE_DATA` -- they are **not** a separate
+  simulator layer or a post-EBITDA engine. The approved workbook values are
+  wired as fixed assumptions for the current version; no alternative Service
+  Contracts option set has been approved, so no selector is required for the
+  current Phase 15D gate. Service Contracts are **not double-counted** (see
+  `dreServiceContractsReconciliation.ts` overlap reconciliation). That
+  Service Contracts values are invariant across the tested scenarios (S1-S8)
+  is the correct, approved behavior for this version and does **not** block
+  Phase 15D.
+- **Future upstream integration item**: MS/HS Progression Model (per Step 7
+  classification: contract exists but is not wired into `DreEngineInput`).
+  Not implemented in Phase 15D or Phase 15D.2.
+
+Phase 15D.2 proved dynamic propagation across all five currently variable,
+production-wired levers (Step 4-6).
+
+### Step 8: Corrections applied
+
+**None.** No accidental fixture use, dropped scenario inputs, cross-scenario
+caching, overwritten parity metadata, or regressed `compactValue: null`
+behavior was found in the Phase 15D production chain
+(`calculateDiscountedPaybackForCapitalDecision`,
+`calculatePhase15CInvestmentMetrics`, `calculateCapitalDecisionBridge`,
+`calculateDre`). The discounted-payback formula, `"NA"`/`"20+"`/`"20"` rules,
+recovery-search logic, and exclusions are unchanged from Phase 15D.
+
+One **out-of-scope observation** was made during exploration (not part of the
+required scenario matrix, and not corrected): passing a deliberately invalid
+`orgDesignOptionId` (e.g. `"not_a_real_option"`, not used in any of S1-S8)
+causes `payrollAdapter.buildPayrollAdapterInput` to return
+`adapterStatus: "failed_unsupported_option"`, `calculationReady: false`, but
+`calculateDre`'s `DreEngineOutput` carries no calculation-readiness field, and
+neither `calculateCapitalDecisionBridge` nor `calculatePhase15CInvestmentMetrics`
+detect this and set `calculationStatus` to a non-`"calculated"` value;
+`calculateDiscountedPaybackForCapitalDecision` therefore returns
+`status: "calculated"` with a numeric `compactValue` instead of a blocked
+result with `compactValue: null`. This would only be reachable via an
+invalid/invented `orgDesignOptionId`, which Step 3 explicitly prohibits, so it
+does not affect S1-S8 or the validated 15/15 + 36/36 results above. If this
+is to be corrected, the owner is `calculateDre`/`calculateCapitalDecisionBridge`
+(Phase 13A/13E layer, `dreEngine.ts` / `capitalDecisionEngine.ts`) --
+propagating `fopagOutput.calculationReady`/diagnostics into `DreEngineOutput`
+and from there into `Phase15CResult.calculationStatus`. **Not fixed here**:
+it is upstream of Phase 15D and reopens DRE/FOPAG-engine readiness semantics.
+
+### Files created (2)
+
+- `src/features/rio-scenario-resilience/model/phase15dDecisionLeverPropagationValidationContract.ts`
+- `src/features/rio-scenario-resilience/model/phase15dDecisionLeverPropagationValidation.ts`
+
+### Validation / build status (Phase 15D.2)
+
+`npm run lint` (`tsc --noEmit`): clean. `npm run build`: succeeds (2807
+modules, unchanged). `discountedPaybackEngineValidation.ts` (Phase 15D):
+36/36 pass (unchanged). `phase15dDecisionLeverPropagationValidation.ts`
+(Phase 15D.2, new): 15/15 pass.
+`phase15cInvestmentMetricsEngineValidation.ts` (Phase 15C): 28/28 pass
+(unchanged). `capitalDecisionEngineValidation.ts` (Phase 15B): 25/25 pass
+(unchanged). `dreEngineValidation.ts`: 20/20 pass (unchanged). 2 new files
+created, 1 existing file (`IMPLEMENTATION.md`, this section) updated. No
+other files modified.
