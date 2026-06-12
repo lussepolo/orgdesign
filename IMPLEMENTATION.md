@@ -1172,3 +1172,214 @@ DCF/VPL/TIR/perpetuity/discounted-payback formulas it introduces against the
 workbook methodology (`phase15CapitalDecisionArchitecture.md` §16) — Phase
 15B's 25/25 bridge-core validation does not extend to those Phase 15C/15D
 calculations.
+
+---
+
+## Phase 15C-DCF-VPL-TIR-PERPETUITY
+
+**Boundary**: Phase 15C consumes Phase 15B's committed `CapitalDecisionResult`
+(`fcoAfterCapexBRL` for all 21 periods, `netIncomeBRL` for 2047) as a
+read-only input and adds discounted cash flow (DCF), Gordon Growth terminal
+value/perpetuity, VPL (NPV), and TIR (IRR). It does **not** recalculate
+Receita, FOPAG, EBITDA, D&A, tax/NOL, FCO, or CAPEX, and does not call
+`dreEngine`, `receitaEngine`, `fopagEngine`, `capexScheduleEngine`,
+`ppeDepreciationEngine`, or `nolTaxEngine`. No UI, no `App.tsx`/workbook/
+`HighSchoolTab.tsx` changes, no hidden sheets.
+
+### Files created (13)
+
+1. `capitalDecisionDriverSourceContract.ts` / `capitalDecisionDriverSourceData.ts`
+   -- single canonical source for `preOpsWaccRate` (0.1325, PnL!B6),
+   `operatingPeriodWaccRate` (0.12, PnL!C6:V6, also the perpetuity WACC,
+   PnL!Z278 = V6), and `perpetuityGrowthRate` (0.035, PnL!Z279). Per
+   `phase15CapitalDecisionArchitecture.md` S16.5 D10, these are not
+   hardcoded independently anywhere else -- `discountedCashFlowEngine.ts`,
+   `terminalValueEngine.ts`, and `phase15cInvestmentMetricsEngine.ts` receive
+   them only via this source.
+2. `discountedCashFlowEngineContract.ts` / `discountedCashFlowEngine.ts` --
+   21-period DCF (PnL!B305:V306 / B308:V308 equivalent).
+3. `terminalValueEngineContract.ts` / `terminalValueEngine.ts` -- Gordon
+   Growth terminal value (PnL!Z280:Z283).
+4. `irrEngineContract.ts` / `irrEngine.ts` -- Newton-Raphson + bracket/
+   bisection-fallback IRR solver (PnL!Z288 = `IRR(B295:W295)` equivalent).
+5. `phase15cInvestmentMetricsEngineContract.ts` / `phase15cInvestmentMetricsEngine.ts`
+   -- orchestrator: pure core (`computePhase15CInvestmentMetricsCore`) +
+   production entry point (`calculatePhase15CInvestmentMetrics`).
+6. `phase15cR100mParitySourceData.ts` -- R$100M workbook-cached parity
+   fixture (WACC rates, discount factors, discounted cash flows, cumulative
+   discounted cash flows for all 21 periods; 2047 terminal net income;
+   terminal value; terminal value PV; VPL; TIR).
+7. `phase15cInvestmentMetricsEngineValidationContract.ts` /
+   `phase15cInvestmentMetricsEngineValidation.ts` -- 28 checks across R$100M
+   parity, R$90M structural, IRR solver, and boundary surfaces (all pass).
+
+### DCF period-index convention (1-based, PnL!B286:V286)
+
+```
+discountFactor[1] = 1 + wacc[1]                          (pre_ops, periodIndex 1, WACC 13.25%)
+discountFactor[i] = discountFactor[i-1] * (1 + wacc[i])  (i = 2..21; 2028=index 2 .. 2047=index 21, WACC 12%)
+discountedCashFlowBRL          = fcoAfterCapexBRL / discountFactor
+cumulativeDiscountedCashFlowBRL = previousCumulative + discountedCashFlowBRL
+```
+
+This is a **recursive cumulative product**, not a closed-form
+`(1+wacc)^periodIndex` exponent, because the pre_ops period uses a different
+rate (13.25%) than 2028-2047 (12%).
+
+### TIR period-index convention (0-based exponents, distinct from DCF)
+
+`calculateIrr()` is fed a 22-entry series:
+
+```
+[fcoAfterCapexBRL(pre_ops), fcoAfterCapexBRL(2028), ..., fcoAfterCapexBRL(2047), terminalValueAt2047BRL]
+```
+
+with `cashFlows[i]` at **exponent i** (`pre_ops` = exponent 0 ... `2047` =
+exponent 20, terminal value = exponent 21), matching Excel's
+`IRR(B295:W295)`. TIR uses **undiscounted** `fcoAfterCapexBRL` -- it does NOT
+consume the DCF engine's `discountedCashFlowBRL` series. The DCF engine's
+`periodIndex` (1-based, 1=pre_ops..21=2047) and the IRR series' exponents
+(0-based, 0=pre_ops..20=2047, 21=terminal value) are deliberately different
+conventions and must not be conflated.
+
+### Terminal-value net-income source and cancellation identity
+
+The terminal cash-flow numerator (PnL!Z280 = PnL!V290 - PnL!V288) equals
+**2047 net income** (`CapitalDecisionPeriodResult.netIncomeBRL` for
+`periodKey === 2047`, i.e. PnL!V282), **not** `fcoAfterCapexBRL[2047]`
+(PnL!V295). The perpetual depreciation add-back (PnL!W288) and the assumed
+perpetual Sustain CAPEX (PnL!W291 = -W288) cancel exactly, so PnL!W295
+("perpetuity cash flow after CAPEX") reduces algebraically to PnL!Z281 (net
+income perpetuity). `terminalValueEngine.ts` therefore takes `netIncomeBRL`
+as its numerator input and does not separately model a terminal Sustain CAPEX
+or terminal depreciation adjustment:
+
+```
+terminalValueAt2047BRL          = terminalNetIncomeBRL * (1 + perpetuityGrowthRate) / (perpetuityWaccRate - perpetuityGrowthRate)
+terminalValuePresentValueBRL    = terminalValueAt2047BRL / finalYearDiscountFactor   (PnL!V308 == PnL!W308; no extra terminal discounting)
+```
+
+### VPL (PnL!Z289) -- one canonical field
+
+```
+npvBRL = sum(periods[i].discountedCashFlowBRL for i = 1..21) + terminalValue.terminalValuePresentValueBRL
+```
+
+There is no separate "with/without terminal value" field.
+
+### IRR solver
+
+Newton-Raphson from the standard seed `0.10`, with `npvAtRate(rate) =
+sum(cashFlows[i] / (1+rate)^i)` (cashFlows[0] at exponent 0). Convergence:
+rate-delta tolerance `1e-10`, NPV residual tolerance `0.01 BRL` (NOT `1e-7`),
+max 100 Newton iterations. If Newton fails (non-finite derivative, or the
+next iterate would leave the valid rate domain `rate > -1`), falls back to a
+deterministic 2000-step bracket scan over `(-1+1e-9, 10]` followed by
+bisection (max 200 iterations). `multipleRootsPossible` is set whenever the
+cash-flow series has more than one sign change, independent of whether a root
+was found. Status: `"calculated"` (root found by either method),
+`"no_sign_change"` (all cash flows same sign -- no real root), or
+`"did_not_converge"` (neither method found a root within tolerance, e.g. an
+implied rate far outside `(-1, 10]`). `0` is never returned as a substitute
+for an unavailable rate.
+
+### Dual status axes (IRR unavailability does not block VPL)
+
+`Phase15CCalculationStatus` (`"calculated"` |
+`"blocked_missing_phase15b_inputs"` | `"blocked_invalid_wacc_growth"`) and
+`IrrStatus` (`"calculated"` | `"no_sign_change"` | `"did_not_converge"`) are
+independent. A series with no sign change (e.g. all cash flows positive)
+yields `calculationStatus: "calculated"`, a valid `npvBRL`, and a valid
+terminal value, while `irrRate: null` / `irrStatus: "no_sign_change"`
+explains why IRR specifically is unavailable. `blocked_missing_phase15b_inputs`
+fires only when Phase 15B's `calculationReadiness !== "structurally_calculated"`.
+`blocked_invalid_wacc_growth` fires when `perpetuityWaccRate <= perpetuityGrowthRate`
+(or either is non-finite) -- in both blocked cases, terminal value, VPL, and
+IRR are all unavailable (`null`).
+
+### R$100M workbook-parity results (10/10)
+
+`phase15cInvestmentMetricsEngineValidation.ts`, fed `computeCapitalDecisionBridgeCore()`
+with the workbook's cached `PnL!236/273` (same inputs as Phase 15B's
+`r100m_*` checks), reproduces all five workbook anchors exactly within
+tolerance:
+
+| Anchor | Workbook (PnL cell) | Computed |
+| --- | --- | --- |
+| Cumulative discounted cash flow, 2047 (V306) | -18,153,646.635 | -18,153,646.635 |
+| Terminal value at 2047 (Z281) | 420,628,018.055 | 420,628,018.055 |
+| Terminal value PV (Z283) | 38,503,440.118 | 38,503,440.118 |
+| VPL (Z289) | 20,349,793.483 | 20,349,793.483 |
+| TIR (Z288) | 0.132612905776 | 0.132612905776 |
+
+Plus: period indices 1..21, WACC rates (tol 1e-6), discount factors (tol
+1e-6), and discounted/cumulative-discounted cash flows for all 21 periods
+(tol 0.01 BRL) -- all pass.
+
+### R$90M structural results (4/4)
+
+Same canonical WACC/growth source as R$100M; R$90M `fcoAfterCapexBRL` (from
+`computeCapitalDecisionBridgeCore({capexOptionId: "capex_90m_brl"})`) produces
+discounted cash flows differing from R$100M's in 14/21 periods; R$90M
+terminal value uses R$90M's own 2047 net income; R$90M VPL
+(27,719,396.96) differs from the R$100M cached VPL (no cached-output
+leakage); repeated calls are deterministic.
+
+### Solver-validation results (9/9)
+
+Standard single-root series (`[-1000,300,300,300,300,300]` -> IRR
+15.238236...%, Newton, 4 iterations); all-positive and all-negative series ->
+`no_sign_change`; classic dual-root series `[-100,230,-132]` (roots at 10%
+and 20%) -> `multipleRootsPossible: true`, deterministic seed-0.10 root
+(10%); bisection fallback (`[1000,-1]`, root near -99.9%, Newton's first step
+leaves the rate domain); non-convergence (`[-1, 1e30]`, implied rate far
+outside `(-1, 10]` -> `did_not_converge`); near-(-1) domain
+(`[10000,-1]`, root ≈ -99.99%); deterministic repeated calls.
+
+### Boundary-validation results (5/5)
+
+Input `CapitalDecisionResult` not mutated; result contains exactly 21
+explicit periods plus 1 separate `terminalValue` object;
+`explicitExclusions` declares working capital / financing cash flows / simple
+payback / discounted payback / Tier-investment interpretation / UI
+interpretation as excluded; an all-positive synthetic `fcoAfterCapexBRL`
+series yields `irrStatus: "no_sign_change"` while `calculationStatus:
+"calculated"` and `npvBRL` remains a valid number; an invalid driver
+(`perpetuityGrowthRate=0.5 > perpetuityWaccRate=0.12`) yields
+`calculationStatus: "blocked_invalid_wacc_growth"`, a blocked `terminalValue`,
+and `npvBRL: null`.
+
+### Scenario-parity semantics
+
+`integratedBaselineParityStatus` / `integratedBaselineParityNote` are passed
+through unchanged from the input `CapitalDecisionResult` -- Phase 15C does
+not re-derive or alter Phase 15B's scenario-parity finding (see "Phase
+15B-FINAL-QA-AND-COMMIT" above). `phase15CFormulaParityStatus:
+"formula_validated"` is a fixed property of the Phase 15C formulas
+themselves (DCF/terminal-value/IRR), independent of the calling scenario,
+analogous to Phase 15B's `bridgeFormulaParityStatus`.
+
+### Phase 15D / 15E boundaries
+
+Phase 15C's `Phase15CExplicitExclusions` explicitly excludes: working
+capital, financing cash flows, simple payback, discounted payback,
+Tier/investment interpretation, and UI interpretation. **Phase 15D** is
+expected to own simple/discounted payback (using the DCF periods'
+`discountedCashFlowBRL`/`cumulativeDiscountedCashFlowBRL` produced here).
+**Phase 15E** is expected to own Tier/investment and UI interpretation of
+the VPL/TIR/payback outputs. Neither is implemented in Phase 15C.
+
+### Residual numerical risk (IRR solver)
+
+The solver matches the workbook fixture and required synthetic cases, but
+Excel IRR parity for arbitrary multi-root or pathological cash-flow series is
+not guaranteed beyond the deterministic root-selection policy. This is a
+documented residual risk, not a blocker to Phase 15C.
+
+### Validation / build status
+
+`npm run lint` (`tsc --noEmit`): clean. `npm run build`: succeeds (2807
+modules). `phase15cInvestmentMetricsEngineValidation.ts`: 28/28 pass.
+`capitalDecisionEngineValidation.ts` (Phase 15B): 25/25 pass (unchanged).
+`dreEngineValidation.ts`: 20/20 pass (unchanged). 13 new files created, 0
+existing files modified other than this document.
