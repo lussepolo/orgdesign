@@ -1,8 +1,16 @@
 # Phase 15 Capital Decision Architecture
 
 Status: governance/architecture document. Phase 15A + Phase 15A.1 + Phase 15A.2
-(workbook audit) + Phase 15A.3 (workbook-informed update) consolidated.
+(workbook audit) + Phase 15A.3 (workbook-informed update) + Phase 15A.4
+(Finance methodology ratification) consolidated.
 No Phase 15 calculations, UI, or exports are implemented by this document.
+
+**Phase 15A.4 update (2026-06-12):** The remaining Finance methodology
+questions raised in §15 have been answered by Luciana. The ratified final
+decisions are recorded in §16 (Ratified Finance methodology) and §17 (Phase
+15B implementation boundary). **Phase 15B is no longer blocked by missing
+Finance methodology confirmation** and may begin once this documentation
+update itself is reviewed and committed (§16, §17, §9).
 
 **Phase 15A.3 update (2026-06-11):** Phase 15A.2 audited the Finance workbook
 "Concept Rio - 20 anos - Org BU - Apresentação vBU v8 (2).xlsx" (read-only, not
@@ -339,14 +347,20 @@ scope, and Tier rules must be defined fresh if Phase 15E proceeds (§15.F,
 
 ## 9. Missing approvals before Phase 15B
 
-**Phase 15A.2/15A.3 reframe:** the blocker below is **not** "no
+**Status (Phase 15A.4, 2026-06-12): RESOLVED.** All approvals listed in this
+section have been ratified by Luciana. See §16 for the final decisions and
+§17 for the resulting Phase 15B implementation boundary. This section is
+retained as a historical record of what was outstanding before Phase 15A.4;
+it is no longer a blocker.
+
+**Phase 15A.2/15A.3 reframe (historical):** the blocker below was **not** "no
 capital-decision methodology exists." The Finance workbook already contains
 a working CAPEX phasing/Sustain mechanism, FCO bridge, tax/NOL treatment,
-WACC, DCF/VPL/TIR, perpetuity, and payback formula (§8A). **The blocker is
-that Finance must confirm which of these methodologies, phasing approaches,
-WACC values, FCO bridge designs, and payback treatments should be applied to
-the simulator's confirmed R$90M and R$100M CAPEX options** — not whether such
-methodologies exist at all.
+WACC, DCF/VPL/TIR, perpetuity, and payback formula (§8A). **The blocker was
+that Finance needed to confirm which of these methodologies, phasing
+approaches, WACC values, FCO bridge designs, and payback treatments should be
+applied to the simulator's confirmed R$90M and R$100M CAPEX options** — not
+whether such methodologies exist at all. This has now been confirmed (§16).
 
 **Before any cash-flow bridge implementation:**
 
@@ -447,8 +461,15 @@ not inside Phase 15A implementation.
   document).
 - **Phase 15A.1** — committed-code verification of Service Contracts and
   operating horizon.
+- **Phase 15A.2** — workbook capital-decision audit (§8A), committed as
+  `1008925`.
+- **Phase 15A.3** — workbook-informed update to this architecture document,
+  committed as `1008925`.
+- **Phase 15A.4** — Finance methodology ratification (§16, §17). Documented
+  here, not yet committed.
 - **Phase 15B** — CAPEX source contract finalization and cash-flow bridge
-  design.
+  design. **Eligible to begin** once Phase 15A.4 documentation is reviewed
+  and committed (§16, §17). Scope is bounded by §17.
 - **Phase 15C** — discount-rate ratification and DCF / NPV / VPL formulas.
 - **Phase 15D** — payback / discounted payback / investment recovery
   formulas.
@@ -496,6 +517,11 @@ naming starting point, not to commit to field names or formulas.
 
 ## 15. Finance questions (Phase 15A.3, workbook-informed)
 
+**Status (Phase 15A.4, 2026-06-12): all 21 questions below are RATIFIED.** See
+§16 for the consolidated final decisions. The questions are retained verbatim
+for traceability; each group below is annotated with a pointer to its
+ratified answer.
+
 The simulator's CAPEX option amounts (R$90M and R$100M) are already
 confirmed and are **not** part of these questions. These questions ask which
 existing workbook methodology/treatment should be applied to those two
@@ -503,6 +529,8 @@ confirmed amounts — not whether the underlying formulas exist (they do, see
 §8A).
 
 ### A. Canonical workbook methodology
+
+**Ratified: see §16.1.**
 
 1. Which workbook block should be used as the methodology reference for
    Phase 15: the live `PnL` sheet, the `CAPEX` sheet, `Resumo Cenários
@@ -512,6 +540,8 @@ confirmed amounts — not whether the underlying formulas exist (they do, see
    inconsistent WACC (14.53%)?
 
 ### B. CAPEX treatment for the R$90M/R$100M simulator options
+
+**Ratified: see §16.2.**
 
 3. Should the live `PnL` sheet's phasing logic (70% / 20% / 10% across
    2027/2030/2031) be applied to the R$90M and R$100M options?
@@ -524,6 +554,8 @@ confirmed amounts — not whether the underlying formulas exist (they do, see
 
 ### C. FCO / operating cash flow
 
+**Ratified: see §16.3.**
+
 7. Should the workbook's FCO bridge (EBITDA → Depreciação → EBIT → Receita/
    Despesa Financeira → EBT → IR/CSLL → Lucro Líquido → FCO) be ported
    as-is?
@@ -534,6 +566,8 @@ confirmed amounts — not whether the underlying formulas exist (they do, see
 
 ### D. WACC / DCF / VPL / TIR
 
+**Ratified: see §16.4 and §16.5.**
+
 10. Should Phase 15 use 12%, 13.25%, 14.53%, or another WACC?
 11. Should perpetuity use 12% WACC and 3.5% growth, as in the live `PnL`
     sheet?
@@ -542,6 +576,8 @@ confirmed amounts — not whether the underlying formulas exist (they do, see
     workbook's current cumulative-compounding convention?
 
 ### E. Payback
+
+**Ratified: see §16.6.**
 
 14. Should the workbook's existing payback formula (based on discounted
     cumulative cash flow) be reused?
@@ -552,12 +588,16 @@ confirmed amounts — not whether the underlying formulas exist (they do, see
 
 ### F. Tax and working capital
 
+**Ratified: see §16.3 and §16.7.**
+
 18. Should the 34% tax rate and NOL carryforward treatment (as modeled in
     `Recuperação de Prejuízos`) be used?
 19. Is working capital intentionally out of scope (it is not modeled in the
     workbook)?
 
 ### G. Tier / board interpretation
+
+**Ratified: see §16.8.**
 
 20. Should Tier rules be created fresh, since no workbook threshold logic was
     found?
@@ -568,3 +608,274 @@ confirmed amounts — not whether the underlying formulas exist (they do, see
 features, cash-flow calculations, CAPEX bridge calculations, DCF, NPV/VPL,
 payback, discounted payback, investment recovery, Tier, or UI cards are
 implemented by this document.
+
+## 16. Ratified Finance methodology (Phase 15A.4, 2026-06-12)
+
+This section records Luciana's final answers to the §15 questions. These are
+the **final ratified Phase 15 methodology decisions**. They supersede the
+open questions in §9 and §15 and are the source of truth for Phase 15B.
+
+### 16.0 Workbook source authority
+
+- The Concept Rio 20 anos workbook
+  (`/Users/lucianapolonen/Downloads/Concept Rio - 20 anos - Org BU -
+  Apresentação vBU v8 (2).xlsx`) is the **methodological source** for Phase
+  15.
+- **Only visible workbook sheets** may be used for methodology,
+  calculations, assumptions, WACC, indicators, and scenario outputs.
+- **All hidden sheets are excluded** for these purposes — this includes the
+  orphaned "Otimista/Pessimista - PnL - CAPEX 72mm/61mm/51mm" scenario tabs
+  (§8A.2, §8A.4) and any other hidden tab, regardless of content.
+- For WACC and other financial indicators/drivers, the source is the
+  **drivers section at the top of the visible `PnL` sheet** (the rows
+  referenced in §8A.4, e.g. row 6 for WACC) — not any other sheet.
+- The **visible live `PnL` viability block** (rows 273–308, perpetuity block
+  Y277–Z283, "Viabilidade Financeira" summary Z288–Z290, per §8A.1) is the
+  **canonical methodology source**, unless a later explicit Finance decision
+  supersedes it.
+
+### 16.1 Canonical workbook methodology (answers A1–A2)
+
+- **A1:** the live `PnL` sheet (visible) is the methodology reference for
+  Phase 15 — specifically its drivers section (top of sheet, for WACC/other
+  indicators) and its viability block (rows 273–308 + perpetuity block, per
+  §16.0 and §8A.1). The `CAPEX` sheet and `Resumo Cenários CAPEX` are **not**
+  the methodology reference (see §16.2 for their limited reference-only role).
+- **A2:** the orphaned "Otimista/Pessimista - PnL - CAPEX 72mm/61mm/51mm"
+  scenario sheets are confirmed **stale/superseded** and are excluded from
+  Phase 15 entirely, both because they are hidden (§16.0) and because of
+  their formula errors and inconsistent 14.53% WACC (§8A.2, §8A.4).
+
+### 16.2 CAPEX option amounts and treatment (answers B3–B6)
+
+- **CAPEX option amounts remain R$90M and R$100M.** These are **not
+  reopened** by this ratification. Workbook figures such as R$100.7M,
+  R$65.3M, R$54.3M, R$44.3M, or any other legacy scenario totals **must not**
+  become simulator CAPEX options.
+- **B3:** yes — for **both** the R$90M and R$100M options, apply the live
+  `PnL` sheet's CAPEX phasing methodology (the 70% / 20% / 10% phasing
+  pattern across the pre-ops/2027, 2030, and 2031 years described in §8A.1
+  and §8A.2 "Faseamento Capex", row 285), scaled to the R$90M/R$100M total
+  rather than the workbook's R$100M reference total.
+- **B4:** yes — include the live `PnL` sheet's "Sustain" CAPEX mechanism (%
+  of ROL, escalating 2% → 2.5% → 3% → 3.5% → 4% across the workbook's defined
+  year bands, per §8A.1/§8A.2) for both the R$90M and R$100M options.
+- **B5:** the separate `CAPEX` sheet (≈R$100.7M annual schedule, §8A.2) is
+  **reference only**. It is **not** the source of simulator CAPEX option
+  amounts and is **not** used as the simulator's annual phasing schedule —
+  the live `PnL` phasing (B3) is used instead.
+- **B6:** no recurring/post-opening CAPEX is included beyond the Sustain
+  mechanism (B4), unless a later approved schedule is provided by Finance.
+
+CAPEX continues to be:
+
+- **excluded from EBITDA** (§1, §3, §8);
+- represented as a **negative cash-flow outflow** (consistent with
+  `capexEngine.ts`'s sign convention, §8);
+- applied **after FCO** (i.e. "cash flow after CAPEX" = FCO + CAPEX, per
+  §8A.1 row 295).
+
+### 16.3 FCO / operating cash-flow bridge and tax/NOL (answers C7–C9, F18)
+
+- **C7 / C8 / C9:** the simulator uses the workbook's **full FCO bridge**, not
+  a simplified EBITDA proxy. EBITDA is **not** an acceptable standalone
+  cash-flow proxy for Phase 15 (this resolves §7's open question in favor of
+  the full bridge).
+- **F18:** yes — the workbook's 34% combined IRPJ/CSLL rate and full
+  Brazilian NOL carryforward treatment (`Recuperação de Prejuízos`
+  methodology, §8A.6) are used, **as part of** the full FCO bridge below.
+- The Phase 15B FCO bridge must implement the following workbook methodology,
+  in order (per §8A.1, §8A.3):
+  1. **EBITDA** (already implemented in `dreEngine.ts`, Phase 14B —
+     unchanged, not redefined by Phase 15, §1/§3).
+  2. **Depreciação/Amortização** (sourced per workbook `PPE` methodology,
+     §8A.1).
+  3. **EBIT** = EBITDA + Depreciação/Amortização.
+  4. **Receita/Despesa Financeira** (financial result) — preserve this line
+     in the bridge **even though it currently evaluates to 0** throughout the
+     live model (§8A.3, no active debt financing). The bridge must not omit
+     this step merely because its current value is zero.
+  5. **EBT** = EBIT + Receita/Despesa Financeira.
+  6. **IR/CSLL** at 34% = `IF(EBT < 0, 0, -EBT * 34%)` on positive EBT
+     (§8A.1, §8A.6).
+  7. **Recuperação de Prejuízos / NOL treatment** — standard Brazilian NOL
+     rule: taxable base reduced to 70% of profit when prior-period losses
+     exist (§8A.1, §8A.6), applied before/within the IR/CSLL step as in the
+     workbook.
+  8. **Lucro Líquido** (net income) = EBT − IR/CSLL (after NOL adjustment).
+  9. **Depreciação/Amortização add-back** to net income.
+  10. **Despesa Financeira add-back** to net income (preserved even when
+      currently zero, per item 4 above).
+  11. **FCO (Fluxo de Caixa Operacional)** = Lucro Líquido + Depreciação
+      add-back + Despesa Financeira add-back (§8A.1 row 290).
+  12. **CAPEX** (§16.2) — phased "Expansão" + "Sustain", excluded from EBITDA,
+      applied after FCO.
+  13. **Cash flow after CAPEX** = FCO + CAPEX (§8A.1 row 295).
+
+### 16.4 Working capital (answer F19)
+
+- **F19:** working capital ("Capital de Giro") is **explicitly out of
+  scope** for Phase 15. It is not modeled in the workbook (§8A.7) and is not
+  added by the simulator.
+- The Phase 15 model scope ends at:
+  1. FCO (§16.3 item 11);
+  2. plus CAPEX (§16.2 / §16.3 item 12);
+  3. cash flow after CAPEX (§16.3 item 13).
+- No working-capital calculations or assumptions are added at any later step
+  (DCF, VPL, TIR, payback) unless a future, separately-approved phase
+  introduces them.
+- **This scope boundary is aligned with the company CFO.**
+
+### 16.5 WACC and discount drivers (answers D10–D13)
+
+- **D10:** Phase 15 uses the WACC values from the **drivers section at the
+  top of the visible `PnL` sheet** (§16.0, §8A.4):
+  - **2027 / pre-ops: 13.25%**
+  - **2028 onward: 12%**
+  - The **14.53%** WACC found in the hidden/orphaned "Otimista/Pessimista"
+    sheets (§8A.2, §8A.4) is **not used** — those sheets are excluded per
+    §16.0/§16.1.
+  - Phase 15B implementation must **not hardcode** these WACC values
+    independently in multiple places. The implementation must expose or
+    source the ratified driver values (13.25% pre-ops/2027, 12% 2028+) from a
+    single canonical driver source consistent with the workbook's drivers
+    section, so that future driver changes (if Finance ever revises the
+    workbook drivers) can be reflected without scattered edits.
+- **D11 / D12 (perpetuity, also answers §16.6 below where relevant):** follow
+  the visible `PnL` methodology (§8A.1, §8A.4):
+  - perpetuity growth rate **g = 3.5%**;
+  - perpetuity WACC = the **WACC of the final projection year** (i.e. 12%,
+    the 2028+ rate, consistent with the live model's 2047 steady-state
+    value);
+  - use the **workbook's terminal-value (Gordon Growth) formula** (§8A.1,
+    Y277–Z283 / row 287 column W);
+  - terminal value is **included in both VPL and TIR** (§8A.1, Z288/Z289).
+  - No alternative perpetuity method is invented.
+- **D13 (DCF timing convention):** no alternative timing convention was
+  specified. Per the general instruction to follow the visible `PnL`
+  methodology (§16.0), Phase 15B follows the **workbook's existing
+  cumulative-compounding discount-factor convention** (§8A.1 "Fator de
+  Desconto", row 308 — cumulative `(1+WACC_t)` product across years), not a
+  separately-invented year-end or mid-year convention.
+
+### 16.6 Payback (answers E14–E17)
+
+- **E14:** yes — the workbook's existing payback formula is reused. The
+  required Phase 15 metric is **discounted payback**, calculated from the
+  **discounted cash flow after CAPEX** (§16.3 item 13: FCO + CAPEX,
+  discounted per §16.5's cumulative-compounding convention), consistent with
+  §8A.5's finding that the workbook's single "Payback" metric (`Z290`) is
+  already effectively a discounted payback.
+- **E15:** the **"20+"** output is accepted as-is, including the case where
+  it occurs alongside a positive VPL driven by terminal value (§8A.5). "20+"
+  means:
+  - discounted payback is **not achieved within the 20-year projection
+    horizon**;
+  - this is **not an error**;
+  - it **must not** be interpreted as "payback occurs in year 20".
+  - UI/export wording must use explanatory text such as: *"Payback not
+    achieved within the 20-year projection horizon."*
+  - The compact value **"20+"** is preserved as a workbook-compatible value
+    where a compact representation is needed (e.g. tables, exports), paired
+    with the explanatory wording above wherever space allows.
+- **E16:** only **one** payback metric — discounted payback. No separate
+  simple/undiscounted payback metric is introduced unless Luciana later
+  explicitly requests it.
+- **E17:** "recuperação do investimento" (investment recovery) for the
+  simulator is defined as **discounted payback** per E14–E15 above — there is
+  no separate "investment recovery" concept distinct from discounted payback.
+
+### 16.7 Investment decision rule (answer G20–G21, supersedes prior Tier framing)
+
+- **G20:** **no Tier taxonomy is created.** There is no approved Tier
+  framework, and none is invented by Phase 15A.4 or Phase 15B.
+- **G21:** there are **no thresholds, categories, traffic-light labels, or
+  approval tiers**. Instead, the governing investment reference is:
+  - **TIR must exceed WACC** (TIR > WACC) for a scenario to be viable, using
+    the ratified WACC values (§16.5).
+  - For **comparing scenarios** (e.g. R$90M vs. R$100M):
+    - a **higher positive spread between TIR and WACC** indicates a
+      **stronger** scenario;
+    - a **lower discounted payback** (§16.6) is **preferable**.
+  - **VPL** remains a **reported investment output** (per §8A.1's VPL
+    formula and §16.5's perpetuity treatment), but **no VPL threshold** is
+    defined or invented. VPL is reported as a number, for relative
+    comparison and context, not evaluated against a pass/fail threshold.
+
+### 16.8 Summary of ratified values
+
+| Item | Ratified value | Source |
+|---|---|---|
+| CAPEX option amounts | R$90M, R$100M (unchanged) | Phase 15A.3, confirmed |
+| CAPEX phasing | Live `PnL` 70/20/10 (§8A.1 row 285), scaled to option amount | §16.2 |
+| Sustain CAPEX | % of ROL, 2%→2.5%→3%→3.5%→4% escalation (§8A.1/§8A.2) | §16.2 |
+| CAPEX sheet | Reference only, not an option-amount or schedule source | §16.2 |
+| Operating cash-flow basis | Full FCO bridge (EBITDA → ... → FCO), not EBITDA proxy | §16.3 |
+| Tax rate | 34% IRPJ/CSLL on positive EBT | §16.3 |
+| NOL treatment | Standard Brazilian NOL, 70% taxable-base cap | §16.3 |
+| Working capital | Out of scope, aligned with CFO | §16.4 |
+| WACC, pre-ops/2027 | 13.25% | §16.5, visible `PnL` drivers section |
+| WACC, 2028+ | 12% | §16.5, visible `PnL` drivers section |
+| Perpetuity growth | 3.5% | §16.5 |
+| Perpetuity WACC | 12% (final projection year) | §16.5 |
+| Terminal value in VPL/TIR | Included | §16.5 |
+| DCF timing convention | Workbook cumulative-compounding (§8A.1 row 308) | §16.5 |
+| Payback metric | Discounted payback only (FCO + CAPEX, discounted) | §16.6 |
+| "20+" meaning | Not achieved within 20-year horizon; not an error; not year 20 | §16.6 |
+| Investment decision rule | TIR > WACC; compare via TIR-WACC spread and discounted payback | §16.7 |
+| Tier taxonomy | None — not created | §16.7 |
+| VPL threshold | None — VPL reported, no threshold | §16.7 |
+
+## 17. Phase 15B implementation boundary (ratified scope)
+
+Phase 15B is **eligible to begin** once this document (§16, §17) is reviewed
+and committed (§9, §12). Phase 15B implements the ratified workbook
+methodology (§16) for the R$90M/R$100M CAPEX options.
+
+### 17.1 In scope for Phase 15B
+
+- **Canonical capital-decision source contracts** — typed contracts/data
+  sources for the ratified drivers (WACC 13.25%/12%, perpetuity g=3.5%,
+  CAPEX phasing percentages, Sustain CAPEX schedule, tax rate 34%, NOL rule)
+  per §16.0/§16.5, sourced consistently rather than hardcoded ad hoc.
+- **R$90M / R$100M CAPEX schedules** using the live `PnL` phasing methodology
+  (§16.2), including:
+  - the phased "Expansão" buildout (70/20/10 pattern scaled to R$90M/R$100M);
+  - the Sustain CAPEX mechanism (% of ROL, escalating per §16.2).
+- **FCO bridge** implementing the full chain in §16.3 (EBITDA → Depreciação →
+  EBIT → Receita/Despesa Financeira → EBT → IR/CSLL/NOL → Lucro Líquido →
+  add-backs → FCO), reading EBITDA from the existing Phase 14B `dreEngine.ts`
+  output without modifying it (§1/§3).
+- **Cash flow after CAPEX** = FCO + CAPEX (§16.2/§16.3).
+- **Source provenance and validation** — validating the new source contracts
+  and schedules against the corresponding live `PnL` workbook formulas/cells
+  (§8A), so Phase 15B outputs can be traced back to the ratified workbook
+  source (§16.0).
+
+### 17.2 Not in scope for Phase 15B
+
+The following remain in later phases per the sequencing in §12:
+
+- **Final UI integration** (Phase 15F) — no new UI cards, panels, or
+  App.tsx wiring.
+- **Board interpretation UI** (Phase 15E/15F) — no Tier or governance UI,
+  consistent with §16.7 (no Tier taxonomy exists to display).
+- **XLSX export expansion** (Phase 15G) — no changes to the DRE/Phase 14B
+  export workbook.
+- **Unsupported Tier taxonomy** — not implemented, per §16.7 (none exists
+  and none is to be invented).
+- DCF / NPV / VPL / TIR calculations (Phase 15C/15D) and discounted-payback
+  calculation (Phase 15D/15E) build on the Phase 15B contracts but are
+  **not** themselves Phase 15B deliverables — Phase 15B establishes the
+  source contracts, CAPEX schedules, and FCO bridge that these later phases
+  will consume.
+
+### 17.3 Files explicitly out of scope for Phase 15B
+
+- `HighSchoolTab.tsx` — separate, non-Rio work (§ Phase 14E history in
+  `IMPLEMENTATION.md`); Phase 15B must not touch this file.
+- `App.tsx` — no wiring of Phase 15 files into the app shell during Phase
+  15B (per §17.1/§17.2, this is Phase 15F).
+- The source workbook (`Concept Rio - 20 anos - Org BU - Apresentação vBU v8
+  (2).xlsx`) — read-only methodology reference (§16.0); Phase 15B does not
+  edit it.

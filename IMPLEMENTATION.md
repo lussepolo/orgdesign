@@ -483,3 +483,111 @@ Decisions:
   Phase 15A may begin only from committed governance sources and the
   explicit Phase 15A pre-reading list above — not from the reverted
   `inputReadinessRegistry.ts` draft.
+
+## Phase 15A.2 / 15A.3 — Workbook audit and architecture update (committed as `1008925`)
+
+- **Phase 15A.2** audited the Finance workbook `Concept Rio - 20 anos - Org
+  BU - Apresentação vBU v8 (2).xlsx` (read-only, not edited) and found that it
+  already implements a complete capital-decision methodology (FCO bridge,
+  CAPEX phasing + Sustain, tax/NOL, WACC, perpetuity, DCF/VPL/TIR, payback).
+- **Phase 15A.3** updated
+  `src/features/rio-scenario-resilience/docs/phase15CapitalDecisionArchitecture.md`
+  with these findings (§8A) and reframed the Phase 15B blocker from "no
+  methodology exists" to "Finance must confirm which workbook
+  methodology/treatment applies to the simulator's confirmed R$90M/R$100M
+  CAPEX options" (§9, §15).
+- Both committed as `1008925` ("Update Phase 15A architecture with workbook
+  audit findings").
+- **Phase 15A.2/15A.3 workbook audit complete.**
+
+## Phase 15A.4-FINANCE-METHODOLOGY-RATIFICATION
+
+The remaining Finance methodology questions from
+`phase15CapitalDecisionArchitecture.md` §15 (groups A–G, 21 questions) have
+been answered by Luciana and recorded as ratified Phase 15 methodology in
+that document's new §16 (Ratified Finance methodology) and §17 (Phase 15B
+implementation boundary).
+
+### Ratified decisions (summary; full detail in `phase15CapitalDecisionArchitecture.md` §16)
+
+1. **Workbook source authority** — the Concept Rio 20 anos workbook is the
+   methodological source for Phase 15. Only **visible** sheets are used for
+   methodology, calculations, assumptions, WACC, indicators, and scenario
+   outputs; **all hidden sheets are excluded**. WACC and other financial
+   indicators come from the **drivers section at the top of the visible
+   `PnL` sheet**. The visible live `PnL` viability block (rows 273–308 +
+   perpetuity block) is the canonical methodology source unless a later
+   explicit Finance decision supersedes it.
+2. **CAPEX options** — remain **R$90M and R$100M only**, not reopened.
+   Workbook figures (R$100.7M, R$65.3M, R$54.3M, R$44.3M, or other legacy
+   scenario totals) do not become simulator CAPEX options.
+3. **CAPEX treatment** — for both R$90M and R$100M: apply the live `PnL`
+   CAPEX phasing methodology (70/20/10, scaled to the option amount) and
+   include Sustain CAPEX as % of ROL. The separate `CAPEX` sheet is
+   reference-only, not a source of option amounts or schedules. No
+   recurring/post-opening CAPEX beyond Sustain unless a later approved
+   schedule is provided. CAPEX remains excluded from EBITDA, a negative
+   cash-flow outflow, applied after FCO.
+4. **Operating cash-flow bridge** — the simulator uses the workbook's **full
+   FCO bridge** (EBITDA → Depreciação/Amortização → EBIT → Receita/Despesa
+   Financeira → EBT → IR/CSLL (34% + NOL/"Recuperação de Prejuízos") → Lucro
+   Líquido → depreciação + despesa financeira add-backs → FCO → CAPEX → cash
+   flow after CAPEX), **not** an EBITDA-only proxy. The financial-result step
+   is preserved even though it currently evaluates to 0 in the live model.
+5. **Working capital** — explicitly **out of scope**. Model scope ends at
+   FCO, plus CAPEX, and cash flow after CAPEX. This scope is **aligned with
+   the company CFO**.
+6. **WACC and discount drivers** — from the visible `PnL` drivers section:
+   **13.25%** for 2027/pre-ops, **12%** for 2028 onward. The 14.53% WACC
+   found in hidden/orphaned sheets is **not used**. Phase 15B must source
+   these values from a single canonical driver source, not hardcode them
+   independently in multiple places.
+7. **Perpetuity / terminal value** — perpetuity growth rate **3.5%**,
+   perpetuity WACC = WACC of the final projection year (12%), using the
+   workbook's Gordon Growth terminal-value formula, included in both VPL and
+   TIR. No alternative perpetuity method.
+8. **Payback** — required metric is **discounted payback**, based on
+   discounted cash flow after CAPEX (FCO + CAPEX). "20+" means discounted
+   payback is not achieved within the 20-year projection horizon — not an
+   error, and not interpreted as payback in year 20. UI/export wording must
+   explain this (e.g. "Payback not achieved within the 20-year projection
+   horizon"), while preserving "20+" as a compact workbook-compatible value.
+   No separate simple-payback metric unless Luciana later requests one.
+9. **Investment decision rule** — no Tier taxonomy is created. Governing
+   reference: **TIR must exceed WACC**. Scenario comparison uses the
+   TIR-WACC spread (higher positive spread = stronger) and discounted
+   payback (lower = preferable). VPL remains a reported output with no
+   invented threshold.
+
+### Phase 15B gate status
+
+- **Phase 15B is no longer blocked by missing Finance methodology
+  confirmation.**
+- **Phase 15B may begin after this documentation update
+  (`phase15CapitalDecisionArchitecture.md` §16/§17 and this section) is
+  reviewed and committed.**
+- Phase 15B implements the ratified workbook methodology for the R$90M/R$100M
+  CAPEX options: canonical capital-decision source contracts; R$90M/R$100M
+  CAPEX schedules using live `PnL` phasing; Sustain CAPEX; FCO bridge; cash
+  flow after CAPEX; source provenance and validation against workbook
+  formulas.
+- Phase 15B does **not** yet implement: final UI integration, board
+  interpretation UI, XLSX export expansion, or any Tier taxonomy. Those
+  remain in later phases (15C–15G) per the sequencing in
+  `phase15CapitalDecisionArchitecture.md` §12.
+
+### Gate review
+
+- Phase 15A.2 workbook audit: **complete**.
+- Phase 15A.3 workbook findings: **committed as `1008925`**.
+- Phase 15A.4 Finance methodology ratification: **documented in this section
+  and in `phase15CapitalDecisionArchitecture.md` §16/§17, not yet
+  committed**.
+- Phase 15B: **eligible to begin only after Phase 15A.4 documentation
+  approval and commit.**
+- No Phase 15 app implementation has been started (no cash-flow, CAPEX,
+  DCF, VPL, TIR, payback, or Tier calculations; no UI changes; no `App.tsx`
+  wiring).
+- The source workbook was not edited.
+- `HighSchoolTab.tsx` remains separate, non-Rio work (see Phase 14E history
+  above) and was not touched by this update.
