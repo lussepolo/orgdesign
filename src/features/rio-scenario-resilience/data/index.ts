@@ -5,3 +5,5 @@ export * from "./sourceOfTruthMap";
 export * from "./orgDesignStructure";
 export * from "./orgDesignScenarioExtensions";
 export * from "./tuitionArchitecture";
+export * from "./occupancyOptions";
+export * from "./capexOptions";

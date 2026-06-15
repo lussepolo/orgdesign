@@ -2110,3 +2110,88 @@ widgets, and no `App.tsx` changes.
 25/25 pass (unchanged). `dreEngineValidation.ts`: 20/20 pass (unchanged). 6
 new files created, 1 existing file (`IMPLEMENTATION.md`, this section)
 updated. No other files modified.
+
+## Phase 15F-SCENARIO-OUTPUT-UI-IMPLEMENTATION — Capital Decision UI
+
+Feature-local "Capital Decision" view (`components/CapitalDecision/`) for
+the Rio Scenario Resilience preview, exposing the five currently variable,
+production-wired decision levers (Opening Grades, Occupancy, Org Design
+Structure, Tuition, CAPEX). Each saved scenario configuration maps to exactly
+one `calculateInvestmentInterpretation()` call (Phase 15E); only the scenario
+whose lever changed is recalculated. Pairwise comparison (section C) reuses
+already-computed results via `compareInvestmentScenarioPair()` -- no
+additional recalculation.
+
+### UI option sources (new, no invented values)
+
+- `data/occupancyOptions.ts`: canonical IDs `pessimista` / `intermediario` /
+  `otimista` with pt-BR labels "Pessimista" / "Intermediário" / "Otimista".
+- `data/capexOptions.ts`: canonical IDs `capex_90m_brl` / `capex_100m_brl`
+  with UI labels "R$ 90 milhões" / "R$ 100 milhões" (distinct from the
+  calculation-source labels in `capexOptionSource.ts`, which remains
+  unchanged).
+
+### Decision-lever state correction
+
+`DecisionLeverId` (in `components/DecisionLevers/leverTypes.ts`) is now
+exactly `openingGrades | occupancy | orgDesignStructure | tuition | capex`
+-- `serviceContracts` removed, since Service Contracts is a fixed approved
+DRE assumption, not a selectable lever. `DecisionLeversPanel.tsx` renders
+`ServiceContractsLever` as non-interactive informational content (component
+file retained, not deleted). The new Capital Decision UI's own Service
+Contracts / MS-HS Progression notes are rendered as explanatory context in
+`ScenarioConfigurationPanel.tsx`, not via `ServiceContractsLever`.
+
+### Status language (strict TIR-vs-WACC)
+
+`capitalDecisionViewModel.ts`'s `getInvestmentReferenceStatusDisplay()`
+implements the ratified language verbatim: "TIR exceeds the X% reference
+WACC." for `meets_reference`; "TIR is equal to or below the X% reference
+WACC." (with an optional equal-to-WACC vs below-WACC detail note from the
+actual spread, same machine status) for `does_not_meet_reference`; "TIR
+could not be calculated for this scenario." plus `irrStatusReason` for
+`irr_unavailable`; and the exact `calculationStatusReason` for
+`blocked_upstream`, with no investment conclusions shown while blocked.
+
+### Page structure
+
+`CapitalDecisionView.tsx` orchestrates: (A) `ScenarioConfigurationPanel`
+(up to 4 saved scenarios, name/duplicate/add/remove, 5 lever selectors +
+fixed/future context); (B) `ScenarioResultPanel` for the selected scenario
+(calculation readiness -> TIR vs WACC -> TIR -> WACC -> spread -> VPL ->
+discounted payback -> interpretation notes -> methodology disclosure, no
+simple payback); (C) `ScenarioComparisonPanel` (A/B selection among saved
+scenarios, factual dimension-by-dimension comparison and trade-off notes, no
+overall winner/score/rank). `RioScenarioResiliencePreview.tsx` now renders
+`CapitalDecisionView` directly; the earlier scaffold panels (`ScenarioFlowMap`,
+`ScenarioFunnel`, `ScenarioOutputsPanel`, `RoleCostLibraryNotice`, standalone
+`DecisionLeversPanel`) are no longer rendered there but remain in
+`components/` (not deleted). `App.tsx` is unchanged.
+
+### Phase 15E barrel exports
+
+`model/index.ts` now also exports `investmentInterpretationEngineContract`,
+`investmentInterpretationEngine`, `scenarioInvestmentComparisonContract`, and
+`scenarioInvestmentComparison` -- the four modules the UI calls. No
+validation modules were added to the barrel (no prior Phase 15B-15E module
+was exported there either, so there is no convention to extend).
+
+### Phase 15F validation (new)
+
+`model/phase15fUiIntegrationValidation.ts` / `...ValidationContract.ts`:
+21/21 checks pass, covering option-source canonical IDs/labels, the 5-lever
+set (no `serviceContracts`), every lever option producing a `calculated`
+result, status-text/label/spread-sign correctness, VPL/payback formatting,
+pairwise-comparison non-recalculation and absence of winner/score/rank
+fields, `MAX_SAVED_SCENARIOS === 4`, and explicit-exclusions boundary.
+
+### Validation / build status (Phase 15F)
+
+`npm run lint` (`tsc --noEmit`): clean. `npm run build`: succeeds.
+`phase15fUiIntegrationValidation.ts` (new): 21/21 pass.
+`phase15eInvestmentInterpretationValidation.ts`: 40/40 pass (unchanged).
+`phase15dDecisionLeverPropagationValidation.ts`: 15/15 pass (unchanged).
+`discountedPaybackEngineValidation.ts`: 36/36 pass (unchanged).
+`phase15cInvestmentMetricsEngineValidation.ts`: 28/28 pass (unchanged).
+`capitalDecisionEngineValidation.ts`: 25/25 pass (unchanged).
+`dreEngineValidation.ts`: 20/20 pass (unchanged). `git diff --check`: clean.
