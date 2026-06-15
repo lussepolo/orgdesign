@@ -1892,3 +1892,221 @@ modules, unchanged). `discountedPaybackEngineValidation.ts` (Phase 15D):
 (unchanged). `dreEngineValidation.ts`: 20/20 pass (unchanged). 2 new files
 created, 1 existing file (`IMPLEMENTATION.md`, this section) updated. No
 other files modified.
+
+## Phase 15E-INVESTMENT-INTERPRETATION-AND-SCENARIO-COMPARISON
+
+**Boundary**: Phase 15E consumes Phase 15C's committed `Phase15CResult`
+(commit `94f2ebb`) and Phase 15D's committed `DiscountedPaybackResult`
+(commit `0fbd188`) as read-only inputs and adds two outputs: (1) a per-scenario
+**investment interpretation** of those results against the ratified TIR>WACC
+reference, and (2) a **dimension-by-dimension comparison** between scenarios'
+interpretations. It does **not** recalculate Receita, FOPAG, EBITDA, FCO,
+CAPEX, DCF, VPL, TIR, or discounted payback -- every numeric figure in
+`InvestmentInterpretationResult` is read directly from `Phase15CResult` /
+`DiscountedPaybackResult`. No UI, no `App.tsx`/workbook/`HighSchoolTab.tsx`
+changes.
+
+### Files created (6)
+
+1. `investmentInterpretationEngineContract.ts` -- `InvestmentReferenceStatus`,
+   `NpvSign`, `Phase15EInterpretationSourceProvenance`,
+   `Phase15EExplicitExclusions`, `ScenarioDecisionLeverTraceability`,
+   `InvestmentInterpretationResult`, `InvestmentInterpretationEngineInput`.
+2. `investmentInterpretationEngine.ts` -- pure core
+   (`interpretInvestmentResult`) + production entry point
+   (`calculateInvestmentInterpretation`, which calls
+   `calculatePhase15CInvestmentMetrics()` exactly once and derives the
+   `DiscountedPaybackResult` from that same `Phase15CResult` via
+   `calculateDiscountedPayback({ phase15CResult })`).
+3. `scenarioInvestmentComparisonContract.ts` -- `DimensionComparisonOutcome`,
+   `ScenarioInvestmentInterpretationRecord`, `ScenarioInvestmentPairComparison`
+   (+ its `explicitExclusions`), `ScenarioInvestmentComparisonResult`
+   (+ its `explicitExclusions`).
+4. `scenarioInvestmentComparison.ts` -- pure pairwise/scenario-set comparison
+   (`compareInvestmentScenarioPair`, `compareInvestmentScenarios`) + production
+   wrapper (`calculateScenarioInvestmentComparison`).
+5. `phase15eInvestmentInterpretationValidationContract.ts` /
+   `phase15eInvestmentInterpretationValidation.ts` -- 40 checks across
+   interpretation-status, dimension-comparison, trade-off-detection,
+   production scenario-matrix (S1-S8), and boundary surfaces (all pass).
+
+### Governing investment reference
+
+```ts
+irrRate > investmentReferenceWaccRate
+```
+
+`investmentReferenceWaccRate` is
+`CAPITAL_DECISION_DRIVER_SOURCE.operatingPeriodWaccRate` (currently `0.12`),
+the canonical 2028+/final-projection-year/perpetuity WACC ratified in §16.5 of
+`phase15CapitalDecisionArchitecture.md` (not `preOpsWaccRate`, not an average
+across periods, and not a scenario-specific or hidden-workbook value). The
+reference is evaluated **strictly**: `irrRate === investmentReferenceWaccRate`
+does **not** meet the reference (`investmentReferenceStatus =
+"does_not_meet_reference"`, `meetsInvestmentReference = false`,
+`tirWaccSpreadRate = 0`).
+
+### Interpretation precedence
+
+- **§A Blocked upstream**: if Phase 15C `calculationStatus !== "calculated"`,
+  or Phase 15D `status` is a technical-failure status
+  (`"blocked_missing_phase15c_inputs"` | `"invalid_cash_flow_series"`) --
+  `investmentReferenceStatus = "blocked_upstream"`,
+  `meetsInvestmentReference = null`, `tirWaccSpreadRate = null`, and
+  `npvSign = "unavailable"` when `npvBRL === null`. The technical reason
+  (`calculationStatusReason`) is preserved verbatim; no investment result is
+  inferred.
+- **§B IRR unavailable**: if Phase 15C is `"calculated"` but
+  `irrStatus` is `"no_sign_change"` or `"did_not_converge"`, or
+  `irrRate === null` -- `investmentReferenceStatus = "irr_unavailable"`,
+  `meetsInvestmentReference = null`, `tirWaccSpreadRate = null`. VPL and
+  discounted payback remain reported.
+- **§C IRR calculated**: `tirWaccSpreadRate = irrRate -
+  investmentReferenceWaccRate`; `meetsInvestmentReference = irrRate >
+  investmentReferenceWaccRate` (strict). Positive spread ->
+  `"meets_reference"`; zero or negative spread -> `"does_not_meet_reference"`.
+- **§D Multiple-root warning**: when `irrMultipleRootsPossible === true`, the
+  calculated `investmentReferenceStatus` is retained as-is and an
+  `interpretationNotes` entry warns that the reported `irrRate` may not be the
+  unique root. No reconciliation against `npvBRL` and no recommendation are
+  produced.
+
+### VPL sign model
+
+`npvSign` is a four-valued, factual sign independent of
+`InvestmentReferenceStatus`: `"positive"` (`npvBRL > 0`), `"zero"`
+(`npvBRL === 0`), `"negative"` (`npvBRL < 0`), `"unavailable"`
+(`npvBRL === null`, i.e. blocked upstream). `npvBRL` itself is always reported
+alongside `npvSign` (or `null` when unavailable); there is no `npvIsNegative`
+boolean and no VPL pass/fail threshold.
+
+### Discounted-payback pass-through
+
+`discountedPaybackStatus`, `discountedPaybackYears`, and
+`discountedPaybackCompactValue` are copied verbatim from Phase 15D's
+`DiscountedPaybackResult` (`"1"`..`"20"`, `"20+"`, `"NA"`, or `null`). Phase
+15E performs no recovery-search or discount-factor logic of its own.
+
+### Decision-lever traceability
+
+`ScenarioDecisionLeverTraceability` preserves the exact production input's
+five currently-variable, production-wired levers verbatim:
+`openingPackageId`, `occupancyScenarioId`, `tuitionScenarioId`,
+`orgDesignOptionId`, `capexOptionId` (canonical IDs, no invented user-facing
+labels). It also carries two fixed traceability notes, not selectable Phase
+15E inputs:
+
+- `serviceContracts: "fixed_approved_dre_assumption"` -- Service Contracts
+  remain a fixed approved DRE-cost-line assumption, invariant across
+  scenarios (per Phase 15D.2's lever classification).
+- `msHsProgressionModel: "future_upstream_integration_not_wired"` -- the
+  MS/HS Progression Model remains a future upstream integration item, not
+  currently wired into any production input (per Phase 15D.2's lever
+  classification).
+
+### Scenario comparison: dimensions, not a ranking
+
+`scenarioInvestmentComparison.ts` compares two
+`InvestmentInterpretationResult`s across **four independent dimensions** --
+`investmentReferenceComparison`, `tirWaccSpreadComparison`,
+`discountedPaybackComparison`, `npvComparison` -- each yielding a
+`DimensionComparisonOutcome` (`"scenario_a_stronger"` |
+`"scenario_b_stronger"` | `"equal"` | `"not_comparable"`). No unapproved
+priority is established between payback, TIR-WACC spread, and VPL; the four
+dimensions are reported side by side and never combined.
+
+- **Investment reference**: `meets_reference` is stronger than
+  `does_not_meet_reference`; identical statuses are `"equal"`;
+  `irr_unavailable` is `"not_comparable"` against either calculated status
+  (never ranked above or below `does_not_meet_reference`); `blocked_upstream`
+  is `"not_comparable"`.
+- **TIR-WACC spread**: comparable only when both spreads are finite; higher
+  spread is stronger; equal within `1e-9` is `"equal"`; a `null` spread (IRR
+  unavailable or blocked) is `"not_comparable"`.
+- **Discounted payback**: numeric vs numeric -- lower is stronger; numeric vs
+  `"20+"` -- numeric is stronger; `"20+"` vs `"20+"` -- `"equal"`; `"NA"`
+  (negative-VPL, a distinct economic/status condition, not a duration) vs
+  anything -- `"not_comparable"`; `null` (technical failure) vs anything --
+  `"not_comparable"`.
+- **VPL**: comparable only when both `npvBRL` values are finite; higher VPL is
+  stronger; equal within R$1 is `"equal"`; `null` is `"not_comparable"`. This
+  is a factual comparison -- VPL carries no independent pass/fail threshold.
+
+### Trade-off detection
+
+`tradeOffsPresent = true` when the comparable, non-equal dimensions do not all
+favor the same scenario (e.g. scenario A has the shorter discounted payback
+while scenario B has the higher VPL or TIR-WACC spread). `tradeOffNotes` are
+plain factual sentences (e.g. *"Scenario A has the shorter discounted payback,
+while Scenario B has the higher VPL."*); when the payback dimension is
+`"equal"`, an explicit note records the shared compact outcome. No trade-off
+is ever converted into a recommendation.
+
+### Scenario-set comparison and explicit exclusions
+
+`compareInvestmentScenarios` / `calculateScenarioInvestmentComparison` produce
+all `C(n,2)` pairwise comparisons in input order, plus
+`notComparableScenarioIds` (scenarios with `investmentReferenceStatus ===
+"blocked_upstream"`). Input scenario order is preserved throughout.
+
+`InvestmentInterpretationResult.explicitExclusions`,
+`ScenarioInvestmentComparisonResult.explicitExclusions`, and each
+`ScenarioInvestmentPairComparison.explicitExclusions` all declare
+`tierTaxonomy`, `weightedScore`, `totalRanking`, `overallWinner`, and
+`boardRecommendation` as `"excluded"` (plus, on the interpretation result,
+`receitaRecalculation` / `fopagRecalculation` / `ebitdaRecalculation` /
+`fcoRecalculation` / `capexRecalculation` / `dcfRecalculation` /
+`npvRecalculation` / `irrRecalculation` / `discountedPaybackRecalculation` /
+`uiInterpretation`, all `"excluded"`). Phase 15E defines **no Tier taxonomy,
+no traffic-light classification, no weighted/composite score, no
+total/lexicographic ranking, no "overall winner"/"preferred scenario" field,
+no sorted best-to-worst list, and no approve/reject/invest recommendation**.
+Neither type has a `rank`, `score`, `winnerScenarioId`, or
+`preferredScenario` field.
+
+### Production scenario matrix (S1-S8, reused from Phase 15D.2)
+
+All eight production scenarios meet the investment reference
+(`investmentReferenceStatus = "meets_reference"`), with independently-derived
+spreads, VPLs, and discounted-payback outcomes:
+
+| Scenario | irrRate | tirWaccSpreadRate | npvBRL | discountedPaybackCompactValue |
+| --- | --- | --- | --- | --- |
+| S1_canonical_90m | 0.17062 | 0.05062 | R$106.86M | 19 |
+| S2_canonical_100m | 0.16538 | 0.04538 | R$100.55M | 20 |
+| S3_pessimista_100m | 0.13241 | 0.01241 | R$30.82M | 20+ |
+| S4_otimista_100m | 0.18843 | 0.06843 | R$152.63M | 16 |
+| S5_t1g6_100m | 0.15222 | 0.03222 | R$68.37M | 20+ |
+| S6_bp2_100m | 0.14785 | 0.02785 | R$59.35M | 20+ |
+| S7_premium_100m | 0.16367 | 0.04367 | R$97.15M | 20 |
+| S8_minimum_100m | 0.16742 | 0.04742 | R$104.51M | 19 |
+
+S7 (premium) and S2 (balanced) share `discountedPaybackCompactValue="20"` but
+differ in `npvBRL` and `tirWaccSpreadRate` -- the org-design trade-off remains
+visible despite the identical payback label, and is reported, not collapsed.
+For S1-S8, no pairwise comparison yields `tradeOffsPresent=true`: every
+comparable, non-equal dimension consistently favors the same scenario in each
+pair (e.g. S1 > S2 on spread, VPL, and payback alike) -- a factual outcome of
+this particular scenario set, not an assumption built into the comparison
+logic.
+
+### Phase 15F boundary
+
+**Phase 15F** is expected to own UI presentation of the
+`InvestmentInterpretationResult` / `ScenarioInvestmentComparisonResult`
+produced by Phase 15E (e.g. surfacing `investmentReferenceStatus`,
+`tirWaccSpreadRate`, `npvBRL`/`npvSign`, `discountedPaybackCompactValue`, and
+`tradeOffNotes` per scenario/pair). Phase 15E implements no UI, no Tier/score
+widgets, and no `App.tsx` changes.
+
+### Validation / build status (Phase 15E)
+
+`npm run lint` (`tsc --noEmit`): clean. `npm run build`: succeeds.
+`phase15eInvestmentInterpretationValidation.ts` (Phase 15E, new): 40/40 pass.
+`phase15dDecisionLeverPropagationValidation.ts` (Phase 15D.2): 15/15 pass
+(unchanged). `discountedPaybackEngineValidation.ts` (Phase 15D): 36/36 pass
+(unchanged). `phase15cInvestmentMetricsEngineValidation.ts` (Phase 15C):
+28/28 pass (unchanged). `capitalDecisionEngineValidation.ts` (Phase 15B):
+25/25 pass (unchanged). `dreEngineValidation.ts`: 20/20 pass (unchanged). 6
+new files created, 1 existing file (`IMPLEMENTATION.md`, this section)
+updated. No other files modified.
