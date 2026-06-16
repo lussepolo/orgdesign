@@ -1,4 +1,4 @@
-// Phase 15G.2 — Pure state validation (24 checks).
+// Phase 15G.2 — Pure state validation (25 checks).
 //
 // Tests capitalDecisionWorkspace.ts pure transitions in isolation.
 // No React, no browser, no engine calls (uses a stub buildResult).
@@ -145,23 +145,28 @@ const afterRemove = transitionRemoveScenario(
 expectTrue("24. removing active scenario shifts activeScenarioId to next",
   afterRemove.activeScenarioId !== firstId && afterRemove.scenarios.length === 1);
 
-// Additional: monotonic ordinal
+// 25: monotonic ordinal — nextScenarioOrdinal never resets after remove
 const mon1 = transitionImportFromDre(INITIAL_WORKSPACE_STATE, SEL_A, stub).nextState;
 const mon2 = transitionImportFromDre(mon1, SEL_B, stub).nextState;
 // Remove first, then import a new one — ordinal must not reset
 const mon3 = transitionRemoveScenario(mon2, mon2.scenarios[0].id);
 const mon4 = transitionImportFromDre(mon3, { ...SEL_A, occupancyScenarioId: "pessimista" }, stub).nextState;
-// At this point nextScenarioOrdinal was 3 before the import (started at 1, two imports)
-// After remove it stays at 3. After new import it becomes 4, and the scenario name is "Scenario 3".
-expectTrue("bonus: monotonic ordinal — name reflects pre-remove count",
+// nextScenarioOrdinal was 3 before the new import (two prior imports); scenario name must be "Scenario 3".
+expectTrue("25. monotonic ordinal — name reflects pre-remove count",
   mon4.scenarios[mon4.scenarios.length - 1].name === "Scenario 3");
 
 // ── Summary ───────────────────────────────────────────────────────────────────
 
-const EXPECTED = 24;
+// EXPECTED_CHECKS must equal the number of expect/expectTrue calls above.
+// The output denominator uses totalChecks (dynamic) so numerator can never
+// exceed it. The integrity guard below catches any mismatch against EXPECTED_CHECKS.
+const EXPECTED_CHECKS = 25;
 const totalChecks = passCount + failCount;
-const allGreen = failCount === 0 && passCount >= EXPECTED;
+const allGreen = failCount === 0 && passCount === totalChecks && totalChecks === EXPECTED_CHECKS;
 const icon = allGreen ? "✓" : "✗";
-console.log(`\n${icon} Phase 15G.2: ${passCount}/${EXPECTED} pass, ${failCount} fail, ${totalChecks} total`);
+console.log(`\n${icon} Phase 15G.2: ${passCount}/${totalChecks} pass, ${failCount} fail`);
+if (totalChecks !== EXPECTED_CHECKS) {
+  console.log(`  ✗ integrity: executed ${totalChecks} checks, expected ${EXPECTED_CHECKS}`);
+}
 
 if (!allGreen) process.exit(1);

@@ -2301,7 +2301,7 @@ integration committed in one atomic change.
 - `src/features/rio-scenario-resilience/hooks/useCapitalDecisionWorkspace.ts`
   — React hook implementing `CapitalDecisionWorkspaceController` with the
   `stateRef` atomic pattern.
-- `scripts/validate-phase15g2.ts` — 25 pure checks (24 required).
+- `scripts/validate-phase15g2.ts` — 25 pure checks.
 - `tests/phase15g2/qa-entry.html` — browser QA entry point (port 4176).
 - `tests/phase15g2/qa-main.tsx` — renders full `<App />` for QA.
 - `tests/phase15g2/dre-capital-handoff.run.ts` — Playwright browser QA:
@@ -2334,8 +2334,8 @@ integration committed in one atomic change.
 - `npm run lint` (`tsc --noEmit`): **exit 0** (clean).
 - `npm run build` (`vite build`): **exit 0** (2843 modules transformed).
 - `npm run validate:phase15f`: **185/185** (0 fail) — no regressions.
-- `npm run validate:phase15g2`: **25/24** pass (0 fail) — all pure state
-  checks pass including bonus monotonic-ordinal check.
+- `npm run validate:phase15g2`: **25/25** pass, 0 fail — all pure state
+  checks pass; monotonic-ordinal invariant (check 25) included.
 - `npm run qa:phase15f`: **58 pass / 0 fail** — Phase 15F standalone mode
   unaffected.
 - `npm run qa:phase15g2`: see browser QA section below.
