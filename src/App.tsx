@@ -46,9 +46,13 @@ import StaffingTab from "./components/sections/StaffingTab";
 import LoadTab from "./components/sections/LoadTab";
 import AboutModal from "./components/sections/AboutModal";
 import DreScenarioSimulatorTab from "./components/sections/DreScenarioSimulatorTab";
+import { RioScenarioResiliencePreview } from "./features/rio-scenario-resilience/RioScenarioResiliencePreview";
+import { useCapitalDecisionWorkspace } from "./features/rio-scenario-resilience/hooks/useCapitalDecisionWorkspace";
+import { DRE_DEFAULT_SELECTIONS } from "./hooks/useDreScenarioSimulator";
+import type { DreScenarioSimulatorSelections } from "./hooks/useDreScenarioSimulator";
 
 // --- Types ---
-export type TabId = "cover" | "staffing" | "offer-scenarios" | "executive-org-design" | "hr" | "early-years" | "lower-school" | "ms" | "hs" | "load" | "payroll" | "viability" | "dre-scenario-simulator";
+export type TabId = "cover" | "staffing" | "offer-scenarios" | "executive-org-design" | "hr" | "early-years" | "lower-school" | "ms" | "hs" | "load" | "payroll" | "viability" | "dre-scenario-simulator" | "capital-decision";
 
 const APP_TAB_ORDER: TabId[] = [
   "cover",
@@ -64,6 +68,7 @@ const APP_TAB_ORDER: TabId[] = [
   "payroll",
   "viability",
   "dre-scenario-simulator",
+  "capital-decision",
 ];
 
 // --- Components ---
@@ -169,6 +174,11 @@ export default function App() {
   const [hsSections, setHsSections] = useState(2);
   const [selectedYear, setSelectedYear] = useState<number>(2028);
 
+  // Phase 15G.2: DRE selections lifted above AnimatePresence so they survive
+  // tab switches. Capital Decision workspace lives here for the same reason.
+  const [dreSelections, setDreSelections] = useState<DreScenarioSimulatorSelections>(DRE_DEFAULT_SELECTIONS);
+  const capitalDecisionWorkspace = useCapitalDecisionWorkspace();
+
   React.useEffect(() => {
     const hasSeenAbout = localStorage.getItem('hasSeenAbout_v3.0');
     if (!hasSeenAbout) {
@@ -207,6 +217,7 @@ export default function App() {
             <TabButton active={activeTab === "payroll"} onClick={() => setActiveTab("payroll")} label="Payroll Projection" icon={DollarSign} />
             <TabButton active={activeTab === "viability"} onClick={() => setActiveTab("viability")} label="Viability Simulator" icon={Scale} />
             <TabButton active={activeTab === "dre-scenario-simulator"} onClick={() => setActiveTab("dre-scenario-simulator")} label="DRE Scenario Simulator" icon={PieChart} />
+            <TabButton active={activeTab === "capital-decision"} onClick={() => setActiveTab("capital-decision")} label="Decisão de Capital" icon={Scale} />
           </nav>
 
           <div className="flex items-center gap-2 md:gap-4">
@@ -251,6 +262,7 @@ export default function App() {
               {activeTab === "payroll" && "Payroll Projection & Cost Stack"}
               {activeTab === "viability" && "Viability Decision Simulator"}
               {activeTab === "dre-scenario-simulator" && "DRE Scenario Simulator"}
+              {activeTab === "capital-decision" && "Decisão de Capital"}
             </h2>
             <p className="text-slate-500 mt-2 max-w-2xl mx-auto md:mx-0">
               {activeTab === "hr" && "Detailed ownership, hiring profiles, and strategic cluster models for Middle and High School."}
@@ -265,6 +277,7 @@ export default function App() {
               {activeTab === "payroll" && "Board view of class-driven staffing cost, revenue less modeled FOPAG, and payroll coverage across the approved scenarios."}
               {activeTab === "viability" && "Board-facing baseline plus directional sensitivity and threshold planning signals; not a final financial model."}
               {activeTab === "dre-scenario-simulator" && "Operating scenario layer for Rio's 2028 opening model."}
+              {activeTab === "capital-decision" && "CAPEX analysis and scenario comparison via DRE-owned configurations."}
             </p>
           </div>
         )}
@@ -283,7 +296,21 @@ export default function App() {
             {activeTab === "hs" && <HighSchoolTab sections={hsSections} setSections={setHsSections} />}
             {activeTab === "payroll" && <PayrollProjectionTab />}
             {activeTab === "viability" && <ViabilitySimulatorTab />}
-            {activeTab === "dre-scenario-simulator" && <DreScenarioSimulatorTab />}
+            {activeTab === "dre-scenario-simulator" && (
+              <DreScenarioSimulatorTab
+                selections={dreSelections}
+                onSelectionsChange={setDreSelections}
+                onSendToCapitalDecision={capitalDecisionWorkspace.importFromDre}
+                onNavigateToCapitalDecision={() => setActiveTab("capital-decision")}
+              />
+            )}
+            {activeTab === "capital-decision" && (
+              <RioScenarioResiliencePreview
+                mode="integrated"
+                workspace={capitalDecisionWorkspace}
+                onNavigateToDre={() => setActiveTab("dre-scenario-simulator")}
+              />
+            )}
 
             {activeTab !== "cover" && (
               <div className="mt-16 pt-8 border-t border-slate-200 flex flex-col md:flex-row items-center justify-between gap-4">
@@ -293,7 +320,7 @@ export default function App() {
                   </button>
                 </div>
                 <div className="flex items-center gap-4">
-                  {activeTab !== "dre-scenario-simulator" ? (
+                  {activeTab !== "capital-decision" ? (
                     <button onClick={() => { const currentIndex = APP_TAB_ORDER.indexOf(activeTab); if (currentIndex < APP_TAB_ORDER.length - 1) setActiveTab(APP_TAB_ORDER[currentIndex + 1]); }} className="flex items-center gap-2 px-8 py-3 bg-slate-900 rounded-2xl text-sm font-bold text-white hover:bg-slate-800 transition-all shadow-lg shadow-slate-200">
                       NEXT SECTION<ArrowRight className="h-4 w-4" />
                     </button>

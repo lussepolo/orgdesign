@@ -10,7 +10,9 @@
     "clean": "rm -rf dist",
     "lint": "tsc --noEmit",
     "validate:phase15f": "tsx scripts/validate-phase15f.ts",
-    "qa:phase15f": "tsx tests/phase15f/phase15f.run.ts"
+    "qa:phase15f": "tsx tests/phase15f/phase15f.run.ts",
+    "validate:phase15g2": "tsx scripts/validate-phase15g2.ts",
+    "qa:phase15g2": "tsx tests/phase15g2/dre-capital-handoff.run.ts"
   },
   "dependencies": {
     "@google/genai": "^1.29.0",

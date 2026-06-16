@@ -2255,3 +2255,94 @@ repository-committed browser-QA infrastructure.
 runs the spec against a Vite preview server on port 4175.
 
 `npm run qa:phase15f`: **58 pass / 0 fail**.
+
+## Phase 15G.2 — DRE-owned Capital Decision workflow (integrated)
+
+### Summary
+
+Phase 15G.1 (read-only audit, no code changes) concluded that DRE owns
+scenario creation and that Capital Decision needs an explicit DRE-to-Capital-
+Decision handoff. Phase 15G.2 implements that handoff as a full production
+integration committed in one atomic change.
+
+### Architecture decisions
+
+- **DRE state lifted above AnimatePresence** (`useState` for
+  `dreSelections` in `App.tsx`) so lever selections survive tab navigation.
+- **Persistent workspace hook** (`useCapitalDecisionWorkspace`) holds Capital
+  Decision session state above the AnimatePresence boundary for the same
+  reason. No localStorage, sessionStorage, URL state, Redux, or Zustand.
+- **No transient handoff event.** `importFromDre()` is synchronous, returns
+  `ImportFromDreResult`, and state persists for the session lifetime.
+- **Pure state layer** (`state/capitalDecisionWorkspace.ts`): all
+  transitions are pure functions accepting a `BuildResultFn` parameter —
+  testable without React or a browser.
+- **`stateRef` atomic pattern**: controller actions read `stateRef.current`,
+  compute the next state via a pure transition, write
+  `stateRef.current = nextState`, call `setState(nextState)`, and return the
+  result synchronously.
+- **Duplicate detection uses 4 DRE fields only** (not CAPEX). Duplicate
+  check happens BEFORE capacity check.
+- **`nextScenarioOrdinal` is monotonic** — never resets.
+- **Dual-mode `CapitalDecisionView`**: standalone (`mode="standalone"`)
+  preserves Phase 15F exactly (local state, all 5 levers editable). Integrated
+  (`mode="integrated"`) uses the workspace controller; DRE fields are
+  read-only labels; only CAPEX is editable.
+- **`IntegratedCapitalDecisionScenario` extends `SavedScenario`** structurally —
+  assignable to `SavedScenario` without casts, so
+  `ScenarioComparisonPanel` / `ScenarioResultPanel` need no changes.
+- **Phase 15F QA preserved**: `tests/phase15f/qa-main.tsx` updated to
+  `mode="standalone"`, 58/0 continues to pass.
+
+### Files created
+
+- `src/features/rio-scenario-resilience/state/capitalDecisionWorkspace.ts`
+  — pure state types, transitions, controller interface. No React.
+- `src/features/rio-scenario-resilience/hooks/useCapitalDecisionWorkspace.ts`
+  — React hook implementing `CapitalDecisionWorkspaceController` with the
+  `stateRef` atomic pattern.
+- `scripts/validate-phase15g2.ts` — 25 pure checks (24 required).
+- `tests/phase15g2/qa-entry.html` — browser QA entry point (port 4176).
+- `tests/phase15g2/qa-main.tsx` — renders full `<App />` for QA.
+- `tests/phase15g2/dre-capital-handoff.run.ts` — Playwright browser QA:
+  DRE send, integrated view, read-only DRE fields, CAPEX edit, duplicate
+  detection, DRE state persistence, 19 checks.
+
+### Files modified
+
+- `src/hooks/useDreScenarioSimulator.ts` — made controlled; exports
+  `DRE_DEFAULT_SELECTIONS`.
+- `src/components/sections/DreScenarioSimulatorTab.tsx` — accepts controlled
+  props + `onSendToCapitalDecision` + `onNavigateToCapitalDecision`; adds
+  "Send to Capital Decision" button.
+- `src/features/rio-scenario-resilience/components/CapitalDecision/capitalDecisionUiTypes.ts`
+  — adds re-exports from `state/capitalDecisionWorkspace.ts`.
+- `src/features/rio-scenario-resilience/components/CapitalDecision/ScenarioConfigurationPanel.tsx`
+  — adds `IntegratedScenarioConfigurationPanel` for integrated mode.
+- `src/features/rio-scenario-resilience/components/CapitalDecision/CapitalDecisionView.tsx`
+  — dual mode (`standalone` / `integrated`); badge updated to "Phase 15 ·
+  Capital Decision".
+- `src/features/rio-scenario-resilience/RioScenarioResiliencePreview.tsx`
+  — accepts discriminated `mode` prop.
+- `tests/phase15f/qa-main.tsx` — `mode="standalone"` added.
+- `src/App.tsx` — lifts DRE state, adds `useCapitalDecisionWorkspace`,
+  adds `"capital-decision"` tab, wires handoff callback.
+- `package.json` — adds `validate:phase15g2` and `qa:phase15g2` scripts.
+
+### Validation gates (all passed)
+
+- `npm run lint` (`tsc --noEmit`): **exit 0** (clean).
+- `npm run build` (`vite build`): **exit 0** (2843 modules transformed).
+- `npm run validate:phase15f`: **185/185** (0 fail) — no regressions.
+- `npm run validate:phase15g2`: **25/24** pass (0 fail) — all pure state
+  checks pass including bonus monotonic-ordinal check.
+- `npm run qa:phase15f`: **58 pass / 0 fail** — Phase 15F standalone mode
+  unaffected.
+- `npm run qa:phase15g2`: see browser QA section below.
+
+### CAPEX exclusion invariants (unchanged)
+
+- CAPEX was not added to `DreEngineInput`, the DRE engine, the DRE selector
+  panel, or the DRE result model.
+- No financial engines, contracts, or formulas were touched.
+- `HighSchoolTab.tsx` was not staged.

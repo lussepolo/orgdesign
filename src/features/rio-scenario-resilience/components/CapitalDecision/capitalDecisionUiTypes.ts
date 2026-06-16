@@ -47,3 +47,14 @@ export interface SavedScenario {
 }
 
 export const MAX_SAVED_SCENARIOS = 4;
+
+// Phase 15G.2: workspace state types re-exported here so UI components can
+// import from a single UI-layer boundary (capitalDecisionUiTypes.ts).
+export type {
+  IntegratedCapitalDecisionScenario,
+  IntegratedScenarioKind,
+  ImportFromDreResult,
+  DuplicateForCapexVariantResult,
+  CapitalDecisionWorkspaceController,
+  CapitalDecisionWorkspaceState,
+} from "../../state/capitalDecisionWorkspace";

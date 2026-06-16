@@ -31,7 +31,7 @@
 // If reconciliation ever fails, the UI must surface an error and withhold the
 // FOPAG/payroll display rather than show conflicting values.
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { calculateDre } from "../features/rio-scenario-resilience/model/dreEngine";
 import { calculateFopag } from "../features/rio-scenario-resilience/model/fopagEngine";
 import {
@@ -134,6 +134,9 @@ const DEFAULT_SELECTIONS: DreScenarioSimulatorSelections = {
     WORKING_SCENARIO_SELECTIONS.orgDesignStructure.selectedOptionId as DreWorkingScenarioOrgDesignOptionId,
 };
 
+// Phase 15G.2: exported for App.tsx to initialise lifted DRE state.
+export const DRE_DEFAULT_SELECTIONS: DreScenarioSimulatorSelections = DEFAULT_SELECTIONS;
+
 export {
   DRE_ENROLLMENT_LEVER_OPENING_PACKAGE_IDS,
   DRE_ENROLLMENT_LEVER_OCCUPANCY_SCENARIO_IDS,
@@ -142,8 +145,15 @@ export {
   LAST_PROJECTION_YEAR,
 };
 
-export function useDreScenarioSimulator() {
-  const [selections, setSelections] = useState<DreScenarioSimulatorSelections>(DEFAULT_SELECTIONS);
+export interface UseDreScenarioSimulatorOptions {
+  readonly selections: DreScenarioSimulatorSelections;
+  readonly onSelectionsChange: (next: DreScenarioSimulatorSelections) => void;
+}
+
+export function useDreScenarioSimulator({ selections, onSelectionsChange }: UseDreScenarioSimulatorOptions) {
+  // onSelectionsChange is surfaced in the return so callers that held
+  // `setSelections` from the old uncontrolled API continue to work unchanged.
+  const setSelections = onSelectionsChange;
 
   const dreOutput: DreEngineOutput = useMemo(
     () => calculateDre(selections),

@@ -11,18 +11,25 @@
 //
 // No Tier, score, ranking, overall winner, or recommendation is produced or
 // displayed anywhere in this view.
+//
+// Phase 15G.2: accepts discriminated mode prop.
+//   mode="standalone"  → full Phase 15F local state (preserved exactly).
+//   mode="integrated"  → driven by CapitalDecisionWorkspaceController from
+//                        App.tsx; DRE fields are read-only; CAPEX is editable.
 
 import { useMemo, useState } from "react";
 import { Activity } from "lucide-react";
 import { Badge, Card } from "../../../../components/common";
 import { calculateInvestmentInterpretation } from "../../model/investmentInterpretationEngine";
 import type { CapitalDecisionEngineInput } from "../../model/capitalDecisionEngineContract";
+import type { CapexOptionId } from "../../model/capexOptionSourceContract";
 import {
   MAX_SAVED_SCENARIOS,
   type CapitalDecisionLeverId,
   type SavedScenario,
+  type CapitalDecisionWorkspaceController,
 } from "./capitalDecisionUiTypes";
-import { ScenarioConfigurationPanel } from "./ScenarioConfigurationPanel";
+import { ScenarioConfigurationPanel, IntegratedScenarioConfigurationPanel } from "./ScenarioConfigurationPanel";
 import { ScenarioResultPanel } from "./ScenarioResultPanel";
 import { ScenarioComparisonPanel } from "./ScenarioComparisonPanel";
 
@@ -72,7 +79,19 @@ function configKey(input: CapitalDecisionEngineInput): string {
   ].join("|");
 }
 
-export function CapitalDecisionView() {
+// ── Discriminated props ───────────────────────────────────────────────────────
+
+export type CapitalDecisionViewProps =
+  | { readonly mode: "standalone" }
+  | {
+      readonly mode: "integrated";
+      readonly workspace: CapitalDecisionWorkspaceController;
+      readonly onNavigateToDre: () => void;
+    };
+
+// ── Standalone mode (Phase 15F, preserved exactly) ───────────────────────────
+
+function StandaloneCapitalDecisionView() {
   const [scenarios, setScenarios] = useState<SavedScenario[]>(() => [
     createScenario("Scenario 1", DEFAULT_INPUT),
   ]);
@@ -162,7 +181,7 @@ export function CapitalDecisionView() {
         title="Capital Decision"
         subtitle="Rio Scenario Resilience Simulator"
         icon={Activity}
-        actions={<Badge variant="info">Feature-local · not mounted in App</Badge>}
+        actions={<Badge variant="info">Phase 15 · Capital Decision</Badge>}
       >
         <p className="max-w-3xl text-sm leading-6 text-slate-600">
           Configure up to {MAX_SAVED_SCENARIOS} scenarios using the five currently variable
@@ -205,6 +224,116 @@ export function CapitalDecisionView() {
       />
     </div>
   );
+}
+
+// ── Integrated mode (Phase 15G.2) ─────────────────────────────────────────────
+
+function IntegratedCapitalDecisionView({
+  workspace,
+  onNavigateToDre,
+}: {
+  workspace: CapitalDecisionWorkspaceController;
+  onNavigateToDre: () => void;
+}) {
+  const { state, setActiveScenario, updateCapexOption, duplicateForCapexVariant, removeScenario } =
+    workspace;
+  const [scenarioAId, setScenarioAId] = useState<string | null>(null);
+  const [scenarioBId, setScenarioBId] = useState<string | null>(null);
+
+  const activeScenario =
+    state.scenarios.find((s) => s.id === state.activeScenarioId) ??
+    state.scenarios[0] ??
+    null;
+
+  if (state.scenarios.length === 0) {
+    return (
+      <div className="space-y-8">
+        <Card
+          title="Decisão de Capital"
+          subtitle="Integrated mode — DRE handoff"
+          icon={Activity}
+          actions={<Badge variant="info">Phase 15 · Capital Decision</Badge>}
+        >
+          <p className="max-w-3xl text-sm leading-6 text-slate-600">
+            No scenarios yet. Go to the DRE Scenario Simulator, configure the four DRE levers,
+            and click "Send to Capital Decision" to create your first integrated scenario.
+          </p>
+          <div className="mt-4">
+            <button
+              type="button"
+              onClick={onNavigateToDre}
+              className="rounded-full bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
+            >
+              ← Go to DRE Scenario Simulator
+            </button>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-8">
+      <Card
+        title="Decisão de Capital"
+        subtitle="Integrated mode — DRE handoff"
+        icon={Activity}
+        actions={<Badge variant="info">Phase 15 · Capital Decision</Badge>}
+      >
+        <p className="max-w-3xl text-sm leading-6 text-slate-600">
+          Scenarios imported from the DRE Simulator. The four DRE fields are fixed per scenario
+          and can only be changed in the DRE Simulator. CAPEX is the one freely editable lever
+          here. Each configuration is evaluated by the Phase 15E investment-interpretation engine.
+        </p>
+      </Card>
+
+      <IntegratedScenarioConfigurationPanel
+        scenarios={state.scenarios}
+        activeScenarioId={activeScenario?.id ?? null}
+        onSelectScenario={setActiveScenario}
+        onUpdateCapex={(id, capexOptionId) => updateCapexOption(id, capexOptionId as CapexOptionId)}
+        onDuplicateForCapexVariant={(id, capexOptionId) =>
+          duplicateForCapexVariant(id, capexOptionId as CapexOptionId)
+        }
+        onRemoveScenario={removeScenario}
+        onNavigateToDre={onNavigateToDre}
+      />
+
+      {activeScenario && (
+        <section className="space-y-3">
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+              Scenario Result
+            </p>
+            <h2 className="text-lg font-semibold text-slate-900">{activeScenario.name}</h2>
+          </div>
+          <ScenarioResultPanel scenario={activeScenario} />
+        </section>
+      )}
+
+      <ScenarioComparisonPanel
+        scenarios={state.scenarios}
+        scenarioAId={scenarioAId}
+        scenarioBId={scenarioBId}
+        onSelectA={setScenarioAId}
+        onSelectB={setScenarioBId}
+      />
+    </div>
+  );
+}
+
+// ── Public export ─────────────────────────────────────────────────────────────
+
+export function CapitalDecisionView(props: CapitalDecisionViewProps) {
+  if (props.mode === "integrated") {
+    return (
+      <IntegratedCapitalDecisionView
+        workspace={props.workspace}
+        onNavigateToDre={props.onNavigateToDre}
+      />
+    );
+  }
+  return <StandaloneCapitalDecisionView />;
 }
 
 export default CapitalDecisionView;
