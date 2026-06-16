@@ -3,6 +3,10 @@ import { ChevronRight, GraduationCap, Info, Scale, Users } from "lucide-react";
 import { motion } from "motion/react";
 import { cn } from "../../lib/utils";
 import {
+  SECONDARY_EDUCATOR_CAPACITY_MODEL,
+  getSecondaryProgrammeOwnershipByDivision,
+} from "../../features/rio-scenario-resilience/model/secondaryEducatorCapacityModel";
+import {
   HIGH_SCHOOL_EDUCATOR_CAPABILITY_PROFILES,
   HIGH_SCHOOL_MOCK_SCHEDULE_SCENARIOS,
   HIGH_SCHOOL_SCHEDULE_UNIT_COUNTING_NOTE,
@@ -136,9 +140,9 @@ const HS_YEAR_DATA: HSYearData[] = [
       "AP Social Sciences & AP Macro",
       "Brazilian Studies I & II",
       "Global Expression & Leadership",
-      "Innovation Diploma & Design Technologies"
+      "Innovation Diploma Project & Design Technologies"
     ],
-    description: "Grade 11 is the next provisional expansion point for AP Seminar / AP Capstone preparation, advanced mathematics, and deeper STEM and humanities specialization."
+    description: "Grade 11 is the next provisional expansion point for AP Capstone preparation, advanced mathematics, deeper STEM and humanities specialization, and the Innovation Diploma Project."
   },
   {
     year: "Grade 12",
@@ -156,7 +160,7 @@ const HS_YEAR_DATA: HSYearData[] = [
       "AP Macroeconomics / Advanced Social Sciences",
       "Brazilian Studies I & II",
       "Global Expression & Leadership",
-      "Innovation Diploma & Design Technologies",
+      "Innovation Diploma Project & Design Technologies",
     ],
     description: "Grade 12 completes the current instructional-capacity ramp assumption. Staffing carries forward flat only if later validation confirms the workload model."
   }
@@ -238,7 +242,7 @@ const HS_COURSE_OFFER_ARCHITECTURE: HSCourseOfferArchitecture[] = [
     programFunctions: [
       "College and Career Counseling",
       "External mentors",
-      "Capstone-like research or independent work",
+      "Innovation Diploma Project or independent work",
       "GCD within Pathways/Leadership",
       "Innovation / Design Technologies",
     ],
@@ -258,7 +262,7 @@ const HS_COURSE_OFFER_ARCHITECTURE: HSCourseOfferArchitecture[] = [
       "AP Research (Social Sciences — Grade 12 capstone)",
       "AP / advanced courses as selected",
       "Independent Study",
-      "Capstone-like pathway work",
+      "Innovation Diploma pathway work",
     ],
     programFunctions: [
       "College and Career Counseling",
@@ -274,16 +278,15 @@ const HS_COURSE_OFFER_ARCHITECTURE: HSCourseOfferArchitecture[] = [
 
 const HS_RAMP_INCREMENT_FTE_BY_GRADE = [4, 0, 3, 3];
 const HS_RAMP_TOTALS_FOR_DISPLAY = [4, 4, 7, 10];
-const HS_FULL_RAMP_FTE = 10;
 
 const SPECIALIST_INTEGRITY_NOTE = "The fractional FTEs (e.g., 0.25 per section) reflect the instructional load within the 27-period cap. While a subject may require 0.5 FTE for two sections, this represents a dedicated specialist's focus, often shared across grade levels or divisions to maintain subject-matter integrity (e.g., Portuguese specialists do not teach English).";
 
 const HS_LOAD_DATA = [
   { subject: "Portuguese", g9: 5, g10: 5, g11: 5, g12: 5 },
-  { subject: "English Language Arts (G9) / ELA–AP Seminar pathway (G10+)", g9: 5, g10: 5, g11: 10, g12: 10 },
-  { subject: "Integrated Mathematics (G9) / AP Calculus pathway (G11+)", g9: 5, g10: 5, g11: 5, g12: 5 },
-  { subject: "Brazilian Studies / Global Studies", g9: 6, g10: 5, g11: 5, g12: 5 },
-  { subject: "Natural Sciences: Bio/Chem (G9) / AP lab sciences (G10+)", g9: 6, g10: 8, g11: 8, g12: 8 },
+  { subject: "English / AP English", g9: 5, g10: 5, g11: 5, g12: 5 },
+  { subject: "Mathematics / AP Mathematics", g9: 5, g10: 5, g11: 5, g12: 5 },
+  { subject: "Social Sciences / AP Social Sciences", g9: 6, g10: 6, g11: 6, g12: 6 },
+  { subject: "Natural Sciences / AP Sciences", g9: 6, g10: 6, g11: 6, g12: 6 },
 ];
 
 const HS_ROADMAP_DATA = [
@@ -374,7 +377,7 @@ const HS_LOAD_CATEGORY_PREVIEW = [
   {
     title: "Mentorship/contact load",
     variant: "purple" as const,
-    items: ["Project Mentorship", "Passion Project", "Innovation Diploma", "Independent Study"],
+    items: ["Project Mentorship", "Passion Project I-II", "Innovation Diploma Project G11-G12", "Independent Study"],
   },
   {
     title: "Program ownership load",
@@ -439,6 +442,143 @@ const HS_LOAD_LOGIC_LAYERS = [
     variant: "default" as const,
     copy:
       "Visible FTE and Total HS labels are provisional instructional-capacity signals only, not payroll authorization, final FTE, final headcount, or hiring approval.",
+  },
+];
+
+type HighSchoolLoadStageId = "g9" | "g9-g10" | "g9-g11" | "g9-g12";
+
+const HS_LOAD_STAGE_OPTIONS: Array<{
+  id: HighSchoolLoadStageId;
+  label: string;
+  activeGrades: string[];
+  requiredCoverageStatus: string;
+  programFunctionPressure: string;
+  validationStatus: string;
+}> = [
+  {
+    id: "g9",
+    label: "Grade 9",
+    activeGrades: ["G9"],
+    requiredCoverageStatus: "Launch coverage",
+    programFunctionPressure: "Moderate",
+    validationStatus: "Timetable validation required",
+  },
+  {
+    id: "g9-g10",
+    label: "Grades 9-10",
+    activeGrades: ["G9", "G10"],
+    requiredCoverageStatus: "Foundation coverage",
+    programFunctionPressure: "Rising",
+    validationStatus: "Course ownership validation required",
+  },
+  {
+    id: "g9-g11",
+    label: "Grades 9-11",
+    activeGrades: ["G9", "G10", "G11"],
+    requiredCoverageStatus: "Specialist density",
+    programFunctionPressure: "High",
+    validationStatus: "Advanced-course validation required",
+  },
+  {
+    id: "g9-g12",
+    label: "Grades 9-12",
+    activeGrades: ["G9", "G10", "G11", "G12"],
+    requiredCoverageStatus: "Full ramp coverage",
+    programFunctionPressure: "Full model",
+    validationStatus: "Graduation pathway validation required",
+  },
+];
+
+const HS_LOAD_LOGIC_LEDGER_ROWS = [
+  {
+    domain: "Required Course Coverage",
+    loadType: "Course coverage",
+    stageActive: "G9-G12",
+    coverageNeed: "Required academic courses by active grade",
+    ownershipModel: "HS-capable educator coverage",
+    capacityImplication: "Drives instructional-capacity planning",
+    validationStatus: "Validate weekly slots and capability fit",
+  },
+  {
+    domain: "Advanced / AP / Specialist Courses",
+    loadType: "Specialist course layer",
+    stageActive: "G10-G12",
+    coverageNeed: "AP, lab sciences, advanced humanities",
+    ownershipModel: "Specialist or validated HS profile",
+    capacityImplication: "Adds density beyond launch coverage",
+    validationStatus: "Validate course offer and enrollment",
+  },
+  {
+    domain: "Specialist and Elective Load",
+    loadType: "Offer layer",
+    stageActive: "G9-G12",
+    coverageNeed: "Electives, design technologies, Body & Movement",
+    ownershipModel: "Specialist or elective owner",
+    capacityImplication: "Separate from required course coverage",
+    validationStatus: "Validate timetable and staffing fit",
+  },
+  {
+    domain: "Pathways",
+    loadType: "Program function",
+    stageActive: "G9-G12",
+    coverageNeed: "Pathway advising and ownership",
+    ownershipModel: "Distributed program ownership",
+    capacityImplication: "Uses available instructional capacity after required course coverage",
+    validationStatus: "Validate assignment and timetable fit",
+  },
+  {
+    domain: "Global Citizen Diploma / IGC",
+    loadType: "Program function",
+    stageActive: "G9-G12",
+    coverageNeed: "Credential and leadership pathway support",
+    ownershipModel: "Embedded within Pathways / Leadership",
+    capacityImplication: "Not a separate staffing bucket by default",
+    validationStatus: "Validate ownership model",
+  },
+  {
+    domain: "Advisory",
+    loadType: "Support function",
+    stageActive: "G9-G12",
+    coverageNeed: "Student-support and belonging structure",
+    ownershipModel: "Distributed educator responsibility",
+    capacityImplication: "Requires schedule validation",
+    validationStatus: "Validate contact rhythm",
+  },
+  {
+    domain: "Project Mentorship / Capstone",
+    loadType: "Mentorship function",
+    stageActive: "G9-G12",
+    coverageNeed: "Fixed mentorship and capstone support",
+    ownershipModel: "Eligible educators by profile fit",
+    capacityImplication: "Not a separate Project Mentor hire by default",
+    validationStatus: "Validate synchronized block",
+  },
+  {
+    domain: "College and Career Counseling",
+    loadType: "Counseling/support",
+    stageActive: "G9-G12",
+    coverageNeed: "College-facing and course-choice guidance",
+    ownershipModel: "Counseling/support function",
+    capacityImplication: "Separate from Pathways and GCD ownership",
+    validationStatus: "Validate counseling role signal",
+  },
+  {
+    domain: "Embedded Educator Routines",
+    loadType: "Routine",
+    stageActive: "G9-G12",
+    coverageNeed: "Documentation, feedback, reflection, portfolio evidence",
+    ownershipModel: "Expected educator practice",
+    capacityImplication: "Not a standalone headcount driver",
+    validationStatus: "Keep embedded in practice model",
+  },
+  {
+    domain: "HS Counselor / College Counselor",
+    loadType: "Role / headcount signal",
+    stageActive: "When model activates",
+    coverageNeed: "Dedicated counseling role signal",
+    ownershipModel: "Explicit model activation only",
+    capacityImplication: "Not inferred from program functions",
+    validationStatus: "Validate role activation before use",
   },
 ];
 
@@ -632,19 +772,26 @@ type HighSchoolTabProps = {
 
 const HighSchoolTab = ({ sections, setSections }: HighSchoolTabProps) => {
   const [activeView, setActiveView] = useState<HighSchoolView>("decision-summary");
+  const [selectedLoadStageId, setSelectedLoadStageId] = useState<HighSchoolLoadStageId>("g9");
 
-  const learnersPerSection = 25;
+  const highSchoolCapacity = SECONDARY_EDUCATOR_CAPACITY_MODEL.highSchool;
+  const highSchoolMidpointScenario =
+    highSchoolCapacity.loadScenarios[SECONDARY_EDUCATOR_CAPACITY_MODEL.loadPolicy.planningMidpoint];
+  const highSchoolProgrammeOwnership = getSecondaryProgrammeOwnershipByDivision("highSchool");
   const totalG9 = 27 * sections;
-  const totalG10 = 28 * sections;
-  const totalG11 = 33 * sections;
-  const totalG12 = 33 * sections;
+  const totalG10 = 27 * sections;
+  const totalG11 = 27 * sections;
+  const totalG12 = 27 * sections;
   const totalHS = totalG9 + totalG10 + totalG11 + totalG12;
-  const specialists = HS_FULL_RAMP_FTE;
-  const efficiency = (totalHS / (specialists * 27)) * 100;
+  const specialists = highSchoolCapacity.totalEducators;
+  const efficiency = (highSchoolCapacity.coreDemand / highSchoolMidpointScenario.totalEducatorCapacity) * 100;
 
   const weeklyRows = buildRioWeeklyLoadByOffer(sections);
   const g9LedgerOutput = buildGrade9CapacityLedger(sections);
   const g9MockSchedule = buildGrade9MockSchedule();
+  const selectedLoadStage =
+    HS_LOAD_STAGE_OPTIONS.find((stage) => stage.id === selectedLoadStageId) ?? HS_LOAD_STAGE_OPTIONS[0];
+  const totalActiveHsSections = selectedLoadStage.activeGrades.length * sections;
 
   const viewClassName = (view: HighSchoolView) =>
     cn("hs-view-section", activeView !== view && "hs-screen-inactive");
@@ -663,7 +810,7 @@ const HighSchoolTab = ({ sections, setSections }: HighSchoolTabProps) => {
       `}</style>
 
       <section className="rounded-[2.25rem] bg-[#f5f0e7] p-3 text-slate-950 shadow-sm md:p-4">
-        <div className="grid min-h-[760px] gap-4 lg:grid-cols-[280px_minmax(0,1fr)]">
+        <div className="grid grid-cols-1 min-h-[760px] gap-4 lg:grid-cols-[280px_minmax(0,1fr)]">
 
           {/* ── Left aside nav ── */}
           <aside className="rounded-[2rem] bg-[#1a2035] p-5 text-white lg:sticky lg:top-4 lg:h-[calc(100vh-2rem)] lg:min-h-[720px]">
@@ -759,26 +906,250 @@ const HighSchoolTab = ({ sections, setSections }: HighSchoolTabProps) => {
                 </div>
               </div>
 
-              {/* High School Load Logic — reader key before grade implications */}
-              <Card title="High School Load Logic" subtitle="Reader key before Grade 9-12 implications" icon={Scale}>
-                <div className="mb-4 rounded-2xl border border-slate-100 bg-slate-50 p-4">
-                  <p className="text-xs font-semibold leading-relaxed text-slate-600">
-                    Use this taxonomy before reading the grade cards: course coverage drives instructional-capacity planning; functions, support, routines, and role signals remain separate unless explicitly modeled.
-                  </p>
-                </div>
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                  {HS_LOAD_LOGIC_LAYERS.map((layer) => (
-                    <div key={layer.title} className="rounded-2xl border border-slate-100 bg-white p-3 shadow-sm">
-                      <div className="mb-2 flex items-start justify-between gap-2">
-                        <h4 className="text-xs font-black leading-tight text-slate-900">{layer.title}</h4>
-                        <Badge variant={layer.variant}>{layer.badge}</Badge>
-                      </div>
-                      <p className="text-[10px] font-medium leading-relaxed text-slate-500">{layer.copy}</p>
+              <Card title="Canonical High School Capacity" subtitle="Mature planning envelope" icon={Users}>
+                <div className="space-y-5">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <h3 className="text-lg font-black text-slate-900">
+                        {highSchoolCapacity.coreEducators} core + {highSchoolCapacity.flexibleEducators} flexible = {highSchoolCapacity.totalEducators} educators serving High School
+                      </h3>
+                      <p className="mt-1 max-w-3xl text-xs font-semibold leading-relaxed text-slate-500">
+                        Planning envelope only. Capacity condition pending: {highSchoolMidpointScenario.requiredTimetableEfficiency} block-equivalent efficiencies still require timetable validation.
+                      </p>
                     </div>
-                  ))}
+                    <Badge variant="warning">Conditional approval</Badge>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+                    {[
+                      ["Raw section-blocks", `${highSchoolCapacity.rawLearnerBlocks}`],
+                      ["Core blocks", `${highSchoolCapacity.coreDemand}`],
+                      ["Raw programme blocks", `${highSchoolCapacity.programmeDemand}`],
+                      ["Programme capacity at 27", `${highSchoolMidpointScenario.programmeCapacityAfterCore}`],
+                      ["Required efficiency at 26", `${highSchoolCapacity.loadScenarios[26].requiredTimetableEfficiency}`],
+                      ["Required efficiency at 27", `${highSchoolMidpointScenario.requiredTimetableEfficiency}`],
+                      ["Required efficiency at 28", `${highSchoolCapacity.loadScenarios[28].requiredTimetableEfficiency}`],
+                      ["Validated efficiency", `${highSchoolMidpointScenario.validatedTimetableEfficiency}`],
+                    ].map(([label, value]) => (
+                      <div key={`hs-capacity-${label}`} className="rounded-xl border border-slate-100 bg-slate-50 px-3 py-2">
+                        <div className="text-[8px] font-bold uppercase tracking-wider text-slate-400">{label}</div>
+                        <div className="mt-1 text-base font-black text-slate-900">{value}</div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+                    <div className="border-b border-slate-100 bg-slate-50 px-4 py-3">
+                      <div className="text-[9px] font-black uppercase tracking-widest text-slate-400">
+                        Role-level programme capacity at 27 blocks
+                      </div>
+                    </div>
+                    <div className="overflow-x-auto">
+                      <table className="min-w-[760px] w-full text-left">
+                        <thead>
+                          <tr className="border-b border-slate-100 text-[9px] font-black uppercase tracking-widest text-slate-400">
+                            <th className="px-4 py-3">Educator group</th>
+                            <th className="px-4 py-3 text-center">Count</th>
+                            <th className="px-4 py-3 text-center">Core load each</th>
+                            <th className="px-4 py-3 text-center">Programme capacity each</th>
+                            <th className="px-4 py-3 text-center">Total programme capacity</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {highSchoolCapacity.midpointRoleDistribution.map((row) => {
+                            const programmeCapacity = row.programmeCapacityByLoadPoint[27];
+                            return (
+                              <tr key={`hs-role-${row.label}`} className="border-b border-slate-100 last:border-b-0">
+                                <td className="px-4 py-3 text-[11px] font-black text-slate-900">{row.label}</td>
+                                <td className="px-4 py-3 text-center text-[11px] font-semibold text-slate-600">{row.educators}</td>
+                                <td className="px-4 py-3 text-center text-[11px] font-semibold text-slate-600">{row.coreLoadEach}</td>
+                                <td className="px-4 py-3 text-center text-[11px] font-semibold text-slate-600">{programmeCapacity / row.educators}</td>
+                                <td className="px-4 py-3 text-center text-[11px] font-black text-indigo-700">{programmeCapacity}</td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                  <div className="rounded-2xl border border-amber-100 bg-amber-50 p-3 text-[10px] font-semibold leading-relaxed text-amber-900">
+                    Do not label this model feasible or validated. The application currently assigns {highSchoolMidpointScenario.validatedTimetableEfficiency} validated timetable efficiencies, leaving a {highSchoolMidpointScenario.remainingUnvalidatedEfficiencyGap}-block gap at the 27-block midpoint.
+                  </div>
                 </div>
-                <div className="mt-4 rounded-2xl border border-amber-100 bg-amber-50 p-3 text-[10px] font-semibold leading-relaxed text-amber-900">
-                  {HS_STAFFING_VALIDATION_NOTE}
+              </Card>
+
+              {/* High School Load Logic — model-style panel before grade implications */}
+              <Card title="High School Load Logic" subtitle="Selected-stage course-coverage model" icon={Scale}>
+                <div className="space-y-5">
+                  <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
+                    <p className="text-xs font-semibold leading-relaxed text-slate-600">
+                      Read the grade cards through this operating model: required course coverage anchors the load; program functions, counseling support, embedded routines, and role signals remain separate unless explicitly modeled.
+                    </p>
+                  </div>
+
+                  <div className="grid gap-3 xl:grid-cols-[minmax(0,1fr)_auto] xl:items-end">
+                    <div>
+                      <div className="mb-2 text-[10px] font-black uppercase tracking-[0.24em] text-slate-400">
+                        High School stage
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 lg:grid-cols-4">
+                        {HS_LOAD_STAGE_OPTIONS.map((stage) => (
+                          <button
+                            key={stage.id}
+                            type="button"
+                            onClick={() => setSelectedLoadStageId(stage.id)}
+                            className={cn(
+                              "rounded-2xl border px-3 py-3 text-left transition-all",
+                              selectedLoadStageId === stage.id
+                                ? "border-slate-900 bg-slate-900 text-white shadow-sm"
+                                : "border-slate-200 bg-white text-slate-500 hover:border-slate-300 hover:text-slate-900"
+                            )}
+                          >
+                            <div className="text-[10px] font-black uppercase tracking-wider">{stage.label}</div>
+                            <div className={cn(
+                              "mt-1 text-[9px] font-bold uppercase tracking-wide",
+                              selectedLoadStageId === stage.id ? "text-slate-100/70" : "text-slate-400"
+                            )}>
+                              {stage.activeGrades.join(" / ")}
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="mb-2 text-[10px] font-black uppercase tracking-[0.24em] text-slate-400">
+                        Section mode
+                      </div>
+                      <div className="flex rounded-2xl border border-slate-200 bg-white p-1">
+                        <button
+                          type="button"
+                          onClick={() => setSections(1)}
+                          className={cn(
+                            "rounded-xl px-3 py-2 text-[10px] font-black uppercase tracking-wide transition-all",
+                            sections === 1 ? "bg-slate-900 text-white shadow-sm" : "text-slate-500 hover:text-slate-900"
+                          )}
+                        >
+                          1 section
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setSections(2)}
+                          className={cn(
+                            "rounded-xl px-3 py-2 text-[10px] font-black uppercase tracking-wide transition-all",
+                            sections === 2 ? "bg-slate-900 text-white shadow-sm" : "text-slate-500 hover:text-slate-900"
+                          )}
+                        >
+                          2 sections
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3 lg:grid-cols-3 xl:grid-cols-6">
+                    {[
+                      ["Active stage", selectedLoadStage.label],
+                      ["Active grades", selectedLoadStage.activeGrades.join(", ")],
+                      ["Total HS sections", `${totalActiveHsSections}`],
+                      ["Required coverage", selectedLoadStage.requiredCoverageStatus],
+                      ["Program pressure", selectedLoadStage.programFunctionPressure],
+                      ["Validation", selectedLoadStage.validationStatus],
+                    ].map(([label, value]) => (
+                      <div key={label} className="rounded-2xl border border-slate-100 bg-white p-3 shadow-sm">
+                        <div className="text-[9px] font-black uppercase tracking-widest text-slate-400">{label}</div>
+                        <div className="mt-2 text-sm font-black leading-tight text-slate-900">{value}</div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+                    <div className="border-b border-slate-100 bg-slate-50 px-4 py-3">
+                      <div className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-400">
+                        Load ledger
+                      </div>
+                    </div>
+                    <div className="overflow-x-auto">
+                      <table className="min-w-[980px] w-full border-collapse text-left">
+                        <thead>
+                          <tr className="border-b border-slate-100 bg-white text-[9px] font-black uppercase tracking-widest text-slate-400">
+                            <th className="px-4 py-3">Domain / Function</th>
+                            <th className="px-4 py-3">Load Type</th>
+                            <th className="px-4 py-3">Stage Active</th>
+                            <th className="px-4 py-3">Coverage Need</th>
+                            <th className="px-4 py-3">Ownership Model</th>
+                            <th className="px-4 py-3">Capacity Implication</th>
+                            <th className="px-4 py-3">Validation Status</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {HS_LOAD_LOGIC_LEDGER_ROWS.map((row) => (
+                            <tr key={row.domain} className="border-b border-slate-100 last:border-b-0">
+                              <td className="px-4 py-3 text-[11px] font-black text-slate-900">{row.domain}</td>
+                              <td className="px-4 py-3 text-[10px] font-semibold text-slate-600">{row.loadType}</td>
+                              <td className="px-4 py-3 text-[10px] font-semibold text-slate-600">{row.stageActive}</td>
+                              <td className="px-4 py-3 text-[10px] font-medium leading-relaxed text-slate-500">{row.coverageNeed}</td>
+                              <td className="px-4 py-3 text-[10px] font-medium leading-relaxed text-slate-500">{row.ownershipModel}</td>
+                              <td className="px-4 py-3 text-[10px] font-medium leading-relaxed text-slate-500">{row.capacityImplication}</td>
+                              <td className="px-4 py-3 text-[10px] font-semibold leading-relaxed text-slate-600">{row.validationStatus}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+                    {highSchoolProgrammeOwnership.map((entry) => (
+                      <div key={entry.id} className="rounded-2xl border border-slate-100 bg-white p-4">
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <div className="text-[11px] font-black text-slate-900">{entry.programmeName}</div>
+                            <div className="mt-1 text-[9px] font-bold uppercase tracking-wider text-slate-400">
+                              {entry.gradeRange} · {entry.deliveryUnit.replaceAll("_", " ")}
+                            </div>
+                          </div>
+                          <Badge variant={entry.ownershipStatus === "pending" ? "warning" : "info"}>
+                            {entry.ownershipStatus}
+                          </Badge>
+                        </div>
+                        <div className="mt-3 grid grid-cols-2 gap-2">
+                          <div className="rounded-xl border border-slate-100 bg-slate-50 px-3 py-2">
+                            <div className="text-[8px] font-bold uppercase tracking-wider text-slate-400">Raw demand</div>
+                            <div className="text-[11px] font-black text-slate-900">{entry.rawSectionBlockDemand ?? "Pending"}</div>
+                          </div>
+                          <div className="rounded-xl border border-slate-100 bg-slate-50 px-3 py-2">
+                            <div className="text-[8px] font-bold uppercase tracking-wider text-slate-400">Delivery demand</div>
+                            <div className="text-[11px] font-black text-slate-900">{entry.educatorDeliveryDemand ?? "Pending"}</div>
+                          </div>
+                        </div>
+                        <p className="mt-3 text-[10px] font-medium leading-relaxed text-slate-500">
+                          Owner: {entry.eligibleEducatorDomainOrOwnerRole}
+                        </p>
+                        <p className="mt-2 text-[10px] font-medium leading-relaxed text-slate-500">
+                          {entry.validationNotes}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+
+                  <details className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
+                    <summary className="cursor-pointer text-[10px] font-black uppercase tracking-[0.24em] text-slate-500">
+                      Reader key: taxonomy layers
+                    </summary>
+                    <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4">
+                      {HS_LOAD_LOGIC_LAYERS.map((layer) => (
+                        <div key={layer.title} className="rounded-xl border border-slate-100 bg-white p-3">
+                          <div className="mb-2 flex items-start justify-between gap-2">
+                            <h4 className="text-[11px] font-black leading-tight text-slate-900">{layer.title}</h4>
+                            <Badge variant={layer.variant}>{layer.badge}</Badge>
+                          </div>
+                          <p className="text-[10px] font-medium leading-relaxed text-slate-500">{layer.copy}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </details>
+
+                  <div className="rounded-2xl border border-amber-100 bg-amber-50 p-3 text-[10px] font-semibold leading-relaxed text-amber-900">
+                    {HS_STAFFING_VALIDATION_NOTE}
+                  </div>
                 </div>
               </Card>
 
@@ -881,8 +1252,25 @@ const HighSchoolTab = ({ sections, setSections }: HighSchoolTabProps) => {
                 Reminder: this section translates the course offer into instructional-capacity logic. Finance/HR must validate the payroll source of truth before any staffing ramp is treated as authorization.
               </div>
 
-              <div className="rounded-2xl border border-indigo-100 bg-indigo-50 p-4 text-xs font-semibold leading-relaxed text-indigo-900">
-                Advanced/AP and pathway references indicate possible course-offer layers subject to curriculum, enrollment, and staffing validation.
+                  <div className="rounded-2xl border border-indigo-100 bg-indigo-50 p-4 text-xs font-semibold leading-relaxed text-indigo-900">
+                    Advanced/AP and pathway references indicate possible course-offer layers subject to curriculum, enrollment, and staffing validation.
+                  </div>
+
+              <div className="rounded-2xl border border-slate-200 bg-white p-4">
+                <div className="mb-3 text-[10px] font-black uppercase tracking-[0.24em] text-slate-400">
+                  AP replacement classification
+                </div>
+                <div className="grid grid-cols-1 gap-2 lg:grid-cols-2">
+                  {SECONDARY_EDUCATOR_CAPACITY_MODEL.apCourseClassifications.map((course) => (
+                    <div key={course.id} className="rounded-xl border border-slate-100 bg-slate-50 px-3 py-2">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="text-[11px] font-black text-slate-900">{course.label}</div>
+                        <Badge variant="info">{course.allocation.replaceAll("_", " ")}</Badge>
+                      </div>
+                      <p className="mt-1 text-[10px] font-medium leading-relaxed text-slate-500">{course.notes}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
 
               <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
@@ -1589,13 +1977,13 @@ const HighSchoolTab = ({ sections, setSections }: HighSchoolTabProps) => {
               </div>
 
               <div className="rounded-2xl border border-amber-100 bg-amber-50 p-4 text-xs font-semibold leading-relaxed text-amber-900">
-                {HS_STAFFING_VALIDATION_NOTE}
+                Planning envelope only: 10 core educators plus 1 flexible programme educator. Timetable sufficiency is not proven until the {highSchoolMidpointScenario.remainingUnvalidatedEfficiencyGap}-block midpoint gap is validated.
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
                 {/* Load table */}
-                <Card className="lg:col-span-2" title={`Provisional HS Load View (${sections * 25} learners/grade)`} icon={Scale}>
+                <Card className="lg:col-span-2" title={`Canonical HS Core Load View (${sections * 25} learners/grade)`} icon={Scale}>
                   <div className="overflow-x-auto">
                     <table className="w-full text-left">
                       <thead>
@@ -1636,18 +2024,33 @@ const HighSchoolTab = ({ sections, setSections }: HighSchoolTabProps) => {
                 <Card title="Load Capacity Context" icon={Users}>
                   <div className="space-y-6">
                     <div className="p-4 bg-indigo-50 rounded-2xl border border-indigo-100">
-                      <div className="text-[10px] font-bold text-indigo-600 uppercase mb-2">Planning assumption</div>
-                      <div className="text-2xl font-bold text-slate-900">{specialists}-specialist capacity view</div>
-                      <p className="mt-2 text-[10px] text-slate-400 leading-relaxed">Provisional planning premise. Not payroll authorization, final FTE, final headcount, or hiring approval.</p>
+                      <div className="text-[10px] font-bold text-indigo-600 uppercase mb-2">Planning envelope</div>
+                      <div className="text-2xl font-bold text-slate-900">{specialists} educators</div>
+                      <p className="mt-2 text-[10px] text-slate-500 leading-relaxed">
+                        10 core + 1 flexible = 11. Not payroll authorization, final FTE, final headcount, or hiring approval.
+                      </p>
                     </div>
                     <div className="space-y-3">
                       <div className="flex justify-between items-center text-[10px] font-bold text-slate-400 uppercase">
-                        <span>Load utilization</span>
+                        <span>Core load share at midpoint</span>
                         <span className={cn("font-bold", efficiency > 80 ? "text-emerald-600" : "text-amber-600")}>{efficiency.toFixed(0)}%</span>
                       </div>
                       <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
                         <div className={cn("h-full transition-all duration-500", efficiency > 80 ? "bg-emerald-500" : "bg-amber-500")} style={{ width: `${Math.min(100, efficiency)}%` }} />
                       </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 border-t border-slate-100 pt-4">
+                      {[
+                        ["Raw demand", highSchoolCapacity.rawLearnerBlocks],
+                        ["Core demand", highSchoolCapacity.coreDemand],
+                        ["Programme cap.", highSchoolMidpointScenario.programmeCapacityAfterCore],
+                        ["Gap", highSchoolMidpointScenario.requiredTimetableEfficiency],
+                      ].map(([label, value]) => (
+                        <div key={`hs-context-${label}`} className="rounded-xl border border-slate-100 bg-slate-50 px-3 py-2">
+                          <div className="text-[8px] font-bold uppercase tracking-wider text-slate-400">{label}</div>
+                          <div className="text-sm font-black text-slate-900">{value}</div>
+                        </div>
+                      ))}
                     </div>
                     <div className="pt-4 border-t border-slate-100">
                       <div className="text-[10px] font-bold text-slate-400 uppercase mb-2">Specialist integrity note</div>

@@ -2346,3 +2346,326 @@ integration committed in one atomic change.
   panel, or the DRE result model.
 - No financial engines, contracts, or formulas were touched.
 - `HighSchoolTab.tsx` was not staged.
+
+## Phase 15H.1 — Secondary educator capacity architecture audit
+
+### Audit purpose
+
+Phase 15H.1 is a documentation-only, repository-wide audit of the current
+Middle School and High School educator-capacity architecture against the
+locked mature secondary planning model: 9 educators serving Middle School,
+11 educators serving High School, and 20 educators in the combined mature
+secondary pool.
+
+This phase does not implement educator-capacity, staffing, timetable, UI,
+data, payroll, or calculation changes. Production logic was not changed.
+
+### Architecture-discovery scope
+
+The audit reconstructed current runtime behavior before comparing it with
+the locked model. The discovery scope included MS/HS tab components, load and
+schedule models, Executive Org Design integration, source-of-truth/readiness
+registries, payroll/headcount adapters, shared-specialist roles, validators,
+documentation, and relevant Git history.
+
+### Files inspected
+
+Primary inspected files:
+- `src/components/sections/MiddleSchoolTab.tsx`
+- `src/components/sections/middleSchoolLoadModel.ts`
+- `src/components/sections/HighSchoolTab.tsx`
+- `src/components/sections/highSchoolScheduleModel.ts`
+- `src/components/sections/ExecutiveOrgDesignTab.tsx`
+- `src/features/rio-scenario-resilience/model/msHsStaffingReadiness.ts`
+- `src/features/rio-scenario-resilience/model/executiveOrgDesignModel.ts`
+- `src/features/rio-scenario-resilience/model/payrollAdapter.ts`
+- `src/features/rio-scenario-resilience/model/inputReadinessRegistry.ts`
+- `src/features/rio-scenario-resilience/data/sourceOfTruthMap.ts`
+- `src/features/rio-scenario-resilience/data/orgDesignScenarioExtensions.ts`
+- `src/constants/teaching.ts`
+- `src/constants/leadership.ts`
+- `src/lib/payroll/domain.ts`
+- `src/hooks/useStaffingLogic.ts`
+- `src/components/sections/AGENTS.md`
+- `src/features/rio-scenario-resilience/docs/payrollStaffingRuleSourceTrace.md`
+- `src/features/rio-scenario-resilience/docs/msHsProgressionModelSourceSemantics.md`
+- `src/features/rio-scenario-resilience/docs/orgDesignLogic.md`
+- `README.md`
+- this `IMPLEMENTATION.md`
+
+Audit report:
+- `docs/secondary-educator-capacity-audit.md`
+
+### Canonical locked model assessed
+
+- Middle School: 8 core educators + 1 flexible programme educator = 9.
+- High School: 10 core educators + 1 flexible programme educator = 11.
+- Combined mature secondary pool: 18 core educators + 2 flexible educators
+  = 20.
+- Scheduled learner-facing load range: 26-28 blocks per educator per week,
+  with a 27-block planning midpoint.
+
+### Verified current architecture
+
+- Middle School currently has executable core-slot logic that derives the
+  mature 8-core-educator model at Grades 6-8, 2 sections per grade. It does
+  not currently add the locked flexible programme educator or calculate the
+  9-educator programme-capacity margin.
+- Middle School programme rows calculate weekly programme slots, but do not
+  assign owners, validate educator-delivery demand, or prove that programme
+  functions fit within residual educator capacity.
+- High School currently exposes a 10-FTE/core-educator ramp and course-offer
+  scaffolding. It does not calculate the locked 11-educator HS model, the
+  216-core-block mature demand, the 104 raw programme blocks, or the 23
+  required efficiency block equivalents at the 27-block midpoint.
+- Executive Org Design consumes MS/HS core educator readiness counts only:
+  8 MS core educators and 10 HS core educators. It does not currently consume
+  the locked 9/11/20 total serving-division model.
+- Shared specialists and counselors exist elsewhere in the org design. Body &
+  Movement, Creative Hub, AP Research support, Innovation Diploma support,
+  language/elective educators, and counselor-owned Pathways/college support
+  require explicit double-counting boundaries before the 20-educator model is
+  implementation-ready.
+
+### Major gaps
+
+- No executable flexible programme educator model for MS or HS.
+- No combined 20-educator secondary pool model.
+- No consistent 26-28 load-policy contract with 27 as planning midpoint.
+- No role-level residual-capacity ledger for MS programme absorption.
+- No HS raw-vs-delivery ledger proving the 23-block efficiency requirement
+  at the 27-block midpoint.
+- No AP replacement/course-choice allocator preventing double counting.
+- No timetable validator for double blocks, educator conflicts, simultaneous
+  electives/AP demand, Advisory/project synchronization, room/lab constraints,
+  daily load, or shared-role conflicts.
+- Payroll/headcount logic still contains duplicated hardcoded MS/HS values
+  that differ from tab-derived readiness semantics.
+
+### Validation status
+
+Phase 15H.1 added documentation only. It did not add new validators and did
+not change existing runtime validators. The repository's normal validation
+commands were run after the documentation update and are recorded in the
+audit report and final response for this phase.
+
+### Unresolved blockers
+
+- Board approval must remain conditional until a master timetable validates
+  the 20-educator envelope.
+- The HS model must prove legitimate programme-delivery efficiencies rather
+  than hiding the raw `320 - 297 = 23` block-equivalent difference at the
+  27-block midpoint.
+- Shared specialists and counselors must be counted once and assigned clear
+  programme boundaries.
+- Flexible programme educator activation years are not evidenced and must not
+  be inferred.
+- Current Executive Org Design and payroll consumers must be reconciled before
+  educator counts become financial-model authority.
+
+### Phase status
+
+Phase 15H.1 read-only audit: **complete**.
+
+Educator-capacity implementation: **not started**.
+
+Timetable validation implementation: **not started**.
+
+Board readiness: **conditional only; not complete**.
+
+### Next recommended implementation phase
+
+The next phase should implement a secondary schedule-envelope and load-policy
+contract before changing UI-facing educator counts. That phase should define
+raw learner section-blocks, educator-delivery blocks, the 26-28 load range,
+the 27-block midpoint, and formula validators for the locked MS and HS mature
+models. Only after that contract is validated should the app implement MS
+9-educator capacity, HS 11-educator capacity, programme ownership, shared-role
+boundaries, Executive Org Design integration, and payroll reconciliation.
+
+## Phase 15H.2 — Secondary educator capacity model implementation
+
+### Objective
+
+Implement the canonical secondary educator-capacity model identified by the
+Phase 15H.1 audit:
+
+- 9 educators serving mature Middle School: 8 core + 1 flexible.
+- 11 educators serving mature High School: 10 core + 1 flexible.
+- 20 educators in the mature combined secondary instructional planning pool:
+  18 core + 2 flexible.
+- 26-28 scheduled learner-facing blocks as the mature load range, with 27 as
+  the planning midpoint.
+
+This phase is implementation work, not a second audit. It remains inside the
+instructional-capacity planning boundary and does not wire payroll totals.
+
+### Canonical model implemented
+
+Created a pure TypeScript model:
+
+- `src/features/rio-scenario-resilience/model/secondaryEducatorCapacityModel.ts`
+
+The model owns:
+
+- shared timetable envelope: 5 days, 8 learner blocks/day, 40 learner blocks
+  per section/week, 45 minutes/block, 2 sections per active grade;
+- mature load policy: 26 minimum, 27 midpoint, 28 maximum;
+- MS raw demand: `6 * 40 = 240`;
+- MS core demand: `36 + 36 + 36 + 24 + 24 = 156`;
+- MS programme demand: `240 - 156 = 84`;
+- MS educator count: `8 core + 1 flexible = 9`;
+- MS programme capacity at 27: `9 * 27 - 156 = 87`;
+- MS midpoint margin: `87 - 84 = 3`;
+- HS raw demand: `8 * 40 = 320`;
+- HS core demand: `40 + 40 + 40 + 48 + 48 = 216`;
+- HS raw programme demand: `320 - 216 = 104`;
+- HS educator count: `10 core + 1 flexible = 11`;
+- HS programme capacity at 27: `11 * 27 - 216 = 81`;
+- HS required midpoint efficiency: `104 - 81 = 23`;
+- combined raw learner demand: `240 + 320 = 560`;
+- combined pool: `18 core + 2 flexible = 20`;
+- board readiness status: `conditional`;
+- timetable validation status: not validated.
+
+### Files changed
+
+Created:
+
+- `src/features/rio-scenario-resilience/model/secondaryEducatorCapacityModel.ts`
+- `src/features/rio-scenario-resilience/model/secondaryEducatorCapacityValidation.ts`
+- `scripts/validate-phase15h2.ts`
+- `tests/phase15h2/qa-entry.html`
+- `tests/phase15h2/qa-main.tsx`
+- `tests/phase15h2/secondary-capacity.run.ts`
+
+Modified:
+
+- `package.json` — added `validate:phase15h2` and `qa:phase15h2` scripts
+- `src/features/rio-scenario-resilience/model/msHsStaffingReadinessContract.ts`
+- `src/features/rio-scenario-resilience/model/msHsStaffingReadiness.ts`
+- `src/features/rio-scenario-resilience/model/executiveOrgDesignModel.ts`
+- `src/components/sections/MiddleSchoolTab.tsx` — canonical model display, `grid-cols-1` mobile fix
+- `src/components/sections/HighSchoolTab.tsx` — canonical model display, `grid-cols-1` mobile fix
+- `src/components/sections/highSchoolScheduleModel.ts`
+- `IMPLEMENTATION.md`
+
+### UI changes
+
+Middle School:
+
+- Added canonical mature MS planning envelope:
+  `8 core + 1 flexible = 9`.
+- Shows raw learner blocks `240`, core blocks `156`, programme blocks `84`,
+  average load `26.67`, midpoint programme capacity `87`, and midpoint margin
+  `3`.
+- Shows role-level 27-block programme capacity by domain:
+  Mathematics 18, ELA 18, Lingua Portuguesa 18, Natural Sciences 3, Social
+  Sciences 3, Flexible Programme Educator 27.
+- Keeps the Grade 6 launch cluster architecture distinct from the mature model.
+- Relabels the 24-block threshold as a historical / launch-specific threshold,
+  not the mature secondary load policy.
+- Shows programme ownership/readiness entries from the canonical model.
+
+High School:
+
+- Added canonical mature HS planning envelope:
+  `10 core + 1 flexible = 11`.
+- Shows raw section-blocks `320`, core blocks `216`, raw programme blocks
+  `104`, midpoint programme capacity `81`, and required midpoint efficiency
+  `23`.
+- Shows role-level 27-block programme capacity by domain:
+  Lingua Portuguesa 14, Mathematics 14, English 14, Natural Sciences 6,
+  Social Sciences 6, Flexible Programme Educator 27.
+- Replaced the mature provisional core-load display with the canonical
+  27-block-per-section core pattern.
+- Corrected Grade 11-12 project language so Innovation Diploma Project is the
+  active project progression, not Passion Projects.
+- Shows programme ownership/readiness entries and AP replacement
+  classifications from the canonical model.
+- Keeps the HS model explicitly conditional and does not label it feasible.
+
+Executive Org Design:
+
+- Future-division nodes now show:
+  - Middle School: `8 core + 1 flexible = 9`;
+  - High School: `10 core + 1 flexible = 11`;
+  - Combined: `18 core + 2 flexible = 20`.
+- Added governance note that the 20-educator model is a mature
+  instructional-capacity planning envelope, not payroll authorization.
+- Shared specialist governance shows Body & Movement, Arts, Music,
+  counselors, flexible programme educators, and legacy HS pool boundaries.
+
+### Validators and browser QA created
+
+Created pure deterministic validation coverage:
+
+- `src/features/rio-scenario-resilience/model/secondaryEducatorCapacityValidation.ts`
+- `scripts/validate-phase15h2.ts`
+- package script: `npm run validate:phase15h2`
+
+The validator contains 30 checks covering MS, HS, combined model, shared-role
+double-counting, Passion Project / Innovation Diploma progression, and AP
+replacement non-duplication.
+
+Created permanent Playwright browser QA:
+
+- `tests/phase15h2/qa-entry.html` — Vite-served HTML harness
+- `tests/phase15h2/qa-main.tsx` — React entry point rendering the full App
+- `tests/phase15h2/secondary-capacity.run.ts` — 46-assertion Playwright suite
+- package script: `npm run qa:phase15h2`
+
+The browser QA covers desktop (1440×1000), tablet (1024×900), and mobile
+(390×844) viewports. Assertions target canonical arithmetic values, conditional
+status labels, instructional-capacity / payroll-boundary notes, Innovation
+Diploma Project wording, Language Acquisition Coach node, board condition, and
+horizontal-overflow safety across all three viewports.
+
+### Validation status
+
+All Phase 15H.2 gates pass:
+
+| Gate | Result |
+|------|--------|
+| `npm run validate:phase15h2` | 30/30 pass, 0 fail |
+| `npm run qa:phase15h2` | 46/46 pass, 0 fail |
+| Prior phase 15G regressions (`validate:phase15g2`) | 25/25 pass |
+| Prior phase 15F regressions (`validate:phase15f`) | 185/185 pass |
+| Prior browser QA (`qa:phase15g2`) | 19/19 pass |
+| Prior browser QA (`qa:phase15f`) | 58/58 pass |
+| `npm run lint` (`tsc --noEmit`) | clean |
+| `npm run build` | clean (existing large-chunk warning only) |
+| `git diff --check` | exit 0 |
+
+Phase 15H.2 is closed. Timetable sufficiency remains conditional because the
+phase intentionally does not build a master-timetable solver or assign the
+required High School delivery efficiencies.
+
+### Remaining timetable boundary
+
+This phase does not build a complete master-timetable solver. It exposes:
+
+- MS 3-block midpoint programme margin;
+- HS 23-block midpoint efficiency requirement;
+- programme ownership readiness;
+- shared-role double-counting governance;
+- timetable validation readiness as not validated.
+
+It does not invent timetable efficiencies, manufacture programme owners, infer
+operational combined-section delivery, or claim final feasibility.
+
+### Board-readiness status
+
+The core model is implemented and the 20-person planning envelope is
+represented. Board readiness remains conditional. The UI must continue to state
+that final sufficiency depends on programme ownership, shared-role
+reconciliation, educator qualification mapping, AP/elective demand, and
+master-timetable validation.
+
+### Next phase
+
+Build grade-level mock schedules and educator-concurrency validation. That
+phase should test double blocks, synchronized Advisory/project blocks,
+AP/elective concurrency, lab/room constraints, shared MS/HS role conflicts, and
+whether the HS 23-block midpoint efficiency requirement is operationally
+legitimate.

@@ -7,6 +7,7 @@ import type {
   MsHsStaffingReadinessSummary,
   MsHsYearModelStatus,
 } from "./msHsStaffingReadinessContract";
+import { SECONDARY_EDUCATOR_CAPACITY_MODEL } from "./secondaryEducatorCapacityModel";
 
 const ORG_DESIGN_MS_EVIDENCE: MsHsStaffingEvidence = {
   file: "src/features/rio-scenario-resilience/data/orgDesignScenarioExtensions.ts",
@@ -80,6 +81,8 @@ const MASTER_EDUCATOR_EVIDENCE: MsHsStaffingEvidence = {
 export const MIDDLE_SCHOOL_CANONICAL_FULL_MODEL = {
   fullModelGrades: ["g6", "g7", "g8"],
   fullModelCoreEducators: 8,
+  fullModelFlexibleProgrammeEducators: 1,
+  fullModelTotalEducators: 9,
   sectionsPerGrade: 2,
   compensationArchetype: "master_educator",
   sourceAuthority: "middle_school_tab_model",
@@ -88,8 +91,9 @@ export const MIDDLE_SCHOOL_CANONICAL_FULL_MODEL = {
   notes: [
     "User-validated simulator modeling rule based on the Middle School tab/model.",
     "Middle School tab/model indicates the full G6-G8 model reaches 8 core educators at 2 sections per grade.",
+    "The secondary educator-capacity model adds 1 flexible programme educator inside the mature 9-person MS instructional planning envelope.",
     "Legacy payroll assumptions g6=3, g7=4, g8=3 are comparison values only and must not be summed to 10.",
-    "The 8 educator model refers to core Middle School educators only, not counselors, specialists, assistants, or monitors.",
+    "The 8 core + 1 flexible model refers to Middle School instructional planning capacity only, not counselors, specialists, assistants, or monitors.",
     "This utility does not wire payroll totals.",
   ],
 } as const;
@@ -109,6 +113,8 @@ export const HIGH_SCHOOL_CANONICAL_FULL_MODEL = {
     g12: 10,
   },
   fullModelCoreEducators: 10,
+  fullModelFlexibleProgrammeEducators: 1,
+  fullModelTotalEducators: 11,
   compensationArchetype: "master_educator",
   sourceAuthority: "high_school_tab_model",
   status: "canonical_for_simulator_modeling",
@@ -118,8 +124,9 @@ export const HIGH_SCHOOL_CANONICAL_FULL_MODEL = {
     "User-validated simulator modeling rule based on the High School tab/model.",
     "High School tab/model indicates a 10-FTE full ramp across G9-G12.",
     "The tab ramp is used as the canonical simulator modeling rule by user validation.",
+    "The secondary educator-capacity model adds 1 flexible programme educator inside the mature 11-person HS instructional planning envelope.",
     "HS pool must not be added on top of the tab-derived HS ramp.",
-    "The 10 educator model refers to core High School educators only, not counselors, specialists, assistants, or monitors.",
+    "The 10 core + 1 flexible model refers to High School instructional planning capacity only, not counselors, specialists, assistants, or monitors.",
     "This utility does not wire payroll totals.",
   ],
 } as const;
@@ -178,11 +185,29 @@ function getMiddleSchoolCoreEducatorsForYear(year: number): number | null {
   return null;
 }
 
+function getMiddleSchoolFlexibleEducatorsForYear(year: number): number | null {
+  if (year < 2031) return 0;
+  if (year >= MS_FULL_MODEL_ACTIVE_YEAR) {
+    return MIDDLE_SCHOOL_CANONICAL_FULL_MODEL.fullModelFlexibleProgrammeEducators;
+  }
+
+  return null;
+}
+
 function getHighSchoolCoreEducatorsForYear(year: number): number {
   if (year < 2034) return 0;
   if (year < 2036) return HIGH_SCHOOL_CANONICAL_FULL_MODEL.cumulativeFteByGrade.g10;
   if (year < HS_FULL_MODEL_ACTIVE_YEAR) return HIGH_SCHOOL_CANONICAL_FULL_MODEL.cumulativeFteByGrade.g11;
   return HIGH_SCHOOL_CANONICAL_FULL_MODEL.cumulativeFteByGrade.g12;
+}
+
+function getHighSchoolFlexibleEducatorsForYear(year: number): number | null {
+  if (year < 2034) return 0;
+  if (year >= HS_FULL_MODEL_ACTIVE_YEAR) {
+    return HIGH_SCHOOL_CANONICAL_FULL_MODEL.fullModelFlexibleProgrammeEducators;
+  }
+
+  return null;
 }
 
 function getMiddleSchoolModelStatus(year: number): MsHsYearModelStatus {
@@ -427,14 +452,24 @@ export const MS_HS_STAFFING_READINESS_SUMMARY = {
   selectedHighSchoolStaffingSource: "high_school_tab_model",
   compensationArchetypeForFutureUse: "master_educator",
   middleSchoolFullModelCoreEducators: 8,
+  middleSchoolFullModelFlexibleEducators: 1,
+  middleSchoolFullModelTotalEducators: 9,
   highSchoolFullModelCoreEducators: 10,
+  highSchoolFullModelFlexibleEducators: 1,
+  highSchoolFullModelTotalEducators: 11,
+  combinedSecondaryCoreEducators: SECONDARY_EDUCATOR_CAPACITY_MODEL.combined.coreEducators,
+  combinedSecondaryFlexibleEducators: SECONDARY_EDUCATOR_CAPACITY_MODEL.combined.flexibleEducators,
+  combinedSecondaryEducatorPool: SECONDARY_EDUCATOR_CAPACITY_MODEL.combined.combinedPool,
+  boardReadinessStatus: SECONDARY_EDUCATOR_CAPACITY_MODEL.combined.boardReadinessStatus,
   records: MS_HS_STAFFING_READINESS_RECORDS,
   notes: [
     "User-validated simulator modeling rule based on the Middle School tab/model.",
     "User-validated simulator modeling rule based on the High School tab/model.",
+    "Secondary educator-capacity model represents the mature 8+1 MS, 10+1 HS, 20-person combined instructional planning envelope.",
     "Legacy MS payroll values are comparison-only and must not be summed to 10.",
     "Legacy HS payroll values are comparison-only; the canonical HS simulator model uses cumulative 4/4/7/10.",
     "HS pool must be excluded from tab-derived HS educator totals.",
+    "Flexible programme educators are not payroll-wired by this utility.",
     "This utility does not wire payroll totals.",
   ],
 } as const satisfies MsHsStaffingReadinessSummary;
@@ -468,11 +503,29 @@ export function getMsHsStaffingReadinessSummaryForYear(
   year: number,
 ): MsHsStaffingReadinessYearSummary {
   const middleSchoolCoreEducators = getMiddleSchoolCoreEducatorsForYear(year);
+  const middleSchoolFlexibleEducators = getMiddleSchoolFlexibleEducatorsForYear(year);
   const highSchoolCoreEducators = getHighSchoolCoreEducatorsForYear(year);
+  const highSchoolFlexibleEducators = getHighSchoolFlexibleEducatorsForYear(year);
   const totalCoreEducators =
     middleSchoolCoreEducators === null
       ? null
       : middleSchoolCoreEducators + highSchoolCoreEducators;
+  const totalFlexibleProgrammeEducators =
+    middleSchoolFlexibleEducators === null || highSchoolFlexibleEducators === null
+      ? null
+      : middleSchoolFlexibleEducators + highSchoolFlexibleEducators;
+  const middleSchoolTotalServingEducators =
+    middleSchoolCoreEducators === null || middleSchoolFlexibleEducators === null
+      ? null
+      : middleSchoolCoreEducators + middleSchoolFlexibleEducators;
+  const highSchoolTotalServingEducators =
+    highSchoolFlexibleEducators === null
+      ? highSchoolCoreEducators
+      : highSchoolCoreEducators + highSchoolFlexibleEducators;
+  const totalServingEducators =
+    middleSchoolTotalServingEducators === null || totalFlexibleProgrammeEducators === null
+      ? null
+      : middleSchoolTotalServingEducators + highSchoolTotalServingEducators;
 
   return {
     year,
@@ -485,14 +538,20 @@ export function getMsHsStaffingReadinessSummaryForYear(
       modelStatus: getMiddleSchoolModelStatus(year),
       activeGrades: getActiveGradesForYear(year, MIDDLE_SCHOOL_GRADE_START_YEARS),
       coreEducators: middleSchoolCoreEducators,
+      flexibleProgrammeEducators: middleSchoolFlexibleEducators,
+      totalServingEducators: middleSchoolTotalServingEducators,
       fullModelCoreEducators: MIDDLE_SCHOOL_CANONICAL_FULL_MODEL.fullModelCoreEducators,
+      fullModelFlexibleEducators: MIDDLE_SCHOOL_CANONICAL_FULL_MODEL.fullModelFlexibleProgrammeEducators,
+      fullModelTotalEducators: MIDDLE_SCHOOL_CANONICAL_FULL_MODEL.fullModelTotalEducators,
       compensationArchetypeId: "master_educator",
       governanceStatus: "user_validated_simulator_modeling_rule",
       notes: [
         "User-validated simulator modeling rule based on the Middle School tab/model.",
         "Middle School full model reaches 8 core educators once G8 is active.",
+        "Middle School mature planning envelope is 8 core + 1 flexible = 9 once the full model is active.",
         "MS partial years before G8 do not expose a canonical interim educator count in this utility.",
         "Legacy payroll assumptions g6=3, g7=4, g8=3 are comparison values only and must not be summed to 10.",
+        "Flexible programme educator activation is represented only for the mature planning envelope, not payroll.",
         "This utility does not wire payroll totals.",
       ],
     },
@@ -502,23 +561,32 @@ export function getMsHsStaffingReadinessSummaryForYear(
       modelStatus: getHighSchoolModelStatus(year),
       activeGrades: getActiveGradesForYear(year, HIGH_SCHOOL_GRADE_START_YEARS),
       coreEducators: highSchoolCoreEducators,
+      flexibleProgrammeEducators: highSchoolFlexibleEducators,
+      totalServingEducators: highSchoolTotalServingEducators,
       fullModelCoreEducators: HIGH_SCHOOL_CANONICAL_FULL_MODEL.fullModelCoreEducators,
+      fullModelFlexibleEducators: HIGH_SCHOOL_CANONICAL_FULL_MODEL.fullModelFlexibleProgrammeEducators,
+      fullModelTotalEducators: HIGH_SCHOOL_CANONICAL_FULL_MODEL.fullModelTotalEducators,
       compensationArchetypeId: "master_educator",
       governanceStatus: "user_validated_simulator_modeling_rule",
       notes: [
         "User-validated simulator modeling rule based on the High School tab/model.",
         "High School canonical cumulative model is 2034/G9=4, 2035/G10=4, 2036/G11=7, 2037+/G12=10.",
+        "High School mature planning envelope is 10 core + 1 flexible = 11 once the full model is active.",
         "HS pool must not be added on top of the tab-derived HS ramp.",
         "Legacy payroll assumptions g9=4, g10=0, g11=3, g12=3 are comparison values only.",
+        "Flexible programme educator activation is represented only for the mature planning envelope, not payroll.",
         "This utility does not wire payroll totals.",
       ],
     },
     totalCoreEducators,
+    totalFlexibleProgrammeEducators,
+    totalServingEducators,
     excludedSources: ["hs_pool"],
     notes: [
       "Year-based summary uses canonical simulator modeling rules only.",
       "MS full-model count is available from 2033 onward; MS partial years return null for MS and total core educators.",
       "HS year counts use the canonical cumulative High School tab/model ramp.",
+      "Mature secondary planning envelope is 18 core + 2 flexible = 20; sufficiency remains conditional on timetable validation.",
       "This utility does not wire payroll totals.",
     ],
   };

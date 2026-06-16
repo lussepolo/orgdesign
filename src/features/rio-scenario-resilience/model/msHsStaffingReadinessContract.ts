@@ -73,7 +73,15 @@ export interface MsHsStaffingReadinessSummary {
   selectedHighSchoolStaffingSource: "high_school_tab_model";
   compensationArchetypeForFutureUse: "master_educator";
   middleSchoolFullModelCoreEducators: 8;
+  middleSchoolFullModelFlexibleEducators: 1;
+  middleSchoolFullModelTotalEducators: 9;
   highSchoolFullModelCoreEducators: 10;
+  highSchoolFullModelFlexibleEducators: 1;
+  highSchoolFullModelTotalEducators: 11;
+  combinedSecondaryCoreEducators: 18;
+  combinedSecondaryFlexibleEducators: 2;
+  combinedSecondaryEducatorPool: 20;
+  boardReadinessStatus: "conditional";
   records: readonly MsHsStaffingReadinessRecord[];
   notes: readonly string[];
 }
@@ -84,7 +92,11 @@ export interface MsHsDivisionYearStaffingSummary {
   modelStatus: MsHsYearModelStatus;
   activeGrades: readonly MsHsGradeId[];
   coreEducators: number | null;
+  flexibleProgrammeEducators: number | null;
+  totalServingEducators: number | null;
   fullModelCoreEducators: 8 | 10;
+  fullModelFlexibleEducators: 1;
+  fullModelTotalEducators: 9 | 11;
   compensationArchetypeId: "master_educator";
   governanceStatus: "user_validated_simulator_modeling_rule";
   notes: readonly string[];
@@ -98,6 +110,8 @@ export interface MsHsStaffingReadinessYearSummary {
   middleSchool: MsHsDivisionYearStaffingSummary;
   highSchool: MsHsDivisionYearStaffingSummary;
   totalCoreEducators: number | null;
+  totalFlexibleProgrammeEducators: number | null;
+  totalServingEducators: number | null;
   excludedSources: readonly string[];
   notes: readonly string[];
 }

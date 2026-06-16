@@ -1,6 +1,7 @@
 import { BACKOFFICE_CONFIG, LEADERSHIP_CONFIG, SPECIALISTS_CONFIG } from "../../../constants/leadership";
 import { orgDesignScenarioExtensionRoles } from "../data/orgDesignScenarioExtensions";
 import { getMsHsStaffingReadinessSummary } from "./msHsStaffingReadiness";
+import { SECONDARY_EDUCATOR_CAPACITY_MODEL } from "./secondaryEducatorCapacityModel";
 
 export type ExecutiveOrgScenario = "minimum" | "balanced" | "premium";
 
@@ -208,8 +209,8 @@ function getMiddleSchoolHeadcount(
 ): Pick<OrgTreeNode, "headcountValue" | "headcountStatus" | "headcountSourceLabel"> {
   const summary = getMsHsStaffingReadinessSummary({ year }).middleSchool;
   if (summary.activeGrades.length === 0) return notApplicableHeadcount();
-  if (summary.coreEducators === null) return pendingHeadcount(readinessLayerSourceLabel);
-  return sourceBackedHeadcount(summary.coreEducators, readinessLayerSourceLabel);
+  if (summary.totalServingEducators === null) return pendingHeadcount(readinessLayerSourceLabel);
+  return sourceBackedHeadcount(summary.totalServingEducators, readinessLayerSourceLabel);
 }
 
 function getHighSchoolHeadcount(
@@ -217,8 +218,8 @@ function getHighSchoolHeadcount(
 ): Pick<OrgTreeNode, "headcountValue" | "headcountStatus" | "headcountSourceLabel"> {
   const summary = getMsHsStaffingReadinessSummary({ year }).highSchool;
   if (summary.activeGrades.length === 0) return notApplicableHeadcount();
-  if (summary.coreEducators === null) return pendingHeadcount(readinessLayerSourceLabel);
-  return sourceBackedHeadcount(summary.coreEducators, readinessLayerSourceLabel);
+  if (summary.totalServingEducators === null) return pendingHeadcount(readinessLayerSourceLabel);
+  return sourceBackedHeadcount(summary.totalServingEducators, readinessLayerSourceLabel);
 }
 
 function getIncrementalExistingRoleHeadcount(
@@ -248,9 +249,9 @@ function isHighSchoolActive(year: ExecutiveOrgYear) {
 function getYearSignal(year: ExecutiveOrgYear) {
   if (year < 2031) return `${year}: Base opening structure`;
   if (year < 2033) return `${year}: MS begins, HC pending`;
-  if (year === 2033) return "2033: MS full model, HC 8";
+  if (year === 2033) return "2033: MS full model, 8 core + 1 flexible = 9";
   if (year < 2037) return `${year}: HS ramp active`;
-  return "2037: HS full model, HC 10";
+  return "2037: Mature secondary envelope, 18 core + 2 flexible = 20";
 }
 
 function futureDivisionNodes(year: ExecutiveOrgYear): OrgTreeNode[] {
@@ -259,23 +260,49 @@ function futureDivisionNodes(year: ExecutiveOrgYear): OrgTreeNode[] {
   const hsGrades = formatGrades(summary.highSchool.activeGrades);
   const middleSchoolActive = summary.middleSchool.activeGrades.length > 0;
   const highSchoolActive = summary.highSchool.activeGrades.length > 0;
+  const capacity = SECONDARY_EDUCATOR_CAPACITY_MODEL;
 
   return [
     {
-      id: "middle-school-core-educators",
-      label: "Middle School Core Educators",
+      id: "middle-school-secondary-educators",
+      label: "Middle School Educators",
       badge: middleSchoolActive ? "Readiness layer" : "Inactive",
-      note: msGrades,
+      note: middleSchoolActive
+        ? `${msGrades} · ${summary.middleSchool.fullModelCoreEducators} core + ${summary.middleSchool.fullModelFlexibleEducators} flexible = ${summary.middleSchool.fullModelTotalEducators} mature planning envelope`
+        : msGrades,
       variant: "yearBased",
+      headcountBasisNote: "Instructional-capacity planning only; not payroll authorization.",
       ...getMiddleSchoolHeadcount(year),
     },
     {
-      id: "high-school-core-educators",
-      label: "High School Core Educators",
+      id: "high-school-secondary-educators",
+      label: "High School Educators",
       badge: highSchoolActive ? "Readiness layer" : "Inactive",
-      note: hsGrades,
+      note: highSchoolActive
+        ? `${hsGrades} · ${summary.highSchool.fullModelCoreEducators} core + ${summary.highSchool.fullModelFlexibleEducators} flexible = ${summary.highSchool.fullModelTotalEducators} mature planning envelope`
+        : hsGrades,
       variant: "yearBased",
+      headcountBasisNote: "Instructional-capacity planning only; final sufficiency remains timetable-conditional.",
       ...getHighSchoolHeadcount(year),
+    },
+    {
+      id: "combined-secondary-planning-envelope",
+      label: "Combined Secondary Planning Envelope",
+      badge: "Conditional",
+      note: `${capacity.combined.coreEducators} core + ${capacity.combined.flexibleEducators} flexible = ${capacity.combined.combinedPool}`,
+      variant: "guardrail",
+      headcountBasisNote:
+        "Mature instructional-capacity envelope; not final hiring approval or payroll authorization.",
+      packageBasisNote: capacity.boardExplanation.governanceNote,
+      children: capacity.sharedSpecialistGovernance.map((entry) => ({
+        id: `shared-role-${entry.id}`,
+        label: entry.label,
+        badge: entry.countedInSecondaryTwenty ? "Inside 20" : entry.treatment === "excluded_legacy_pool" ? "Excluded" : "Count once",
+        note: entry.notes,
+        variant: "guardrail" as const,
+        ...notApplicableHeadcount(),
+      })),
+      ...sourceBackedHeadcount(capacity.combined.combinedPool, readinessLayerSourceLabel),
     },
     {
       id: "hs-pool-excluded",
@@ -423,6 +450,7 @@ function buildLearningEcosystemBranch(
     {
       id: "language-acquisition-coach",
       label: "Language Acquisition Coach",
+      badge: "New addition",
       variant: "base",
       ...getFixedExtensionHeadcount("language_acquisition_coach", scenario, year),
     },
@@ -703,8 +731,13 @@ export function buildExecutiveOrgDesignTree(
       },
       {
         label: "HC status",
-        value: "Partial source-backed HC",
-        note: "Scenario-wide count is not shown.",
+        value: "Secondary envelope represented",
+        note: "MS/HS future-division nodes now show the mature 18 core + 2 flexible = 20 instructional planning pool.",
+      },
+      {
+        label: "Board condition",
+        value: "Conditional approval language",
+        note: SECONDARY_EDUCATOR_CAPACITY_MODEL.boardExplanation.governanceNote,
       },
       {
         label: "Source guardrails",

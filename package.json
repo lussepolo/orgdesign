@@ -12,7 +12,9 @@
     "validate:phase15f": "tsx scripts/validate-phase15f.ts",
     "qa:phase15f": "tsx tests/phase15f/phase15f.run.ts",
     "validate:phase15g2": "tsx scripts/validate-phase15g2.ts",
-    "qa:phase15g2": "tsx tests/phase15g2/dre-capital-handoff.run.ts"
+    "qa:phase15g2": "tsx tests/phase15g2/dre-capital-handoff.run.ts",
+    "validate:phase15h2": "tsx scripts/validate-phase15h2.ts",
+    "qa:phase15h2": "tsx tests/phase15h2/secondary-capacity.run.ts"
   },
   "dependencies": {
     "@google/genai": "^1.29.0",

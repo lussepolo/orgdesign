@@ -2,6 +2,10 @@ import React, { useMemo, useState } from "react";
 import { BookOpen, ChevronRight, Cpu, Database, Users } from "lucide-react";
 import { cn } from "../../lib/utils";
 import {
+  SECONDARY_EDUCATOR_CAPACITY_MODEL,
+  getSecondaryProgrammeOwnershipByDivision,
+} from "../../features/rio-scenario-resilience/model/secondaryEducatorCapacityModel";
+import {
   BLOCK_OPTIONS,
   CORE_DOMAIN_ASSUMPTIONS,
   DEFAULT_MAX_TEACHING_LOAD,
@@ -121,8 +125,8 @@ const CORE_EDUCATOR_BUILD_UP_STAGES: Array<{
     stage: "Grades 6–7 active",
     config: { g6: 2, g7: 2, g8: 0 },
     interpretation: [
-      "Mathematics, Portuguese, and ELA reach the 24-slot minimum threshold at 2 sections per grade.",
-      "Natural Sciences and Social Sciences still require complementary load or schedule validation. This remains threshold-sensitive.",
+      "Mathematics, Portuguese, and ELA reach the historical 24-slot launch threshold at 2 sections per grade.",
+      "Natural Sciences and Social Sciences still require complementary load or schedule validation. This remains threshold-sensitive before the mature 26-28 policy is applied.",
     ],
     programFunctions: [
       "Project Mentorship / Passion Projects",
@@ -325,6 +329,10 @@ const MiddleSchoolTab = (_props: MiddleSchoolTabProps) => {
     }),
     [domainSlotsPerSection, minViableLoad, msSectionsByGrade],
   );
+  const middleSchoolCapacity = SECONDARY_EDUCATOR_CAPACITY_MODEL.middleSchool;
+  const middleSchoolMidpointScenario =
+    middleSchoolCapacity.loadScenarios[SECONDARY_EDUCATOR_CAPACITY_MODEL.loadPolicy.planningMidpoint];
+  const middleSchoolProgrammeOwnership = getSecondaryProgrammeOwnershipByDivision("middleSchool");
 
   const coreEducatorBuildUp = useMemo(() => (
     CORE_EDUCATOR_BUILD_UP_STAGES.map((stage) => {
@@ -382,7 +390,7 @@ const MiddleSchoolTab = (_props: MiddleSchoolTabProps) => {
         sectionsLabel: "2 sections per grade",
         config: { g6: 2, g7: 2, g8: 0 },
         specialistSignal: "Specialist load and program-function allocation required",
-        interpretation: "Mathematics, Portuguese, and ELA approach viable full-load domains at 24 slots each.",
+        interpretation: "Mathematics, Portuguese, and ELA approach the historical launch threshold at 24 slots each.",
       },
       {
         stage: "Grades 6–8 active",
@@ -449,7 +457,7 @@ const MiddleSchoolTab = (_props: MiddleSchoolTabProps) => {
       `}</style>
 
       <section className="rounded-[2.25rem] bg-[#f5f0e7] p-3 text-slate-950 shadow-sm md:p-4">
-        <div className="grid min-h-[760px] gap-4 lg:grid-cols-[280px_minmax(0,1fr)]">
+        <div className="grid grid-cols-1 min-h-[760px] gap-4 lg:grid-cols-[280px_minmax(0,1fr)]">
 
           {/* ── Left aside nav ── */}
           <aside className="rounded-[2rem] bg-[#1a2035] p-5 text-white lg:sticky lg:top-4 lg:h-[calc(100vh-2rem)] lg:min-h-[720px]">
@@ -543,6 +551,75 @@ const MiddleSchoolTab = (_props: MiddleSchoolTabProps) => {
                     The model does not begin with job titles. It begins with instructional functions: core subject load, cluster viability, signature Middle School experiences, advisory/pathways ownership, and bridge constraints.
                   </p>
                 </div>
+                <div className="rounded-2xl border border-slate-200 bg-white p-5">
+                  <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <div className="text-[9px] font-bold uppercase tracking-widest text-blue-500">
+                        Mature canonical capacity
+                      </div>
+                      <h3 className="mt-1 text-lg font-black text-slate-900">
+                        {middleSchoolCapacity.coreEducators} core + {middleSchoolCapacity.flexibleEducators} flexible = {middleSchoolCapacity.totalEducators} educators serving Middle School
+                      </h3>
+                    </div>
+                    <div className="rounded-xl border border-amber-100 bg-amber-50 px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-amber-800">
+                      Planning envelope
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+                    {[
+                      ["Raw learner blocks", `${middleSchoolCapacity.rawLearnerBlocks}`],
+                      ["Core blocks", `${middleSchoolCapacity.coreDemand}`],
+                      ["Programme blocks", `${middleSchoolCapacity.programmeDemand}`],
+                      ["Average load", middleSchoolCapacity.averageRequiredLoad.toFixed(2)],
+                      ["Capacity at 27", `${middleSchoolMidpointScenario.programmeCapacityAfterCore}`],
+                      ["27-block margin", `${middleSchoolMidpointScenario.programmeMargin}`],
+                      ["Load range", `${SECONDARY_EDUCATOR_CAPACITY_MODEL.loadPolicy.preferredMinimum}-${SECONDARY_EDUCATOR_CAPACITY_MODEL.loadPolicy.preferredMaximum}`],
+                      ["Readiness", "Timetable pending"],
+                    ].map(([label, value]) => (
+                      <div key={`ms-canonical-${label}`} className="rounded-xl border border-slate-100 bg-slate-50 px-3 py-2">
+                        <div className="text-[8px] font-bold uppercase tracking-wider text-slate-400">{label}</div>
+                        <div className="mt-1 text-base font-black text-slate-900">{value}</div>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="mt-4 rounded-xl border border-amber-100 bg-amber-50 px-4 py-3 text-[10px] font-semibold leading-relaxed text-amber-900">
+                    The 3-block midpoint margin requires named programme ownership and timetable validation before the model can be treated as operationally sufficient.
+                  </p>
+                </div>
+                <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+                  <div className="border-b border-slate-100 bg-slate-50 px-4 py-3">
+                    <div className="text-[9px] font-bold uppercase tracking-widest text-slate-400">
+                      Role-level programme capacity at 27 blocks
+                    </div>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="min-w-[760px] w-full text-left">
+                      <thead>
+                        <tr className="border-b border-slate-100 text-[9px] font-bold uppercase tracking-widest text-slate-400">
+                          <th className="px-4 py-3">Educator group</th>
+                          <th className="px-4 py-3 text-center">Count</th>
+                          <th className="px-4 py-3 text-center">Core load each</th>
+                          <th className="px-4 py-3 text-center">Programme capacity each</th>
+                          <th className="px-4 py-3 text-center">Total programme capacity</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {middleSchoolCapacity.midpointRoleDistribution.map((row) => {
+                          const programmeCapacity = row.programmeCapacityByLoadPoint[27];
+                          return (
+                            <tr key={`ms-role-${row.label}`} className="border-b border-slate-100 last:border-b-0">
+                              <td className="px-4 py-3 text-[11px] font-bold text-slate-900">{row.label}</td>
+                              <td className="px-4 py-3 text-center text-[11px] font-semibold text-slate-600">{row.educators}</td>
+                              <td className="px-4 py-3 text-center text-[11px] font-semibold text-slate-600">{row.coreLoadEach}</td>
+                              <td className="px-4 py-3 text-center text-[11px] font-semibold text-slate-600">{programmeCapacity / row.educators}</td>
+                              <td className="px-4 py-3 text-center text-[11px] font-black text-blue-700">{programmeCapacity}</td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
               </div>
 
               {/* Section 2: Grade 6 operating logic */}
@@ -586,7 +663,7 @@ const MiddleSchoolTab = (_props: MiddleSchoolTabProps) => {
                   </div>
                 </div>
                 <div className="rounded-xl border border-amber-100 bg-amber-50 px-4 py-3 text-[10px] font-medium leading-relaxed text-amber-800">
-                  This does not mean three fully loaded educators. The cluster model organizes instructional responsibility, while the slot math still shows gaps to the 24-slot minimum.
+                  This does not mean three fully loaded educators. The cluster model organizes instructional responsibility, while the slot math still shows gaps to the historical 24-slot Grade 6 launch threshold.
                 </div>
               </div>
 
@@ -715,6 +792,32 @@ const MiddleSchoolTab = (_props: MiddleSchoolTabProps) => {
                 <p className="text-xs text-slate-600 leading-relaxed">
                   Program functions are distributed to educators through available slot capacity after core subject-domain teaching load.
                 </p>
+                <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+                  {middleSchoolProgrammeOwnership.map((entry) => (
+                    <div key={entry.id} className="rounded-xl border border-slate-100 bg-white px-4 py-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <div className="text-[10px] font-black text-slate-900">{entry.programmeName}</div>
+                          <div className="mt-1 text-[9px] font-semibold uppercase tracking-wider text-slate-400">
+                            {entry.gradeRange} · {entry.deliveryUnit.replaceAll("_", " ")}
+                          </div>
+                        </div>
+                        <span className={cn(
+                          "rounded-full border px-2 py-0.5 text-[8px] font-black uppercase tracking-wider",
+                          entry.ownershipStatus === "pending"
+                            ? "border-amber-200 bg-amber-50 text-amber-700"
+                            : "border-blue-100 bg-blue-50 text-blue-700"
+                        )}>
+                          {entry.ownershipStatus}
+                        </span>
+                      </div>
+                      <div className="mt-2 text-[10px] font-medium leading-relaxed text-slate-500">
+                        Raw demand: {entry.rawSectionBlockDemand ?? "pending"} blocks · Owner: {entry.eligibleEducatorDomainOrOwnerRole}
+                      </div>
+                      <p className="mt-2 text-[10px] font-medium leading-relaxed text-slate-500">{entry.validationNotes}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
 
               {/* Section 7: Embedded Educator Routines */}
@@ -976,7 +1079,7 @@ const MiddleSchoolTab = (_props: MiddleSchoolTabProps) => {
                     </div>
                   </div>
                   <p className="text-xs text-slate-600 leading-relaxed">
-                    Grade 6 can be organized through 3 educator clusters, but these are not automatically 3 fully loaded educators. Each cluster still has a gap to the 24-slot minimum, so program functions must be distributed through available educator capacity or schedule validation.
+                    Grade 6 can be organized through 3 educator clusters, but these are not automatically 3 fully loaded educators. Each cluster still has a gap to the historical 24-slot launch threshold, so program functions must be distributed through available educator capacity or schedule validation.
                   </p>
                   <p className="text-[10px] text-slate-500 leading-relaxed">
                     Grade 6 has two valid planning lenses: 5 core subject-domain rows in the simulator and 3 educator clusters in the launch architecture. The domain rows capture per-subject load; the clusters capture how Grade 6 instruction can be organized before subject specialization deepens.
@@ -1016,7 +1119,7 @@ const MiddleSchoolTab = (_props: MiddleSchoolTabProps) => {
                             <div className="text-sm font-bold text-slate-900">{cluster.slotsAcrossTwoSections}</div>
                           </div>
                           <div className="bg-blue-50 rounded-xl p-2 border border-blue-100">
-                            <div className="text-[8px] font-bold text-blue-500 uppercase mb-0.5">Min viable load</div>
+                            <div className="text-[8px] font-bold text-blue-500 uppercase mb-0.5">Launch threshold</div>
                             <div className="text-sm font-bold text-blue-700">24 slots</div>
                           </div>
                           <div className="bg-amber-50 rounded-xl p-2 border border-amber-100">
@@ -1305,10 +1408,11 @@ const MiddleSchoolTab = (_props: MiddleSchoolTabProps) => {
               <Card title="Educator Load Logic by Opening Stage" icon={Users}>
                 <div className="space-y-4">
                   <p className="text-xs font-medium leading-relaxed text-slate-500">
-                    This simulator models Rio's Middle School load with a maximum of two sections per grade.
-                    A 24-slot load is the minimum viable full-time educator load; 28 slots is the maximum
-                    teaching load. Complementary functions complete the educator profile only when they align
-                    with the domain.
+                    This simulator models Rio's Middle School launch load with a maximum of two sections per grade.
+                    A 24-slot load remains a historical launch-specific threshold in this view. The mature
+                    secondary capacity policy is 26-28 scheduled learner-facing blocks, with 27 as the
+                    planning midpoint. Complementary functions complete the educator profile only when they
+                    align with the domain.
                   </p>
                   <div className="grid grid-cols-1 gap-3 lg:grid-cols-5">
                     {(Object.keys(msSectionsByGrade) as MiddleSchoolGrade[]).map((grade) => (

@@ -2091,18 +2091,18 @@ export const RIO_WEEKLY_COURSE_LOAD_STUB: readonly RioWeeklyCourseLoadStubRow[] 
   {
     id: "rio_g11_capstone_research",
     grade: "g11",
-    courseArea: "Capstone-like work / independent research preparation",
+    courseArea: "Innovation Diploma Project / independent research preparation",
     capabilityProfileIds: ["ap_seminar_research", "pathways_college_career"],
     weeklySlotsPerSection: null,
     minutesPerSlot: null,
     loadCategory: "mentorship_contact_load",
     validationStatus: "pending_rio_curriculum_validation",
-    notes: "Prepares for Grade 12 AP Research. Mentorship/contact load, not generic teaching.",
+    notes: "Begins the Grade 11 Innovation Diploma Project while preparing for Grade 12 AP Research where relevant. Mentorship/contact load, not generic teaching.",
   },
   {
     id: "rio_g11_project_mentorship",
     grade: "g11",
-    courseArea: "Project Mentorship / Passion Project",
+    courseArea: "Innovation Diploma Project Mentorship",
     capabilityProfileIds: [
       "innovation_design_technologies_project_mentorship",
       "ap_seminar_research",
@@ -2111,18 +2111,18 @@ export const RIO_WEEKLY_COURSE_LOAD_STUB: readonly RioWeeklyCourseLoadStubRow[] 
     minutesPerSlot: null,
     loadCategory: "mentorship_contact_load",
     validationStatus: "pending_rio_curriculum_validation",
-    notes: "Distributed educator responsibility inside the fixed synchronized mentorship block. Not a separate Project Mentor hire by default.",
+    notes: "Grade 11 uses Innovation Diploma Project mentorship, not Passion Project. Distributed educator responsibility inside the fixed synchronized mentorship block. Not a separate Project Mentor hire by default.",
   },
   {
     id: "rio_g11_innovation_design",
     grade: "g11",
-    courseArea: "Innovation / Design Technologies",
+    courseArea: "Innovation Diploma / Design Technologies",
     capabilityProfileIds: ["innovation_design_technologies_project_mentorship"],
     weeklySlotsPerSection: null,
     minutesPerSlot: null,
     loadCategory: "mentorship_contact_load",
     validationStatus: "pending_rio_curriculum_validation",
-    notes: "Distributed educator responsibility within the fixed mentorship block.",
+    notes: "Supports the Grade 11 Innovation Diploma Project. Distributed educator responsibility within the fixed mentorship block.",
   },
 
   // ── Grade 12 ─────────────────────────────────────────────────────────────
@@ -2228,13 +2228,13 @@ export const RIO_WEEKLY_COURSE_LOAD_STUB: readonly RioWeeklyCourseLoadStubRow[] 
   {
     id: "rio_g12_innovation_diploma",
     grade: "g12",
-    courseArea: "Innovation Diploma completion where applicable",
+    courseArea: "Innovation Diploma Project completion",
     capabilityProfileIds: ["innovation_design_technologies_project_mentorship"],
     weeklySlotsPerSection: null,
     minutesPerSlot: null,
     loadCategory: "mentorship_contact_load",
     validationStatus: "pending_rio_curriculum_validation",
-    notes: "Distributed educator responsibility inside the fixed synchronized mentorship block. Not a separate Project Mentor hire.",
+    notes: "Grade 12 completes the Innovation Diploma Project. Distributed educator responsibility inside the fixed synchronized mentorship block. Not a separate Project Mentor hire.",
   },
 ];
 
