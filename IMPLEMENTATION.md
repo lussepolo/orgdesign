@@ -2725,3 +2725,135 @@ DRE Scenario Simulator finalization
 This includes completing the operational-scenario workflow, calculation
 integrity, board-facing interpretation, application integration, regression
 validation, browser QA, and clean-index reproducibility.
+
+## Phase 15I.0 — DRE Simulator Governance Audit (read-only)
+
+### Status
+
+**Completed.** Outcome: Class B.
+
+Phase 15I.0 was a read-only audit of the DRE Scenario Simulator's governance
+state prior to Finance-source closure and board ratification. No files were
+modified.
+
+### Audit outcome (Class B)
+
+All engineering gates passed. The following governance and Finance-source
+blockers were identified and carried forward to Phase 15I.1:
+
+1. `CALCULATION_CAN_BEGIN = false` semantically stale (engine calculates; gate reflects governance, not implementation).
+2. `payroll_adapter_output` registry entry stale (said "missing_adapter_implementation"; Phase 15H.2 established the instructional-capacity model; FOPAG sync remains pending).
+3. "CAPEX excluded until Phase 15" badge in `DreScenarioContextBanner.tsx` stale (CAPEX is now in Capital Decision).
+4. No explicit three-state governance structure (engineering / Finance / board).
+5. Six unresolved Finance-source open items not consolidated into a single queryable registry.
+
+---
+
+## Phase 15I.1 — DRE Governance-State and Finance-Source Closure Preparation
+## Phase 15I.1 Closure Correction — Readiness Semantics, Capital Handoff Disclosure, and Browser QA
+
+### Status
+
+**Implemented and corrected.** Commit: `"Clarify DRE governance and Finance readiness"` (2026-06-16), amended by Phase 15I.1 Closure Correction.
+
+### Objective
+
+Prepare the DRE Scenario Simulator for formal Finance-source closure and board
+ratification by:
+
+- establishing an explicit three-state governance architecture;
+- exposing all unresolved Finance assumptions in a consolidated, queryable registry;
+- creating a permanent 24-check validator and a browser QA suite;
+- updating the DRE Scenario Context Banner with the three-state disclosure.
+
+**Closure Correction (Phase 15I.1 Closure):** Two semantic defects were corrected:
+1. `"missing_payroll_fopag_synchronization"` was an incorrect classification — both models are implemented; the correct blocking reason is `"reconciliation_required"`.
+2. `CALCULATION_CAN_BEGIN` was incorrectly derived from Finance/board confirmation gates. It now derives from engineering readiness + calculation availability, evaluating to `true`. Finance and board status are independent gates (`FINANCE_SOURCE_CLOSURE_COMPLETE = false`, `BOARD_RATIFICATION_READY = false`).
+
+### Files created
+
+| File | Purpose |
+|------|---------|
+| `src/features/rio-scenario-resilience/model/dreGovernanceReadiness.ts` | Three-state governance state + six Finance-source open items + payroll model state |
+| `src/features/rio-scenario-resilience/model/dreGovernanceReadinessValidation.ts` | 24-check validator (updated for closure correction) |
+| `scripts/validate-phase15i1.ts` | `npm run validate:phase15i1` entry point |
+| `tests/phase15i1/qa-entry.html` | Playwright QA harness HTML |
+| `tests/phase15i1/qa-main.tsx` | React root for QA harness |
+| `tests/phase15i1/dre-governance-readiness.run.ts` | Playwright QA runner (22/22 pass) |
+
+### Files modified
+
+| File | Change |
+|------|--------|
+| `src/features/rio-scenario-resilience/model/inputReadinessRegistry.ts` | Remove `"missing_payroll_fopag_synchronization"` from `InputBlockingReason`; add `"reconciliation_required"`; update `payroll_adapter_output.blockingReason`; derive `CALCULATION_CAN_BEGIN` from engineering readiness (= `true`) |
+| `src/features/rio-scenario-resilience/model/dreEngineValidation.ts` | Check 20: `CALCULATION_CAN_BEGIN === false` → `FINANCE_SOURCE_CLOSURE_COMPLETE === false` |
+| `src/features/rio-scenario-resilience/model/dreEngineValidationContract.ts` | Rename check ID to `"finance_source_closure_incomplete"` |
+| `src/features/rio-scenario-resilience/components/CapitalDecision/CapitalDecisionView.tsx` | Add compact inherited DRE governance disclosure (engine validated / Finance pending / not ratified) |
+| `src/components/dreSimulator/DreScenarioContextBanner.tsx` | Replace stale "CAPEX excluded until Phase 15" badge with "CAPEX in Capital Decision"; add three-state governance disclosure panel |
+| `src/hooks/useDreScenarioSimulator.ts` | Update stale `CALCULATION_CAN_BEGIN remains false` comment |
+| `package.json` | Add `validate:phase15i1` and `qa:phase15i1` scripts |
+
+**Untracked validators corrected (all had `CALCULATION_CAN_BEGIN === false` checks):** `dreScenarioAdaptersValidation.ts`, `dreEbitdaEngineReadinessValidation.ts`, `dreEnrollmentCapacityLeverValidation.ts`, `dreFormulaParityValidation.ts`, `dreEbitdaBacktestValidation.ts`, `dreRevenueBlockReconciliationValidation.ts`, `dreRevenueDriverSourceValidation.ts`, `dreScenarioAdapterDesignValidation.ts`, `dreWorkingScenarioValidation.ts`, and their contract files. All migrated to `FINANCE_SOURCE_CLOSURE_COMPLETE === false`.
+
+### Governance architecture
+
+```
+DRE_GOVERNANCE_READINESS.engineeringReadiness      → "engineering_ready"
+DRE_GOVERNANCE_READINESS.calculationAvailability   → "available"
+DRE_GOVERNANCE_READINESS.financeSourceReadiness    → "pending_finance_confirmation"
+DRE_GOVERNANCE_READINESS.boardRatificationReadiness → "not_ratified"
+DRE_GOVERNANCE_READINESS.instructionalCapacityStatus → "established"
+DRE_GOVERNANCE_READINESS.payrollFopagModelStatus    → "implemented"
+DRE_GOVERNANCE_READINESS.payrollCapacityAlignmentStatus → "reconciliation_required"
+```
+
+`CALCULATION_CAN_BEGIN = true` (engineering ready + calculation available).
+`FINANCE_SOURCE_CLOSURE_COMPLETE = false` (Finance sources not yet confirmed).
+`BOARD_RATIFICATION_READY = false` (board has not ratified a scenario).
+
+### Six Finance-source open items
+
+| Key | Status |
+|-----|--------|
+| `outras_receitas_reajuste` | `pending_finance_confirmation` |
+| `descontos_metodo_formula_base` | `pending_finance_confirmation` |
+| `tuition_source_provenance` | `provisional_source` |
+| `discount_schedule_provenance` | `provisional_source` |
+| `enrollment_baseline_parity` | `reconciliation_required` |
+| `instructional_capacity_payroll_sync` | `reconciliation_required` |
+
+All six items have `blocksEngineCalculation: false`, `blocksBoardRatification: true`, `calculationContinues: true`.
+
+### Phase 15I.1 gates (closure correction)
+
+| Gate | Result |
+|------|--------|
+| `npm run lint` | ✓ clean |
+| `npm run validate:phase15i1` | ✓ 24/24 |
+| `npm run validate:phase15h2` | ✓ 30/30 |
+| `npm run validate:phase15g2` | ✓ 25/25 |
+| `npm run validate:phase15f` | ✓ 185/185 |
+| `npm run qa:phase15i1` | ✓ 22/22 |
+| `npm run qa:phase15h2` | ✓ 46/46 |
+| `npm run qa:phase15g2` | ✓ 19/19 |
+| `npm run qa:phase15f` | ✓ 58/58 |
+| `npm run build` | ✓ clean |
+| `git diff --check` | ✓ clean |
+| Staged-index gate | ✓ all validators + browser QA pass in exported tree |
+| Canonical fixture 2028 enrollment | 228 learners ✓ |
+| Canonical fixture first EBITDA-positive year | 2032 ✓ |
+
+### What did NOT change
+
+- No DRE engine formulas, Capital Decision formulas, or Viability formulas were changed.
+- No tuition values, discount percentages, or enrollment values were changed.
+- No FOPAG or payroll adapter calculations were changed.
+- `WORKING_SCENARIO_RATIFICATION_STATUS` remains `"technical_validation_fixture"`.
+- The 228-vs-246 enrollment parity question is not resolved; it is registered as an open Finance item.
+- Phase 15H.3 remains deferred.
+
+### Locked invariants (unchanged)
+
+- Canonical fixture (t1_g3 / intermediario / bp1_division_differentiated / balanced_experience): 228 learners 2028, first EBITDA-positive 2032.
+- Secondary instructional-capacity model: MS 9 educators, HS 11 educators, combined 20 (Phase 15H.2).
+- `CALCULATION_CAN_BEGIN = true` (engine ready + availability confirmed). Finance-source confirmation and board ratification remain pending and independent.

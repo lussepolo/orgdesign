@@ -32,8 +32,8 @@ export type DreEngineCheckId =
   | "custo_material_digital_sign_correct"
   // Behavioral: discount driver source
   | "bolsa_de_estudos_uses_dre_driver_not_discount_schedule"
-  // Structural: global gate
-  | "calculation_can_begin_remains_false";
+  // Structural: Finance-source closure gate
+  | "finance_source_closure_incomplete";
 
 export interface DreEngineCheckResult {
   readonly checkId: DreEngineCheckId;

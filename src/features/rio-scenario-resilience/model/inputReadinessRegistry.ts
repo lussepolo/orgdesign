@@ -1,4 +1,10 @@
 import type { ScenarioOutputId } from "./scenarioCalculationBoundaryContract";
+import {
+  DRE_CALCULATION_ENGINE_IS_READY,
+  DRE_CALCULATION_AVAILABILITY_CONFIRMED,
+  DRE_FINANCE_SOURCES_CONFIRMED,
+  DRE_BOARD_RATIFIED,
+} from "./dreGovernanceReadiness";
 
 export const AUTHORITATIVE_TOP_LEVEL_DECISION_LEVER_IDS = [
   "opening_grades",
@@ -98,6 +104,7 @@ export type InputBlockingReason =
   | "missing_capex_validation"
   | "missing_formula_definition"
   | "missing_adapter_implementation"
+  | "reconciliation_required"
   | "missing_upstream_output"
   | "missing_interpretation_rules"
   | "not_required_until_upstream_ready";
@@ -433,15 +440,18 @@ export const INPUT_READINESS_REGISTRY: InputReadinessRegistry = {
     currentSource: "payrollAdapterContract.ts PayrollAdapterOutput",
     sourceOwnership: "not_applicable",
     canUseForCalculation: false,
-    blockingReason: "missing_adapter_implementation",
-    requiredNextAction: "Implement mapping only after role-cost and staffing inputs pass validation.",
+    blockingReason: "reconciliation_required",
+    requiredNextAction:
+      "Synchronize the payroll/FOPAG adapter with the Phase 15H.2 instructional-capacity planning model (MS 9 / HS 11 / combined 20). This is Phase 15H.3 scope, currently deferred.",
     dependsOn: [
       "validated_role_cost_map",
       "staffing_rules",
       "sections_by_year_and_grade",
       "payroll_allocation_category",
     ],
-    futureArtifactOrFile: "future payroll adapter implementation",
+    futureArtifactOrFile: "future payroll adapter reconciliation with Phase 15H.2 instructional-capacity model",
+    notes:
+      "Phase 15H.2 (2026-06-16) established the secondary instructional-capacity planning model: MS 9 educators, HS 11 educators, combined 20. This planning envelope is not a payroll authorization and has not been synchronized with the FOPAG payroll adapter. The instructional-capacity model is established; payroll synchronization with it remains pending dedicated reconciliation (Phase 15H.3, currently deferred).",
   },
   selected_service_contract_option: {
     inputId: "selected_service_contract_option",
@@ -844,5 +854,9 @@ export const INPUT_READINESS_REGISTRY_SUMMARY = {
   calculationReady: 4,
 };
 
-// Calculations remain blocked until required revenue, payroll, OPEX/CAPEX, and scenario-boundary inputs are validated or mapped.
-export const CALCULATION_CAN_BEGIN = false;
+// Derives from engineering readiness and calculation availability — evaluates true
+// because the engine is implemented (engineering_ready) and calculation is available.
+// Finance-source confirmation and board ratification are separate governance gates
+// (see FINANCE_SOURCE_CLOSURE_COMPLETE and BOARD_RATIFICATION_READY in dreGovernanceReadiness.ts).
+export const CALCULATION_CAN_BEGIN =
+  DRE_CALCULATION_ENGINE_IS_READY && DRE_CALCULATION_AVAILABILITY_CONFIRMED;

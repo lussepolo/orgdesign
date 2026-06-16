@@ -21,6 +21,7 @@ import { useMemo, useState } from "react";
 import { Activity } from "lucide-react";
 import { Badge, Card } from "../../../../components/common";
 import { calculateInvestmentInterpretation } from "../../model/investmentInterpretationEngine";
+import { DRE_GOVERNANCE_READINESS } from "../../model/dreGovernanceReadiness";
 import type { CapitalDecisionEngineInput } from "../../model/capitalDecisionEngineContract";
 import type { CapexOptionId } from "../../model/capexOptionSourceContract";
 import {
@@ -77,6 +78,32 @@ function configKey(input: CapitalDecisionEngineInput): string {
     input.orgDesignOptionId,
     input.capexOptionId,
   ].join("|");
+}
+
+// ── Inherited DRE governance disclosure (compact, non-blocking) ───────────────
+
+function CapitalDecisionGovernanceDisclosure() {
+  const gov = DRE_GOVERNANCE_READINESS;
+  const engineLabel = gov.engineeringReadiness === "engineering_ready" ? "validated" : "not ready";
+  const financeLabel =
+    gov.financeSourceReadiness === "confirmed" ? "confirmed" : "pending";
+  const boardLabel =
+    gov.boardRatificationReadiness === "board_ratified" ? "ratified" : "not ratified";
+  return (
+    <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-xs text-slate-600">
+      <p className="mb-1 font-semibold uppercase tracking-wide text-slate-500">
+        DRE Governance Status (inherited)
+      </p>
+      <div className="flex flex-wrap gap-x-6 gap-y-1">
+        <span>Technical engine: <span className="font-medium text-slate-700">{engineLabel}</span></span>
+        <span>Finance-source confirmation: <span className="font-medium text-amber-700">{financeLabel}</span></span>
+        <span>Working scenario ratification: <span className="font-medium text-slate-700">{boardLabel}</span></span>
+      </div>
+      <p className="mt-1.5 text-slate-500">
+        CAPEX and investment metrics calculate regardless of Finance-source confirmation or board ratification status.
+      </p>
+    </div>
+  );
 }
 
 // ── Discriminated props ───────────────────────────────────────────────────────
@@ -193,6 +220,8 @@ function StandaloneCapitalDecisionView() {
         </p>
       </Card>
 
+      <CapitalDecisionGovernanceDisclosure />
+
       <ScenarioConfigurationPanel
         scenarios={scenarios}
         selectedScenarioId={selectedScenario.id}
@@ -286,6 +315,8 @@ function IntegratedCapitalDecisionView({
           here. Each configuration is evaluated by the Phase 15E investment-interpretation engine.
         </p>
       </Card>
+
+      <CapitalDecisionGovernanceDisclosure />
 
       <IntegratedScenarioConfigurationPanel
         scenarios={state.scenarios}

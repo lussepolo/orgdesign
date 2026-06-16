@@ -11,7 +11,9 @@
 // fixture, NOT board-ratified — see dreWorkingScenarioContract.ts
 // WORKING_SCENARIO_RATIFICATION_STATUS).
 //
-// CALCULATION_CAN_BEGIN remains false (inputReadinessRegistry.ts).
+// CALCULATION_CAN_BEGIN is true (engine ready, calculation available).
+// Finance-source confirmation pending (FINANCE_SOURCE_CLOSURE_COMPLETE = false).
+// Board ratification pending (BOARD_RATIFICATION_READY = false).
 // No cash-flow bridge. No CAPEX bridge. No DCF. No NPV. No payback. No Tier.
 //
 // ── Orchestration invariant (Phase 14A.1) ───────────────────────────────────────

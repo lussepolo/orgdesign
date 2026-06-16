@@ -11,6 +11,7 @@ import type { DreScenarioSimulatorSelections } from "../../hooks/useDreScenarioS
 import type { DreEngineOutput } from "../../features/rio-scenario-resilience/model/dreEngineContract";
 import type { OpeningPackageProjectionYear } from "../../features/rio-scenario-resilience/model/openingPackageOccupancySourceDataContract";
 import { RECEITA_PROJECTION_YEARS } from "../../features/rio-scenario-resilience/model/receitaEngineContract";
+import { DRE_GOVERNANCE_READINESS } from "../../features/rio-scenario-resilience/model/dreGovernanceReadiness";
 
 interface DreScenarioContextBannerProps {
   selections: DreScenarioSimulatorSelections;
@@ -69,7 +70,7 @@ export default function DreScenarioContextBanner({ selections, dreOutput, year }
           <Badge variant="default">DRE operating layer</Badge>
           <Badge variant="default">v8 PnL/DRE source</Badge>
           <Badge variant="default">Service Contracts as DRE cost lines</Badge>
-          <Badge variant="default">CAPEX excluded until Phase 15</Badge>
+          <Badge variant="default">CAPEX in Capital Decision</Badge>
         </div>
       </div>
 
@@ -114,9 +115,36 @@ export default function DreScenarioContextBanner({ selections, dreOutput, year }
         </div>
       </div>
 
-      <p className="mt-3 text-xs leading-relaxed text-cockpit-meta">
-        Current default is a technical validation fixture, not a board-ratified recommendation.
-      </p>
+      <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
+        <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.16em] text-amber-700">
+          DRE Governance Readiness
+        </div>
+        <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-3">
+          <div className="flex items-center gap-2">
+            <span className="inline-block h-2 w-2 shrink-0 rounded-full bg-green-500" />
+            <span className="text-xs text-cockpit-slate">
+              Engineering: <span className="font-semibold text-cockpit-ink">ready</span>
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="inline-block h-2 w-2 shrink-0 rounded-full bg-amber-400" />
+            <span className="text-xs text-cockpit-slate">
+              Finance sources: <span className="font-semibold text-amber-700">pending confirmation</span>
+              {" "}({DRE_GOVERNANCE_READINESS.openItems.length} open items)
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="inline-block h-2 w-2 shrink-0 rounded-full bg-slate-400" />
+            <span className="text-xs text-cockpit-slate">
+              Board ratification: <span className="font-semibold text-slate-600">not yet ratified</span>
+            </span>
+          </div>
+        </div>
+        <p className="mt-2 text-[11px] leading-relaxed text-cockpit-meta">
+          Current default is a technical validation fixture, not a board-ratified recommendation.
+          Engine calculates deterministically; Finance source confirmation and board ratification remain pending.
+        </p>
+      </div>
     </div>
   );
 }

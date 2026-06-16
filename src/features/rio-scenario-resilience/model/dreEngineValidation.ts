@@ -17,7 +17,7 @@ import { calculateFopag } from "./fopagEngine";
 import { DRE_REVENUE_DRIVER_SOURCE_DATA } from "./dreRevenueDriverSourceData";
 import { DRE_ANNUAL_ASSUMPTION_SOURCE_DATA } from "./dreAnnualAssumptionSourceData";
 import { DRE_OUTRAS_RECEITAS_BASE_PER_LEARNER } from "./dreScenarioAdapters";
-import { CALCULATION_CAN_BEGIN } from "./inputReadinessRegistry";
+import { FINANCE_SOURCE_CLOSURE_COMPLETE } from "./dreGovernanceReadiness";
 
 const VALIDATION_INPUT = {
   openingPackageId: "t1_g3" as const,
@@ -581,16 +581,16 @@ export function runDreEngineValidation(): DreEngineValidationReport {
     }
   }
 
-  // ── Check 20: calculation_can_begin_remains_false ────────────────────────────
+  // ── Check 20: finance_source_closure_incomplete ──────────────────────────────
   checks.push(
-    CALCULATION_CAN_BEGIN === false
+    FINANCE_SOURCE_CLOSURE_COMPLETE === false
       ? pass(
-          "calculation_can_begin_remains_false",
-          "CALCULATION_CAN_BEGIN === false (inputReadinessRegistry.ts line 1827) — global gate unchanged",
+          "finance_source_closure_incomplete",
+          "FINANCE_SOURCE_CLOSURE_COMPLETE === false — Finance-source confirmation remains pending",
         )
       : fail(
-          "calculation_can_begin_remains_false",
-          `CALCULATION_CAN_BEGIN is ${String(CALCULATION_CAN_BEGIN)} — must remain false`,
+          "finance_source_closure_incomplete",
+          `FINANCE_SOURCE_CLOSURE_COMPLETE is ${String(FINANCE_SOURCE_CLOSURE_COMPLETE)} — must remain false until Finance confirms all source items`,
         ),
   );
 
