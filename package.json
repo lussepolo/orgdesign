@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "clean": "rm -rf dist",
     "lint": "tsc --noEmit",
-    "validate:phase15f": "tsx scripts/validate-phase15f.ts"
+    "validate:phase15f": "tsx scripts/validate-phase15f.ts",
+    "qa:phase15f": "tsx tests/phase15f/phase15f.run.ts"
   },
   "dependencies": {
     "@google/genai": "^1.29.0",

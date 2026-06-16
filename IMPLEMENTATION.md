@@ -2254,4 +2254,4 @@ repository-committed browser-QA infrastructure.
 **Script:** `npm run qa:phase15f` (`tsx tests/phase15f/phase15f.run.ts`)
 runs the spec against a Vite preview server on port 4175.
 
-`npm run qa:phase15f`: **56 pass / 0 fail**.
+`npm run qa:phase15f`: **58 pass / 0 fail**.
