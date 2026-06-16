@@ -2195,3 +2195,63 @@ fields, `MAX_SAVED_SCENARIOS === 4`, and explicit-exclusions boundary.
 `phase15cInvestmentMetricsEngineValidation.ts`: 28/28 pass (unchanged).
 `capitalDecisionEngineValidation.ts`: 25/25 pass (unchanged).
 `dreEngineValidation.ts`: 20/20 pass (unchanged). `git diff --check`: clean.
+
+## Phase 15F.4-DRE-VALIDATION-AND-PERMANENT-BROWSER-QA-CLOSURE
+
+### Commit A: DRE validation repository closure
+
+The Phase 15F commit (53ebbf7) referenced `dreEngineValidation.ts` (20/20
+pass) in the validation status section but the file and its 3 transitive
+dependencies were untracked and therefore not reproducible from a clean
+checkout. This commit closes that gap.
+
+**Four previously-untracked model files committed:**
+- `model/dreEngineValidation.ts` — entry point; `runDreEngineValidation()`
+  returns 20-check `DreEngineValidationReport`
+- `model/dreEngineValidationContract.ts` — types only, no local imports
+- `model/scenarioCalculationBoundaryContract.ts` — type contracts for
+  calculation boundary; imports `revenueInputs` (committed) and
+  `payrollAdapterContract` (committed)
+- `model/opexCapexAdapterContract.ts` — imports only `revenueInputs`
+  (committed)
+
+All other imports of `dreEngineValidation.ts` were already committed:
+`dreEngine`, `receitaEngine`, `receitaEngineContract`, `fopagEngine`,
+`dreRevenueDriverSourceData`, `dreAnnualAssumptionSourceData`,
+`dreScenarioAdapters`, and `inputReadinessRegistry`. The dependency chain is
+now bounded and fully committed.
+
+**Aggregate validator added:** `scripts/validate-phase15f.ts`
+Runs all 7 phase validators in order via `npm run validate:phase15f`
+(`tsx scripts/validate-phase15f.ts`). Expected output: 185/185.
+
+Phase order and counts:
+- DRE: 20/20 (`runDreEngineValidation`)
+- Phase 15B: 25/25 (`runCapitalDecisionEngineValidation`)
+- Phase 15C: 28/28 (`runPhase15CInvestmentMetricsValidation`)
+- Phase 15D: 36/36 (`runDiscountedPaybackEngineValidation`)
+- Phase 15D.2: 15/15 (`runPhase15DLeverPropagationValidation`)
+- Phase 15E: 40/40 (`runPhase15EInvestmentInterpretationValidation`)
+- Phase 15F: 21/21 (`runPhase15FUiIntegrationValidation`)
+
+`npm run lint` (`tsc --noEmit`): clean after committing the 4 files.
+`npm run validate:phase15f`: **185/185** (0 fail).
+
+### Commit B: Permanent Phase 15F browser QA
+
+Converts the Phase 15F.2 one-shot QA harness into permanent, deterministic,
+repository-committed browser-QA infrastructure.
+
+**Files added:**
+- `playwright.config.ts` — Playwright config; `webServer` auto-starts Vite
+  on port 4175 (`vite preview --port 4175`)
+- `tests/phase15f/phase15f.spec.ts` — 56-assertion spec using the
+  `playwright` library (chromium); covers default-load, lever selection,
+  scenario save/remove, scenario comparison, strict-language invariants,
+  forbidden-term sweep, ARIA structure
+- `.gitignore` — adds `test-results/` and `playwright-report/`
+
+**Script:** `npm run qa:phase15f` (`tsx tests/phase15f/phase15f.run.ts`)
+runs the spec against a Vite preview server on port 4175.
+
+`npm run qa:phase15f`: **56 pass / 0 fail**.
