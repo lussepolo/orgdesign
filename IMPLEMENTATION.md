@@ -2669,3 +2669,59 @@ phase should test double blocks, synchronized Advisory/project blocks,
 AP/elective concurrency, lab/room constraints, shared MS/HS role conflicts, and
 whether the HS 23-block midpoint efficiency requirement is operationally
 legitimate.
+
+---
+
+## Phase 15H.3 — PAUSED / DEFERRED
+
+### Status
+
+Phase 15H.3 has not started.
+
+The next planned MS/HS phase, master-timetable feasibility validation, is
+intentionally paused while implementation priority shifts to finalizing the DRE
+Scenario Simulator and its board-facing decision workflow.
+
+Phase 15H.2 remains complete and closed. The pause does not change the
+validated mature instructional-capacity planning envelope:
+
+- Middle School: 8 core + 1 flexible = 9 educators
+- High School: 10 core + 1 flexible = 11 educators
+- Combined secondary pool: 18 core + 2 flexible = 20 educators
+- Scheduled load policy: 26–28 blocks
+- Board readiness: conditional
+
+### Deferred scope
+
+The following work remains deferred and must not be treated as completed:
+
+- grade-level master timetable construction;
+- educator-level schedule construction;
+- concurrency and double-booking validation;
+- subject-qualification mapping;
+- validation of double-block rules;
+- final programme-ownership allocation;
+- AP and elective demand confirmation;
+- proof of the 23 High School block-equivalent delivery efficiencies;
+- individual educator load validation against the 26–28 range;
+- flexible programme-educator activation timing;
+- payroll-adapter and FOPAG reconciliation.
+
+### Re-entry condition
+
+Phase 15H.3 should resume only after the DRE Scenario Simulator, scenario
+handoff, and board-facing DRE decision workflow are finalized and closed.
+
+When resumed, the phase must attempt to prove or disprove the operational
+feasibility of the 9/11/20 planning envelope. It must not assume timetable
+feasibility in advance.
+
+### Active implementation priority
+
+The active implementation priority is now:
+
+DRE Scenario Simulator finalization
+
+This includes completing the operational-scenario workflow, calculation
+integrity, board-facing interpretation, application integration, regression
+validation, browser QA, and clean-index reproducibility.
