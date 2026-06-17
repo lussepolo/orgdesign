@@ -16,7 +16,8 @@
     "validate:phase15h2": "tsx scripts/validate-phase15h2.ts",
     "qa:phase15h2": "tsx tests/phase15h2/secondary-capacity.run.ts",
     "validate:phase15i1": "tsx scripts/validate-phase15i1.ts",
-    "qa:phase15i1": "tsx tests/phase15i1/dre-governance-readiness.run.ts"
+    "qa:phase15i1": "tsx tests/phase15i1/dre-governance-readiness.run.ts",
+    "validate:phase15i2-packet": "tsx scripts/validate-phase15i2-packet.ts"
   },
   "dependencies": {
     "@google/genai": "^1.29.0",

@@ -2857,3 +2857,95 @@ All six items have `blocksEngineCalculation: false`, `blocksBoardRatification: t
 - Canonical fixture (t1_g3 / intermediario / bp1_division_differentiated / balanced_experience): 228 learners 2028, first EBITDA-positive 2032.
 - Secondary instructional-capacity model: MS 9 educators, HS 11 educators, combined 20 (Phase 15H.2).
 - `CALCULATION_CAN_BEGIN = true` (engine ready + availability confirmed). Finance-source confirmation and board ratification remain pending and independent.
+
+---
+
+## Phase 15I.2 — DRE Finance Confirmation Packet Preparation
+
+### Status
+
+**Implemented.** Commit: `"Prepare DRE Finance confirmation packet"` (2026-06-17).
+
+### Objective
+
+Prepare a structured Finance confirmation packet that presents the six open Finance-source
+items (F01–F06) to the Finance team for formal review, enabling Finance-source closure and
+subsequent board ratification.
+
+Key governance constraints enforced:
+- No DRE formula was changed.
+- No source value was changed.
+- No Finance item was marked confirmed.
+- Board-ratification status was not changed.
+- Capital Decision calculations were not modified.
+
+### Files created
+
+| File | Purpose |
+|------|---------|
+| `docs/finance/dre-finance-confirmation-packet.md` | Primary Finance confirmation packet in Brazilian Portuguese — 13 sections covering F01–F06 with decisions required, current engine behavior, source provenance, and approval fields |
+| `docs/finance/dre-finance-confirmation-register.json` | Structured decision register — all 6 items with `decisionStatus: "open"`, all approval fields `null`, governance state snapshot |
+| `docs/finance/dre-finance-confirmation-agenda.md` | 60-minute Finance confirmation session agenda covering F01–F06 with expected outcomes per item |
+| `scripts/validate-phase15i2-packet.ts` | 25-check validator: file existence, F01–F06 presence, null approval fields, governance state invariants, enrollment documentation (228 and 246), payroll/capacity state, no forbidden wording |
+
+### Files modified
+
+| File | Change |
+|------|--------|
+| `package.json` | Add `validate:phase15i2-packet` script |
+| `IMPLEMENTATION.md` | Add Phase 15I.2 history entry |
+
+### Six Finance-source open items — documented state
+
+| ID  | Key | Status | Engine behavior |
+|-----|-----|--------|----------------|
+| F01 | `outras_receitas_reajuste` | `pending_finance_confirmation` | Reajuste term omitted; `outrasReceitasRatio × numero_de_alunos` only |
+| F02 | `descontos_metodo_formula_base` | `pending_finance_confirmation` | Assumed: `−desconto_metodo_rate × receita_de_ensino_liquida` |
+| F03 | `tuition_source_provenance` | `provisional_source` | Screenshot-transcription-based; BP1 2028: EY R$91,390 / LS R$111,670 / MS R$122,419 / HS R$141,469 |
+| F04 | `discount_schedule_provenance` | `provisional_source` | 20% (2028–2030), 17% (2031), 15% (2032–2033), 12.5% (2034+) |
+| F05 | `enrollment_baseline_parity` | `reconciliation_required` | Engine: 228 (t1_g3/intermediario) / PnL workbook: ~246; neither declared authoritative |
+| F06 | `instructional_capacity_payroll_sync` | `reconciliation_required` | Both models implemented; assumptions not yet formally reconciled |
+
+### Enrollment parity documentation
+
+| Source | Learners 2028 | Configuration |
+|--------|---------------|--------------|
+| Engine (canonical fixture) | 228 | t1_g3 / intermediario / bp1_division_differentiated / balanced_experience |
+| PnL workbook (Phase 13B) | ~246 | Original workbook baseline (not mapped to engine scenario) |
+
+Neither value is declared authoritative. Finance + Board must confirm the authoritative baseline and equivalent-scenario mapping.
+
+### Phase 15I.2 gates
+
+| Gate | Result |
+|------|--------|
+| `npm run validate:phase15i2-packet` | ✓ 25/25 |
+| `npm run validate:phase15i1` | ✓ 24/24 |
+| `npm run validate:phase15h2` | ✓ 30/30 |
+| `npm run validate:phase15g2` | ✓ 25/25 |
+| `npm run validate:phase15f` | ✓ 185/185 |
+| `npm run lint` | ✓ clean |
+| `npm run build` | ✓ clean |
+| `git diff --check` | ✓ clean |
+| 108 scenarios: 0 failures, 0 NaN, 0 Infinity | ✓ (established; no engine code changed) |
+| Max EBITDA parity delta | 0 (established; no engine code changed) |
+| Canonical fixture 2028 enrollment | 228 learners ✓ |
+| Canonical fixture first EBITDA-positive year | 2032 ✓ |
+
+### What did NOT change
+
+- No DRE engine formulas, Capital Decision formulas, or Viability formulas were changed.
+- No tuition values, discount percentages, or enrollment values were changed.
+- No FOPAG or payroll adapter calculations were changed.
+- `WORKING_SCENARIO_RATIFICATION_STATUS` remains `"technical_validation_fixture"`.
+- `FINANCE_SOURCE_CLOSURE_COMPLETE` remains `false`.
+- `BOARD_RATIFICATION_READY` remains `false`.
+- `CALCULATION_CAN_BEGIN` remains `true`.
+- The 228-vs-246 enrollment parity question is not resolved; it is registered as F05.
+- Phase 15H.3 remains deferred.
+
+### Locked invariants (unchanged)
+
+- Canonical fixture (t1_g3 / intermediario / bp1_division_differentiated / balanced_experience): 228 learners 2028, first EBITDA-positive 2032.
+- Secondary instructional-capacity model: MS 9 educators, HS 11 educators, combined 20 (Phase 15H.2).
+- `CALCULATION_CAN_BEGIN = true` (engine ready + availability confirmed). Finance-source confirmation and board ratification remain pending and independent.
