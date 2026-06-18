@@ -14,6 +14,8 @@ import DreScopeBoundaryPanel from "../dreSimulator/DreScopeBoundaryPanel";
 import OrgDesignPanel from "../dreSimulator/OrgDesignPanel";
 import OrgDesignSensitivityPanel from "../dreSimulator/OrgDesignSensitivityPanel";
 import DreExportButton from "../dreSimulator/DreExportButton";
+import DreAssumptionStatusPanel from "../dreSimulator/DreAssumptionStatusPanel";
+import DreBoardReadableExport from "../dreSimulator/DreBoardReadableExport";
 
 interface DreScenarioSimulatorTabProps {
   readonly selections: DreScenarioSimulatorSelections;
@@ -114,6 +116,10 @@ export default function DreScenarioSimulatorTab({
       <OrgDesignSensitivityPanel rows={orgDesignSensitivity} />
 
       <DreAnnualTable dreOutput={dreOutput} />
+
+      <DreAssumptionStatusPanel />
+
+      <DreBoardReadableExport selections={selections} dreOutput={dreOutput} />
 
       <Card
         title="Export audit workbook"

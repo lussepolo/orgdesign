@@ -1,4 +1,4 @@
-import { Compass } from "lucide-react";
+import { Compass, CheckCircle2 } from "lucide-react";
 import { Badge } from "../common/Badge";
 import { formatBRL } from "../../lib/utils";
 import {
@@ -115,36 +115,35 @@ export default function DreScenarioContextBanner({ selections, dreOutput, year }
         </div>
       </div>
 
-      <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
-        <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.16em] text-amber-700">
-          DRE Governance Readiness
-        </div>
-        <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-3">
-          <div className="flex items-center gap-2">
-            <span className="inline-block h-2 w-2 shrink-0 rounded-full bg-green-500" />
-            <span className="text-xs text-cockpit-slate">
-              Engineering: <span className="font-semibold text-cockpit-ink">ready</span>
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="inline-block h-2 w-2 shrink-0 rounded-full bg-amber-400" />
-            <span className="text-xs text-cockpit-slate">
-              Finance sources: <span className="font-semibold text-amber-700">pending confirmation</span>
-              {" "}({DRE_GOVERNANCE_READINESS.openItems.length} open items)
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="inline-block h-2 w-2 shrink-0 rounded-full bg-slate-400" />
-            <span className="text-xs text-cockpit-slate">
-              Board ratification: <span className="font-semibold text-slate-600">not yet ratified</span>
-            </span>
+      <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
+        <div className="flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2">
+          <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-600" />
+          <div>
+            <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-emerald-700">Simulation available</div>
+            <div className="text-[11px] text-emerald-800">Engine ready · calculation runs</div>
           </div>
         </div>
-        <p className="mt-2 text-[11px] leading-relaxed text-cockpit-meta">
-          Current default is a technical validation fixture, not a board-ratified recommendation.
-          Engine calculates deterministically; Finance source confirmation and board ratification remain pending.
-        </p>
+        <div className="flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2">
+          <span className="inline-block h-2 w-2 shrink-0 rounded-full bg-amber-400" />
+          <div>
+            <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-amber-700">Source confirmation pending</div>
+            <div className="text-[11px] text-amber-800">
+              Finance sources: {DRE_GOVERNANCE_READINESS.openItems.length} open assumption items
+            </div>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+          <span className="inline-block h-2 w-2 shrink-0 rounded-full bg-slate-400" />
+          <div>
+            <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-600">Board ratification pending</div>
+            <div className="text-[11px] text-slate-600">Not yet board-ratified</div>
+          </div>
+        </div>
       </div>
+      <p className="mt-2 text-[11px] leading-relaxed text-cockpit-meta">
+        Simulation runs regardless of Finance-source confirmation or board ratification status.
+        Open assumption items are provenance gaps, not calculation blockers.
+      </p>
     </div>
   );
 }

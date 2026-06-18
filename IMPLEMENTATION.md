@@ -2999,3 +2999,101 @@ Formula mechanics confirmed: `C233 = ($Y233/$Y$221)*(1+C$9)*C$221`. Row-9 (reaju
 - `FINANCE_SOURCE_CLOSURE_COMPLETE = false`. `BOARD_RATIFICATION_READY = false`.
 - 5 Finance open items (F01, F03, F04, F05, F06) block board ratification; engine calculates regardless.
 - No tuition values, discount percentages, payroll, CAPEX, WACC, or DCF methodology changed.
+
+---
+
+## Phase 15J — Simulation-First Productization (2026-06-18)
+
+### Summary
+
+Reframed the Rio DRE and Capital Decision app as a simulation-first tool. Finance-source confirmation and board ratification are displayed as governance metadata, not as blockers. Simulation runs regardless of both governance states.
+
+### What changed
+
+**DRE Scenario Context Banner (`DreScenarioContextBanner.tsx`)**
+- "Simulation Available" (green pill) is now the primary state signal.
+- "Source confirmation pending" (amber) and "Board ratification pending" (slate) are shown as secondary metadata alongside simulation availability.
+- The amber "DRE Governance Readiness" title replaced with three explicit state badges.
+- Footer copy updated: "Simulation runs regardless of Finance-source confirmation or board ratification status."
+
+**Assumption Status Panel (`DreAssumptionStatusPanel.tsx`) — new**
+- Displays F01/F03/F04/F05/F06 as pending assumption metadata.
+- F02 displayed only as `resolved_engineering`.
+- Explicitly notes: "does not block simulation."
+- Shows `blocksEngineCalculation: false` semantics for all open items.
+
+**Board-Readable Export (`DreBoardReadableExport.tsx`) — new**
+- Per-scenario text block including: inputs, key outputs (learners 2028, first EBITDA-positive year, EBITDA 2028/2032/2037), and mandatory provisional-source caveat.
+- Caveat text: "This scenario is technically calculated and internally consistent. It is NOT Finance-source confirmed and NOT board-ratified."
+- Copy-to-clipboard button.
+
+**DRE Scenario Simulator Tab (`DreScenarioSimulatorTab.tsx`)**
+- Added `DreAssumptionStatusPanel` and `DreBoardReadableExport` after the annual table.
+
+**Scenario Comparison Panel (`ScenarioComparisonPanel.tsx`)**
+- Extended with "Scenario output overview" table including: Scenario name, Opening package, Occupancy, Tuition scenario, Org design option, Learners 2028, First EBITDA-positive year, EBITDA 2028, EBITDA 2032, EBITDA 2037, Cumulative EBITDA (2028–2047), VPL/NPV, TIR, Discounted payback, Source-status warning count.
+- DRE fields computed via `calculateDre(input)` per scenario.
+- Source-status warning count: constant 5 (global open items, same for all scenarios).
+- No winner row, no ranking, no recommendation.
+- Section heading uses neutral language: "Scenario output comparison."
+- Pairwise dimension table retitled "Sensitivity" (not "Winner").
+
+### Simulation is available
+
+```
+Can calculate:              yes
+Can simulate:               yes
+Can compare scenarios:      yes
+Finance-source confirmed:   not yet
+Board-ratified:             not yet
+```
+
+Finance-source gaps are shown as assumption-status labels (F01, F03, F04, F05, F06), not as blockers.
+
+### F02 status
+
+F02 (`descontos_metodo_formula_base`) remains `resolved_engineering`. It is displayed as resolved, not as an open item. The open item count is 5.
+
+### F01/F03/F04/F05/F06 display
+
+All five items are displayed as assumption metadata only. Each has `blocksEngineCalculation: false` and `calculationContinues: true`. None block simulation.
+
+### Phase 15J gates
+
+| Gate | Result |
+|------|--------|
+| `npm run validate:phase15j` | ✓ 21/21 |
+| `npm run qa:phase15j` | ✓ 12/12 |
+| `npm run validate:phase15i2c` | ✓ 26/26 |
+| `npm run validate:phase15i2-packet` | ✓ 25/25 |
+| `npm run validate:phase15i1` | ✓ 24/24 |
+| `npm run validate:phase15h2` | ✓ 30/30 |
+| `npm run validate:phase15g2` | ✓ 25/25 |
+| `npm run validate:phase15f` | ✓ 185/185 |
+| `npm run lint` | ✓ clean |
+| `npm run build` | ✓ clean |
+| `git diff --check` | ✓ clean |
+| 108 scenarios: 0 NaN, 0 Infinity | ✓ |
+| DRE-to-Capital EBITDA parity delta | 0 (no engine change) |
+
+### What did NOT change
+
+- No DRE engine formulas changed.
+- No Capital Decision engine formulas changed.
+- No tuition, discount, or enrollment values changed.
+- `FINANCE_SOURCE_CLOSURE_COMPLETE` remains `false`.
+- `BOARD_RATIFICATION_READY` remains `false`.
+- `CALCULATION_CAN_BEGIN` remains `true`.
+- F02 remains `resolved_engineering`.
+- F01/F03/F04/F05/F06 remain open with `blocksEngineCalculation: false`.
+- 108 scenarios remain finite.
+- DRE-to-Capital EBITDA parity: zero delta.
+
+### Locked invariants (unchanged)
+
+- Canonical fixture: 228 learners 2028, EBITDA positive by 2032.
+- `CALCULATION_CAN_BEGIN = true`.
+- `FINANCE_SOURCE_CLOSURE_COMPLETE = false`. `BOARD_RATIFICATION_READY = false`.
+- 5 Finance open items (F01, F03, F04, F05, F06) — block board ratification only; engine calculates regardless.
+- CAPEX excluded from DRE EBITDA; in Capital Decision only.
+- Service Contracts included once in DRE as cost lines.

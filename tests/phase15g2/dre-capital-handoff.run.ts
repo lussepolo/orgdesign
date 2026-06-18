@@ -209,7 +209,7 @@ async function runQa(page: Page) {
 
   // ── 16. Scenario comparison panel is present when 2+ scenarios ────────────
   check("comparison_panel_visible", await safe("comparison_panel_visible",
-    () => page.locator("text=Compare").first().isVisible(), false));
+    () => page.locator("text=Scenario output comparison").first().isVisible(), false));
 
   // ── 17. DRE selections persist when returning to DRE tab ─────────────────
   await safe("dre_selections_persist", async () => {

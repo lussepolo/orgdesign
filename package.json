@@ -19,7 +19,9 @@
     "qa:phase15i1": "tsx tests/phase15i1/dre-governance-readiness.run.ts",
     "validate:phase15i2-packet": "tsx scripts/validate-phase15i2-packet.ts",
     "validate:phase15i2c": "tsx scripts/validate-phase15i2c.ts",
-    "qa:phase15i2c": "tsx tests/phase15i2c/dre-formula-parity.run.ts"
+    "qa:phase15i2c": "tsx tests/phase15i2c/dre-formula-parity.run.ts",
+    "validate:phase15j": "tsx scripts/validate-phase15j.ts",
+    "qa:phase15j": "tsx tests/phase15j/phase15j.run.ts"
   },
   "dependencies": {
     "@google/genai": "^1.29.0",
