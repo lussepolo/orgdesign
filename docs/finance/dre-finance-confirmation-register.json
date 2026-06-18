@@ -1,7 +1,7 @@
 {
-  "packetVersion": "15I.2",
-  "phase": "Phase 15I.2 — DRE Finance Confirmation Packet Preparation",
-  "generatedDate": "2026-06-17",
+  "packetVersion": "15I.2C",
+  "phase": "Phase 15I.2C — DRE Workbook Formula Parity and Finance Registry Correction",
+  "generatedDate": "2026-06-18",
   "governanceState": {
     "engineeringReadiness": "engineering_ready",
     "calculationAvailability": "available",
@@ -12,7 +12,8 @@
     "CALCULATION_CAN_BEGIN": true,
     "FINANCE_SOURCE_CLOSURE_COMPLETE": false,
     "BOARD_RATIFICATION_READY": false,
-    "openItemCount": 6
+    "openItemCount": 5,
+    "resolvedItemCount": 1
   },
   "enrollmentDocumentation": {
     "engineCanonicalFixture2028": 228,
@@ -24,33 +25,16 @@
     {
       "id": "F01",
       "key": "outras_receitas_reajuste",
-      "label": "Outras Receitas — annual adjustment (reajuste_despesas) term",
-      "status": "pending_finance_confirmation",
+      "label": "Outras Receitas — annual adjustment (reajuste_despesas) index name and signed source",
+      "status": "provisional_source",
       "decisionStatus": "open",
-      "currentEngineBehavior": "outras_receitas = outrasReceitasRatio × numero_de_alunos — reajuste term omitted; engine discloses via outrasReceitasReajusteNote",
-      "sourceProvenance": "annualValuesStatus: not_available_pending_finance_source (dreScenarioAdapters.ts)",
+      "currentEngineBehavior": "outras_receitas = outrasReceitasRatio × numero_de_alunos — reajuste term omitted; engine discloses via outrasReceitasReajusteNote. Formula mechanics confirmed from PnL workbook (C233 = ($Y233/$Y$221)*(1+C$9)*C$221); direct row-9 annual values not yet extracted as a committed source record.",
+      "sourceProvenance": "Formula structure: PnL workbook row 233 (confirmed Phase 12I/12K). Direct row-9 (reajuste_despesas) extraction: not available in any committed source file. Branch B determination: Phase 15I.2C.",
       "requiredOwner": "Finance",
       "blocksEngineCalculation": false,
       "blocksBoardRatification": true,
       "calculationContinues": true,
-      "approvedFormula": null,
-      "approvedValue": null,
-      "approvedSourceReference": null,
-      "decisionDate": null,
-      "owner": null
-    },
-    {
-      "id": "F02",
-      "key": "descontos_metodo_formula_base",
-      "label": "Descontos Método de Assinatura — formula base relationship",
-      "status": "pending_finance_confirmation",
-      "decisionStatus": "open",
-      "currentEngineBehavior": "descontos_metodo_de_assinatura = −desconto_metodo_rate × receita_de_ensino_liquida — assumed relationship; engine discloses via descontosMetodoFormulaNote",
-      "sourceProvenance": "sourceType: pending_finance_source_confirmation (dreLineItemMap.ts)",
-      "requiredOwner": "Finance",
-      "blocksEngineCalculation": false,
-      "blocksBoardRatification": true,
-      "calculationContinues": true,
+      "financeAsk": "Confirm the index name for reajuste_despesas (C$9, PnL row 9) and provide a signed source reference. The formula structure (C233 = (Y233/Y221)*(1+C9)*C221) is already confirmed — only the economic index name and signed reference are needed.",
       "approvedFormula": null,
       "approvedValue": null,
       "approvedSourceReference": null,
@@ -69,6 +53,7 @@
       "blocksEngineCalculation": false,
       "blocksBoardRatification": true,
       "calculationContinues": true,
+      "financeAsk": "Confirm that the transcribed values match Finance-approved values and provide signed xlsx as official source.",
       "approvedFormula": null,
       "approvedValue": null,
       "approvedSourceReference": null,
@@ -87,6 +72,7 @@
       "blocksEngineCalculation": false,
       "blocksBoardRatification": true,
       "calculationContinues": true,
+      "financeAsk": "Provide signed document confirming the existing discount schedule. No formula change required — provenance sign-off only.",
       "approvedFormula": null,
       "approvedValue": null,
       "approvedSourceReference": null,
@@ -96,7 +82,7 @@
     {
       "id": "F05",
       "key": "enrollment_baseline_parity",
-      "label": "2028 enrollment baseline — engine vs PnL workbook reconciliation",
+      "label": "2028 enrollment baseline — engine vs PnL workbook scenario mapping",
       "status": "reconciliation_required",
       "decisionStatus": "open",
       "currentEngineBehavior": "Engine canonical fixture: 228 learners (t1_g3/intermediario/bp1_division_differentiated/balanced_experience). PnL workbook baseline: ~246 learners (Phase 13B, PNL_FORMULA_PARITY_SOURCE_DATA). Neither is declared authoritative. Difference reflects scenario configuration mismatch, not engine error.",
@@ -105,6 +91,7 @@
       "blocksEngineCalculation": false,
       "blocksBoardRatification": true,
       "calculationContinues": true,
+      "financeAsk": "Identify which engine scenario configuration (opening package + occupancy) corresponds to the PnL workbook baseline. This is a scenario-mapping question, not a formula dispute.",
       "enrollmentEngineLearners2028": 228,
       "enrollmentWorkbookLearners2028": 246,
       "authoritative2028Enrollment": null,
@@ -120,12 +107,13 @@
       "label": "Instructional-capacity / FOPAG payroll synchronization",
       "status": "reconciliation_required",
       "decisionStatus": "open",
-      "currentEngineBehavior": "Both models are implemented. Instructional-capacity planning model (Phase 15H.2): MS 9 educators, HS 11 educators, combined pool 20 (secondaryEducatorCapacityModel.ts). FOPAG payroll adapter: implemented with separate current assumptions (fopagEngine.ts + orgDesignPayrollActivation.ts). Both implemented; assumptions not yet formally reconciled. Synchronization is pending a dedicated future phase, to be scoped after Finance and Academic confirmation.",
+      "currentEngineBehavior": "Both models are implemented. Instructional-capacity planning model (Phase 15H.2): MS 9 educators, HS 11 educators, combined pool 20 (secondaryEducatorCapacityModel.ts). FOPAG payroll adapter: implemented with separate current assumptions (fopagEngine.ts + orgDesignPayrollActivation.ts). Both implemented; assumptions not yet formally reconciled. Synchronization is pending a dedicated future phase.",
       "sourceProvenance": "Instructional model: secondaryEducatorCapacityModel.ts (Phase 15H.2); Payroll: fopagEngine.ts + orgDesignPayrollActivation.ts",
-      "requiredOwner": "Finance",
+      "requiredOwner": "Finance + Academic",
       "blocksEngineCalculation": false,
       "blocksBoardRatification": true,
       "calculationContinues": true,
+      "financeAsk": "Finance and Academic must jointly confirm whether the FOPAG/instructional sync can proceed as a future dedicated phase, or whether any assumption must be resolved before Finance closure.",
       "payrollModelStatus": "implemented",
       "instructionalCapacityStatus": "established",
       "reconciliationStatus": "pending_dedicated_future_phase",
@@ -134,6 +122,22 @@
       "approvedSourceReference": null,
       "decisionDate": null,
       "owner": null
+    }
+  ],
+  "resolvedItems": [
+    {
+      "id": "F02",
+      "key": "descontos_metodo_formula_base",
+      "label": "Descontos Método de Assinatura — formula base relationship",
+      "status": "resolved_engineering",
+      "decisionStatus": "resolved",
+      "resolution": "Formula base corrected from receita_de_ensino_liquida to receitas_com_ensino_regular. PnL workbook: C230 = −C$13 × C225 where C225 = receitas_com_ensino_regular. Confirmed in dreRevenueDriverSourceData.ts Phase 12I/12K extraction. Engine correction applied in Phase 15I.2C.",
+      "resolvedAt": "2026-06-18",
+      "resolvedBy": "Phase 15I.2C — workbook formula evidence",
+      "engineChange": "dreEngine.ts line 121: base changed from receita_de_ensino_liquida to receitas_com_ensino_regular",
+      "remainingProvenance": "Formula closure complete. Provenance open: Finance signed xlsx not yet received (tracked under F03/F04). Not a Finance formula question.",
+      "approvedFormula": "descontos_metodo_de_assinatura = −desconto_metodo_rate × receitas_com_ensino_regular",
+      "approvedSourceReference": "PnL workbook C230 = −C$13 × C225 (Phase 12I/12K, dreRevenueDriverSourceData.ts)"
     }
   ]
 }

@@ -1,15 +1,15 @@
 # Pacote de Confirmação Finance — DRE Scenario Simulator
 
-**Versão:** 15I.2
-**Data:** 2026-06-17
-**Fase:** Phase 15I.2 — Preparação do Pacote de Confirmação Finance
+**Versão:** 15I.2C
+**Data:** 2026-06-18
+**Fase:** Phase 15I.2C — DRE Workbook Formula Parity and Finance Registry Correction
 **Status do pacote:** Aberto para revisão Finance
 
 ---
 
 ## 1. Objetivo
 
-Este pacote apresenta ao time de Finance as seis decisões abertas que precisam ser
+Este pacote apresenta ao time de Finance as cinco decisões abertas que precisam ser
 formalizadas antes que o simulador de cenários DRE possa ser encerrado como fonte
 Finance e levado ao conselho para ratificação de cenário.
 
@@ -17,11 +17,17 @@ Finance e levado ao conselho para ratificação de cenário.
 
 O motor de cálculo DRE está implementado e calcula hoje (`CALCULATION_CAN_BEGIN = true`).
 Os resultados foram tecnicamente validados em 108 cenários, sem falhas, sem NaN e sem
-Infinity, com delta máximo de paridade EBITDA igual a zero. Os seis itens abertos
+Infinity, com delta máximo de paridade EBITDA igual a zero. Os cinco itens abertos
 listados neste pacote **não significam que a implementação do motor está incompleta** —
-eles significam que as fontes Finance que alimentam premissas específicas ainda não foram
-formalmente confirmadas. Essas decisões bloqueiam o encerramento da fonte Finance e a
-ratificação pelo conselho, mas **não bloqueiam o cálculo**.
+eles significam que fontes Finance que alimentam premissas específicas ainda não foram
+formalmente confirmadas ou que reconciliações de cenário estão pendentes. Essas decisões
+bloqueiam o encerramento da fonte Finance e a ratificação pelo conselho, mas **não
+bloqueiam o cálculo**.
+
+**Atualização Phase 15I.2C:** F02 (Descontos Método de Assinatura — base da fórmula)
+foi resolvido como questão de engenharia. A fórmula do motor foi corrigida para usar
+`receitas_com_ensino_regular` (C225) como base, conforme a planilha PnL
+(`C230 = −C$13 × C225`). F02 não é mais uma questão Finance.
 
 ---
 
@@ -38,6 +44,7 @@ ratificação pelo conselho, mas **não bloqueiam o cálculo**.
 | Fixture canônica — primeiro ano EBITDA positivo | 2032 ou antes |
 | Modelo de capacidade instrucional | Estabelecido — EM: 9 educadores, HS: 11 educadores, pool combinado: 20 (Phase 15H.2) |
 | Modelo FOPAG de folha de pagamento | Implementado |
+| F02 — fórmula Descontos Método | **Resolvido** — base corrigida para `receitas_com_ensino_regular` (Phase 15I.2C) |
 
 ---
 
@@ -50,9 +57,7 @@ ratificação pelo conselho, mas **não bloqueiam o cálculo**.
 | `FINANCE_SOURCE_CLOSURE_COMPLETE` | `false` |
 | `BOARD_RATIFICATION_READY` | `false` |
 
-Esses valores **não mudarão** enquanto as seis decisões abaixo permanecerem abertas.
-Nenhuma fórmula DRE, valor de fonte ou cálculo de Decisão de Capital foi alterado nesta
-fase.
+Esses valores **não mudarão** enquanto os cinco itens abaixo permanecerem abertos.
 
 ---
 
@@ -60,18 +65,17 @@ fase.
 
 | ID  | Chave | Status | Proprietário |
 |-----|-------|--------|--------------|
-| F01 | `outras_receitas_reajuste` | `pending_finance_confirmation` | Finance |
-| F02 | `descontos_metodo_formula_base` | `pending_finance_confirmation` | Finance |
+| F01 | `outras_receitas_reajuste` | `provisional_source` | Finance |
 | F03 | `tuition_source_provenance` | `provisional_source` | Finance |
 | F04 | `discount_schedule_provenance` | `provisional_source` | Finance |
 | F05 | `enrollment_baseline_parity` | `reconciliation_required` | Finance + Conselho |
-| F06 | `instructional_capacity_payroll_sync` | `reconciliation_required` | Finance |
+| F06 | `instructional_capacity_payroll_sync` | `reconciliation_required` | Finance + Acadêmico |
 
-Todos os seis itens têm `blocksEngineCalculation: false` e `blocksBoardRatification: true`.
+Todos os cinco itens têm `blocksEngineCalculation: false` e `blocksBoardRatification: true`.
 
 ---
 
-## 5. F01 — Outras Receitas: fator de reajuste anual (reajuste_despesas)
+## 5. F01 — Outras Receitas: nome do índice e referência assinada de reajuste_despesas
 
 ### Comportamento atual do motor
 
@@ -84,7 +88,7 @@ outras_receitas = outrasReceitasRatio × numero_de_alunos
 O fator de reajuste anual (`reajuste_despesas`) **não é aplicado**. O motor reporta isso
 explicitamente via `outrasReceitasReajusteNote` em cada saída de ano.
 
-### Referência da planilha PnL
+### O que já é conhecido
 
 A fórmula completa da planilha PnL de referência é:
 
@@ -92,94 +96,39 @@ A fórmula completa da planilha PnL de referência é:
 C233 = ($Y233 / $Y$221) × (1 + C$9) × C$221
 ```
 
-O termo `(1 + C$9)` corresponde ao fator de reajuste anual omitido pelo motor.
+- **Estrutura da fórmula:** confirmada da planilha PnL (Phase 12I/12K).
+- **Razão base:** Y233/Y221 = 2.571,87 por aluno (extraída e confirmada em
+  `outras_receitas_base_per_learner_extraction.json`).
+- **C$9:** linha 9 da planilha PnL (reajuste_despesas) — fator cumulativo de reajuste
+  desde o ano de referência histórico.
+- **Valores anuais linha 9:** não estão disponíveis como extração direta em nenhum
+  arquivo de fonte comprometido. Branch B determinado na Phase 15I.2C.
 
-### Proveniência da fonte
+### O que Finance precisa confirmar (F01)
 
-`annualValuesStatus: not_available_pending_finance_source` — os valores anuais de
-`reajuste_despesas` não estão disponíveis e dependem de confirmação Finance.
+Finance deve confirmar **apenas**:
 
-### Impacto no cálculo
+1. **Nome do índice:** qual índice econômico alimenta a linha 9 (reajuste_despesas)?
+   (Ex.: IGPM, IPCA, índice interno Concept)
+2. **Referência assinada:** indicar a planilha ou documento assinado que contém os
+   valores anuais de reajuste_despesas para 2028–2047.
 
-Afeta diretamente: `outras_receitas`, `receita_operacional_antes_das_deducoes`,
-`receita_operacional_liquida`, `margem_de_contribuicao`, `ebitda`.
-
-A magnitude do impacto não pode ser calculada até que Finance forneça os valores anuais
-do fator de reajuste.
-
-### Decisão necessária (F01)
-
-Finance deve confirmar:
-
-1. O fator de reajuste anual (`reajuste_despesas`) aplica-se a Outras Receitas?
-2. Caso sim, quais são os valores anuais para 2028–2047?
-3. A fonte aprovada é o mesmo fator de inflação utilizado em outras linhas, ou um índice
-   específico para Outras Receitas?
+**Finance não precisa definir a metodologia** — a estrutura da fórmula já está confirmada
+pela planilha PnL. Apenas o nome do índice e a referência de fonte são necessários.
 
 ### Referência aprovada
 
 | Campo | Valor |
 |-------|-------|
-| Fórmula aprovada | _A preencher pelo Finance_ |
-| Valores anuais aprovados | _A preencher pelo Finance_ |
-| Referência de fonte aprovada | _A preencher pelo Finance_ |
+| Nome do índice confirmado | _A preencher pelo Finance_ |
+| Valores anuais 2028–2047 | _A preencher pelo Finance_ |
+| Referência de fonte assinada | _A preencher pelo Finance_ |
 | Responsável | _A preencher_ |
 | Data de decisão | _A preencher_ |
 
 ---
 
-## 6. F02 — Descontos Método de Assinatura: base da relação da fórmula
-
-### Comportamento atual do motor
-
-O motor calcula o desconto do método de assinatura como:
-
-```
-descontos_metodo_de_assinatura = −desconto_metodo_rate × receita_de_ensino_liquida
-```
-
-Esta é uma relação **assumida** — a base exata da fórmula ainda não foi confirmada pelo
-Finance. O motor reporta isso via `descontosMetodoFormulaNote` em cada saída de ano.
-
-### Proveniência da fonte
-
-`sourceType: pending_finance_source_confirmation` (`dreLineItemMap.ts`) — a relação de
-base da fórmula está pendente de confirmação Finance.
-
-### Tabela de descontos aplicada
-
-| Período | Taxa de desconto |
-|---------|-----------------|
-| 2028–2030 | 20% |
-| 2031 | 17% |
-| 2032–2033 | 15% |
-| 2034+ (terminal) | 12,5% |
-
-### Impacto no cálculo
-
-Afeta: `descontos_metodo_de_assinatura`, receita líquida pós-desconto,
-`margem_de_contribuicao`, `ebitda`. O impacto depende de qual base o Finance confirmar.
-
-### Decisão necessária (F02)
-
-Finance deve confirmar:
-
-1. A base da fórmula é `receita_de_ensino_liquida` (comportamento atual do motor)?
-2. Caso contrário, qual é a base correta?
-
-### Referência aprovada
-
-| Campo | Valor |
-|-------|-------|
-| Fórmula aprovada | _A preencher pelo Finance_ |
-| Base confirmada | _A preencher pelo Finance_ |
-| Referência de fonte aprovada | _A preencher pelo Finance_ |
-| Responsável | _A preencher_ |
-| Data de decisão | _A preencher_ |
-
----
-
-## 7. F03 — Taxas de anuidade: proveniência da fonte
+## 6. F03 — Taxas de anuidade: proveniência da fonte
 
 ### Comportamento atual do motor
 
@@ -201,8 +150,9 @@ captura de tela, sem assinatura formal de Finance.
 
 ### Impacto no cálculo
 
-Afeta todas as linhas de receita derivadas de anuidade: `receita_bruta_de_ensino`,
-`receita_de_ensino_liquida`, e todas as linhas downstream, incluindo
+Afeta todas as linhas de receita derivadas de anuidade: `receitas_com_ensino_regular`,
+`receita_de_ensino_bruta`, `bolsa_de_estudos`, `receita_de_ensino_liquida`,
+`descontos_metodo_de_assinatura`, e todas as linhas downstream, incluindo
 `margem_de_contribuicao` e `ebitda`.
 
 ### Decisão necessária (F03)
@@ -225,7 +175,7 @@ Finance deve:
 
 ---
 
-## 8. F04 — Tabela de descontos: formalização da fonte
+## 7. F04 — Tabela de descontos: formalização da fonte
 
 ### Comportamento atual do motor
 
@@ -246,8 +196,7 @@ pelo Finance.**
 
 ### Impacto no cálculo
 
-Afeta: `descontos_metodo_de_assinatura`, receita líquida pós-desconto, e todas as linhas
-downstream.
+Afeta: `bolsa_de_estudos` e todas as linhas downstream.
 
 ### Decisão necessária (F04)
 
@@ -255,6 +204,8 @@ Finance deve:
 
 1. Confirmar formalmente a tabela de descontos documentada.
 2. Fornecer planilha ou documento assinado como fonte oficial.
+
+Nenhuma alteração de fórmula ou valor é necessária — apenas a formalização da fonte.
 
 ### Referência aprovada
 
@@ -268,7 +219,7 @@ Finance deve:
 
 ---
 
-## 9. F05 — Base de alunos 2028: paridade entre motor e planilha PnL
+## 8. F05 — Base de alunos 2028: mapeamento de cenário entre motor e planilha PnL
 
 ### Comportamento atual do motor
 
@@ -279,8 +230,8 @@ A planilha PnL de referência (Phase 13B — `PNL_FORMULA_PARITY_SOURCE_DATA`) d
 **aproximadamente 246 alunos** como baseline de referência.
 
 **Nenhum dos dois valores é declarado autorizado.** A diferença reflete configurações de
-cenário distintas (pacote de abertura, taxa de ocupação, escopo) — os dois modelos são
-internamente consistentes, mas a equivalência de premissas não foi estabelecida.
+cenário distintas — não é um erro de fórmula. Os dois modelos são internamente
+consistentes, mas o mapeamento de premissas equivalentes não foi estabelecido.
 
 ### Valores documentados
 
@@ -291,19 +242,20 @@ internamente consistentes, mas a equivalência de premissas não foi estabelecid
 
 ### Impacto no cálculo
 
-Afeta todas as linhas de receita e EBITDA, além das projeções da Decisão de Capital. A
-diferença de 18 alunos em 2028 propaga-se ao longo de todos os 20 anos de projeção.
+Afeta todas as linhas de receita e EBITDA, além das projeções da Decisão de Capital.
 
 ### Decisão necessária (F05)
 
 Finance e Conselho devem:
 
-1. Identificar qual configuração de cenário do motor corresponde ao baseline da planilha
-   PnL.
-2. Confirmar se o cenário de referência para ratificação pelo conselho é
-   `t1_g3 / intermediario` (228 alunos) ou um cenário de maior ocupação (~246 alunos).
+1. Identificar qual configuração de cenário do motor (pacote de abertura + ocupação)
+   corresponde ao baseline da planilha PnL.
+2. Confirmar o cenário de referência para ratificação pelo conselho.
 3. Documentar as premissas equivalentes de forma que o motor e a planilha PnL sejam
    comparáveis.
+
+**Nota:** Esta é uma questão de mapeamento de cenário, não de disputa de fórmula. Nenhuma
+fórmula precisa ser alterada — apenas o cenário de referência precisa ser identificado.
 
 ### Referência aprovada
 
@@ -317,7 +269,7 @@ Finance e Conselho devem:
 
 ---
 
-## 10. F06 — Capacidade instrucional e sincronização FOPAG
+## 9. F06 — Capacidade instrucional e sincronização FOPAG
 
 ### Estado atual dos modelos
 
@@ -333,52 +285,52 @@ A sincronização das premissas do adaptador FOPAG com o envelope instrucional d
 será realizada em uma **fase futura dedicada**, a ser escopada após a confirmação formal
 do Finance e da equipe Acadêmica sobre a relação entre os dois modelos.
 
-### Impacto no cálculo
-
-Afeta: linhas FOPAG na DRE, `ebitda`. O impacto final dependerá do resultado da
-reconciliação.
-
 ### Decisão necessária (F06)
 
-Finance deve:
+Finance **e a equipe Acadêmica** devem confirmar **conjuntamente**:
 
-1. Confirmar o entendimento da relação entre o modelo de capacidade instrucional
-   (9/11/20) e o adaptador FOPAG.
-2. Confirmar se a sincronização pode ser escopada como fase futura ou se alguma premissa
-   FOPAG precisa ser ajustada antes do encerramento Finance.
+1. O entendimento da relação entre o modelo de capacidade instrucional (9/11/20) e o
+   adaptador FOPAG.
+2. A definição de headcount (HC) que alimenta ambos os modelos.
+3. Se a sincronização pode ser escopada como fase futura ou se alguma premissa FOPAG
+   precisa ser ajustada antes do encerramento Finance.
+
+**Nota:** O Representante Acadêmico é co-proprietário desta decisão — a definição de HC
+instrucional e a reconciliação FOPAG não podem ser confirmadas exclusivamente pelo
+Finance.
 
 ### Referência aprovada
 
 | Campo | Valor |
 |-------|-------|
-| Decisão de sincronização | _A preencher pelo Finance_ |
-| Escopo da fase futura confirmado | _A preencher pelo Finance_ |
+| Decisão de sincronização | _A preencher pelo Finance + Acadêmico_ |
+| Definição de HC confirmada | _A preencher pelo Finance + Acadêmico_ |
+| Escopo da fase futura confirmado | _A preencher pelo Finance + Acadêmico_ |
 | Responsável | _A preencher_ |
 | Data de decisão | _A preencher_ |
 
 ---
 
-## 11. Critérios para encerramento da fonte Finance
+## 10. Critérios para encerramento da fonte Finance
 
 O encerramento da fonte Finance (`FINANCE_SOURCE_CLOSURE_COMPLETE = true`) requer que
 **todas** as seguintes condições sejam satisfeitas:
 
-- [ ] F01: Finance confirma a fórmula de reajuste de Outras Receitas (ou ausência dela)
-- [ ] F02: Finance confirma a base da fórmula de Descontos Método de Assinatura
-- [ ] F03: Finance fornece planilha XLSX assinada para as taxas de anuidade
+- [ ] F01: Finance confirma o nome do índice e a referência assinada para reajuste_despesas
+- [ ] F03: Finance confirma os valores de anuidade e fornece planilha XLSX assinada
 - [ ] F04: Finance fornece documento assinado para a tabela de descontos
 - [ ] F05: Finance + Conselho confirmam o cenário de baseline de alunos 2028
-- [ ] F06: Finance confirma a abordagem de sincronização FOPAG / capacidade instrucional
+- [ ] F06: Finance + Acadêmico confirmam a abordagem de sincronização FOPAG / capacidade instrucional
 
-Enquanto qualquer um desses itens permanecer aberto, `FINANCE_SOURCE_CLOSURE_COMPLETE`
-permanece `false` e a ratificação pelo conselho não está disponível.
+**F02 encerrado:** A fórmula de Descontos Método de Assinatura foi corrigida para usar
+`receitas_com_ensino_regular` como base (Phase 15I.2C). F02 não bloqueia o encerramento
+Finance.
 
 ---
 
-## 12. Declaração de governança
+## 11. Declaração de governança
 
-Esta declaração registra o estado de governança no momento da preparação deste pacote.
-**Nenhum valor foi alterado.**
+Esta declaração registra o estado de governança na Phase 15I.2C.
 
 ```
 Prontidão de engenharia:           engineering_ready
@@ -390,18 +342,18 @@ Prontidão de ratificação:          not_ratified
 BOARD_RATIFICATION_READY:          false
 Status do modelo FOPAG:            implemented
 Status de alinhamento FOPAG:       reconciliation_required
+F02 (fórmula):                     resolved_engineering (Phase 15I.2C)
 ```
 
 O motor de cálculo DRE produziu resultados determinísticos em 108 cenários. Os itens
-abertos F01–F06 bloqueiam o encerramento da fonte Finance e a ratificação pelo conselho.
-Eles **não bloqueiam o cálculo**.
+abertos F01, F03–F06 bloqueiam o encerramento da fonte Finance e a ratificação pelo
+conselho. **Não bloqueiam o cálculo**.
 
-Nenhuma fórmula DRE, valor de fonte ou cálculo de Decisão de Capital foi alterado.
 `WORKING_SCENARIO_RATIFICATION_STATUS` permanece `"technical_validation_fixture"`.
 
 ---
 
-## 13. Aprovações
+## 12. Aprovações
 
 | Papel | Nome | Assinatura | Data |
 |-------|------|------------|------|
@@ -411,4 +363,5 @@ Nenhuma fórmula DRE, valor de fonte ou cálculo de Decisão de Capital foi alte
 | Arquiteto(a) de Modelo Técnico | | | |
 
 _Este pacote não produz encerramento Finance. As aprovações acima tornam-se efetivas
-somente quando todos os campos de decisão de F01 a F06 forem preenchidos e assinados._
+somente quando todos os campos de decisão de F01, F03, F04, F05 e F06 forem preenchidos
+e assinados._

@@ -2949,3 +2949,53 @@ Neither value is declared authoritative. Finance + Board must confirm the author
 - Canonical fixture (t1_g3 / intermediario / bp1_division_differentiated / balanced_experience): 228 learners 2028, first EBITDA-positive 2032.
 - Secondary instructional-capacity model: MS 9 educators, HS 11 educators, combined 20 (Phase 15H.2).
 - `CALCULATION_CAN_BEGIN = true` (engine ready + availability confirmed). Finance-source confirmation and board ratification remain pending and independent.
+
+---
+
+## Phase 15I.2C — DRE Workbook Formula Parity and Finance Registry Correction (2026-06-18)
+
+### Summary
+
+Corrected the DRE engine formula for Descontos Método de Assinatura (F02) and corrected the Finance registry to accurately distinguish formula defects, provenance gaps, and scenario reconciliation items.
+
+### F02 — Engine Formula Correction
+
+PnL workbook formula: `C230 = −C$13 × C225` where C225 = `receitas_com_ensino_regular`. Engine previously used `receita_de_ensino_liquida` as base — incorrect.
+
+**Correction:** `descontos_metodo_de_assinatura = −desconto_metodo_rate × receitas_com_ensino_regular`
+
+Source: `dreRevenueDriverSourceData.ts` Phase 12I/12K extraction, formula `Z13 = −Y230/Y225`.
+
+**Impact on canonical fixture 2028:** descontos_metodo_de_assinatura: −565,739 → −629,776 (delta −64,037). EBITDA delta −60,312. All deltas fully explained by base correction. `outras_receitas` unchanged (delta 0).
+
+### F01 — Branch B Determination (no engine change)
+
+Formula mechanics confirmed: `C233 = ($Y233/$Y$221)*(1+C$9)*C$221`. Row-9 (reajuste_despesas) values not directly extracted in any committed source file. Stop condition 3 applies. Engine unchanged. Registry: F01 → `provisional_source`.
+
+### Finance Registry Changes
+
+| Item | Before | After |
+|------|--------|-------|
+| F01 | `pending_finance_confirmation` | `provisional_source` |
+| F02 | `pending_finance_confirmation` | `resolved_engineering` (moved to resolvedItems) |
+| F06 | `requiredOwner: Finance` | `requiredOwner: Finance + Academic` |
+| Open item count | 6 | 5 |
+
+### Phase 15I.2C gates
+
+| Gate | Result |
+|------|--------|
+| `npx tsx scripts/validate-phase15i2c.ts` | ✓ 26/26 |
+| `npx tsx scripts/validate-phase15i2-packet.ts` | ✓ 25/25 |
+| `npx tsx scripts/validate-phase15i1.ts` | ✓ 24/24 |
+| `npx tsx scripts/validate-phase15h2.ts` | ✓ 30/30 |
+| `npx tsx scripts/validate-phase15f.ts` | ✓ 185/185 |
+| `npm run build` | ✓ clean |
+
+### Locked invariants (unchanged)
+
+- Canonical fixture: 228 learners 2028, EBITDA positive by 2032.
+- `CALCULATION_CAN_BEGIN = true`.
+- `FINANCE_SOURCE_CLOSURE_COMPLETE = false`. `BOARD_RATIFICATION_READY = false`.
+- 5 Finance open items (F01, F03, F04, F05, F06) block board ratification; engine calculates regardless.
+- No tuition values, discount percentages, payroll, CAPEX, WACC, or DCF methodology changed.

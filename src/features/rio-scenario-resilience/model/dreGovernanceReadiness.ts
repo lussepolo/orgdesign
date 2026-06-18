@@ -40,7 +40,7 @@ export interface DreFinanceSourceOpenItem {
   readonly status: DreFinanceSourceReadinessStatus;
   readonly currentEngineBehavior: string;
   readonly sourceProvenance: string;
-  readonly requiredOwner: "Finance" | "Finance + Board" | "Board";
+  readonly requiredOwner: "Finance" | "Finance + Board" | "Finance + Academic" | "Board";
   /** Engine calculation continues regardless of this item's open status. */
   readonly blocksEngineCalculation: false;
   /** This item must be resolved before board ratification is valid. */
@@ -65,28 +65,19 @@ export interface DreGovernanceReadinessState {
 // The engine discloses each via notes in the Raw Engine Output (dreScenarioWorkbook.ts)
 // and via the outrasReceitasReajusteNote / descontosMetodoFormulaNote fields.
 
+// F02 (descontos_metodo_formula_base) resolved in Phase 15I.2C:
+// Engine corrected to use receitas_com_ensino_regular as base (workbook C230 = −C$13 × C225).
+// F02 is no longer a Finance formula question and is removed from open items.
+// 5 open items remain (F01, F03, F04, F05, F06).
 const OPEN_ITEMS: readonly DreFinanceSourceOpenItem[] = [
   {
     key: "outras_receitas_reajuste",
-    label: "Outras Receitas — annual adjustment (reajuste_despesas) term",
-    status: "pending_finance_confirmation",
+    label: "Outras Receitas — reajuste_despesas index name and signed source reference",
+    status: "provisional_source",
     currentEngineBehavior:
-      "Adjustment term omitted; Outras Receitas computed as basePerLearnerRatio × numero_de_alunos without an annual reajuste factor. Engine output discloses this via outrasReceitasReajusteNote.",
+      "Adjustment term omitted; Outras Receitas computed as basePerLearnerRatio × numero_de_alunos without an annual reajuste factor. Engine output discloses this via outrasReceitasReajusteNote. Formula mechanics confirmed from PnL workbook (C233 = ($Y233/$Y$221)*(1+C$9)*C$221). Direct row-9 extraction not available in committed source files (Branch B — Phase 15I.2C).",
     sourceProvenance:
-      "annualValuesStatus: not_available_pending_finance_source (dreScenarioAdapters.ts)",
-    requiredOwner: "Finance",
-    blocksEngineCalculation: false,
-    blocksBoardRatification: true,
-    calculationContinues: true,
-  },
-  {
-    key: "descontos_metodo_formula_base",
-    label: "Descontos Método de Assinatura — formula base relationship",
-    status: "pending_finance_confirmation",
-    currentEngineBehavior:
-      "Assumed relationship: descontos_metodo_de_assinatura = −desconto_metodo × receita_de_ensino_liquida. Engine output discloses this via descontosMetodoFormulaNote.",
-    sourceProvenance:
-      "sourceType: pending_finance_source_confirmation (dreLineItemMap.ts)",
+      "Formula structure: PnL workbook row 233 (confirmed Phase 12I/12K). Direct row-9 (reajuste_despesas) extraction: not available. Branch B determination: Phase 15I.2C.",
     requiredOwner: "Finance",
     blocksEngineCalculation: false,
     blocksBoardRatification: true,
@@ -120,10 +111,10 @@ const OPEN_ITEMS: readonly DreFinanceSourceOpenItem[] = [
   },
   {
     key: "enrollment_baseline_parity",
-    label: "2028 enrollment baseline — engine vs PnL workbook reconciliation",
+    label: "2028 enrollment baseline — engine vs PnL workbook scenario mapping",
     status: "reconciliation_required",
     currentEngineBehavior:
-      "Canonical engine produces 228 learners in 2028 (t1_g3 / intermediario). PnL workbook baseline: approximately 246 learners. The difference reflects a different scenario configuration; the engine is self-consistent. Workbook baseline parity is not yet established.",
+      "Canonical engine produces 228 learners in 2028 (t1_g3 / intermediario). PnL workbook baseline: approximately 246 learners. The difference reflects a different scenario configuration; the engine is self-consistent. Scenario mapping to workbook baseline is not yet established.",
     sourceProvenance:
       "Engine: openingPackageOccupancySourceData.ts (t1_g3 / intermediario); Workbook: PNL_FORMULA_PARITY_SOURCE_DATA (~246 learners, Phase 13B)",
     requiredOwner: "Finance + Board",
@@ -136,10 +127,10 @@ const OPEN_ITEMS: readonly DreFinanceSourceOpenItem[] = [
     label: "Instructional-capacity / FOPAG payroll synchronization",
     status: "reconciliation_required",
     currentEngineBehavior:
-      "Phase 15H.2 established the instructional-capacity planning model: MS 9 educators, HS 11 educators, combined 20. The FOPAG payroll adapter uses separate current assumptions. Synchronization of the payroll/FOPAG adapter with the 9/11/20 instructional envelope is a dedicated future reconciliation phase (Phase 15H.3, currently deferred).",
+      "Phase 15H.2 established the instructional-capacity planning model: MS 9 educators, HS 11 educators, combined 20. The FOPAG payroll adapter uses separate current assumptions. Synchronization is a dedicated future reconciliation phase (Phase 15H.3, currently deferred). Finance and Academic must jointly confirm the deferral scope and the HC definition that drives both models.",
     sourceProvenance:
       "Instructional model: secondaryEducatorCapacityModel.ts (Phase 15H.2); Payroll: fopagEngine.ts + orgDesignPayrollActivation.ts",
-    requiredOwner: "Finance",
+    requiredOwner: "Finance + Academic",
     blocksEngineCalculation: false,
     blocksBoardRatification: true,
     calculationContinues: true,

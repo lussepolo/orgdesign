@@ -117,8 +117,9 @@ export function calculateDre(input: DreEngineInput): DreEngineOutput {
 
     const receita_de_ensino_liquida = receita_de_ensino_bruta + bolsa_de_estudos;
 
-    // desconto_metodo_rate is positive → explicit minus makes result negative
-    const descontos_metodo_de_assinatura = -desconto_metodo_rate * receita_de_ensino_liquida;
+    // PnL workbook: C230 = −C$13 × C225, where C225 = receitas_com_ensino_regular.
+    // desconto_metodo_rate is positive → explicit minus makes result negative.
+    const descontos_metodo_de_assinatura = -desconto_metodo_rate * receitas_com_ensino_regular;
 
     // independent Finance assumption, positive revenue
     const receita_com_eventos = assumption("receita_com_eventos", year);
@@ -325,10 +326,9 @@ export function calculateDre(input: DreEngineInput): DreEngineOutput {
       "Full PnL benchmark formula: C233 = ($Y233/$Y$221)*(1+C$9)*C$221; " +
       "the (1+C$9) reajuste term is omitted pending Finance source confirmation.",
     descontosMetodoFormulaNote:
-      "descontos_metodo_de_assinatura computed as −desconto_metodo × receita_de_ensino_liquida. " +
-      "dreLineItemMap.ts marks this row sourceType 'pending_finance_source_confirmation' with " +
-      "'formula text not provided — exact formula relationship is not confirmed.' " +
-      "The formula base (receita_de_ensino_liquida) and the multiplier relationship are " +
-      "assumed from DRE structure; Finance source confirmation is pending.",
+      "descontos_metodo_de_assinatura computed as −desconto_metodo × receitas_com_ensino_regular. " +
+      "Formula base confirmed from PnL workbook: C230 = −C$13 × C225, where C225 = receitas_com_ensino_regular " +
+      "(Phase 12I/12K, dreRevenueDriverSourceData.ts). Rate back-derived as Z13 = −Y230/Y225. " +
+      "Formula closure complete — provenance remains open (Finance signed xlsx not yet received, F02 resolved as engineering item).",
   };
 }

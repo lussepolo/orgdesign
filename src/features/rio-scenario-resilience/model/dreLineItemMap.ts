@@ -472,24 +472,21 @@ const DRE_LINE_ITEM_MAP_DATA: readonly DreLineItemRecord[] = [
     displayLabelPt: "Descontos Método de Assinatura",
     section: "revenue",
     classification: "formula_derived",
-    sourceType: "pending_finance_source_confirmation",
+    sourceType: "extracted_from_pnl_spreadsheet",
     directScenarioDriver: false,
-    scenarioSensitivity: "not_yet_determined",
+    scenarioSensitivity: "scenario_sensitive",
     signConvention: "negative_cost_or_deduction",
     subtotalRole: "component_line",
     horizon: "2028-2047",
     preOpsTreatment: "excluded_no_pre_ops_value",
     perpetuityTreatment: "excluded_horizon_ends_2047",
-    implementationStatus: "formula_candidate_pending_confirmation",
+    implementationStatus: "implemented",
     includedInEbitda: true,
     notes:
-      "Phase 12B (Luciana): formula text not provided — flagged formula-candidate " +
-      "pending confirmation only. Sign inferred as negative_cost_or_deduction by " +
-      "name ('descontos') and by its position as an additive term alongside the " +
-      "explicitly-negative Bolsa de Estudos in the Receita Operacional Antes das " +
-      "Deduções formula; this inference itself requires Finance confirmation. A " +
-      "candidate driver-table reference (Desconto Método) exists in DRIVER_LINE_MAP " +
-      "but the exact formula relationship is not confirmed.",
+      "Phase 15I.2C: formula base corrected to receitas_com_ensino_regular (C225). " +
+      "PnL workbook: C230 = −C$13 × C225; rate back-derived as Z13 = −Y230/Y225 " +
+      "(Phase 12I/12K, dreRevenueDriverSourceData.ts). Formula closure complete. " +
+      "Provenance open: Finance signed xlsx not yet received (F04/F03 track).",
   },
   {
     dreLineId: "receita_com_eventos",

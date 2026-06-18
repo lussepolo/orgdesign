@@ -26,14 +26,14 @@ type CheckId =
   | "packet_contains_f05"
   | "packet_contains_f06"
   | "register_is_valid_json"
-  | "register_has_six_items"
+  | "register_has_five_items"
   | "all_items_decision_status_open"
   | "all_items_no_approval_recorded"
   | "register_enrollment_not_declared_authoritative"
   | "governance_engineering_ready"
   | "governance_finance_pending"
   | "governance_board_not_ratified"
-  | "governance_open_items_count_six"
+  | "governance_open_items_count_five"
   | "packet_mentions_228"
   | "packet_mentions_246"
   | "governance_payroll_implemented"
@@ -218,11 +218,12 @@ checks.push(makeCheck(
 ));
 
 const itemCount = register !== null ? register.openItems.length : -1;
+// Phase 15I.2C: F02 resolved — 5 open items remain.
 checks.push(makeCheck(
-  "register_has_six_items",
+  "register_has_five_items",
   itemCount,
-  6,
-  "Register must contain exactly 6 open Finance items.",
+  5,
+  "Register must contain exactly 5 open Finance items (F02 resolved in Phase 15I.2C).",
 ));
 
 const allStatusOpen =
@@ -288,11 +289,12 @@ checks.push(makeCheck(
   "DRE_GOVERNANCE_READINESS.boardRatificationReadiness must be 'not_ratified' — board has not ratified.",
 ));
 
+// Phase 15I.2C: F02 resolved — 5 open items remain.
 checks.push(makeCheck(
-  "governance_open_items_count_six",
+  "governance_open_items_count_five",
   gov.openItems.length,
-  6,
-  "DRE_GOVERNANCE_READINESS.openItems must contain exactly 6 Finance-source open items.",
+  5,
+  "DRE_GOVERNANCE_READINESS.openItems must contain exactly 5 Finance-source open items (F02 resolved Phase 15I.2C).",
 ));
 
 // Phase E — Enrollment documentation (2)

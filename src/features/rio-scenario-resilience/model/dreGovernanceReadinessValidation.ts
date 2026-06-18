@@ -42,7 +42,7 @@ export type DreGovernanceReadinessCheckId =
   | "finance_source_closure_incomplete"
   | "board_ratification_ready_false"
   | "calculation_engine_is_ready_flag_true"
-  | "open_items_count_is_six"
+  | "open_items_count_is_five"
   | "payroll_registry_status_blocked"
   | "canonical_fixture_2028_enrollment_228"
   | "canonical_fixture_ebitda_positive_by_2032";
@@ -224,11 +224,12 @@ export function runDreGovernanceReadinessValidation(): DreGovernanceReadinessRep
       "DRE_CALCULATION_ENGINE_IS_READY must be true — the engine is implemented.",
     ),
     // ── Phase F: Open items count and registry state ───────────────────────────
+    // Phase 15I.2C: F02 resolved as engineering item — 5 open items remain.
     check(
-      "open_items_count_is_six",
+      "open_items_count_is_five",
       gov.openItems.length,
-      6,
-      "Exactly six Finance-source open items must be registered.",
+      5,
+      "Exactly five Finance-source open items must be registered (F02 resolved in Phase 15I.2C).",
     ),
     check(
       "payroll_registry_status_blocked",

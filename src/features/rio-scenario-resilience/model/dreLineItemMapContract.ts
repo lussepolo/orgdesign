@@ -113,6 +113,9 @@ export type DreLineSourceType =
   // Finance DRE table itself, not from a simulator engine or formula.
   | "finance_dre_table_annual_values"
   | "pending_finance_source_confirmation"
+  // Phase 15I.2C: formula base back-derived from PnL workbook cell evidence
+  // (C230 = -C$13 × C225). Provenance open: signed xlsx not yet received.
+  | "extracted_from_pnl_spreadsheet"
   | "not_applicable";
 
 export type DreLineScenarioSensitivity =
@@ -124,6 +127,9 @@ export type DreLineScenarioSensitivity =
   // org design, or CAPEX decisions unless a later source changes the rule.
   | "independent_of_board_decision_levers"
   | "fixed_or_invariant_by_default"
+  // Phase 15I.2C: line moves with scenario levers directly through formula
+  // chain (e.g. descontos_metodo rate × receitas_com_ensino_regular).
+  | "scenario_sensitive"
   | "not_yet_determined"
   | "not_applicable";
 
@@ -163,6 +169,9 @@ export type DreLineImplementationStatus =
   // all yet — stronger than design_only_not_implemented, which implies a design
   // artifact exists.
   | "not_implemented"
+  // Phase 15I.2C: formula base confirmed against PnL workbook cell evidence;
+  // engine produces correct values. Provenance open: Finance signed xlsx pending.
+  | "implemented"
   | "not_applicable";
 
 // Required only for fixed-cost rows audited against the Service Contracts
