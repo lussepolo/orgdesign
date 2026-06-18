@@ -51,14 +51,14 @@ const HiringProfileCardsTab = () => (
                   color: "bg-blue-500",
                 },
                 {
-                  label: "Signature Cluster",
+                  label: "Global Studies & Project Design",
                   roles: "AI, Eng, Arts, Maker",
                   focus: "Creative Complexity",
                   icon: Cpu,
                   color: "bg-indigo-500",
                 },
                 {
-                  label: "Bilingual Cluster",
+                  label: "Language Acquisition & Global Perspectives",
                   roles: "English, Global Persp",
                   focus: "Cultural Fluency",
                   icon: Globe,
@@ -128,6 +128,10 @@ const HiringProfileCardsTab = () => (
           </div>
         </Card>
       </div>
+    </div>
+
+    <div className="rounded-xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-800">
+      These cards describe selected instructional cluster profiles used for academic staffing design. They are not a complete hiring authorization list and do not cover every leadership, operations, support, or back-office role.
     </div>
 
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

@@ -3161,6 +3161,54 @@ Load range: 26–28 blocks. Planning midpoint: 27 blocks.
 
 Global eyebrow label refined: "Planning Model" → "Strategic Planning". Rationale: "Strategic Planning" works correctly above all 13 non-cover tabs including DRE Scenario Simulator and Decisão de Capital; "Planning Model" read as model-specific on finance surfaces. Phase 15H.2 browser QA updated to reflect the Phase 15L badge replacement ("Conditional approval" → "Timetable validation pending"); three stale checks renamed and updated accordingly.
 
-### Deferred (Phase 15L.2)
+---
 
-S3/S4 findings not addressed in this phase: `ROLE_SCORECARDS` coverage gap, cluster naming divergence, After School Coordinator, Inspirationeer/Librarian cross-reference, EarlyYears T2 cap mismatch, LowerSchool G4–G5 cap mismatch.
+## Phase 15L.2 — Academic Staffing Content Cleanup (2026-06-18)
+
+Resolves S3/S4 content-coherence findings from the Phase 15K Academic Staffing and Org Design Consistency Audit. No finance formulas, DRE source data, Capital Decision formulas, payroll/FOPAG formulas, or governance readiness flags were modified.
+
+### Findings resolved
+
+| ID | Finding | Fix |
+|----|---------|-----|
+| F-5.5-01 | EarlyYearsTab T2 max displayed as 30 (was 30, should be 28 = 14 cap × 2 sections) | `EarlyYearsTab.tsx`: `max: 30` → `max: 28` for Toddlers 2 |
+| F-5.6-01 | LowerSchoolTab G4/G5 max displayed as 44 (should be 48 = 24 cap × 2 sections) | `LowerSchoolTab.tsx`: `max: 44` → `max: 48` for Grade 4 and Grade 5 |
+| F-5.4-03 | Cluster naming divergence: HiringProfileCardsTab used "Signature Cluster" / "Bilingual Cluster" while OfferScenariosTab used "Global Studies / Project Design" | `HiringProfileCardsTab.tsx`: renamed to "Global Studies & Project Design" and "Language Acquisition & Global Perspectives"; `OfferScenariosTab.tsx` grade6ClusterModel string updated to ampersand form |
+| F-5.4-02 | `ROLE_SCORECARDS` partial-coverage disclosure missing in HiringProfileCardsTab | Added disclosure banner: "These cards describe selected instructional cluster profiles…not a complete hiring authorization list…" |
+| G-03 | After School naming inconsistency: `leadership.ts` used "After School Educator"; `executiveOrgDesignModel.ts` already used "After School Coordinator" | `leadership.ts` SPECIALISTS_CONFIG: renamed to "After School Coordinator" |
+| G-04 | Inspirationeer/Librarian cross-reference gap: `leadership.ts` used "Inspirationeer"; `executiveOrgDesignModel.ts` used "Librarian" | `leadership.ts` BACKOFFICE_CONFIG: "Inspirationeer" → "Inspirationeer / Librarian"; `executiveOrgDesignModel.ts` line 693: "Librarian" → "Inspirationeer / Librarian" |
+
+### Files changed
+
+| File | Change |
+|------|--------|
+| `src/components/sections/EarlyYearsTab.tsx` | T2 max 30 → 28 |
+| `src/components/sections/LowerSchoolTab.tsx` | G4 and G5 max 44 → 48 |
+| `src/components/sections/HiringProfileCardsTab.tsx` | Cluster tile renames + disclosure paragraph |
+| `src/components/sections/OfferScenariosTab.tsx` | grade6ClusterModel string: slash → ampersand |
+| `src/constants/leadership.ts` | After School Educator → Coordinator; Inspirationeer → Inspirationeer / Librarian |
+| `src/features/rio-scenario-resilience/model/executiveOrgDesignModel.ts` | Librarian → Inspirationeer / Librarian (line 693) |
+| `scripts/validate-phase15l2.ts` | New: 27-check static validator |
+| `tests/phase15l2/academic-staffing-content.run.ts` | New: 25-check browser QA |
+| `package.json` | Added validate:phase15l2 and qa:phase15l2 scripts |
+
+### Constraints preserved
+
+- `HS_SUBJECT_DISTRIBUTION` calculation keys "Signature" and "Bilingual" in `teaching.ts` unchanged.
+- Role id keys `"after_school"` and `"library"` in `leadership.ts` unchanged (referenced by `getExistingRoleHeadcount()`).
+- `FINANCE_SOURCE_CLOSURE_COMPLETE = false`, `BOARD_RATIFICATION_READY = false` unchanged.
+- No DRE formulas, Capital Decision formulas, payroll/FOPAG formulas, or Finance source data modified.
+
+### Phase 15L.2 gates
+
+| Gate | Result |
+|------|--------|
+| `npm run validate:phase15l2` | ✓ 27/27 |
+| `npm run qa:phase15l2` | ✓ 25/25 |
+| `npm run validate:phase15l` | ✓ 18/18 |
+| `npm run qa:phase15l` | ✓ 16/16 |
+| `npm run validate:phase15j` | ✓ 21/21 |
+| `npm run validate:phase15h2` | ✓ 30/30 |
+| `npm run lint` | ✓ clean |
+| `npm run build` | ✓ clean |
+| `git diff --check` | ✓ clean |

@@ -127,7 +127,7 @@ export const LEADERSHIP_CONFIG: LeadershipRole[] = [
 export const BACKOFFICE_CONFIG: BackofficeRole[] = [
   role("clerk", "Clerk (Portaria)", 2786.75, 1351.57, 839.17, "FOLHA_DIRETA", 2028, hc([[2028, 4]]), "C"),
   role("family", "Family Engagement Analyst", 5335.05, 2587.5, 849.97, "FOLHA_DIRETA", 2028, hc([[2028, 1]]), "C"),
-  role("library", "Inspirationeer", 6880.65, 3337.12, 506.52, "FOLHA_DIRETA", 2028, hc([[2028, 1]]), "C"),
+  role("library", "Inspirationeer / Librarian", 6880.65, 3337.12, 506.52, "FOLHA_DIRETA", 2028, hc([[2028, 1]]), "C"),
   role("it", "IT Technician", 6405.0, 3106.43, 504.51, "FOLHA_DIRETA", 2028, hc([[2028, 1], [2032, 2]]), "C"),
   role("maintenance", "Maintenance Technician", 3878.7, 1881.17, 843.80, "FOLHA_DIRETA", 2028, hc([[2028, 2], [2036, 3]]), "C"),
   role("marketing", "Marketing & Events Analyst", 6195.0, 3004.58, 503.62, "FOLHA_DIRETA", 2028, hc([[2028, 1]]), "C"),
@@ -141,7 +141,7 @@ export const BACKOFFICE_CONFIG: BackofficeRole[] = [
 
 export const SPECIALISTS_CONFIG: SpecialistRole[] = [
   // ── SHARED SPECIALISTS (campus-wide, active from 2028) ───────────────
-  role("after_school", "After School Educator",    15247.55, 7395.06, 1159.83, "FOPAG_DIRETO", 2028, hc([[2028, 1]]),          "D", "shared specialist"),
+  role("after_school", "After School Coordinator",    15247.55, 7395.06, 1159.83, "FOPAG_DIRETO", 2028, hc([[2028, 1]]),          "D", "shared specialist"),
   role("arts",         "Arts Educator",             15247.55, 7395.06, 1159.83, "FOPAG_DIRETO", 2028, hc([[2028, 1], [2031, 2]]), "D", "shared specialist"),
   role("body",         "Body & Movement Educator",  15247.55, 7395.06, 1159.83, "FOPAG_DIRETO", 2028, hc([[2028, 1], [2031, 2]]), "D", "shared specialist"),
   role("music",        "Music Educator",            15247.55, 7395.06, 1159.83, "FOPAG_DIRETO", 2028, hc([[2028, 1], [2031, 2]]), "D", "shared specialist"),

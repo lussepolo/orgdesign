@@ -236,7 +236,7 @@ classroomPackage: [
 grade6ClusterModel: [
 "STEM Cluster: Integrated Mathematics + Natural Sciences",
 "Humanities Cluster: Língua Portuguesa + Social Sciences",
-"Global Studies / Project Design: ELA + Passion Project + Global Expression / early pathways",
+"Global Studies & Project Design: ELA + Passion Project + Global Expression / early pathways",
 "Shared specialist ecosystem: Body & Movement, Creative Hub, Arts, Design, electives",
 ],
 specialistEcosystem: [

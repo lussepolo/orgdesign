@@ -61,7 +61,7 @@ const Badge = ({
 
 const EARLY_YEARS_DATA = [
   { grade: "Toddlers 1", age: "1-2 years", ratio: "1:4.7", focus: "Sensory & Motor Skills", model: "Lead + Assistant + Monitor", max: 28 },
-  { grade: "Toddlers 2", age: "2-3 years", ratio: "1:5", focus: "Social-Emotional Growth", model: "Lead + Assistant + Monitor", max: 30 },
+  { grade: "Toddlers 2", age: "2-3 years", ratio: "1:5", focus: "Social-Emotional Growth", model: "Lead + Assistant + Monitor", max: 28 },
   { grade: "Pre-K3", age: "3-4 years", ratio: "1:6", focus: "Bilingual Foundation", model: "Lead + Assistant + Monitor", max: 36 },
   { grade: "Pre-K4", age: "4-5 years", ratio: "1:6", focus: "Inquiry-based Play", model: "Lead + Assistant + Monitor", max: 36 },
   { grade: "Kinder", age: "5-6 years", ratio: "1:6.7", focus: "Pre-Literacy & Numeracy", model: "Lead + Assistant + Monitor", max: 40 },

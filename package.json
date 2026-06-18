@@ -23,7 +23,9 @@
     "validate:phase15j": "tsx scripts/validate-phase15j.ts",
     "qa:phase15j": "tsx tests/phase15j/phase15j.run.ts",
     "validate:phase15l": "tsx scripts/validate-phase15l.ts",
-    "qa:phase15l": "tsx tests/phase15l/staffing-board-language.run.ts"
+    "qa:phase15l": "tsx tests/phase15l/staffing-board-language.run.ts",
+    "validate:phase15l2": "tsx scripts/validate-phase15l2.ts",
+    "qa:phase15l2": "tsx tests/phase15l2/academic-staffing-content.run.ts"
   },
   "dependencies": {
     "@google/genai": "^1.29.0",

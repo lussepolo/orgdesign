@@ -63,8 +63,8 @@ const LOWER_SCHOOL_DATA = [
   { grade: "Grade 1", focus: "Literacy & Numeracy", model: "Lead + Assistant", ratio: "1:11", max: 44 },
   { grade: "Grade 2", focus: "Fluency & Inquiry", model: "Lead + Assistant", ratio: "1:11", max: 44 },
   { grade: "Grade 3", focus: "Critical Thinking", model: "Lead + Assistant", ratio: "1:11", max: 44 },
-  { grade: "Grade 4", focus: "Project-based Learning", model: "Lead + Assistant", ratio: "1:11", max: 44 },
-  { grade: "Grade 5", focus: "Transition & Leadership", model: "Lead + Assistant", ratio: "1:11", max: 44 },
+  { grade: "Grade 4", focus: "Project-based Learning", model: "Lead + Assistant", ratio: "1:11", max: 48 },
+  { grade: "Grade 5", focus: "Transition & Leadership", model: "Lead + Assistant", ratio: "1:11", max: 48 },
 ];
 
 const LowerSchoolTab = () => (

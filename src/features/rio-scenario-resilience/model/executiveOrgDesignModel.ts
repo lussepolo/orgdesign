@@ -690,7 +690,7 @@ export function buildExecutiveOrgDesignTree(
           },
           {
             id: "librarian",
-            label: "Librarian",
+            label: "Inspirationeer / Librarian",
             variant: "base",
             ...getExistingRoleHeadcount("library", year),
           },
