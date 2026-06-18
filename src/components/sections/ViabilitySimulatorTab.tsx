@@ -190,7 +190,7 @@ export default function ViabilitySimulatorTab() {
             {
               icon: Target,
               title: "Model Boundary",
-              text: "Teaching remains scenario-responsive; non-teaching remains shared/global in the current approved model.",
+              text: "Teaching remains scenario-responsive; non-teaching remains shared/global in the current planning model.",
             },
           ].map((item) => (
             <div key={item.title} className="rounded-2xl border border-white/10 bg-white/5 p-4">

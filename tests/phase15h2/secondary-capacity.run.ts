@@ -181,8 +181,10 @@ async function runQa(page: Page) {
   // Required efficiency at 27 = 23
   check("hs_23_required_efficiency", hsBody.includes("23"));
 
-  // Conditional status — Badge renders as CSS-uppercased text; use case-insensitive search
-  check("hs_conditional_status", hsBody.includes("conditional"));
+  // Timetable-validation status badge (Phase 15L replaced "Conditional approval" with
+  // "Timetable validation pending"; the check now looks for "timetable validation pending").
+  check("hs_timetable_validation_pending_status",
+    hsBody.includes("timetable validation pending"));
 
   // Innovation Diploma Project wording (not Passion Project for G11-12)
   check("hs_innovation_diploma_wording",
@@ -291,10 +293,10 @@ async function runQa(page: Page) {
   await page.waitForTimeout(600);
   await ss("07_hs_tablet");
 
-  check("tablet_hs_conditional_readable", await safe("tablet_hs_conditional_readable",
+  check("tablet_hs_timetable_validation_readable", await safe("tablet_hs_timetable_validation_readable",
     async () => {
       const t = await bodyTextLower(page);
-      return t.includes("conditional");
+      return t.includes("timetable validation pending");
     }, false));
 
   await safe("tablet_nav_exec", () => clickTab(page, "Executive Org Design"), undefined);
@@ -331,10 +333,10 @@ async function runQa(page: Page) {
   check("mobile_hs_no_overflow", await safe("mobile_hs_no_overflow",
     () => noHorizontalOverflow(page), false));
 
-  check("mobile_hs_conditional_readable", await safe("mobile_hs_conditional_readable",
+  check("mobile_hs_timetable_validation_readable", await safe("mobile_hs_timetable_validation_readable",
     async () => {
       const t = await bodyTextLower(page);
-      return t.includes("conditional");
+      return t.includes("timetable validation pending");
     }, false));
 
   await safe("mobile_nav_exec", () => clickTab(page, "Executive Org Design"), undefined);

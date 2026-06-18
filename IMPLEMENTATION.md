@@ -3097,3 +3097,70 @@ All five items are displayed as assumption metadata only. Each has `blocksEngine
 - 5 Finance open items (F01, F03, F04, F05, F06) — block board ratification only; engine calculates regardless.
 - CAPEX excluded from DRE EBITDA; in Capital Decision only.
 - Service Contracts included once in DRE as cost lines.
+
+---
+
+## Phase 15L — Staffing Consistency and Board-Language Repair (2026-06-18)
+
+### Summary
+
+Resolved all S1 and S2 findings from the Phase 15K Academic Staffing and Org Design Consistency Audit. The S1 finding was a staffing arithmetic defect that displayed "Middle School: 10.00 FTE" instead of the canonical 9 educators. Six S2 findings removed premature board-approval framing from the UI.
+
+**Audit classification before this phase:** C (one S1 + multiple S2 = not ready for board use).
+
+### Locked staffing model (authoritative, unchanged by this phase)
+
+| Segment | Core | Flexible | Total |
+|---------|------|----------|-------|
+| Middle School | 8 | 1 | 9 |
+| High School | 10 | 1 | 11 |
+| Combined secondary | 18 | 2 | 20 |
+
+Load range: 26–28 blocks. Planning midpoint: 27 blocks.
+
+### Findings resolved
+
+| ID | Severity | File | Change |
+|----|----------|------|--------|
+| F-5.9-01 | S1 | `LoadTab.tsx` | `msFte = 9`, `hsFte = 11`; removed `HS_FULL_RAMP_FTE = 10` constant |
+| F-5.9-02 | S2 | `LoadTab.tsx` | Replaced "PASS: Current…parity with São Paulo standards." → non-certifying internal planning target text |
+| F-5.4-01 | S2 | `App.tsx` | Global eyebrow: "Board Review" → "Planning Model" |
+| F-5.4-01 | S2 | `App.tsx` | Header subtitle: "São Paulo Parity Scaling v2.5" → "Internal planning reference" |
+| F-5.3-01 | S2 | `executiveOrgDesignModel.ts` | Rail item: label "Board condition" → "Planning status"; value "Conditional approval language" → "Planning model — not board-ratified headcount authorization." |
+| F-5.8-01 | S2 | `HighSchoolTab.tsx` | Badge: "Conditional approval" → "Timetable validation pending" |
+| F-5.8-02 | S2 | `HighSchoolTab.tsx` | `HS_STAFFING_VALIDATION_NOTE`: removed "8-HC HS Educator Pool" internal diagnostic; replaced with canonical 10+1=11 educator model description |
+| F-5.9-03 | S2 | `ViabilitySimulatorTab.tsx` | "current approved model" → "current planning model" |
+
+### What did NOT change
+
+- No DRE engine formulas changed.
+- No Capital Decision engine formulas changed.
+- No tuition, discount, CAPEX, Service Contracts, VPL, TIR, or DRE source data changed.
+- `FINANCE_SOURCE_CLOSURE_COMPLETE` remains `false`.
+- `BOARD_RATIFICATION_READY` remains `false`.
+- F-category items not addressed (S3/S4 findings deferred to Phase 15L.2).
+- F02 remains `resolved_engineering`.
+
+### Phase 15L gates
+
+| Gate | Result |
+|------|--------|
+| `npm run validate:phase15l` | ✓ 18/18 |
+| `npm run qa:phase15l` | ✓ 16/16 |
+| `npm run validate:phase15j` | ✓ 21/21 |
+| `npm run qa:phase15j` | ✓ 12/12 |
+| `npm run validate:phase15i2c` | ✓ 26/26 |
+| `npm run validate:phase15i2-packet` | ✓ 25/25 |
+| `npm run validate:phase15i1` | ✓ 24/24 |
+| `npm run validate:phase15f` | ✓ 185/185 |
+| `npm run lint` | ✓ clean |
+| `npm run build` | ✓ clean |
+| `git diff --check` | ✓ clean |
+
+### Phase 15L.1 wording refinement (same commit, 2026-06-18)
+
+Global eyebrow label refined: "Planning Model" → "Strategic Planning". Rationale: "Strategic Planning" works correctly above all 13 non-cover tabs including DRE Scenario Simulator and Decisão de Capital; "Planning Model" read as model-specific on finance surfaces. Phase 15H.2 browser QA updated to reflect the Phase 15L badge replacement ("Conditional approval" → "Timetable validation pending"); three stale checks renamed and updated accordingly.
+
+### Deferred (Phase 15L.2)
+
+S3/S4 findings not addressed in this phase: `ROLE_SCORECARDS` coverage gap, cluster naming divergence, After School Coordinator, Inspirationeer/Librarian cross-reference, EarlyYears T2 cap mismatch, LowerSchool G4–G5 cap mismatch.

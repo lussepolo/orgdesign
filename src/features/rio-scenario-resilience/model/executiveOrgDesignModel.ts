@@ -735,8 +735,8 @@ export function buildExecutiveOrgDesignTree(
         note: "MS/HS future-division nodes now show the mature 18 core + 2 flexible = 20 instructional planning pool.",
       },
       {
-        label: "Board condition",
-        value: "Conditional approval language",
+        label: "Planning status",
+        value: "Planning model — not board-ratified headcount authorization.",
         note: SECONDARY_EDUCATOR_CAPACITY_MODEL.boardExplanation.governanceNote,
       },
       {

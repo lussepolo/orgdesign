@@ -195,7 +195,7 @@ export default function App() {
             <div className="h-10 w-10 bg-slate-900 rounded-xl flex items-center justify-center shrink-0"><GraduationCap className="h-6 w-6 text-white" /></div>
             <div>
               <h1 className="font-bold text-slate-900 tracking-tight leading-none text-sm md:text-base">Rio | Strategic Organizational Architecture</h1>
-              <p className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">São Paulo Parity Scaling v2.5</p>
+              <p className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Internal planning reference</p>
             </div>
             <div className="ml-auto md:hidden flex items-center gap-2">
               {activeTab !== "cover" && (<button onClick={() => setActiveTab("cover")} className="p-2 bg-slate-100 rounded-lg text-slate-600 hover:bg-slate-200 transition-colors" title="Return to Cover"><Home className="h-4 w-4" /></button>)}
@@ -247,7 +247,7 @@ export default function App() {
           <div className="mb-8 md:mb-12 text-center md:text-left">
             <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
               <div className="h-1 w-8 bg-slate-900 rounded-full" />
-              <span className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Board Review</span>
+              <span className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Strategic Planning</span>
             </div>
             <h2 className="text-2xl md:text-4xl font-bold text-slate-900 tracking-tight">
               {activeTab === "hr" && "Hiring Profile Cards & Clusters"}

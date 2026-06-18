@@ -25,16 +25,14 @@ const Card = ({ children, className, title, subtitle, icon: Icon, actions, style
   </div>
 );
 
-const HS_FULL_RAMP_FTE = 10;
-
 interface LoadTabProps {
   msSections: number;
   hsSections: number;
 }
 
 export default function LoadTab({ msSections, hsSections }: LoadTabProps) {
-  const msFte = 3 + 4 + 3;
-  const hsFte = HS_FULL_RAMP_FTE;
+  const msFte = 9;
+  const hsFte = 11;
   const totalFte = msFte + hsFte;
   const totalSpecialists = Math.ceil(totalFte);
 
@@ -83,7 +81,7 @@ export default function LoadTab({ msSections, hsSections }: LoadTabProps) {
             </div>
             <div className="space-y-4">
               <div className="p-4 bg-white/10 rounded-xl border border-white/10"><div className="text-[10px] font-bold uppercase tracking-wider mb-2 text-indigo-300">System Resilience</div><div className="text-xs font-medium whitespace-normal">The {totalSpecialists}-specialist model allows for internal substitution without disrupting learner experience.</div></div>
-              <div className="p-4 bg-rose-500/20 rounded-xl border border-rose-500/30"><div className="text-[10px] font-bold uppercase tracking-wider mb-2 text-rose-300">Stress Test Verdict</div><div className="text-xs font-bold whitespace-normal">PASS: Current {totalSpecialists}-FTE model maintains parity with São Paulo standards.</div></div>
+              <div className="p-4 bg-rose-500/20 rounded-xl border border-rose-500/30"><div className="text-[10px] font-bold uppercase tracking-wider mb-2 text-rose-300">Stress Test Verdict</div><div className="text-xs font-bold whitespace-normal">Internal planning target: the secondary staffing envelope remains aligned to the {totalSpecialists}-educator instructional-capacity model.</div></div>
             </div>
           </Card>
         </div>

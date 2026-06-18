@@ -21,7 +21,9 @@
     "validate:phase15i2c": "tsx scripts/validate-phase15i2c.ts",
     "qa:phase15i2c": "tsx tests/phase15i2c/dre-formula-parity.run.ts",
     "validate:phase15j": "tsx scripts/validate-phase15j.ts",
-    "qa:phase15j": "tsx tests/phase15j/phase15j.run.ts"
+    "qa:phase15j": "tsx tests/phase15j/phase15j.run.ts",
+    "validate:phase15l": "tsx scripts/validate-phase15l.ts",
+    "qa:phase15l": "tsx tests/phase15l/staffing-board-language.run.ts"
   },
   "dependencies": {
     "@google/genai": "^1.29.0",

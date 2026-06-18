@@ -174,8 +174,10 @@ interface HSCourseOfferArchitecture {
   staffingImplication: string;
 }
 
+// Dev note: an 8-person alternative HS educator pool was considered during scoping
+// and remains in the data model for Finance/HR reconciliation (F06). It is not shown in the UI.
 const HS_STAFFING_VALIDATION_NOTE =
-  "The High School staffing framework shown here is instructional-capacity planning, not payroll authorization, final FTE, final headcount, or hiring approval. The app currently contains both a 10-FTE High School teaching ramp and an 8-HC HS Educator Pool; Finance/HR validation is required before either becomes the payroll source of truth.";
+  "High School instructional-capacity model: 10 core + 1 flexible = 11 educators. This is instructional-capacity planning, not payroll authorization, final FTE, final headcount, or hiring approval. Payroll/FOPAG synchronization remains a separate reconciliation item.";
 
 const HS_COURSE_OFFER_ARCHITECTURE: HSCourseOfferArchitecture[] = [
   {
@@ -917,7 +919,7 @@ const HighSchoolTab = ({ sections, setSections }: HighSchoolTabProps) => {
                         Planning envelope only. Capacity condition pending: {highSchoolMidpointScenario.requiredTimetableEfficiency} block-equivalent efficiencies still require timetable validation.
                       </p>
                     </div>
-                    <Badge variant="warning">Conditional approval</Badge>
+                    <Badge variant="warning">Timetable validation pending</Badge>
                   </div>
                   <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
                     {[
