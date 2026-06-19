@@ -16,6 +16,7 @@ import OrgDesignSensitivityPanel from "../dreSimulator/OrgDesignSensitivityPanel
 import DreExportButton from "../dreSimulator/DreExportButton";
 import DreAssumptionStatusPanel from "../dreSimulator/DreAssumptionStatusPanel";
 import DreBoardReadableExport from "../dreSimulator/DreBoardReadableExport";
+import DreExecutiveInterpretationPanel from "../dreSimulator/DreExecutiveInterpretationPanel";
 
 interface DreScenarioSimulatorTabProps {
   readonly selections: DreScenarioSimulatorSelections;
@@ -103,6 +104,8 @@ export default function DreScenarioSimulatorTab({
       <DreSummaryCards dreOutput={dreOutput} year={year} onYearChange={setYear} />
 
       <DreEbitdaChart dreOutput={dreOutput} />
+
+      <DreExecutiveInterpretationPanel />
 
       <DreScopeBoundaryPanel />
 

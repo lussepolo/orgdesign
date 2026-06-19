@@ -3215,7 +3215,7 @@ Resolves S3/S4 content-coherence findings from the Phase 15K Academic Staffing a
 
 ---
 
-## Phase 15J.2 — Full Simulator End-to-End Acceptance Audit (2026-06-19)
+## Phase 15J.2 — Full Simulator End-to-End Acceptance Audit (2026-06-18)
 
 ### Objective
 
@@ -3289,3 +3289,67 @@ End-to-end acceptance audit of the DRE Scenario Simulator confirming all 108 dec
 | `npm run qa:phase15f` | ✓ 58/58 |
 | `npm run lint` | ✓ clean |
 | `npm run build` | ✓ clean |
+
+---
+
+## Phase 15J.3 — Executive Simulator Interpretation & Board Decision Framing (2026-06-18)
+
+### Objective
+
+Additive board-facing interpretation layer inside the DRE Scenario Simulator that helps leadership understand scenario trade-offs without implying approval, recommendation, winner selection, Finance closure, or Board ratification.
+
+### Files changed
+
+| File | Type | Description |
+|------|------|-------------|
+| `src/components/dreSimulator/DreExecutiveInterpretationPanel.tsx` | New | Executive interpretation component — status header, how-to-read, trade-off lenses, decision questions, pending evidence, boundary note |
+| `src/components/sections/DreScenarioSimulatorTab.tsx` | Modified | Import and render `DreExecutiveInterpretationPanel` between EBITDA chart and scope boundary panel |
+| `scripts/validate-phase15j3.ts` | New | 20-check static validator |
+| `tests/phase15j3/executive-interpretation.run.ts` | New | 21-check browser QA (port 4202) |
+| `package.json` | Modified | Added `validate:phase15j3` and `qa:phase15j3` scripts |
+| `IMPLEMENTATION.md` | Modified | This section |
+
+### Production source changes
+
+`DreScenarioSimulatorTab.tsx` was modified to import and render the new panel. No formula files, engine files, source data files, governance flag files, or DRE/Capital Decision engine contracts were changed.
+
+### Component design
+
+`DreExecutiveInterpretationPanel` is placed between the EBITDA chart and scope boundary panel in the DRE tab. It contains six sections:
+
+1. **Status header** — three badges: "Simulation available" / "Finance-source closure pending" / "Board ratification pending"
+2. **How to read this simulator** — five lever explanations (opening package, occupancy, tuition, org design, CAPEX), each describing what changes, never which is correct
+3. **Trade-off lenses** — five framing panels: growth ambition, revenue sensitivity, operating-model complexity, capital exposure, governance readiness
+4. **Planning lens questions** — five neutral decision questions, one per axis; framed as "planning lens questions, not recommendations"
+5. **Pending evidence** — Finance-source closure status, Board ratification status, F01/F03/F04/F05/F06 non-blocking items with owner labels
+6. **Boundary note** — "decision support, not a recommendation. No scenario has been selected, approved, ratified, or endorsed."
+
+### Governance constraints preserved
+
+- `FINANCE_SOURCE_CLOSURE_COMPLETE = false` — unchanged
+- `BOARD_RATIFICATION_READY = false` — unchanged
+- F02 remains in `resolvedItems`, absent from `openItems` — unchanged
+- F01/F03/F04/F05/F06 remain open and `blocksEngineCalculation: false` — unchanged
+- No DRE formula or Capital Decision formula modified
+- No source values changed
+- No winner, recommended, approved, ratified, best-scenario language introduced
+- No simulator mechanics simplified or removed
+- Not pushed
+
+### Phase 15J.3 gates
+
+| Gate | Result |
+|------|--------|
+| `npm run validate:phase15j3` | ✓ 20/20 |
+| `npm run qa:phase15j3` | ✓ 21/21 |
+| `npm run validate:phase15j2-simulator` | ✓ 31/31 |
+| `npm run qa:phase15j2-simulator` | ✓ 30/30 |
+| `npm run validate:phase15j` | ✓ 21/21 |
+| `npm run qa:phase15j` | ✓ 12/12 |
+| `npm run validate:phase15l` | ✓ 18/18 |
+| `npm run validate:phase15l2` | ✓ 27/27 |
+| `npm run qa:phase15l` | ✓ 16/16 |
+| `npm run qa:phase15l2` | ✓ 25/25 |
+| `npm run lint` | ✓ clean |
+| `npm run build` | ✓ clean |
+| `git diff --check` | ✓ clean |
