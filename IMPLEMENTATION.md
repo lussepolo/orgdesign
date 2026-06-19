@@ -3212,3 +3212,80 @@ Resolves S3/S4 content-coherence findings from the Phase 15K Academic Staffing a
 | `npm run lint` | ✓ clean |
 | `npm run build` | ✓ clean |
 | `git diff --check` | ✓ clean |
+
+---
+
+## Phase 15J.2 — Full Simulator End-to-End Acceptance Audit (2026-06-19)
+
+### Objective
+
+End-to-end acceptance audit of the DRE Scenario Simulator confirming all 108 declared scenario combinations execute, all 216 DRE × CAPEX combinations calculate, DRE-to-Capital EBITDA parity equals zero, governance metadata is correct, and no forbidden approval/winner language appears in display sources. Audit-only phase — no production source changes.
+
+### DRE scenario matrix confirmed
+
+| Dimension | IDs | Count |
+|-----------|-----|-------|
+| Opening Package | t1_g3, t1_g4, t1_g5, t1_g6 | 4 |
+| Occupancy | intermediario, pessimista, otimista | 3 |
+| Tuition | bp1_division_differentiated, bp2_ey_ls_unified, bp3_ey_to_ms_unified | 3 |
+| Org Design | minimum_experience, balanced_experience, premium_experience | 3 |
+| **Total combinations** | 4 × 3 × 3 × 3 | **108** |
+
+### Capital Decision matrix confirmed
+
+| Dimension | IDs | Count |
+|-----------|-----|-------|
+| CAPEX options | capex_90m_brl, capex_100m_brl | 2 |
+| **Total DRE × CAPEX** | 108 × 2 | **216** |
+
+### Key findings
+
+- **All 108 DRE combinations execute**: finite learner count, ROL, and EBITDA for all available years. No NaN, no Infinity, no silent-zero ROL for 2029–2037.
+- **All 216 DRE × CAPEX combinations calculate**: `calculationReadiness === "structurally_calculated"` for every combination.
+- **DRE-to-Capital EBITDA parity = 0**: `capitalResult.periods[yr].ebitdaBRL === dreResult.byYear[yr].ebitda` for all years, all 216 combinations. Max absolute delta: 0. Parity is structural — `calculateCapitalDecisionBridge()` calls `calculateDre()` internally.
+- **CAPEX excluded from DRE**: no `capex*` field present in `DreYearResult`. `ebitdaTreatment: "excluded_from_ebitda"` for both CAPEX options.
+- **Service contracts included in DRE**: `servicos_de_limpeza_e_seguranca` present and non-zero for 2028 in canonical scenario.
+- **Capital Decision output validity**: `explicitExclusions.tir === "excluded"`, `explicitExclusions.discountedPayback === "excluded"`, periods array has exactly 21 entries (pre_ops + 2028–2047). VPL/TIR/payback live in Phase15C engine.
+- **Governance metadata correct**: F02 resolved (not in openItems). F01/F03/F04/F05/F06 all in openItems with `blocksEngineCalculation: false`. `calculationAvailability === "available"`. `FINANCE_SOURCE_CLOSURE_COMPLETE = false`. `BOARD_RATIFICATION_READY = false`.
+- **No forbidden language**: no winner/best-scenario/recommended-scenario in display sources (after stripping comments). No affirmative board-approved/Finance-approved/ratification-complete claims. "not a board-ratified recommendation" in DreBoardReadableExport.tsx is an acceptable negation.
+- **Static guard pre-existing occurrences**: "board-approved" / "finance-approved" in `dreScenarioWorkbook.ts` are documentation strings, not UI display strings (file not in display source scan). "Board Review" / "Board-ready synthesis" in OfferScenariosTab.tsx are in print-only sections; deferred to later phase.
+- **Browser checks confirmed**: 5 selectors on DRE tab (opening package, occupancy, tuition, org design, CAPEX), selector change updates output, Capital Decision handoff renders, no horizontal overflow on desktop/tablet/mobile (1280×900, 1024×768, 390×844), zero console errors, zero network failures.
+
+### Files created (audit only — no production source changes)
+
+| File | Purpose |
+|------|---------|
+| `scripts/validate-phase15j2-simulator.ts` | 31-check static validator |
+| `tests/phase15j2-simulator/full-simulator.run.ts` | 30-check browser QA (port 4201) |
+| `package.json` | Added validate:phase15j2-simulator and qa:phase15j2-simulator scripts |
+
+### Constraints preserved
+
+- No DRE formulas modified.
+- No Capital Decision formulas modified.
+- No source values, governance flags, or staffing/org-design tabs modified.
+- `FINANCE_SOURCE_CLOSURE_COMPLETE = false`, `BOARD_RATIFICATION_READY = false` unchanged.
+- F02 remains in resolvedItems; not reopened.
+- Phase 15J, 15L, 15L.2 production source files untouched.
+
+### Phase 15J.2 gates
+
+| Gate | Result |
+|------|--------|
+| `npm run validate:phase15j2-simulator` | ✓ 31/31 |
+| `npm run qa:phase15j2-simulator` | ✓ 30/30 |
+| `npm run validate:phase15j` | ✓ 21/21 |
+| `npm run validate:phase15i2c` | ✓ 26/26 |
+| `npm run validate:phase15i2-packet` | ✓ 25/25 |
+| `npm run validate:phase15i1` | ✓ 24/24 |
+| `npm run validate:phase15l` | ✓ 18/18 |
+| `npm run validate:phase15l2` | ✓ 27/27 |
+| `npm run qa:phase15j` | ✓ 12/12 |
+| `npm run qa:phase15l` | ✓ 16/16 |
+| `npm run qa:phase15l2` | ✓ 25/25 |
+| `npm run qa:phase15i2c` | ✓ 6/6 |
+| `npm run qa:phase15i1` | ✓ 22/22 |
+| `npm run qa:phase15g2` | ✓ 19/19 |
+| `npm run qa:phase15f` | ✓ 58/58 |
+| `npm run lint` | ✓ clean |
+| `npm run build` | ✓ clean |
