@@ -29,7 +29,9 @@
     "validate:phase15j2-simulator": "tsx scripts/validate-phase15j2-simulator.ts",
     "qa:phase15j2-simulator": "tsx tests/phase15j2-simulator/full-simulator.run.ts",
     "validate:phase15j3": "tsx scripts/validate-phase15j3.ts",
-    "qa:phase15j3": "tsx tests/phase15j3/executive-interpretation.run.ts"
+    "qa:phase15j3": "tsx tests/phase15j3/executive-interpretation.run.ts",
+    "validate:phase15m": "tsx scripts/validate-phase15m.ts",
+    "qa:phase15m": "tsx tests/phase15m/scope-boundary-cleanup.run.ts"
   },
   "dependencies": {
     "@google/genai": "^1.29.0",

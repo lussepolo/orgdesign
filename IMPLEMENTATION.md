@@ -3353,3 +3353,85 @@ Additive board-facing interpretation layer inside the DRE Scenario Simulator tha
 | `npm run lint` | ✓ clean |
 | `npm run build` | ✓ clean |
 | `git diff --check` | ✓ clean |
+
+---
+
+## Phase 15M — Simulator Presentation Flow & Scope Boundary Cleanup (2026-06-18)
+
+### Objective
+
+Clean the "Scope & Source Boundary" panel for executive readability and semantic accuracy.
+Replace stale phase-based framing ("Included in Phase 14" / "Excluded until Phase 15")
+with architecture-based framing that clarifies what is calculated inside DRE EBITDA,
+what belongs to the capital/investment layer, and which source governs each value.
+
+### Files changed
+
+| File | Change |
+|------|--------|
+| `src/components/dreSimulator/DreScopeBoundaryPanel.tsx` | MODIFIED — production component |
+| `scripts/validate-phase15m.ts` | NEW — 20-check static validator |
+| `tests/phase15m/scope-boundary-cleanup.run.ts` | NEW — 21-check browser QA |
+| `package.json` | MODIFIED — added `validate:phase15m`, `qa:phase15m` scripts |
+| `IMPLEMENTATION.md` | MODIFIED — this section |
+
+### What was cleaned
+
+**Old wording removed:**
+- Card heading: "Included in Phase 14"
+- Card heading: "Excluded until Phase 15"
+- Intro paragraph: "Operating drivers, Phase 14 scope, and the Phase 15 boundary."
+- Stale comment referencing Phase 14B-UI-VISUAL-FIXES
+- `"Tier"` as a standalone scope-boundary list item (no defined, source-backed meaning in current engine)
+- `"DCF"`, `"Investment recovery"`, `"Discounted payback"` as standalone excluded items (consolidated into architecture-accurate Capital/Investment Layer language)
+- `XCircle` icon (implied exclusion/risk framing)
+- Rose/risk color tokens on the middle card
+
+**New architecture-based structure:**
+
+1. **DRE Operating Layer** (teal) — `ShieldCheck` icon
+   > These items form the operating scenario and EBITDA view. They belong inside the DRE simulator and are included in operating performance comparison.
+   Items: Enrollment, Tuition and discounts, Receita / ROL, FOPAG-derived payroll rows, Service Contracts as DRE cost lines, Fixed operating DRE rows, EBITDA, XLSX audit export
+
+2. **Capital / Investment Layer** (amber) — `TrendingUp` icon
+   > These items sit outside DRE EBITDA. They should not be treated as operating DRE rows, but they may appear in the Capital Decision or investment-analysis layer where the current engine supports them.
+   Items: CAPEX bridge, Cash flow after CAPEX, Investment-analysis metrics outside DRE EBITDA, VPL / NPV where supported by the investment-analysis engine, Payback metrics where supported by the investment-analysis engine
+
+3. **Source Governance** (indigo) — `BookOpen` icon (unchanged content, added description paragraph)
+   > The simulator separates calculation scope from source authority. DRE rows, payroll rows, and Service Contracts must remain tied to their governing sources.
+
+**Intro paragraph (new):**
+> This section defines what is calculated inside the DRE simulator, what remains outside DRE EBITDA, and which source governs each value.
+
+### Formulas / source values / governance flags preserved
+
+- DRE formulas: not changed
+- Capital Decision formulas: not changed
+- Source data files: not changed
+- `FINANCE_SOURCE_CLOSURE_COMPLETE`: remains `false`
+- `BOARD_RATIFICATION_READY`: remains `false`
+- F02: remains resolved, absent from openItems
+- F01/F03/F04/F05/F06: remain open with `blocksEngineCalculation: false`
+- Staffing/org-design logic: not changed
+
+### Phase 15M gates
+
+| Gate | Result |
+|------|--------|
+| `npm run validate:phase15m` | ✓ 20/20 |
+| `npm run qa:phase15m` | ✓ 21/21 |
+| `npm run validate:phase15j3` | ✓ 20/20 |
+| `npm run qa:phase15j3` | ✓ 21/21 |
+| `npm run validate:phase15j2-simulator` | ✓ 31/31 |
+| `npm run qa:phase15j2-simulator` | ✓ 30/30 |
+| `npm run validate:phase15j` | ✓ 21/21 |
+| `npm run qa:phase15j` | ✓ 12/12 |
+| `npm run validate:phase15l` | ✓ 18/18 |
+| `npm run validate:phase15l2` | ✓ 27/27 |
+| `npm run qa:phase15l` | ✓ 16/16 |
+| `npm run qa:phase15l2` | ✓ 25/25 |
+| `npm run lint` | ✓ clean |
+| `npm run build` | ✓ clean |
+| `git diff --check` | ✓ clean |
+| Committed-HEAD reproduction | ✓ 20/20, build clean |
+- Not pushed
