@@ -3435,3 +3435,81 @@ what belongs to the capital/investment layer, and which source governs each valu
 | `git diff --check` | ✓ clean |
 | Committed-HEAD reproduction | ✓ 20/20, build clean |
 - Not pushed
+
+---
+
+## Phase 15N — Hide Staffing Model from Primary Navigation (2026-06-18)
+
+### Objective
+
+Remove the "Staffing Model" tab from the user-facing primary navigation bar
+before pushing, without deleting staffing logic, source files, validators, or
+QA coverage. This is an exposure-control change, not a staffing model change.
+
+### Files changed
+
+| File | Change |
+|------|--------|
+| `src/App.tsx` | MODIFIED — nav exposure only |
+| `scripts/validate-phase15n.ts` | NEW — 11-check static validator |
+| `tests/phase15n/hide-staffing-model.run.ts` | NEW — 14-check browser QA |
+| `package.json` | MODIFIED — added `validate:phase15n`, `qa:phase15n` scripts |
+| `IMPLEMENTATION.md` | MODIFIED — this section |
+
+### Exact UI exposure change
+
+**Removed from `src/App.tsx`:**
+1. `<TabButton ... label="Staffing Model" icon={Calculator} />` from the `<nav>` block
+2. `"staffing"` from `APP_TAB_ORDER` (so PREV/NEXT traversal skips it)
+3. `Calculator` icon import (became unused after removing the nav button)
+
+**Preserved in `src/App.tsx`:**
+- `import StaffingTab` — still imported
+- `{activeTab === "staffing" && <StaffingTab ... />}` — still renders if tab is programmatically activated
+- Title/subtitle for `activeTab === "staffing"` — still present
+- `"staffing"` in the `TabId` union type — still valid
+
+### Staffing source files intact
+
+All staffing source files remain unchanged:
+- `src/components/sections/StaffingTab.tsx`
+- `src/hooks/useStaffingLogic.ts`
+- `src/components/sections/LoadTab.tsx`
+- `src/components/sections/PayrollProjectionTab.tsx`
+- `src/features/rio-scenario-resilience/model/msHsStaffingReadiness.ts`
+- `src/features/rio-scenario-resilience/model/payrollAdapter.ts`
+- All Phase 15L and 15L.2 validator and QA scripts
+
+### Formulas / source values / governance flags / staffing calculations preserved
+
+- DRE formulas: not changed
+- Capital Decision formulas: not changed
+- Source data files: not changed
+- Staffing calculations: not changed
+- `FINANCE_SOURCE_CLOSURE_COMPLETE`: remains `false`
+- `BOARD_RATIFICATION_READY`: remains `false`
+- F02: remains resolved, absent from openItems
+
+### Phase 15N gates
+
+| Gate | Result |
+|------|--------|
+| `npm run validate:phase15n` | ✓ 11/11 |
+| `npm run qa:phase15n` | ✓ 14/14 |
+| `npm run validate:phase15m` | ✓ 20/20 |
+| `npm run qa:phase15m` | ✓ 21/21 |
+| `npm run validate:phase15j3` | ✓ 20/20 |
+| `npm run qa:phase15j3` | ✓ 21/21 |
+| `npm run validate:phase15j2-simulator` | ✓ 31/31 |
+| `npm run qa:phase15j2-simulator` | ✓ 30/30 |
+| `npm run validate:phase15j` | ✓ 21/21 |
+| `npm run qa:phase15j` | ✓ 12/12 |
+| `npm run validate:phase15l` | ✓ 18/18 |
+| `npm run validate:phase15l2` | ✓ 27/27 |
+| `npm run qa:phase15l` | ✓ 16/16 |
+| `npm run qa:phase15l2` | ✓ 25/25 |
+| `npm run lint` | ✓ clean |
+| `npm run build` | ✓ clean |
+| `git diff --check` | ✓ clean |
+| Committed-HEAD reproduction | ✓ 11/11, build clean |
+- Not pushed

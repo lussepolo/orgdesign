@@ -15,7 +15,6 @@ import {
   Layers,
   Baby,
   School,
-  Calculator,
   FileText,
   Home,
   ArrowLeft,
@@ -56,7 +55,6 @@ export type TabId = "cover" | "staffing" | "offer-scenarios" | "executive-org-de
 
 const APP_TAB_ORDER: TabId[] = [
   "cover",
-  "staffing",
   "offer-scenarios",
   "executive-org-design",
   "hr",
@@ -205,7 +203,6 @@ export default function App() {
 
           <nav aria-label="Model sections" className="flex w-full items-center gap-2 overflow-x-auto rounded-2xl bg-slate-100 p-1 no-scrollbar md:w-auto md:max-w-[820px] lg:max-w-none">
             <TabButton active={activeTab === "cover"} onClick={() => setActiveTab("cover")} label="Cover" icon={LayoutDashboard} />
-            <TabButton active={activeTab === "staffing"} onClick={() => setActiveTab("staffing")} label="Staffing Model" icon={Calculator} />
             <TabButton active={activeTab === "offer-scenarios"} onClick={() => setActiveTab("offer-scenarios")} label="Cenários da Oferta" icon={Layers} />
             <TabButton active={activeTab === "executive-org-design"} onClick={() => setActiveTab("executive-org-design")} label="Executive Org Design" icon={GitBranch} />
             <TabButton active={activeTab === "hr"} onClick={() => setActiveTab("hr")} label="Hiring Profile Cards" icon={FileText} />
