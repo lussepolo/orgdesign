@@ -1,4 +1,4 @@
-// Phase 15O — Board-Ready Visible App Flow Browser QA (17 checks).
+// Phase 15O — Board-Ready Visible App Flow Browser QA (27 checks).
 //
 // Verifies that the three visible-flow defects are corrected in the running app
 // and that core board-facing panels remain functional.
@@ -9,13 +9,23 @@
 //   Check  5:     "Staffing Model" is absent from the AboutModal text
 //   Check  6:     All 13 current visible navigation items are listed in the modal
 //   Check  7:     DRE Simulator still renders
-//   Check  8:     Executive interpretation panel still renders
-//   Check  9:     Scope & Source Boundary still renders
-//   Check 10:     Capital Decision handoff still works
-//   Check 11:     Corrected visible-flow issues are not present
-//   Checks 12-14: No horizontal overflow on desktop, tablet, mobile
-//   Checks 15-16: No console errors, no failed local module/network requests
-//   Check  17:    QA aggregate count is exact
+//   Check  8:     Compact governance summary renders (data-testid scoped)
+//   Check  9:     "Simulation available" in governance summary
+//   Check 10:     "Finance-source closure pending" in governance summary
+//   Check 11:     "Board ratification pending" in governance summary
+//   Check 12:     Non-blocking pending count sentence in governance summary
+//   Check 13:     "Source-status warning count" absent from governance summary
+//   Check 14:     "blocksenginecalculation" absent from governance summary
+//   Check 15:     "Methodology & Source Status" details layer openable
+//   Check 16:     F-code descriptions visible in details after opening
+//   Check 17:     No forbidden approval/ratification-complete language in DRE tab
+//   Check 18:     Executive interpretation panel still renders
+//   Check 19:     Scope & Source Boundary still renders
+//   Check 20:     Capital Decision handoff still works
+//   Check 21:     Corrected visible-flow issues are not present
+//   Checks 22-24: No horizontal overflow on desktop, tablet, mobile
+//   Checks 25-26: No console errors, no failed local module/network requests
+//   Check  27:    QA aggregate count is exact
 //
 // Run with: npm run qa:phase15o
 // Requires Playwright: npx playwright install chromium
@@ -205,7 +215,80 @@ async function runChecks(page: Page) {
   await ss(page, "03_dre_tab");
   const dreBody = await bodyLower(page);
 
-  // ── Check 8: Executive interpretation panel still renders ─────────────────
+  // ── Checks 8-17: Governance summary refactor ──────────────────────────────
+  const govSummary = page.locator('[data-testid="dre-governance-summary"]');
+  let govText = "";
+  try {
+    govText = (await govSummary.innerText().catch(() => "")).toLowerCase();
+  } catch {
+    govText = "";
+  }
+
+  // ── Check 8: Compact governance summary renders ───────────────────────────
+  govText.includes("governance status")
+    ? pass("qa_gov01_compact_summary_renders", "Compact governance summary renders with 'Governance Status' heading")
+    : fail("qa_gov01_compact_summary_renders", "'Governance Status' heading not found in governance summary element");
+
+  // ── Check 9: "Simulation available" in governance summary ─────────────────
+  govText.includes("simulation available")
+    ? pass("qa_gov02_sim_available_in_summary", "'Simulation available' found in governance summary")
+    : fail("qa_gov02_sim_available_in_summary", "'Simulation available' not found in governance summary");
+
+  // ── Check 10: "Finance-source closure pending" in governance summary ───────
+  govText.includes("finance-source closure pending")
+    ? pass("qa_gov03_finance_pending_in_summary", "'Finance-source closure pending' found in governance summary")
+    : fail("qa_gov03_finance_pending_in_summary", "'Finance-source closure pending' not found in governance summary");
+
+  // ── Check 11: "Board ratification pending" in governance summary ──────────
+  govText.includes("board ratification pending")
+    ? pass("qa_gov04_board_pending_in_summary", "'Board ratification pending' found in governance summary")
+    : fail("qa_gov04_board_pending_in_summary", "'Board ratification pending' not found in governance summary");
+
+  // ── Check 12: Non-blocking pending count in governance summary ────────────
+  govText.includes("non-blocking source-governance items remain pending")
+    ? pass("qa_gov05_nonblocking_count_in_flow", "Non-blocking pending count sentence found in governance summary")
+    : fail("qa_gov05_nonblocking_count_in_flow", "Non-blocking pending count sentence not found in governance summary");
+
+  // ── Check 13: "Source-status warning count" absent from governance summary ─
+  !govText.includes("source-status warning count")
+    ? pass("qa_gov06_no_source_status_warning", "'Source-status warning count' is absent from governance summary")
+    : fail("qa_gov06_no_source_status_warning", "'Source-status warning count' still present in governance summary");
+
+  // ── Check 14: "blocksenginecalculation" absent from governance summary ────
+  !govText.includes("blocksenginecalculation")
+    ? pass("qa_gov07_no_blocks_engine_in_flow", "'blocksenginecalculation' is absent from governance summary")
+    : fail("qa_gov07_no_blocks_engine_in_flow", "'blocksenginecalculation' visible in governance summary");
+
+  // ── Check 15: Details layer openable ─────────────────────────────────────
+  try {
+    const detailsBtn = govSummary.getByRole("button", { name: /methodology/i });
+    await detailsBtn.waitFor({ timeout: 5_000 });
+    await detailsBtn.click();
+    await page.waitForTimeout(500);
+    pass("qa_gov08_details_openable", "'Methodology & Source Status' details layer opened successfully");
+  } catch (err) {
+    fail("qa_gov08_details_openable", `Details layer button not found or not clickable: ${err}`);
+  }
+
+  // ── Check 16: F-code descriptions visible in details after opening ─────────
+  try {
+    const govTextExpanded = (await govSummary.innerText().catch(() => "")).toLowerCase();
+    govTextExpanded.includes("c9 source/index pending")
+      ? pass("qa_gov09_fcodes_in_details", "F-code detail 'c9 source/index pending' visible after expanding details layer")
+      : fail("qa_gov09_fcodes_in_details", "'c9 source/index pending' not visible after expanding details layer");
+    await ss(page, "03b_governance_details");
+  } catch (err) {
+    fail("qa_gov09_fcodes_in_details", `Error reading governance details: ${err}`);
+  }
+
+  // ── Check 17: No forbidden language in DRE tab body ───────────────────────
+  const FORBIDDEN_DRE_PATTERN =
+    /\b(winner|best scenario|recommended scenario|final recommendation|is\s+board[\s-]approved|has\s+been\s+board[\s-]approved|board[\s-]approval\s+complete|is\s+finance[\s-]approved|board[\s-]ratification\s+complete|ratification\s+approved|decision\s+complete)\b/i;
+  !FORBIDDEN_DRE_PATTERN.test(dreBody)
+    ? pass("qa_gov10_no_forbidden_in_dre", "No forbidden approval/ratification-complete language in DRE tab body")
+    : fail("qa_gov10_no_forbidden_in_dre", "Forbidden language found in DRE tab body — check FORBIDDEN_DRE_PATTERN matches");
+
+  // ── Check 18 (was 8): Executive interpretation panel still renders ──────────
   const hasExecPanel =
     dreBody.includes("executive simulator interpretation") ||
     dreBody.includes("simulation available") ||
@@ -346,7 +429,7 @@ async function main() {
     }
   }
 
-  const EXPECTED = 17;
+  const EXPECTED = 27;
   const totalChecks = Object.keys(RESULTS).length;
   const passed = Object.values(RESULTS).filter((v) => v === true).length;
   const failed = totalChecks - passed;

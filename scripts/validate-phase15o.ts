@@ -1,4 +1,4 @@
-// Phase 15O — Board-Ready Visible App Flow Review (14 checks).
+// Phase 15O — Board-Ready Visible App Flow Review (23 checks).
 //
 // Verifies that the three visible-flow defects found in Phase 15O are corrected
 // and that all regression gates from prior phases remain intact.
@@ -32,8 +32,8 @@
 //    12. DRE formula and Capital Decision engine files not in git diff
 //    13. Staffing calculation and source-data files not in git diff
 //
-//   Section H — Aggregate count (check 14)
-//    14. Validator ran exactly 14 checks
+//   Section H — Aggregate count (check 23)
+//    23. Validator ran exactly 23 checks
 //
 // Run with: npm run validate:phase15o
 
@@ -100,6 +100,7 @@ const PRIMARY_DISPLAY_PATHS = [
   "src/components/dreSimulator/DreScopeBoundaryPanel.tsx",
   "src/components/dreSimulator/DreExecutiveInterpretationPanel.tsx",
   "src/components/sections/DreScenarioSimulatorTab.tsx",
+  "src/components/dreSimulator/DreGovernanceSummaryPanel.tsx",
   "src/components/dreSimulator/DreAssumptionStatusPanel.tsx",
   "src/components/dreSimulator/DreBoardReadableExport.tsx",
   "src/components/sections/AboutModal.tsx",
@@ -310,10 +311,101 @@ checkTrue(
   `Staffing/source-data files must not be changed: ${staffingFilesChanged.join(", ") || "none changed"}`,
 );
 
+// ── Section I: Governance summary refactor ────────────────────────────────────
+console.log("\nSection I — Governance Summary Refactor");
+
+const GOVERNANCE_PANEL = readFile(
+  "src/components/dreSimulator/DreGovernanceSummaryPanel.tsx",
+);
+const DRE_TAB_CONTENT = readFile("src/components/sections/DreScenarioSimulatorTab.tsx");
+
+// Check 15
+checkTrue(
+  "dre_governance_summary_panel_exists",
+  GOVERNANCE_PANEL.length > 100 &&
+    GOVERNANCE_PANEL.includes("dre-governance-summary") &&
+    GOVERNANCE_PANEL.includes("Governance Status"),
+  "DreGovernanceSummaryPanel must exist with data-testid and 'Governance Status' heading",
+);
+
+// Check 16
+checkTrue(
+  "compact_summary_has_simulation_available",
+  GOVERNANCE_PANEL.includes("Simulation available"),
+  "DreGovernanceSummaryPanel must render 'Simulation available' in always-visible summary",
+);
+
+// Check 17
+checkTrue(
+  "compact_summary_has_finance_pending",
+  GOVERNANCE_PANEL.includes("Finance-source closure pending"),
+  "DreGovernanceSummaryPanel must render 'Finance-source closure pending'",
+);
+
+// Check 18
+checkTrue(
+  "compact_summary_has_board_pending",
+  GOVERNANCE_PANEL.includes("Board ratification pending"),
+  "DreGovernanceSummaryPanel must render 'Board ratification pending'",
+);
+
+// Check 19
+checkTrue(
+  "compact_summary_has_nonblocking_reference",
+  GOVERNANCE_PANEL.includes("non-blocking source-governance items remain pending"),
+  "DreGovernanceSummaryPanel must include non-blocking pending count sentence",
+);
+
+// Check 20
+const hasAssumptionStatusImport = /import\s+DreAssumptionStatusPanel/.test(DRE_TAB_CONTENT);
+checkFalse(
+  "dre_assumption_status_not_imported_in_tab",
+  hasAssumptionStatusImport,
+  "DreScenarioSimulatorTab must not import DreAssumptionStatusPanel — replaced by DreGovernanceSummaryPanel",
+);
+
+const mainFlowForStrings = [GOVERNANCE_PANEL, DRE_TAB_CONTENT]
+  .join("\n")
+  .replace(/^\s*\/\/.*$/gm, "")
+  .replace(/\/\*[\s\S]*?\*\//g, "");
+
+// Check 21
+const sourceStatusWarningInMainFlow = /Source-status warning count/i.test(mainFlowForStrings);
+checkFalse(
+  "source_status_warning_count_absent_from_main_flow",
+  sourceStatusWarningInMainFlow,
+  "'Source-status warning count' must not appear in DreGovernanceSummaryPanel or DreScenarioSimulatorTab",
+);
+
+// Check 22
+const blocksEngineInMainFlow = /blocksEngineCalculation:\s*false/.test(mainFlowForStrings);
+checkFalse(
+  "blocks_engine_calculation_text_absent_from_main_flow",
+  blocksEngineInMainFlow,
+  "'blocksEngineCalculation: false' must not appear in DreGovernanceSummaryPanel or DreScenarioSimulatorTab",
+);
+
+// Check 23 (last non-aggregate check)
+const OPEN_FCODE_UNIQUE_STRINGS = [
+  "Outras Receitas C9 source/index pending",
+  "Tuition signed XLSX pending",
+  "Discount schedule signed reference pending",
+  "228 vs 246 scenario mapping pending",
+  "Payroll/capacity reconciliation ownership pending",
+];
+const missingFcodeDescriptions = OPEN_FCODE_UNIQUE_STRINGS.filter(
+  (s) => !GOVERNANCE_PANEL.includes(s),
+);
+checkTrue(
+  "governance_details_layer_has_all_open_fcodes",
+  missingFcodeDescriptions.length === 0,
+  `DreGovernanceSummaryPanel details layer must contain all 5 open F-code descriptions. Missing: ${missingFcodeDescriptions.join(", ") || "none"}`,
+);
+
 // ── Section H: Aggregate count ────────────────────────────────────────────────
 console.log("\nSection H — Aggregate Count");
 
-const EXPECTED_TOTAL = 14;
+const EXPECTED_TOTAL = 23;
 const totalBefore = passCount + failCount;
 
 if (totalBefore === EXPECTED_TOTAL - 1) {

@@ -3584,3 +3584,69 @@ Phase 15O was not fully closed because:
 | `npm run build` | ✓ clean |
 | `git diff --check` | ✓ clean |
 - Not pushed
+
+---
+
+## Phase 15P — Governance Summary Refactor (2026-06-22)
+
+Builds on pushed Phase 15O (`340eec4`).
+
+### Problem
+
+The detailed F-code source-governance list rendered by `DreAssumptionStatusPanel` was too visually dominant in the primary DRE simulator flow. Two specific strings also needed removal: "Source-status warning count" and "blocksEngineCalculation: false" (rendered as visible text in the footer).
+
+### Changes made
+
+**Created `src/components/dreSimulator/DreGovernanceSummaryPanel.tsx`**
+
+- New component with `data-testid="dre-governance-summary"`.
+- Always-visible compact summary: "Governance Status" heading, three status rows (Simulation available / Finance-source closure pending / Board ratification pending), non-blocking pending count sentence.
+- Collapsible details layer ("Methodology & Source Status", collapsed by default) containing the full F01/F03/F04/F05/F06 card stack and the F02 resolved card — identical data, moved out of the primary flow.
+
+**`src/components/dreSimulator/DreAssumptionStatusPanel.tsx`**
+
+- Removed the footer paragraph containing "Source-status warning count" and "blocksEngineCalculation: false". The file is retained (referenced by prior-phase validate scripts) but no longer renders those strings.
+
+**`src/components/sections/DreScenarioSimulatorTab.tsx`**
+
+- Replaced `import DreAssumptionStatusPanel` with `import DreGovernanceSummaryPanel`.
+- Replaced `<DreAssumptionStatusPanel />` at position 123 with `<DreGovernanceSummaryPanel />`.
+
+**`scripts/validate-phase15o.ts`**
+
+- Expanded from 14 to 23 checks.
+- Added `DreGovernanceSummaryPanel.tsx` to `PRIMARY_DISPLAY_PATHS`.
+- Added Section I ("Governance Summary Refactor") with 9 new checks: panel exists, compact summary content, pending indicator text, non-blocking count sentence, DreAssumptionStatusPanel not imported in tab, forbidden strings absent from main flow, details layer contains all open F-code descriptions.
+
+**`tests/phase15o/board-visible-flow.run.ts`**
+
+- Expanded from 17 to 27 checks.
+- Added 10 new governance checks (qa_gov01–qa_gov10), each scoped to `[data-testid="dre-governance-summary"]` innerText to avoid false-positives from DreExecutiveInterpretationPanel (which independently shows similar status text):
+  - Compact summary renders / status rows present / non-blocking count sentence
+  - Forbidden strings absent before expanding
+  - Details layer openable via button click
+  - F-code descriptions ("c9 source/index pending") visible after expanding
+  - No forbidden approval/ratification-complete language in DRE tab body
+
+### What was not changed
+
+- All DRE formula, Capital Decision engine, and staffing calculation source files: unchanged.
+- `FINANCE_SOURCE_CLOSURE_COMPLETE`: remains `false`.
+- `BOARD_RATIFICATION_READY`: remains `false`.
+- F02: remains resolved, absent from openItems.
+- F01/F03/F04/F05/F06: remain open and non-blocking.
+- Staffing Model not restored to primary navigation.
+
+### Gate results
+
+| Gate | Result |
+|------|--------|
+| `npm run validate:phase15o` | ✓ 23/23 |
+| `npm run qa:phase15o` | ✓ 27/27 |
+| `npm run validate:phase15n` | ✓ 11/11 |
+| `npm run qa:phase15n` | ✓ 14/14 |
+| `npm run validate:phase15m` | ✓ 20/20 |
+| `npm run validate:phase15j3` | ✓ 20/20 |
+| `npm run validate:phase15j2-simulator` | ✓ 31/31 |
+| `npm run validate:phase15j` | ✓ 21/21 |
+- Not pushed

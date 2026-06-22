@@ -91,10 +91,6 @@ export default function DreAssumptionStatusPanel() {
         </div>
       </div>
 
-      <p className="mt-3 text-[11px] leading-relaxed text-slate-400">
-        Source-status warning count: {openItems.length} open items (F01, F03, F04, F05, F06). All
-        share blocksEngineCalculation: false. F02 is not listed as open.
-      </p>
     </Card>
   );
 }

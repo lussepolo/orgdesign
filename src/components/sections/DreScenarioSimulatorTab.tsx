@@ -14,7 +14,7 @@ import DreScopeBoundaryPanel from "../dreSimulator/DreScopeBoundaryPanel";
 import OrgDesignPanel from "../dreSimulator/OrgDesignPanel";
 import OrgDesignSensitivityPanel from "../dreSimulator/OrgDesignSensitivityPanel";
 import DreExportButton from "../dreSimulator/DreExportButton";
-import DreAssumptionStatusPanel from "../dreSimulator/DreAssumptionStatusPanel";
+import DreGovernanceSummaryPanel from "../dreSimulator/DreGovernanceSummaryPanel";
 import DreBoardReadableExport from "../dreSimulator/DreBoardReadableExport";
 import DreExecutiveInterpretationPanel from "../dreSimulator/DreExecutiveInterpretationPanel";
 
@@ -120,7 +120,7 @@ export default function DreScenarioSimulatorTab({
 
       <DreAnnualTable dreOutput={dreOutput} />
 
-      <DreAssumptionStatusPanel />
+      <DreGovernanceSummaryPanel />
 
       <DreBoardReadableExport selections={selections} dreOutput={dreOutput} />
 
