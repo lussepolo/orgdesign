@@ -33,7 +33,9 @@
     "validate:phase15m": "tsx scripts/validate-phase15m.ts",
     "qa:phase15m": "tsx tests/phase15m/scope-boundary-cleanup.run.ts",
     "validate:phase15n": "tsx scripts/validate-phase15n.ts",
-    "qa:phase15n": "tsx tests/phase15n/hide-staffing-model.run.ts"
+    "qa:phase15n": "tsx tests/phase15n/hide-staffing-model.run.ts",
+    "validate:phase15o": "tsx scripts/validate-phase15o.ts",
+    "qa:phase15o": "tsx tests/phase15o/board-visible-flow.run.ts"
   },
   "dependencies": {
     "@google/genai": "^1.29.0",

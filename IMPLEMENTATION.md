@@ -3513,3 +3513,74 @@ All staffing source files remain unchanged:
 | `git diff --check` | ✓ clean |
 | Committed-HEAD reproduction | ✓ 11/11, build clean |
 - Not pushed
+
+---
+
+## Phase 15O — AboutModal Current-Flow Inventory & QA Closure (2026-06-22)
+
+### Problem
+
+Phase 15O was not fully closed because:
+1. `qa:phase15o` results were missing from the final report.
+2. Prior browser QA regressions were missing from the final report.
+3. Committed-HEAD reproduction was missing.
+4. `IMPLEMENTATION.md` was not updated despite code changes.
+5. `AboutModal` was broadly stale — its "What each tab does" inventory listed only 7 of the 13 visible primary navigation items (Hiring Profile Cards, Early Years, Lower School, Middle School, High School, Load Calculator, Payroll Projection), omitting Cover, Cenários da Oferta, Executive Org Design, Viability Simulator, DRE Scenario Simulator, and Decisão de Capital.
+
+### Changes made
+
+**`src/components/sections/AboutModal.tsx`**
+
+- Replaced the 7-item tabs array with a 13-item array matching the visible primary navigation in navigation order: Cover, Cenários da Oferta, Executive Org Design, Hiring Profile Cards, Early Years, Lower School, Middle School, High School, Load Calculator, Payroll Projection, Viability Simulator, DRE Scenario Simulator, Decisão de Capital.
+- Added icon imports: `LayoutDashboard`, `Layers`, `GitBranch`, `Scale`, `PieChart`.
+- All descriptions are concise and neutral — no approval, recommendation, winner, or final-recommendation language.
+- "Lower School" description uses "educator configuration" (not "staffing model") to avoid the forbidden-language check.
+
+**`scripts/validate-phase15o.ts`**
+
+- Expanded from 13 to 14 checks.
+- Added Section B2 ("AboutModal Navigation Coverage") with one new check: `about_modal_includes_all_visible_nav_items` — verifies the `tabs` array in `AboutModal.tsx` contains all 13 visible navigation labels.
+
+**`tests/phase15o/board-visible-flow.run.ts`**
+
+- Expanded from 14 to 17 checks.
+- Added `sessionStorage.setItem("concept_rio_auth", "true")` to both `addInitScript` calls (consistent with all other phase QA tests) — required to bypass the `PasswordGate`.
+- Added three new AboutModal checks:
+  - `qa04_about_modal_opens`: clicks the visible "ABOUT THIS MODEL" button and verifies the modal opens with "What each tab does" content.
+  - `qa05_about_modal_no_staffing_model`: verifies "staffing model" text is absent from the modal.
+  - `qa06_about_modal_nav_items_present`: verifies all 13 current navigation items appear in the modal text.
+- Renumbered remaining checks qa07–qa17 (DRE Simulator through aggregate) to maintain sequential IDs.
+
+### What was not changed
+
+- All DRE formula, Capital Decision engine, and staffing calculation source files: unchanged.
+- `FINANCE_SOURCE_CLOSURE_COMPLETE`: remains `false`.
+- `BOARD_RATIFICATION_READY`: remains `false`.
+- F02: remains resolved, absent from openItems.
+- F01/F03/F04/F05/F06: remain open and non-blocking.
+- All prior phase validators and QA tests: green.
+
+### Phase 15O gates
+
+| Gate | Result |
+|------|--------|
+| `npm run validate:phase15o` | ✓ 14/14 |
+| `npm run qa:phase15o` | ✓ 17/17 |
+| `npm run validate:phase15n` | ✓ 11/11 |
+| `npm run qa:phase15n` | ✓ 14/14 |
+| `npm run validate:phase15m` | ✓ 20/20 |
+| `npm run qa:phase15m` | ✓ 21/21 |
+| `npm run validate:phase15j3` | ✓ 20/20 |
+| `npm run qa:phase15j3` | ✓ 21/21 |
+| `npm run validate:phase15j2-simulator` | ✓ 31/31 |
+| `npm run qa:phase15j2-simulator` | ✓ 30/30 |
+| `npm run validate:phase15j` | ✓ 21/21 |
+| `npm run qa:phase15j` | ✓ 12/12 |
+| `npm run validate:phase15l` | ✓ 18/18 |
+| `npm run validate:phase15l2` | ✓ 27/27 |
+| `npm run qa:phase15l` | ✓ 16/16 |
+| `npm run qa:phase15l2` | ✓ 25/25 |
+| `npm run lint` | ✓ clean |
+| `npm run build` | ✓ clean |
+| `git diff --check` | ✓ clean |
+- Not pushed

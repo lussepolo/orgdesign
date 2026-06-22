@@ -1,5 +1,4 @@
 import {
-  Calculator,
   FileText,
   Baby,
   School,
@@ -8,6 +7,11 @@ import {
   Activity,
   DollarSign,
   X,
+  LayoutDashboard,
+  Layers,
+  GitBranch,
+  Scale,
+  PieChart,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { cn } from "../../lib/utils";
@@ -21,14 +25,19 @@ export function AboutModal({ isOpen, onClose }: AboutModalProps) {
   if (!isOpen) return null;
 
   const tabs = [
-    { icon: Calculator, label: "Staffing Model", color: "bg-indigo-100 text-indigo-700", desc: "Dynamic headcount model: toggle sections per grade, select a year, choose caliber tiers. Computes FTE, monthly FOPAG, and hiring roadmap." },
+    { icon: LayoutDashboard, label: "Cover", color: "bg-slate-100 text-slate-700", desc: "Model overview and entry point." },
+    { icon: Layers, label: "Cenários da Oferta", color: "bg-teal-100 text-teal-700", desc: "Grade ceiling, capacity, target enrollment, academic ecosystem, and signature-program maturity by scenario." },
+    { icon: GitBranch, label: "Executive Org Design", color: "bg-indigo-100 text-indigo-700", desc: "Full Rio organization tree by scenario and year." },
     { icon: FileText, label: "Hiring Profile Cards", color: "bg-blue-100 text-blue-700", desc: "Role-level hiring specs for MS and HS clusters. Each card defines ownership, qualifications, and cluster configuration." },
     { icon: Baby, label: "Early Years", color: "bg-rose-100 text-rose-700", desc: "EY staffing architecture — Toddlers through Kindergarten. Integral and Manhã shift structure, Associate-tier lead educators, Monitor and Assistant support ratios." },
-    { icon: School, label: "Lower School", color: "bg-emerald-100 text-emerald-700", desc: "G1–G5 staffing model with Master-tier leads and Learning Assistant support. Foundational literacy and numeracy focus." },
+    { icon: School, label: "Lower School", color: "bg-emerald-100 text-emerald-700", desc: "G1–G5 educator configuration with Master-tier leads and Learning Assistant support. Foundational literacy and numeracy focus." },
     { icon: Database, label: "Middle School", color: "bg-violet-100 text-violet-700", desc: "G6–G8 transition to specialist-led instruction. Educator pool scales to 3 FTE at G6, 7 at G7, and 10 at G8." },
-    { icon: GraduationCap, label: "High School", color: "bg-purple-100 text-purple-700", desc: "G9-G12 expansion strategy. Cumulative teaching ramp reaches 4 FTE at G9, 7 at G11, and 10 at G12." },
+    { icon: GraduationCap, label: "High School", color: "bg-purple-100 text-purple-700", desc: "G9–G12 expansion strategy. Cumulative teaching ramp reaches 4 FTE at G9, 7 at G11, and 10 at G12." },
     { icon: Activity, label: "Load Calculator", color: "bg-amber-100 text-amber-700", desc: "Instructional load stress test for MS and HS. Validates FTE assumptions against real teaching hour requirements." },
-    { icon: DollarSign, label: "Payroll Projection", color: "bg-orange-100 text-orange-700", desc: "The financial engine. Three enrollment scenarios (Otimista/Intermediário/Pessimista) × three tuition tables (RJ Cen 1/2/3) = 9 projections. Tuition grows 8%/year from the 2028 base. Per-grade educator tier selectors. Long-range payroll projection, 2028–2047, with revenue less modeled FOPAG / people-cost coverage views." },
+    { icon: DollarSign, label: "Payroll Projection", color: "bg-orange-100 text-orange-700", desc: "Three enrollment scenarios × three tuition tables = 9 projections. Tuition grows 8%/year from the 2028 base. Per-grade educator tier selectors. Long-range payroll projection, 2028–2047, with revenue less modeled FOPAG / people-cost coverage views." },
+    { icon: Scale, label: "Viability Simulator", color: "bg-lime-100 text-lime-700", desc: "Baseline viability view plus directional sensitivity and threshold planning signals." },
+    { icon: PieChart, label: "DRE Scenario Simulator", color: "bg-sky-100 text-sky-700", desc: "Operating scenario layer for Rio's 2028 opening model. DRE inputs, revenue, FOPAG, and margin projections." },
+    { icon: Scale, label: "Decisão de Capital", color: "bg-red-100 text-red-700", desc: "CAPEX analysis and scenario comparison via DRE-owned configurations." },
   ];
 
   return (

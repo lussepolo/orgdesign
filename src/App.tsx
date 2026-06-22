@@ -271,7 +271,7 @@ export default function App() {
               {activeTab === "offer-scenarios" && "Board-facing scenario architecture: grade ceiling, capacity, target enrollment, academic ecosystem, and signature-program maturity."}
               {activeTab === "executive-org-design" && "Full Rio organization tree by scenario and year."}
               {activeTab === "hs" && "Strategic roadmap for Grades 9-12, transitioning to dedicated specialists."}
-              {activeTab === "payroll" && "Board view of class-driven staffing cost, revenue less modeled FOPAG, and payroll coverage across the approved scenarios."}
+              {activeTab === "payroll" && "Board view of class-driven staffing cost, revenue less modeled FOPAG, and payroll coverage across the modeled scenarios."}
               {activeTab === "viability" && "Board-facing baseline plus directional sensitivity and threshold planning signals; not a final financial model."}
               {activeTab === "dre-scenario-simulator" && "Operating scenario layer for Rio's 2028 opening model."}
               {activeTab === "capital-decision" && "CAPEX analysis and scenario comparison via DRE-owned configurations."}

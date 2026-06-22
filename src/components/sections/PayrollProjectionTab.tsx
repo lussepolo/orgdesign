@@ -520,7 +520,7 @@ const PayrollProjectionTab = () => {
               </div>
             );
           })}
-          <p className="text-[10px] text-slate-400 mt-2 italic">Independent from the Staffing Model tab. Use division preset buttons to set all grades at once, then override individually.</p>
+          <p className="text-[10px] text-slate-400 mt-2 italic">These selectors are independent of the staffing calculations. Use division preset buttons to set all grades at once, then override individually.</p>
         </div>
       </Card>
 
