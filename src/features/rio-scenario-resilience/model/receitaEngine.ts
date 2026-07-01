@@ -35,10 +35,13 @@ import { GRADE_DIVISION_MAP } from "./revenueInputs";
 // Calculation-layer TuitionScenarioId → source TuitionSourceScenarioId.
 // Explicit literals required; TypeScript cannot narrow computed keys from TUITION_SCENARIO_ID_MAPPING.
 // Source of truth: tuitionRevenueReadiness.ts TUITION_SCENARIO_ID_MAPPING.
-const CALC_TO_SOURCE_SCENARIO: Record<TuitionScenarioId, TuitionSourceScenarioId> = {
+// Phase 15Q: rj4 and rj5 added (BP v8(2) ≡ v8(3) per Luciana).
+export const CALC_TO_SOURCE_SCENARIO: Record<TuitionScenarioId, TuitionSourceScenarioId> = {
   bp1_division_differentiated: "bp_scenario_1",
   bp2_ey_ls_unified: "bp_scenario_2",
   bp3_ey_to_ms_unified: "bp_scenario_3",
+  rj4: "bp_scenario_4",
+  rj5: "bp_scenario_5",
 };
 
 // Pre-computed tuition value lookup: `${scenarioId}::${courseCourseLabel}` → annualGrossContractValueBRL.

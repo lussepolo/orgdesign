@@ -18,7 +18,7 @@
 //   openingPackageId    — DRE_ENROLLMENT_LEVER_OPENING_PACKAGE_IDS (dreEnrollmentCapacityLeverContract.ts)
 //   occupancyScenarioId — DRE_ENROLLMENT_LEVER_OCCUPANCY_SCENARIO_IDS (dreEnrollmentCapacityLeverContract.ts)
 //   tuitionScenarioId   — TuitionScenarioId (revenueInputs.ts): bp1_division_differentiated |
-//                         bp2_ey_ls_unified | bp3_ey_to_ms_unified
+//                         bp2_ey_ls_unified | bp3_ey_to_ms_unified | rj4 | rj5
 //   orgDesignOptionId   — orgDesignPayrollActivation.ts ALL: minimum_experience |
 //                         balanced_experience | premium_experience
 //
@@ -65,10 +65,14 @@ export type DreWorkingScenarioOrgDesignOptionId =
 export const DRE_WORKING_SCENARIO_ORG_DESIGN_OPTION_IDS: readonly DreWorkingScenarioOrgDesignOptionId[] =
   ["minimum_experience", "balanced_experience", "premium_experience"];
 
+// Phase 15Q.1: rj4 and rj5 added — DreLeverPanel.tsx iterates this array to
+// populate the tuition dropdown; omitting them excluded them from active DRE selection.
 export const DRE_WORKING_SCENARIO_TUITION_SCENARIO_IDS: readonly TuitionScenarioId[] = [
   "bp1_division_differentiated",
   "bp2_ey_ls_unified",
   "bp3_ey_to_ms_unified",
+  "rj4",
+  "rj5",
 ];
 
 // Annual DRE output summary — the 6 fields requested for Phase 13F reporting.

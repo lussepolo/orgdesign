@@ -79,6 +79,40 @@ export interface ScenarioConfigurationPanelProps {
   readonly onRemoveScenario: (id: string) => void;
 }
 
+function TuitionBandDetail({ scenarioId }: { scenarioId: string }) {
+  const option = tuitionArchitecture.find((o) => o.id === scenarioId);
+  if (!option?.bandDetails) return null;
+  return (
+    <details className="rounded-lg border border-slate-100 bg-slate-50 p-3 text-xs">
+      <summary className="cursor-pointer font-semibold text-slate-600">
+        Tuition bands — monthly &amp; annual gross contract value
+      </summary>
+      <table className="mt-2 w-full">
+        <thead>
+          <tr className="text-left text-slate-400">
+            <th className="pb-1 pr-2 font-medium">Band</th>
+            <th className="pb-1 pr-2 font-medium text-right">Monthly (R$)</th>
+            <th className="pb-1 font-medium text-right">Annual gross (R$)</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-slate-100">
+          {option.bandDetails.map((band) => (
+            <tr key={band.bandLabel}>
+              <td className="py-1 pr-2 text-slate-700">{band.bandLabel}</td>
+              <td className="py-1 pr-2 text-right text-slate-600">
+                {band.monthlyTuitionBRL.toLocaleString("pt-BR")}
+              </td>
+              <td className="py-1 text-right text-slate-600">
+                {band.annualGrossContractValueBRL.toLocaleString("pt-BR")}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </details>
+  );
+}
+
 export function ScenarioConfigurationPanel({
   scenarios,
   selectedScenarioId,
@@ -187,6 +221,8 @@ export function ScenarioConfigurationPanel({
                     );
                   })}
                 </fieldset>
+
+                <TuitionBandDetail scenarioId={scenario.input.tuitionScenarioId} />
 
                 <div className="flex flex-wrap items-center gap-2 pt-2">
                   <button

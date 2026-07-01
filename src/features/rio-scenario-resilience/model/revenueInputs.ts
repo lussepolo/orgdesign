@@ -92,7 +92,9 @@ export type EnrollmentByYearAndGrade = Record<
 export type TuitionScenarioId =
   | "bp1_division_differentiated"
   | "bp2_ey_ls_unified"
-  | "bp3_ey_to_ms_unified";
+  | "bp3_ey_to_ms_unified"
+  | "rj4"
+  | "rj5";
 
 export type TuitionByScenarioAndGrade = Record<
   TuitionScenarioId,

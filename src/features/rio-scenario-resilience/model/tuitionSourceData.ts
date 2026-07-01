@@ -125,6 +125,52 @@ const BP_SCENARIO_3_VALUES: CourseValues = {
   "GRADE 12":       [119351.36, 9945.95],
 };
 
+// Phase 15Q: Cenário 4 and Cenário 5. Source: BP v8(2) ≡ v8(3) per Luciana.
+// Values are source-of-truth — do not infer, round, interpolate, or recalculate.
+const BP_SCENARIO_4_VALUES: CourseValues = {
+  "TODDLERS 1 - m": [61788,  5149],
+  "TODDLERS 2 - m": [61788,  5149],
+  "TODDLERS 1":     [105636, 8803],
+  "TODDLERS 2":     [105636, 8803],
+  "PRE-K3":         [105636, 8803],
+  "PRE-K4":         [105636, 8803],
+  "KINDERGARTEN":   [105636, 8803],
+  "GRADE 1":        [127320, 10610],
+  "GRADE 2":        [127320, 10610],
+  "GRADE 3":        [127320, 10610],
+  "GRADE 4":        [127320, 10610],
+  "GRADE 5":        [127320, 10610],
+  "GRADE 6":        [138816, 11568],
+  "GRADE 7":        [138816, 11568],
+  "GRADE 8":        [138816, 11568],
+  "GRADE 9":        [159180, 13265],
+  "GRADE 10":       [159180, 13265],
+  "GRADE 11":       [159180, 13265],
+  "GRADE 12":       [159180, 13265],
+};
+
+const BP_SCENARIO_5_VALUES: CourseValues = {
+  "TODDLERS 1 - m": [64884,  5407],
+  "TODDLERS 2 - m": [64884,  5407],
+  "TODDLERS 1":     [110916, 9243],
+  "TODDLERS 2":     [110916, 9243],
+  "PRE-K3":         [110916, 9243],
+  "PRE-K4":         [110916, 9243],
+  "KINDERGARTEN":   [110916, 9243],
+  "GRADE 1":        [133680, 11140],
+  "GRADE 2":        [133680, 11140],
+  "GRADE 3":        [133680, 11140],
+  "GRADE 4":        [133680, 11140],
+  "GRADE 5":        [133680, 11140],
+  "GRADE 6":        [145752, 12146],
+  "GRADE 7":        [145752, 12146],
+  "GRADE 8":        [145752, 12146],
+  "GRADE 9":        [167136, 13928],
+  "GRADE 10":       [167136, 13928],
+  "GRADE 11":       [167136, 13928],
+  "GRADE 12":       [167136, 13928],
+};
+
 const TUITION_SOURCE_SCENARIO_META: Record<
   TuitionSourceScenarioId,
   TuitionSourceScenarioMeta
@@ -153,6 +199,22 @@ const TUITION_SOURCE_SCENARIO_META: Record<
       "EY full-day through Grade 8 share the same price; High School receives a separate premium. The m modality remains separate.",
     interpretationNeedsFinanceConfirmation: true,
   },
+  bp_scenario_4: {
+    scenarioId: "bp_scenario_4",
+    sourceScenarioLabel: "BP Cenário 4",
+    scenarioName: "Division-differentiated with LS/MS/HS premium steps",
+    intakeFileInterpretation:
+      "EY m modality, EY full-day, Lower School, Middle School, High School — explicit price steps at each division.",
+    interpretationNeedsFinanceConfirmation: true,
+  },
+  bp_scenario_5: {
+    scenarioId: "bp_scenario_5",
+    sourceScenarioLabel: "BP Cenário 5",
+    scenarioName: "Division-differentiated highest premium ladder",
+    intakeFileInterpretation:
+      "EY m modality, EY full-day, Lower School, Middle School, High School — highest price points across all divisions.",
+    interpretationNeedsFinanceConfirmation: true,
+  },
 };
 
 type ScenarioEntry = {
@@ -165,9 +227,11 @@ const TUITION_SOURCE_SCENARIO_ENTRIES: ScenarioEntry[] = [
   { id: "bp_scenario_1", sourceLabel: "BP Cenário 1", values: BP_SCENARIO_1_VALUES },
   { id: "bp_scenario_2", sourceLabel: "BP Cenário 2", values: BP_SCENARIO_2_VALUES },
   { id: "bp_scenario_3", sourceLabel: "BP Cenário 3", values: BP_SCENARIO_3_VALUES },
+  { id: "bp_scenario_4", sourceLabel: "BP Cenário 4", values: BP_SCENARIO_4_VALUES },
+  { id: "bp_scenario_5", sourceLabel: "BP Cenário 5", values: BP_SCENARIO_5_VALUES },
 ];
 
-// 3 scenarios × 19 courses = 57 records
+// 5 scenarios × 19 courses = 95 records
 export const TUITION_SOURCE_RECORDS: TuitionSourceRecord[] =
   TUITION_SOURCE_SCENARIO_ENTRIES.flatMap(({ id, sourceLabel, values }) =>
     SOURCE_COURSES.map((course, idx): TuitionSourceRecord => {

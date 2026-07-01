@@ -1,7 +1,9 @@
 export type TuitionSourceScenarioId =
   | "bp_scenario_1"
   | "bp_scenario_2"
-  | "bp_scenario_3";
+  | "bp_scenario_3"
+  | "bp_scenario_4"
+  | "bp_scenario_5";
 
 export type TuitionSourceCourseLabel =
   | "TODDLERS 1 - m"

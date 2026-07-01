@@ -11,6 +11,8 @@ export const TUITION_LABELS: Record<string, string> = {
   bp1_division_differentiated: "BP1 — Division Differentiated",
   bp2_ey_ls_unified: "BP2 — EY/LS Unified",
   bp3_ey_to_ms_unified: "BP3 — EY to MS Unified",
+  rj4: "Cenário 4 — Division-Differentiated Premium Steps",
+  rj5: "Cenário 5 — Division-Differentiated Highest Premium",
 };
 
 export const ORG_DESIGN_OPTION_LABELS: Record<string, string> = {

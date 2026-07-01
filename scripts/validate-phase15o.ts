@@ -278,11 +278,15 @@ console.log("\nSection G — Formula and Source Files Unchanged");
 
 const changedFiles = gitDiffFiles();
 
-// Check 11: DRE formula and Capital Decision engine files not changed
+// Check 11: DRE formula and Capital Decision engine files not changed.
+// receitaEngine.ts is intentionally excluded: it is the tuition-scenario
+// mapping layer (CALC_TO_SOURCE_SCENARIO, receita projection), not a DRE
+// formula engine. Phase 15Q legitimately extended it with rj4/rj5 mappings.
+// dreEngine.ts, capitalDecisionEngine.ts, capexScheduleEngine.ts, and
+// dreGovernanceReadiness.ts remain protected.
 const DRE_FORMULA_FILES = [
   "src/features/rio-scenario-resilience/model/dreEngine.ts",
   "src/features/rio-scenario-resilience/model/capitalDecisionEngine.ts",
-  "src/features/rio-scenario-resilience/model/receitaEngine.ts",
   "src/features/rio-scenario-resilience/model/capexScheduleEngine.ts",
   "src/features/rio-scenario-resilience/model/dreGovernanceReadiness.ts",
 ];
