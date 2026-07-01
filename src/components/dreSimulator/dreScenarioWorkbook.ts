@@ -15,6 +15,8 @@
 // dreOutput.byYear[year].numero_de_alunos.
 
 import * as XLSX from "xlsx";
+import { calculateDre } from "../../features/rio-scenario-resilience/model/dreEngine";
+import { calculateFopag } from "../../features/rio-scenario-resilience/model/fopagEngine";
 import { DRE_LINE_ITEM_MAP } from "../../features/rio-scenario-resilience/model/dreLineItemMap";
 import { DRE_REVENUE_DRIVER_SOURCE_DATA } from "../../features/rio-scenario-resilience/model/dreRevenueDriverSourceData";
 import { DRE_COST_DRIVER_SOURCE_DATA } from "../../features/rio-scenario-resilience/model/dreCostDriverSourceData";
@@ -37,6 +39,44 @@ import type {
   PayrollReconciliationResult,
 } from "../../hooks/useDreScenarioSimulator";
 
+export interface OrgDesignPayrollVariant {
+  dreOutput: DreEngineOutput;
+  fopagOutput: FopagEngineOutput;
+}
+
+export interface ThreeVersionPayroll {
+  minimum: OrgDesignPayrollVariant;
+  balanced: OrgDesignPayrollVariant;
+  premium: OrgDesignPayrollVariant;
+}
+
+// Phase 15R.1: compute three org design payroll variants, reusing the already-computed
+// dreOutput/fopagOutput for the currently selected option to avoid redundant calculation.
+export function computeOrgDesignPayrollVariants(
+  selections: DreScenarioSimulatorSelections,
+  existingDreOutput: DreEngineOutput,
+  existingFopagOutput: FopagEngineOutput,
+): ThreeVersionPayroll {
+  function variantFor(orgDesignOptionId: DreWorkingScenarioOrgDesignOptionId): OrgDesignPayrollVariant {
+    if (orgDesignOptionId === selections.orgDesignOptionId) {
+      return { dreOutput: existingDreOutput, fopagOutput: existingFopagOutput };
+    }
+    return {
+      dreOutput: calculateDre({ ...selections, orgDesignOptionId }),
+      fopagOutput: calculateFopag({
+        openingPackageId: selections.openingPackageId,
+        occupancyScenarioId: selections.occupancyScenarioId,
+        orgDesignOptionId,
+      }),
+    };
+  }
+  return {
+    minimum: variantFor("minimum_experience"),
+    balanced: variantFor("balanced_experience"),
+    premium: variantFor("premium_experience"),
+  };
+}
+
 export interface DreScenarioWorkbookViewModel {
   selections: DreScenarioSimulatorSelections;
   defaultSelections: DreScenarioSimulatorSelections;
@@ -45,6 +85,7 @@ export interface DreScenarioWorkbookViewModel {
   payrollReconciliation: PayrollReconciliationResult;
   orgDesignSensitivity: readonly OrgDesignSensitivityRow[];
   exportedAt: Date;
+  threeVersionPayroll: ThreeVersionPayroll;
 }
 
 const YEARS = RECEITA_PROJECTION_YEARS;
@@ -397,6 +438,24 @@ function buildReadmeSheet(vm: DreScenarioWorkbookViewModel): XLSX.WorkSheet {
     ["11. Scenario Sensitivity Matrix"],
     ["12. Formula Audit"],
     ["13. Raw Engine Output"],
+    ["14. Payroll Comparison"],
+    ["15. Payroll Detail - Minimum"],
+    ["16. Payroll Detail - Balanced"],
+    ["17. Payroll Detail - Premium"],
+    ["18. Payroll Delta Analysis"],
+    ["19. DRE Payroll Bridge"],
+    [],
+    ["Three-version payroll export (Phase 15R.1):"],
+    ["The main DRE sheets (1–13) reflect the selected scenario."],
+    ["The payroll comparison holds opening package, occupancy, tuition, CAPEX, and other levers constant."],
+    ["Only org design option changes across Minimum, Balanced, and Premium versions."],
+    ["Payroll is generated from the app model (calculateDre / calculateFopag), not manually typed into Excel."],
+    ["DRE cost rows (fopag_direto_clt_pj, folha_de_pagamento, beneficios) use negative sign convention."],
+    ["Payroll trace sheets (14–19) show payroll costs as positive values."],
+    ["Payroll detail is role-level (from fopagOutput.records, one row per roleId × year)."],
+    ["Headcount (HC) = sum of headcountOrFte for active (non-audit) records."],
+    ["fopagEngine payroll is tuition-independent: Phase 15Q tuition/discount changes cannot affect payroll totals."],
+    ["Division/Area is not available in fopagOutput.records and is omitted from Payroll Detail sheets."],
   ];
   return XLSX.utils.aoa_to_sheet(rows);
 }
@@ -910,6 +969,14 @@ function buildOrgDesignSensitivitySheet(vm: DreScenarioWorkbookViewModel): XLSX.
       0,
     ]);
   }
+  rows.push([]);
+  rows.push(["Note: Year-by-year payroll comparison across Minimum, Balanced, and Premium is available in:"]);
+  rows.push(["  • Payroll Comparison — year-by-year totals for all three org design versions"]);
+  rows.push(["  • Payroll Detail - Minimum — role-level detail for minimum_experience"]);
+  rows.push(["  • Payroll Detail - Balanced — role-level detail for balanced_experience"]);
+  rows.push(["  • Payroll Detail - Premium — role-level detail for premium_experience"]);
+  rows.push(["  • Payroll Delta Analysis — delta comparisons (Balanced-Minimum, Premium-Balanced, Premium-Minimum)"]);
+  rows.push(["  • DRE Payroll Bridge — DRE reconciliation for all three org design versions"]);
   const sheet = XLSX.utils.aoa_to_sheet(rows);
   if (selectedIdx >= 0) {
     const selectedRowNum = selectedIdx + 2;
@@ -1027,6 +1094,46 @@ function buildFormulaAuditSheet(
       "formulas for audit purposes; it does not re-run that upstream parity check.",
   ]);
 
+  rows.push([]);
+  rows.push(["Three-version payroll comparison sources (Phase 15R.1)"]);
+  rows.push(["Sheet", "Data Source", "Calculation Method"]);
+  rows.push([
+    "Payroll Comparison",
+    "fopagOutput.yearTotals for minimum_experience, balanced_experience, premium_experience",
+    "calculateFopag() called for each org design option; selected option reuses existing fopagOutput",
+  ]);
+  rows.push([
+    "Payroll Detail - Minimum",
+    "fopagOutput.records filtered to minimum_experience",
+    "Role-level: allocationModel determines FOPAG Direto vs Folha Direta column split",
+  ]);
+  rows.push([
+    "Payroll Detail - Balanced",
+    "fopagOutput.records filtered to balanced_experience",
+    "Role-level: allocationModel determines FOPAG Direto vs Folha Direta column split",
+  ]);
+  rows.push([
+    "Payroll Detail - Premium",
+    "fopagOutput.records filtered to premium_experience",
+    "Role-level: allocationModel determines FOPAG Direto vs Folha Direta column split",
+  ]);
+  rows.push([
+    "Payroll Delta Analysis",
+    "fopagOutput.yearTotals for all three variants",
+    "Arithmetic delta (B.totalPayroll - A.totalPayroll) by year, comparison, and dimension",
+  ]);
+  rows.push([
+    "DRE Payroll Bridge",
+    "dreOutput.byYear and fopagOutput.yearTotals for all three variants",
+    "Variance = dreValue + fopagValue (DRE sign convention: negative; payroll trace: positive). OK when |variance| < 1e-6",
+  ]);
+  rows.push([]);
+  rows.push([
+    "Payroll note",
+    "fopagEngine payroll is tuition-independent. Only orgDesignOptionId varies across the three runs. " +
+      "openingPackageId, occupancyScenarioId, and tuitionScenarioId are held constant at the selected values.",
+  ]);
+
   return XLSX.utils.aoa_to_sheet(rows);
 }
 
@@ -1089,6 +1196,210 @@ function buildRawEngineOutputSheet(vm: DreScenarioWorkbookViewModel): XLSX.WorkS
   return XLSX.utils.aoa_to_sheet(rows);
 }
 
+// ── Phase 15R.1: Three-version payroll sheets ─────────────────────────────────
+
+function totalHcForYear(fopagOut: FopagEngineOutput, year: number): number {
+  return fopagOut.records
+    .filter((r) => r.year === year && !r.isAuditRow)
+    .reduce((sum, r) => sum + r.headcountOrFte, 0);
+}
+
+// ── Sheet 14: Payroll Comparison ─────────────────────────────────────────────
+function buildPayrollComparisonSheet(tv: ThreeVersionPayroll): XLSX.WorkSheet {
+  const header = [
+    "Year",
+    "Minimum FOPAG Direto",
+    "Minimum Folha Direta",
+    "Minimum Benefits",
+    "Minimum Total Payroll",
+    "Minimum HC",
+    "Balanced FOPAG Direto",
+    "Balanced Folha Direta",
+    "Balanced Benefits",
+    "Balanced Total Payroll",
+    "Balanced HC",
+    "Premium FOPAG Direto",
+    "Premium Folha Direta",
+    "Premium Benefits",
+    "Premium Total Payroll",
+    "Premium HC",
+    "Balanced minus Minimum Total Payroll",
+    "Premium minus Balanced Total Payroll",
+    "Premium minus Minimum Total Payroll",
+    "Balanced minus Minimum HC",
+    "Premium minus Balanced HC",
+    "Premium minus Minimum HC",
+  ];
+  const rows: (string | number)[][] = [header];
+  const minYtMap = new Map(tv.minimum.fopagOutput.yearTotals.map((yt) => [yt.year, yt]));
+  const balYtMap = new Map(tv.balanced.fopagOutput.yearTotals.map((yt) => [yt.year, yt]));
+  const premYtMap = new Map(tv.premium.fopagOutput.yearTotals.map((yt) => [yt.year, yt]));
+
+  for (const year of YEARS) {
+    const min = minYtMap.get(year)!;
+    const bal = balYtMap.get(year)!;
+    const prem = premYtMap.get(year)!;
+    const minHc = totalHcForYear(tv.minimum.fopagOutput, year);
+    const balHc = totalHcForYear(tv.balanced.fopagOutput, year);
+    const premHc = totalHcForYear(tv.premium.fopagOutput, year);
+    rows.push([
+      year,
+      min.fopagDireto, min.folhaDireta, min.benefits, min.totalPayroll, minHc,
+      bal.fopagDireto, bal.folhaDireta, bal.benefits, bal.totalPayroll, balHc,
+      prem.fopagDireto, prem.folhaDireta, prem.benefits, prem.totalPayroll, premHc,
+      bal.totalPayroll - min.totalPayroll,
+      prem.totalPayroll - bal.totalPayroll,
+      prem.totalPayroll - min.totalPayroll,
+      balHc - minHc,
+      premHc - balHc,
+      premHc - minHc,
+    ]);
+  }
+  return XLSX.utils.aoa_to_sheet(rows);
+}
+
+// ── Sheets 15-17: Payroll Detail (role-level) ────────────────────────────────
+function buildPayrollDetailSheet(fopagOut: FopagEngineOutput, optionLabel: string): XLSX.WorkSheet {
+  const header = [
+    "Year",
+    "Role ID",
+    "Payroll Role ID",
+    "Role Name",
+    "Role Source Type",
+    "Allocation Model",
+    "Headcount/FTE",
+    "FOPAG Direto",
+    "Folha Direta",
+    "Benefits",
+    "Total Payroll",
+    "Is Audit Row",
+    "Source Notes",
+  ];
+  const noteRow = [`Payroll Detail — ${optionLabel} (role-level, source: fopagOutput.records)`];
+  const rows: (string | number | boolean)[][] = [noteRow, header];
+
+  const sorted = [...fopagOut.records].sort(
+    (a, b) => a.year - b.year || a.roleId.localeCompare(b.roleId),
+  );
+  for (const rec of sorted) {
+    const isAudit = rec.isAuditRow;
+    const fopagDireto = !isAudit && rec.allocationModel === "FOPAG_DIRETO" ? rec.grossLaborAnnualAfterGrowth : 0;
+    const folhaDireta = !isAudit && rec.allocationModel === "FOLHA_DIRETA" ? rec.grossLaborAnnualAfterGrowth : 0;
+    const benefits = isAudit ? 0 : rec.benefitsAnnualAfterGrowth;
+    const total = isAudit ? 0 : rec.totalAnnualPayrollAfterGrowth;
+    rows.push([
+      rec.year,
+      rec.roleId,
+      rec.payrollRoleId ?? "—",
+      rec.roleName,
+      rec.roleSourceType,
+      rec.allocationModel,
+      rec.headcountOrFte,
+      fopagDireto,
+      folhaDireta,
+      benefits,
+      total,
+      isAudit,
+      rec.sourceNotes,
+    ]);
+  }
+  return XLSX.utils.aoa_to_sheet(rows);
+}
+
+// ── Sheet 18: Payroll Delta Analysis ─────────────────────────────────────────
+function buildPayrollDeltaAnalysisSheet(tv: ThreeVersionPayroll): XLSX.WorkSheet {
+  const header = [
+    "Year",
+    "Comparison",
+    "Payroll Dimension",
+    "A Value",
+    "B Value",
+    "Delta (B minus A)",
+  ];
+  const rows: (string | number)[][] = [header];
+  type YtKey = "fopagDireto" | "folhaDireta" | "benefits" | "totalPayroll";
+  const TOP_LEVEL_DIMS: { label: string; key: YtKey }[] = [
+    { label: "FOPAG Direto", key: "fopagDireto" },
+    { label: "Folha Direta", key: "folhaDireta" },
+    { label: "Benefits", key: "benefits" },
+    { label: "Total Payroll", key: "totalPayroll" },
+  ];
+  const COMPARISONS = [
+    { label: "Balanced minus Minimum", aMap: new Map(tv.minimum.fopagOutput.yearTotals.map((yt) => [yt.year, yt])), bMap: new Map(tv.balanced.fopagOutput.yearTotals.map((yt) => [yt.year, yt])) },
+    { label: "Premium minus Balanced", aMap: new Map(tv.balanced.fopagOutput.yearTotals.map((yt) => [yt.year, yt])), bMap: new Map(tv.premium.fopagOutput.yearTotals.map((yt) => [yt.year, yt])) },
+    { label: "Premium minus Minimum", aMap: new Map(tv.minimum.fopagOutput.yearTotals.map((yt) => [yt.year, yt])), bMap: new Map(tv.premium.fopagOutput.yearTotals.map((yt) => [yt.year, yt])) },
+  ];
+
+  for (const year of YEARS) {
+    for (const comp of COMPARISONS) {
+      const ytA = comp.aMap.get(year)!;
+      const ytB = comp.bMap.get(year)!;
+      for (const dim of TOP_LEVEL_DIMS) {
+        rows.push([year, comp.label, dim.label, ytA[dim.key], ytB[dim.key], ytB[dim.key] - ytA[dim.key]]);
+      }
+      const sourceTypes = new Set([
+        ...ytA.byRoleSourceType.map((e) => e.roleSourceType),
+        ...ytB.byRoleSourceType.map((e) => e.roleSourceType),
+      ]);
+      for (const sourceType of Array.from(sourceTypes).sort()) {
+        const entryA = ytA.byRoleSourceType.find((e) => e.roleSourceType === sourceType);
+        const entryB = ytB.byRoleSourceType.find((e) => e.roleSourceType === sourceType);
+        const tpA = entryA?.totalPayroll ?? 0;
+        const tpB = entryB?.totalPayroll ?? 0;
+        rows.push([year, comp.label, `Total Payroll — ${sourceType}`, tpA, tpB, tpB - tpA]);
+      }
+    }
+  }
+  return XLSX.utils.aoa_to_sheet(rows);
+}
+
+// ── Sheet 19: DRE Payroll Bridge ──────────────────────────────────────────────
+function buildDrePayrollBridgeSheet(tv: ThreeVersionPayroll): XLSX.WorkSheet {
+  const TOLERANCE = 1e-6;
+  const header = [
+    "Year",
+    "Org Design Option ID",
+    "Org Design Option Label",
+    "DRE fopag_direto_clt_pj",
+    "Payroll model FOPAG Direto",
+    "FOPAG Variance",
+    "FOPAG Status",
+    "DRE folha_de_pagamento",
+    "Payroll model Folha Direta",
+    "Folha Variance",
+    "Folha Status",
+    "DRE beneficios",
+    "Payroll model Benefits",
+    "Benefits Variance",
+    "Benefits Status",
+  ];
+  const rows: (string | number)[][] = [header];
+  const VARIANTS: { id: DreWorkingScenarioOrgDesignOptionId; label: string; v: OrgDesignPayrollVariant }[] = [
+    { id: "minimum_experience", label: "Minimum Experience", v: tv.minimum },
+    { id: "balanced_experience", label: "Balanced Experience", v: tv.balanced },
+    { id: "premium_experience", label: "Premium Experience", v: tv.premium },
+  ];
+  for (const { id, label, v } of VARIANTS) {
+    const ytMap = new Map(v.fopagOutput.yearTotals.map((yt) => [yt.year, yt]));
+    for (const year of YEARS) {
+      const dreRow = v.dreOutput.byYear[year];
+      const yt = ytMap.get(year)!;
+      // DRE sign convention: dreValue is negative; payroll model value is positive.
+      // Variance = dreValue + modelValue; reconciled rows yield 0.
+      const fopagVar = dreRow.fopag_direto_clt_pj + yt.fopagDireto;
+      const folhaVar = dreRow.folha_de_pagamento + yt.folhaDireta;
+      const beneVar = dreRow.beneficios + yt.benefits;
+      rows.push([
+        year, id, label,
+        dreRow.fopag_direto_clt_pj, yt.fopagDireto, fopagVar, Math.abs(fopagVar) < TOLERANCE ? "OK" : "MISMATCH",
+        dreRow.folha_de_pagamento, yt.folhaDireta, folhaVar, Math.abs(folhaVar) < TOLERANCE ? "OK" : "MISMATCH",
+        dreRow.beneficios, yt.benefits, beneVar, Math.abs(beneVar) < TOLERANCE ? "OK" : "MISMATCH",
+      ]);
+    }
+  }
+  return XLSX.utils.aoa_to_sheet(rows);
+}
+
 // ── Main entry point ──────────────────────────────────────────────────────────
 export function buildDreScenarioWorkbook(vm: DreScenarioWorkbookViewModel): XLSX.WorkBook {
   const wb = XLSX.utils.book_new();
@@ -1123,6 +1434,15 @@ export function buildDreScenarioWorkbook(vm: DreScenarioWorkbookViewModel): XLSX
   XLSX.utils.book_append_sheet(wb, buildScenarioSensitivityMatrixSheet(vm), "Scenario Sensitivity Matrix");
   XLSX.utils.book_append_sheet(wb, buildFormulaAuditSheet(vm, rowMap), "Formula Audit");
   XLSX.utils.book_append_sheet(wb, buildRawEngineOutputSheet(vm), "Raw Engine Output");
+
+  // Phase 15R.1: three-version payroll sheets
+  const tv = vm.threeVersionPayroll;
+  XLSX.utils.book_append_sheet(wb, buildPayrollComparisonSheet(tv), "Payroll Comparison");
+  XLSX.utils.book_append_sheet(wb, buildPayrollDetailSheet(tv.minimum.fopagOutput, "Minimum Experience"), "Payroll Detail - Minimum");
+  XLSX.utils.book_append_sheet(wb, buildPayrollDetailSheet(tv.balanced.fopagOutput, "Balanced Experience"), "Payroll Detail - Balanced");
+  XLSX.utils.book_append_sheet(wb, buildPayrollDetailSheet(tv.premium.fopagOutput, "Premium Experience"), "Payroll Detail - Premium");
+  XLSX.utils.book_append_sheet(wb, buildPayrollDeltaAnalysisSheet(tv), "Payroll Delta Analysis");
+  XLSX.utils.book_append_sheet(wb, buildDrePayrollBridgeSheet(tv), "DRE Payroll Bridge");
 
   return wb;
 }

@@ -125,13 +125,16 @@ export default function DreScenarioSimulatorTab({
       <DreBoardReadableExport selections={selections} dreOutput={dreOutput} />
 
       <Card
-        title="Export audit workbook"
-        subtitle="Audit-grade XLSX export of the scenario above"
+        title="Export payroll by org design version"
+        subtitle="Includes Minimum, Balanced, and Premium payroll comparison in the XLSX workbook"
         icon={Download}
       >
-        <p className="mb-4 text-sm leading-relaxed text-slate-600">
-          The XLSX export includes formulas, scenario inputs, DRE detail, FOPAG reconciliation, source
-          notes, raw engine output, and excludes Phase 15 capital-decision metrics.
+        <p className="mb-2 text-sm leading-relaxed text-slate-600">
+          Exports Minimum, Balanced, and Premium payroll views with headcount, payroll detail, and DRE reconciliation.
+        </p>
+        <p className="mb-4 text-sm leading-relaxed text-slate-500">
+          Also includes DRE detail, FOPAG reconciliation, formula audit, and raw engine output for the selected scenario.
+          All payroll values are generated from the app model (calculateDre / calculateFopag) — not manually typed.
         </p>
         <DreExportButton
           selections={selections}

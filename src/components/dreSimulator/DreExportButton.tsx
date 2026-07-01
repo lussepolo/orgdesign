@@ -1,7 +1,11 @@
 import { useState } from "react";
 import { Download, AlertTriangle } from "lucide-react";
 import * as XLSX from "xlsx";
-import { buildDreScenarioWorkbook, buildDreScenarioExportFilename } from "./dreScenarioWorkbook";
+import {
+  buildDreScenarioWorkbook,
+  buildDreScenarioExportFilename,
+  computeOrgDesignPayrollVariants,
+} from "./dreScenarioWorkbook";
 import type {
   DreScenarioSimulatorSelections,
   OrgDesignSensitivityRow,
@@ -49,6 +53,7 @@ export default function DreExportButton({
     setError(null);
 
     const exportedAt = new Date();
+    const threeVersionPayroll = computeOrgDesignPayrollVariants(selections, dreOutput, fopagOutput);
     const workbook = buildDreScenarioWorkbook({
       selections,
       defaultSelections,
@@ -57,6 +62,7 @@ export default function DreExportButton({
       payrollReconciliation,
       orgDesignSensitivity,
       exportedAt,
+      threeVersionPayroll,
     });
     const filename = buildDreScenarioExportFilename(selections, exportedAt);
     XLSX.writeFile(workbook, filename);
