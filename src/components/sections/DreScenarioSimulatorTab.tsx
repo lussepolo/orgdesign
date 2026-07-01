@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import { Download, Send } from "lucide-react";
-import { Card } from "../common/Card";
+import { Send } from "lucide-react";
 import { useDreScenarioSimulator, LAST_PROJECTION_YEAR } from "../../hooks/useDreScenarioSimulator";
 import type { DreScenarioSimulatorSelections } from "../../hooks/useDreScenarioSimulator";
 import type { OpeningPackageProjectionYear } from "../../features/rio-scenario-resilience/model/openingPackageOccupancySourceDataContract";
@@ -62,7 +61,7 @@ export default function DreScenarioSimulatorTab({
         <div className="flex-1">
           <DreScenarioContextBanner selections={selections} dreOutput={dreOutput} year={year} />
         </div>
-        <div className="flex justify-end lg:pt-1">
+        <div className="flex flex-col items-end gap-1 lg:pt-1">
           <DreExportButton
             selections={selections}
             defaultSelections={defaultSelections}
@@ -72,6 +71,9 @@ export default function DreScenarioSimulatorTab({
             orgDesignSensitivity={orgDesignSensitivity}
             compact
           />
+          <p className="text-right text-[10px] leading-tight text-slate-400">
+            Export payroll by org design version — Minimum, Balanced, and Premium. Full FOPAG/Folha Direta.
+          </p>
         </div>
       </div>
 
@@ -123,28 +125,6 @@ export default function DreScenarioSimulatorTab({
       <DreGovernanceSummaryPanel />
 
       <DreBoardReadableExport selections={selections} dreOutput={dreOutput} />
-
-      <Card
-        title="Export payroll by org design version"
-        subtitle="Includes Minimum, Balanced, and Premium payroll comparison in the XLSX workbook"
-        icon={Download}
-      >
-        <p className="mb-2 text-sm leading-relaxed text-slate-600">
-          Exports Minimum, Balanced, and Premium payroll views with headcount, payroll detail, and DRE reconciliation.
-        </p>
-        <p className="mb-4 text-sm leading-relaxed text-slate-500">
-          Also includes DRE detail, FOPAG reconciliation, formula audit, and raw engine output for the selected scenario.
-          All payroll values are generated from the app model (calculateDre / calculateFopag) — not manually typed.
-        </p>
-        <DreExportButton
-          selections={selections}
-          defaultSelections={defaultSelections}
-          dreOutput={dreOutput}
-          fopagOutput={fopagOutput}
-          payrollReconciliation={payrollReconciliation}
-          orgDesignSensitivity={orgDesignSensitivity}
-        />
-      </Card>
     </div>
   );
 }

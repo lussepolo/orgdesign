@@ -396,6 +396,23 @@ function yearCol(yearIndex: number): number {
   return DRE_DETAIL_BASE_COLS + yearIndex;
 }
 
+// ── Role classification from roleSourceType (Phase 15R.3) ────────────────────
+function classifyFopagRole(roleSourceType: string): string {
+  if (
+    roleSourceType === "ey_teaching_lead" ||
+    roleSourceType === "ls_teaching_lead" ||
+    roleSourceType === "ms_teaching_lead" ||
+    roleSourceType === "hs_teaching_lead"
+  ) return "Teaching";
+  if (roleSourceType === "ey_learning_assistant" || roleSourceType === "ls_learning_assistant") return "Teaching-Support (Assistant)";
+  if (roleSourceType === "ey_learning_monitor") return "Teaching-Support (Monitor)";
+  if (roleSourceType === "baseline_leadership") return "Leadership";
+  if (roleSourceType === "baseline_backoffice") return "Backoffice";
+  if (roleSourceType === "baseline_specialist") return "Specialist";
+  if (roleSourceType === "extension_new_role" || roleSourceType === "extension_alias") return "Extension";
+  return "source-unclassified";
+}
+
 // ── Sheet 1: README ──────────────────────────────────────────────────────────
 function buildReadmeSheet(vm: DreScenarioWorkbookViewModel): XLSX.WorkSheet {
   const rows: (string | number)[][] = [
@@ -444,6 +461,9 @@ function buildReadmeSheet(vm: DreScenarioWorkbookViewModel): XLSX.WorkSheet {
     ["17. Payroll Detail - Premium"],
     ["18. Payroll Delta Analysis"],
     ["19. DRE Payroll Bridge"],
+    ["20. FOPAG Headcount Plan"],
+    ["21. FOPAG Role Audit"],
+    ["22. FOPAG Payroll Projection"],
     [],
     ["Three-version payroll export (Phase 15R.1):"],
     ["The main DRE sheets (1–13) reflect the selected scenario."],
@@ -456,6 +476,27 @@ function buildReadmeSheet(vm: DreScenarioWorkbookViewModel): XLSX.WorkSheet {
     ["Headcount (HC) = sum of headcountOrFte for active (non-audit) records."],
     ["fopagEngine payroll is tuition-independent: Phase 15Q tuition/discount changes cannot affect payroll totals."],
     ["Division/Area is not available in fopagOutput.records and is omitted from Payroll Detail sheets."],
+    [],
+    ["Full FOPAG / Folha Direta support tabs (Phase 15R.3):"],
+    [
+      "The DRE workbook includes full FOPAG / Folha Direta support tabs. These tabs cover all model-backed " +
+        "payroll-driving roles, including teaching, leadership, backoffice, specialists, assistants, monitors, " +
+        "counselors, principals, and org-design extension roles. They are not limited to non-teaching headcount.",
+    ],
+    [
+      "External service contracts are not included in FOPAG/Folha Direta. They remain separate DRE fixed assumptions.",
+    ],
+    [
+      "These tabs are generated from the app model (calculateDre / calculateFopag). " +
+        "They are not copied from the BP workbook and they are not manually typed Excel formulas.",
+    ],
+    [
+      "Payroll sheets use positive cost values. DRE rows may preserve the DRE negative cost sign convention. " +
+        "The DRE Payroll Bridge reconciles these conventions.",
+    ],
+    ["FOPAG Headcount Plan — consolidated headcount/FTE for all roles across all three org design versions."],
+    ["FOPAG Role Audit — role inclusion and source completeness audit across all three org design versions."],
+    ["FOPAG Payroll Projection — consolidated full payroll projection across all three org design versions."],
   ];
   return XLSX.utils.aoa_to_sheet(rows);
 }
@@ -1400,6 +1441,212 @@ function buildDrePayrollBridgeSheet(tv: ThreeVersionPayroll): XLSX.WorkSheet {
   return XLSX.utils.aoa_to_sheet(rows);
 }
 
+// ── Phase 15R.3: FOPAG full-scope tabs ───────────────────────────────────────
+
+// ── Sheet 20: FOPAG Headcount Plan ───────────────────────────────────────────
+function buildFopagHeadcountPlanSheet(tv: ThreeVersionPayroll): XLSX.WorkSheet {
+  const header = [
+    "Org Design Option ID",
+    "Org Design Option Label",
+    "Year",
+    "Role ID",
+    "Role Name",
+    "Role Source Type",
+    "Classification",
+    "Headcount / FTE",
+    "Allocation Model",
+    "Payroll Inclusion Status",
+    "Source Notes",
+  ];
+  const noteRow = [
+    "FOPAG Headcount Plan — all model-backed payroll-driving roles across all three org design versions. " +
+      "Includes teaching and non-teaching roles. Division/Area is not available in fopagOutput.records.",
+  ];
+  const rows: (string | number)[][] = [noteRow, header];
+
+  const VARIANTS: { id: string; label: string; fopagOut: FopagEngineOutput }[] = [
+    { id: "minimum_experience", label: "Minimum Experience", fopagOut: tv.minimum.fopagOutput },
+    { id: "balanced_experience", label: "Balanced Experience", fopagOut: tv.balanced.fopagOutput },
+    { id: "premium_experience", label: "Premium Experience", fopagOut: tv.premium.fopagOutput },
+  ];
+
+  for (const { id, label, fopagOut } of VARIANTS) {
+    const sorted = [...fopagOut.records].sort(
+      (a, b) => a.year - b.year || a.roleId.localeCompare(b.roleId),
+    );
+    for (const rec of sorted) {
+      rows.push([
+        id,
+        label,
+        rec.year,
+        rec.roleId,
+        rec.roleName,
+        rec.roleSourceType,
+        classifyFopagRole(rec.roleSourceType),
+        rec.headcountOrFte,
+        rec.allocationModel,
+        rec.isAuditRow ? "audit-row-excluded" : "included",
+        rec.sourceNotes,
+      ]);
+    }
+  }
+  return XLSX.utils.aoa_to_sheet(rows);
+}
+
+// ── Sheet 21: FOPAG Role Audit ────────────────────────────────────────────────
+function buildFopagRoleAuditSheet(tv: ThreeVersionPayroll): XLSX.WorkSheet {
+  const header = [
+    "Role ID",
+    "Role Name",
+    "Org Design Option ID",
+    "Org Design Option Label",
+    "Role Source Type",
+    "Classification",
+    "Included in Payroll",
+    "Included in FOPAG Direto",
+    "Included in Folha Direta",
+    "First Active Year",
+    "Years Active",
+    "Headcount Available",
+    "Payroll Available",
+    "Missing Data Flags",
+    "Source Notes",
+  ];
+  const noteRow = [
+    "FOPAG Role Audit — role inclusion and source completeness across all three org design versions. " +
+      "All roles present in payroll/FOPAG outputs are included; scope is not limited to non-teaching roles. " +
+      "Missing data fields are marked unavailable rather than fabricated.",
+  ];
+  const rows: (string | number | boolean)[][] = [noteRow, header];
+
+  const VARIANTS: { id: string; label: string; fopagOut: FopagEngineOutput }[] = [
+    { id: "minimum_experience", label: "Minimum Experience", fopagOut: tv.minimum.fopagOutput },
+    { id: "balanced_experience", label: "Balanced Experience", fopagOut: tv.balanced.fopagOutput },
+    { id: "premium_experience", label: "Premium Experience", fopagOut: tv.premium.fopagOutput },
+  ];
+
+  for (const { id, label, fopagOut } of VARIANTS) {
+    // Group records by roleId within this variant
+    const roleMap = new Map<string, typeof fopagOut.records[number][]>();
+    for (const rec of fopagOut.records) {
+      if (!roleMap.has(rec.roleId)) roleMap.set(rec.roleId, []);
+      roleMap.get(rec.roleId)!.push(rec);
+    }
+
+    const roleIds = [...roleMap.keys()].sort();
+    for (const roleId of roleIds) {
+      const recs = roleMap.get(roleId)!;
+      const first = recs[0]!;
+      const activeRecs = recs.filter((r) => !r.isAuditRow);
+      const firstActiveYear = activeRecs.length > 0 ? Math.min(...activeRecs.map((r) => r.year)) : "none";
+      const yearsActive = activeRecs.length > 0 ? [...new Set(activeRecs.map((r) => r.year))].length : 0;
+      const inFopagDireto = activeRecs.some((r) => r.allocationModel === "FOPAG_DIRETO");
+      const inFolhaDireta = activeRecs.some((r) => r.allocationModel === "FOLHA_DIRETA");
+      const headcountAvailable = recs.every((r) => typeof r.headcountOrFte === "number");
+      const payrollAvailable = activeRecs.every(
+        (r) => typeof r.grossLaborAnnualAfterGrowth === "number" && typeof r.benefitsAnnualAfterGrowth === "number",
+      );
+
+      const missingFlags: string[] = [];
+      if (activeRecs.length === 0) missingFlags.push("no-active-years");
+      if (!headcountAvailable) missingFlags.push("headcount-unavailable");
+      if (!payrollAvailable) missingFlags.push("payroll-cost-unavailable");
+      if (!inFopagDireto && !inFolhaDireta) missingFlags.push("allocation-model-unresolved");
+
+      rows.push([
+        roleId,
+        first.roleName,
+        id,
+        label,
+        first.roleSourceType,
+        classifyFopagRole(first.roleSourceType),
+        activeRecs.length > 0,
+        inFopagDireto,
+        inFolhaDireta,
+        firstActiveYear,
+        yearsActive,
+        headcountAvailable,
+        payrollAvailable,
+        missingFlags.length > 0 ? missingFlags.join("; ") : "none",
+        first.sourceNotes,
+      ]);
+    }
+  }
+  return XLSX.utils.aoa_to_sheet(rows);
+}
+
+// ── Sheet 22: FOPAG Payroll Projection ────────────────────────────────────────
+function buildFopagPayrollProjectionSheet(tv: ThreeVersionPayroll): XLSX.WorkSheet {
+  const header = [
+    "Org Design Option ID",
+    "Org Design Option Label",
+    "Year",
+    "Role ID",
+    "Role Name",
+    "Role Source Type",
+    "Classification",
+    "Headcount / FTE",
+    "FOPAG Direto",
+    "Folha Direta",
+    "Benefits",
+    "Total Payroll",
+    "Is Audit Row",
+    "DRE Mapping",
+    "Source Notes",
+  ];
+  const noteRow = [
+    "FOPAG Payroll Projection — full payroll projection by role, year, and org design version. " +
+      "Payroll values are positive cost values. Teaching and non-teaching roles included. " +
+      "External service contracts, CAPEX, tuition, and non-payroll fixed costs are not included. " +
+      "Audit rows are retained and marked; they contribute 0 to payroll columns. " +
+      "Total Payroll = FOPAG Direto + Folha Direta + Benefits by construction.",
+  ];
+  const rows: (string | number | boolean)[][] = [noteRow, header];
+
+  const VARIANTS: { id: string; label: string; fopagOut: FopagEngineOutput }[] = [
+    { id: "minimum_experience", label: "Minimum Experience", fopagOut: tv.minimum.fopagOutput },
+    { id: "balanced_experience", label: "Balanced Experience", fopagOut: tv.balanced.fopagOutput },
+    { id: "premium_experience", label: "Premium Experience", fopagOut: tv.premium.fopagOutput },
+  ];
+
+  for (const { id, label, fopagOut } of VARIANTS) {
+    const sorted = [...fopagOut.records].sort(
+      (a, b) => a.year - b.year || a.roleId.localeCompare(b.roleId),
+    );
+    for (const rec of sorted) {
+      const isAudit = rec.isAuditRow;
+      const fopagDireto = !isAudit && rec.allocationModel === "FOPAG_DIRETO" ? rec.grossLaborAnnualAfterGrowth : 0;
+      const folhaDireta = !isAudit && rec.allocationModel === "FOLHA_DIRETA" ? rec.grossLaborAnnualAfterGrowth : 0;
+      const benefits = isAudit ? 0 : rec.benefitsAnnualAfterGrowth;
+      const totalPayroll = fopagDireto + folhaDireta + benefits;
+      const dreMapping =
+        rec.allocationModel === "FOPAG_DIRETO"
+          ? "fopag_direto_clt_pj (DRE direct cost)"
+          : rec.allocationModel === "FOLHA_DIRETA"
+          ? "folha_de_pagamento (DRE fixed cost)"
+          : "unavailable";
+      rows.push([
+        id,
+        label,
+        rec.year,
+        rec.roleId,
+        rec.roleName,
+        rec.roleSourceType,
+        classifyFopagRole(rec.roleSourceType),
+        rec.headcountOrFte,
+        fopagDireto,
+        folhaDireta,
+        benefits,
+        totalPayroll,
+        isAudit,
+        dreMapping,
+        rec.sourceNotes,
+      ]);
+    }
+  }
+  return XLSX.utils.aoa_to_sheet(rows);
+}
+
 // ── Main entry point ──────────────────────────────────────────────────────────
 export function buildDreScenarioWorkbook(vm: DreScenarioWorkbookViewModel): XLSX.WorkBook {
   const wb = XLSX.utils.book_new();
@@ -1443,6 +1690,11 @@ export function buildDreScenarioWorkbook(vm: DreScenarioWorkbookViewModel): XLSX
   XLSX.utils.book_append_sheet(wb, buildPayrollDetailSheet(tv.premium.fopagOutput, "Premium Experience"), "Payroll Detail - Premium");
   XLSX.utils.book_append_sheet(wb, buildPayrollDeltaAnalysisSheet(tv), "Payroll Delta Analysis");
   XLSX.utils.book_append_sheet(wb, buildDrePayrollBridgeSheet(tv), "DRE Payroll Bridge");
+
+  // Phase 15R.3: full FOPAG / Folha Direta support tabs
+  XLSX.utils.book_append_sheet(wb, buildFopagHeadcountPlanSheet(tv), "FOPAG Headcount Plan");
+  XLSX.utils.book_append_sheet(wb, buildFopagRoleAuditSheet(tv), "FOPAG Role Audit");
+  XLSX.utils.book_append_sheet(wb, buildFopagPayrollProjectionSheet(tv), "FOPAG Payroll Projection");
 
   return wb;
 }
