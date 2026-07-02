@@ -328,7 +328,7 @@ function buildOperationsBranch(
     },
     {
       id: "secretary",
-      label: "Secretary",
+      label: "Registrar",
       variant: "base",
       ...getExistingRoleHeadcount("secretary", year),
       children: [
@@ -440,39 +440,56 @@ function buildLearningEcosystemBranch(
   scenario: ExecutiveOrgScenario,
   year: ExecutiveOrgYear,
 ): OrgTreeNode {
-  const children: OrgTreeNode[] = [
-    {
-      id: "learning-experience-designer",
-      label: "Learning Experience Designer",
-      variant: "base",
-      ...getExistingRoleHeadcount("led", year),
-    },
-    {
-      id: "language-acquisition-coach",
-      label: "Language Acquisition Coach",
-      badge: "New addition",
-      variant: "base",
-      ...getFixedExtensionHeadcount("language_acquisition_coach", scenario, year),
-    },
-  ];
+  const children: OrgTreeNode[] = [];
 
   if (scenario !== "minimum") {
+    // Balanced and Premium: Learning Experience Design Hub as umbrella parent
+    children.push({
+      id: "learning-experience-design-hub",
+      label: "Learning Experience Design Hub",
+      badge: "Functional hub",
+      note: "Balanced and Premium",
+      variant: "scenarioAddition",
+      ...notApplicableHeadcount(),
+      children: [
+        {
+          id: "learning-experience-designer",
+          label: "Learning Experience Designer",
+          variant: "base",
+          ...getExistingRoleHeadcount("led", year),
+        },
+        {
+          id: "language-acquisition-coach",
+          label: "Language Acquisition and Performance Coach",
+          badge: "New addition",
+          variant: "base",
+          ...getFixedExtensionHeadcount("language_acquisition_coach", scenario, year),
+        },
+        {
+          id: "personalized-learning-associate",
+          label: "Personalized Learning Associate Educator",
+          badge: "Scenario addition",
+          note: "Balanced and Premium",
+          variant: "scenarioAddition",
+          ...getFixedExtensionHeadcount("personalized_learning_associate_educator", scenario, year),
+        },
+      ],
+    });
+  } else {
+    // Minimum: flat entries without the hub container
     children.push(
       {
-        id: "learning-design-experience",
-        label: "Learning Design Experience",
-        badge: "Functional hub",
-        note: "Balanced and Premium",
-        variant: "scenarioAddition",
-        ...notApplicableHeadcount(),
+        id: "learning-experience-designer",
+        label: "Learning Experience Designer",
+        variant: "base",
+        ...getExistingRoleHeadcount("led", year),
       },
       {
-        id: "personalized-learning-associate",
-        label: "Personalized Learning Associate Educator",
-        badge: "Scenario addition",
-        note: "Balanced and Premium",
-        variant: "scenarioAddition",
-        ...getFixedExtensionHeadcount("personalized_learning_associate_educator", scenario, year),
+        id: "language-acquisition-coach",
+        label: "Language Acquisition and Performance Coach",
+        badge: "New addition",
+        variant: "base",
+        ...getFixedExtensionHeadcount("language_acquisition_coach", scenario, year),
       },
     );
   }
@@ -683,7 +700,7 @@ export function buildExecutiveOrgDesignTree(
           },
           {
             id: "secretary-dotted-support",
-            label: "Secretary dotted-line support",
+            label: "Registrar dotted-line support",
             badge: "Dotted line",
             variant: "dottedLine",
             ...notApplicableHeadcount(),

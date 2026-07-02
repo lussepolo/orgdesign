@@ -10,6 +10,26 @@ import {
   type OrgTreeNode,
   type OrgTreeNodeVariant,
 } from "../../features/rio-scenario-resilience/model/executiveOrgDesignModel";
+import { openingGrades } from "../../features/rio-scenario-resilience/data/openingGrades";
+import { buildOrgDesignHcTable, type OrgDesignHcTableRow } from "../../features/rio-scenario-resilience/model/orgDesignHcTableAdapter";
+
+// Opening scenario options: Scenario A–D mapped to opening package IDs
+const OPENING_SCENARIO_OPTIONS = [
+  { id: "t1_g3" as const, label: "Scenario A / T1→G3" },
+  { id: "t1_g4" as const, label: "Scenario B / T1→G4" },
+  { id: "t1_g5" as const, label: "Scenario C / T1→G5" },
+  { id: "t1_g6" as const, label: "Scenario D / T1→G6" },
+] as const;
+
+type OpeningPackageId = (typeof OPENING_SCENARIO_OPTIONS)[number]["id"];
+
+const ORG_DESIGN_OPTION_MAP: Record<ExecutiveOrgScenario, string> = {
+  minimum: "minimum_experience",
+  balanced: "balanced_experience",
+  premium: "premium_experience",
+};
+
+const OCCUPANCY_SCENARIO_ID = "intermediario" as const;
 
 const nodeVariantClasses: Record<OrgTreeNodeVariant, string> = {
   base: "border-slate-200 bg-white",
@@ -125,15 +145,43 @@ function BranchColumn({ node }: { node: OrgTreeNode }) {
   );
 }
 
+function HcTableRow({ row }: { row: OrgDesignHcTableRow }) {
+  return (
+    <tr className="border-b border-slate-100 hover:bg-slate-50">
+      <td className="px-3 py-2 text-[11px] font-semibold text-slate-700">{row.divisionArea}</td>
+      <td className="px-3 py-2 text-[11px] text-slate-600">{row.roleGroupOrHub !== row.divisionArea ? row.roleGroupOrHub : "—"}</td>
+      <td className="px-3 py-2 text-[11px] font-semibold text-slate-900">{row.role}</td>
+      <td className="px-3 py-2 text-center text-[11px] font-bold text-slate-900">
+        <span className="inline-flex h-6 min-w-[2rem] items-center justify-center rounded border border-slate-300 bg-slate-900 px-1.5 text-white">
+          {row.headcountOrFte}
+        </span>
+      </td>
+      <td className="px-3 py-2 text-[11px] text-slate-500">{row.sourceTypeLogic}</td>
+    </tr>
+  );
+}
+
 const ExecutiveOrgDesignTab = () => {
   const [scenario, setScenario] = useState<ExecutiveOrgScenario>("balanced");
   const [year, setYear] = useState<ExecutiveOrgYear>(2028);
+  const [openingPackageId, setOpeningPackageId] = useState<OpeningPackageId>("t1_g4");
   const [isProgressionPlaying, setIsProgressionPlaying] = useState(false);
 
   const viewModel = useMemo(() => buildExecutiveOrgDesignTree(scenario, year), [scenario, year]);
   const rootChildren = viewModel.root.children ?? [];
   const directRootNodes = rootChildren.filter((node) => !primaryBranchIds.has(node.id));
   const branchNodes = rootChildren.filter((node) => primaryBranchIds.has(node.id));
+
+  const hcTableResult = useMemo(
+    () =>
+      buildOrgDesignHcTable({
+        openingPackageId,
+        occupancyScenarioId: OCCUPANCY_SCENARIO_ID,
+        orgDesignOptionId: ORG_DESIGN_OPTION_MAP[scenario],
+        year,
+      }),
+    [openingPackageId, scenario, year],
+  );
 
   useEffect(() => {
     if (!isProgressionPlaying) return undefined;
@@ -162,6 +210,8 @@ const ExecutiveOrgDesignTab = () => {
     setIsProgressionPlaying(true);
   };
 
+  const openingGradeLabel = openingGrades.find((g) => g.id === openingPackageId)?.label ?? openingPackageId;
+
   return (
     <div className="space-y-4">
       <style>
@@ -183,7 +233,22 @@ const ExecutiveOrgDesignTab = () => {
 
         <div className="flex flex-col gap-2 sm:flex-row">
           <label className="flex flex-col gap-1">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Scenario</span>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Opening Scenario</span>
+            <select
+              value={openingPackageId}
+              onChange={(event) => setOpeningPackageId(event.target.value as OpeningPackageId)}
+              className="h-10 rounded-md border border-slate-300 bg-white px-3 text-sm font-bold text-slate-800 shadow-sm"
+            >
+              {OPENING_SCENARIO_OPTIONS.map((option) => (
+                <option key={option.id} value={option.id}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="flex flex-col gap-1">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Org Design Version</span>
             <select
               value={scenario}
               onChange={(event) => setScenario(event.target.value as ExecutiveOrgScenario)}
@@ -286,6 +351,70 @@ const ExecutiveOrgDesignTab = () => {
             </div>
           ))}
         </aside>
+      </section>
+
+      {/* Role-Level Headcount Table */}
+      <section className="space-y-3">
+        <div className="flex items-center justify-between">
+          <div>
+            <h4 className="text-base font-bold text-slate-900">Role-Level Headcount</h4>
+            <p className="mt-0.5 text-[11px] font-semibold text-slate-500">
+              {OPENING_SCENARIO_OPTIONS.find((o) => o.id === openingPackageId)?.label} ·{" "}
+              {EXECUTIVE_ORG_SCENARIOS.find((o) => o.id === scenario)?.label} · {year} ·{" "}
+              {hcTableResult.calculationReady ? "Calculation ready" : "Blocking diagnostics present"}
+            </p>
+          </div>
+          {!hcTableResult.calculationReady && (
+            <span className="rounded border border-amber-200 bg-amber-50 px-2 py-1 text-[10px] font-bold text-amber-700">
+              Engine: {hcTableResult.engineStatus}
+            </span>
+          )}
+        </div>
+
+        <div className="rounded-md border border-slate-200 bg-slate-50 p-3 text-[11px] font-semibold leading-5 text-slate-600">
+          <span className="font-bold text-slate-800">Methodology: </span>
+          Headcount is model-backed via{" "}
+          <code className="rounded bg-slate-200 px-1 text-[10px]">calculateFopag()</code> / payrollAdapter. EY and LS
+          grade staffing is section-driven: sections = min(ceil(enrollment / studentsPerClass), 2), sourced from{" "}
+          <code className="rounded bg-slate-200 px-1 text-[10px]">sectionCountEngine</code> under occupancy scenario{" "}
+          <span className="font-bold">intermediario</span>. Org Design Extension roles carry HC 1 from activation year
+          2028 per org design source contract. MS and HS educator pools are readiness-layer planning envelopes
+          (instructional-capacity only; not payroll authorization). Opening scenario:{" "}
+          <span className="font-bold">{openingGradeLabel}</span>. Do not modify headcount directly — change the model
+          inputs.
+        </div>
+
+        <div className="overflow-x-auto rounded-md border border-slate-200 shadow-sm">
+          <table className="w-full border-collapse bg-white text-left">
+            <thead>
+              <tr className="border-b border-slate-200 bg-slate-100">
+                <th className="px-3 py-2.5 text-[10px] font-bold uppercase tracking-wider text-slate-500">Division / Area</th>
+                <th className="px-3 py-2.5 text-[10px] font-bold uppercase tracking-wider text-slate-500">Role Group or Hub</th>
+                <th className="px-3 py-2.5 text-[10px] font-bold uppercase tracking-wider text-slate-500">Role</th>
+                <th className="px-3 py-2.5 text-center text-[10px] font-bold uppercase tracking-wider text-slate-500">HC / FTE</th>
+                <th className="px-3 py-2.5 text-[10px] font-bold uppercase tracking-wider text-slate-500">Source Type / Logic</th>
+              </tr>
+            </thead>
+            <tbody>
+              {hcTableResult.rows.map((row, i) => (
+                <HcTableRow key={`${row.divisionArea}-${row.role}-${i}`} row={row} />
+              ))}
+              {hcTableResult.rows.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="px-3 py-6 text-center text-[11px] font-semibold text-slate-400">
+                    No active roles for selected scenario and year.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        <p className="text-[10px] font-semibold text-slate-400">
+          Year: {year} · Opening Scenario: {openingPackageId} · Org Design Version:{" "}
+          {ORG_DESIGN_OPTION_MAP[scenario]} · Occupancy: {OCCUPANCY_SCENARIO_ID} ·{" "}
+          {hcTableResult.rows.length} active role rows
+        </p>
       </section>
     </div>
   );
