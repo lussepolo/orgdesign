@@ -123,8 +123,8 @@ tone: "border-emerald-200 bg-emerald-50 text-emerald-700",
 title: "Scenario B",
 gradeCeiling: "Up to Grade 4",
 targetEnrollment: "258 learners",
-modeledCapacity: "346 learners",
-impliedOccupancy: "74.6%",
+modeledCapacity: "358 learners",
+impliedOccupancy: "72.1%",
 strategicIdentity: "Researchers progression + Concept identity",
 offerStage: "Lower School progression",
 classroomPackage: [
@@ -417,7 +417,7 @@ risk: "Higher cost before enrollment density fully matures.",
 		  ];
 const scenarioMatrix = [
 ["Scenario A", "Grade 3", "228", "302", "75.5%", "Foundation + early academic evidence", "EY: reference educator + assistant + monitor; LS: reference educator + assistant", "Shared, lighter version", "MAP from Grade 1, classroom PDJ, language monitoring", "Not active", "Coached Foundation"],
-["Scenario B", "Grade 4", "258", "346", "74.6%", "Researchers progression + Concept identity", "EY: reference educator + assistant + monitor; LS: reference educator + assistant", "Shared, broader LS load", "MAP cycles, inquiry, evidence-making, academic language, early portfolio, Grade 5 Pathways preparation; PDJ full-class", "Not active", "Academic Progression"],
+["Scenario B", "Grade 4", "258", "358", "72.1%", "Researchers progression + Concept identity", "EY: reference educator + assistant + monitor; LS: reference educator + assistant", "Shared, broader LS load", "MAP cycles, inquiry, evidence-making, academic language, early portfolio, Grade 5 Pathways preparation; PDJ full-class", "Not active", "Academic Progression"],
 ["Scenario C", "Grade 5", "288", "390", "73.8%", "Lower School completion + Pathways activation", "EY: reference educator + assistant + monitor; LS: reference educator + assistant", "Full LS continuity", "Pathway classes active; PDJ full-class; no Passion Projects; Creative Hub preparation only", "Preparation only", "Transition Readiness"],
 ["Scenario D", "Grade 6", "318", "440", "72.3%", "Middle School launch + global/program activation", "EY/LS remains; Grade 6 cluster model", "Shared EY/LS/MS ecosystem", "Creative Hub, MUN, Passion Project, advisory, electives, mentorship", "Active", "Middle School Signature Launch"],
 		  ];
