@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { CheckCircle2, GitBranch, Layers3 } from "lucide-react";
+import { BookOpen, CheckCircle2, GitBranch, Layers3 } from "lucide-react";
 import { cn } from "../../lib/utils";
 import {
   buildExecutiveOrgDesignTree,
@@ -163,6 +163,82 @@ function HcTableRow({ row }: { row: OrgDesignHcTableRow }) {
       </td>
       <td className="px-3 py-2 text-[11px] text-slate-500">{row.sourceTypeLogic}</td>
     </tr>
+  );
+}
+
+function BalancedExplanationPanel() {
+  return (
+    <section
+      aria-label="Balanced Experience: recommended operating model"
+      className="rounded-md border border-emerald-200 bg-emerald-50 p-4 shadow-sm"
+    >
+      <div className="mb-3 flex items-start gap-2">
+        <BookOpen className="mt-0.5 h-4 w-4 shrink-0 text-emerald-700" />
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-600">
+            Balanced Experience: recommended operating model
+          </p>
+          <p className="mt-1 text-sm font-semibold leading-5 text-emerald-950">
+            Balanced Experience is the recommended Rio structure because it protects the Concept learner
+            experience while keeping leadership growth tied to enrollment. The model combines scenario-driven
+            classroom staffing, lean division leadership, and a Learning Experience Design Hub responsible for
+            learning design, language acquisition, performance support, and personalized learning. Role-level HC
+            is model-backed and changes according to the selected opening scenario and year.
+          </p>
+        </div>
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="rounded-md border border-emerald-200 bg-white p-3">
+          <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-emerald-700">Why Balanced</p>
+          <p className="text-[11px] font-semibold leading-5 text-slate-700">
+            Balanced sits between Minimum and Premium. It avoids the fragility of an underbuilt model while
+            avoiding the payroll risk of hiring too many specialized roles before enrollment maturity.
+          </p>
+        </div>
+
+        <div className="rounded-md border border-emerald-200 bg-white p-3">
+          <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-emerald-700">Dynamic HC</p>
+          <p className="text-[11px] font-semibold leading-5 text-slate-700">
+            Headcount is not a static org chart. It is generated from the selected opening scenario, year, and
+            org design version using the same staffing/FOPAG logic that supports the DRE and payroll export.
+          </p>
+        </div>
+
+        <div className="rounded-md border border-emerald-200 bg-white p-3">
+          <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-emerald-700">
+            Learning Experience Design Hub
+          </p>
+          <ul className="space-y-0.5 text-[11px] font-semibold text-slate-700">
+            <li className="font-bold text-emerald-900">Learning Experience Design Hub</li>
+            <li className="pl-3 before:mr-1 before:content-['–']">Learning Experience Designer</li>
+            <li className="pl-3 before:mr-1 before:content-['–']">Language Acquisition and Performance Coach</li>
+            <li className="pl-3 before:mr-1 before:content-['–']">Personalized Learning Associate Educator</li>
+          </ul>
+        </div>
+
+        <div className="rounded-md border border-emerald-200 bg-white p-3">
+          <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-emerald-700">
+            Division Staffing Logic
+          </p>
+          <p className="text-[11px] font-semibold leading-5 text-slate-700">
+            Early Years uses Reference Educator + Assistant + Monitor. Lower School uses Reference Educator +
+            Assistant. Middle School and High School staffing progress with the opening scenario, educator load,
+            mentorship, and program absorption model.
+          </p>
+        </div>
+
+        <div className="rounded-md border border-slate-200 bg-white p-3 sm:col-span-2 lg:col-span-2">
+          <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+            Governance Caveat
+          </p>
+          <p className="text-[11px] font-semibold leading-5 text-slate-600">
+            Read this as a dynamic operating model, not a fixed static chart. Role-level HC should be reviewed
+            by opening scenario and year.
+          </p>
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -357,6 +433,8 @@ const ExecutiveOrgDesignTab = () => {
           ))}
         </aside>
       </section>
+
+      {scenario === "balanced" && <BalancedExplanationPanel />}
 
       {/* Role-Level Headcount Table */}
       <section className="space-y-3">
