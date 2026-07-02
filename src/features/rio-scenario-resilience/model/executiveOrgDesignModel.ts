@@ -27,6 +27,7 @@ export type OrgTreeNodeVariant =
 export type OrgTreeNodeHeadcountStatus =
   | "source-backed"
   | "source-pending"
+  | "model-backed"
   | "not-applicable";
 
 export interface OrgTreeNode {
@@ -128,6 +129,16 @@ const notApplicableHeadcount = (): Pick<
 > => ({
   headcountValue: null,
   headcountStatus: "not-applicable",
+});
+
+const modelBackedHeadcount = (): Pick<
+  OrgTreeNode,
+  "headcountValue" | "headcountStatus" | "headcountSourceLabel"
+> => ({
+  headcountValue: null,
+  headcountStatus: "model-backed",
+  headcountSourceLabel:
+    "Section-driven HC via sectionCountEngine / calculateFopag(). Grade-level breakdown in role-level HC table.",
 });
 
 const sourceBackedHeadcount = (
@@ -549,9 +560,9 @@ function buildAcademicDivisionsBranch(year: ExecutiveOrgYear): OrgTreeNode {
       label: "Early Years Educator Package",
       note: "Educator + Assistant + Monitor",
       variant: "base",
-      headcountBasisNote: "Section-driven HC: depends on sections per grade level.",
+      headcountBasisNote: "Section-driven HC: see role-level HC table for grade-level breakdown.",
       packageBasisNote: "Package basis: Reference Educator + Assistant + Monitor.",
-      ...pendingHeadcount("Package composition incomplete"),
+      ...modelBackedHeadcount(),
     },
     {
       id: "ls-principal",
@@ -570,9 +581,9 @@ function buildAcademicDivisionsBranch(year: ExecutiveOrgYear): OrgTreeNode {
       label: "Lower School Educator Package",
       note: "Educator + Assistant",
       variant: "base",
-      headcountBasisNote: "Section-driven HC: depends on sections per grade level.",
+      headcountBasisNote: "Section-driven HC: see role-level HC table for grade-level breakdown.",
       packageBasisNote: "Package basis: Reference Educator + Assistant.",
-      ...pendingHeadcount("Package composition incomplete"),
+      ...modelBackedHeadcount(),
     },
   ];
 

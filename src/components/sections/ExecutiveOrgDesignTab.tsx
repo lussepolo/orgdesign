@@ -50,6 +50,7 @@ const badgeVariantClasses: Record<OrgTreeNodeVariant, string> = {
 const headcountBadgeClasses = {
   "source-backed": "border-slate-300 bg-slate-900 text-white",
   "source-pending": "border-amber-200 bg-amber-50 text-amber-700",
+  "model-backed": "border-emerald-300 bg-emerald-50 text-emerald-700",
 } as const;
 
 const primaryBranchIds = new Set([
@@ -67,10 +68,14 @@ const progressionIntervalMs = 1000;
 function HeadcountBadge({ node }: { node: OrgTreeNode }) {
   if (!node.headcountStatus || node.headcountStatus === "not-applicable") return null;
 
-  const label =
-    node.headcountStatus === "source-backed" && typeof node.headcountValue === "number"
-      ? `HC ${node.headcountValue}`
-      : "HC source pending";
+  let label: string;
+  if (node.headcountStatus === "source-backed" && typeof node.headcountValue === "number") {
+    label = `HC ${node.headcountValue}`;
+  } else if (node.headcountStatus === "model-backed") {
+    label = "Model-backed HC";
+  } else {
+    label = "HC source pending";
+  }
 
   return (
     <span
