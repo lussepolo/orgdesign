@@ -3,6 +3,7 @@ import {
   COMBINED_ENROLLMENT_RECORDS,
 } from "./matureStateCarryForwardSourceData";
 import {
+  OPENING_PACKAGE_CAPACITY_BY_YEAR_AND_GRADE_RECORDS,
   OPENING_PACKAGE_STUDENTS_PER_CLASS,
 } from "./openingPackageOccupancySourceData";
 import type {
@@ -37,6 +38,18 @@ export function calculateSectionCountsForScenario(
   const spcLookup = new Map<string, number>();
   for (const r of OPENING_PACKAGE_STUDENTS_PER_CLASS) {
     spcLookup.set(String(r.normalizedGradeId).toLowerCase(), r.studentsPerClass);
+  }
+
+  // Build committed-sections lookup: "packageId:year:gradeId" → sections
+  // Used when open rooms exceed what ceil(enrollment/spc) would derive.
+  const committedSectionsLookup = new Map<string, number>();
+  for (const r of OPENING_PACKAGE_CAPACITY_BY_YEAR_AND_GRADE_RECORDS) {
+    if (r.packageId !== openingPackageId) continue;
+    if (r.sections === null) continue;
+    committedSectionsLookup.set(
+      `${openingPackageId}:${r.year}:${String(r.normalizedGradeId).toLowerCase()}`,
+      r.sections,
+    );
   }
 
   for (const r of COMBINED_ENROLLMENT_RECORDS) {
@@ -133,7 +146,10 @@ export function calculateSectionCountsForScenario(
     }
 
     const rawSections = Math.ceil(r.enrollment / spc);
-    const sectionCount = Math.min(rawSections, MAX_SECTIONS);
+    const committedSections = committedSectionsLookup.get(
+      `${openingPackageId}:${r.year}:${gradeId}`,
+    ) ?? 0;
+    const sectionCount = Math.min(Math.max(rawSections, committedSections), MAX_SECTIONS);
     const sectionOverflow = rawSections > MAX_SECTIONS;
 
     records.push({
@@ -150,12 +166,18 @@ export function calculateSectionCountsForScenario(
       sectionCount,
       maxSectionsPerGrade: MAX_SECTIONS,
       sectionOverflow,
-      formulaBasis: "ceil_enrollment_div_studentsPerClass_capped_at_2",
-      capacityConstraintSource:
-        "OPENING_PACKAGE_STUDENTS_PER_CLASS; maxSectionsPerGrade = 2 (workbook cap)",
+      formulaBasis: committedSections > rawSections
+        ? "committed_sections_from_capacity_record"
+        : "ceil_enrollment_div_studentsPerClass_capped_at_2",
+      capacityConstraintSource: committedSections > rawSections
+        ? "OPENING_PACKAGE_CAPACITY_BY_YEAR_AND_GRADE_RECORDS; maxSectionsPerGrade = 2 (workbook cap)"
+        : "OPENING_PACKAGE_STUDENTS_PER_CLASS; maxSectionsPerGrade = 2 (workbook cap)",
       sourceNotes:
         `rawSections = ceil(${r.enrollment}/${spc}) = ${rawSections}; ` +
-        `sectionCount = min(${rawSections}, 2) = ${sectionCount}; ` +
+        (committedSections > rawSections
+          ? `committedSections = ${committedSections} (from capacity record) — overrides rawSections; `
+          : "") +
+        `sectionCount = min(max(${rawSections},${committedSections}), 2) = ${sectionCount}; ` +
         (sectionOverflow ? "OVERFLOW: rawSections > 2." : "no overflow."),
     });
   }

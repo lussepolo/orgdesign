@@ -498,14 +498,11 @@ function buildReadmeSheet(vm: DreScenarioWorkbookViewModel): XLSX.WorkSheet {
     ["FOPAG Role Audit — role inclusion and source completeness audit across all three org design versions."],
     ["FOPAG Payroll Projection — consolidated full payroll projection across all three org design versions."],
     [],
-    ["Phase 15S.1 — Scenario B / T1_G4 enrollment and capacity note:"],
+    ["Phase 15S.2 — Scenario B / T1_G4 source-backed values:"],
     [
-      "Scenario B / T1_G4 uses a 258-learner conservative interim per-grade allocation for 2028. " +
-        "Full capacity is confirmed at 358 learners at package level. " +
-        "Per-grade capacity decomposition remains pending source confirmation. " +
-        "Grade 4 staffing remains model-backed at 2 sections, 2 Reference Educators, and 2 Assistants. " +
-        "Grade-level occupancy rates use current class-size capacity basis (348); " +
-        "package-level occupancy uses confirmed full package capacity of 358 (72.1%).",
+      "Scenario B / T1_G4 now uses the Finance workbook source for 2028 Intermediário: 258 learners, 348 available capacity, and 74.1% occupancy. " +
+        "The per-grade allocation is source-backed: T1 16, T2 16, PK3 28, PK4 32, Kindergarten 36, G1 40, G2 36, G3 32, G4 22. " +
+        "Grade 4 remains a two-section Lower School opening package based on 48 available seats.",
     ],
   ];
   return XLSX.utils.aoa_to_sheet(rows);

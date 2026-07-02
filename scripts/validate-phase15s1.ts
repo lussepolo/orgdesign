@@ -1,12 +1,20 @@
-// Phase 15S.1 — Scenario B T1_G4 Enrollment and Capacity Alignment (39 checks).
+// Phase 15S.1 — Legacy Supersession Validator (39 checks).
+//
+// Phase 15S.1 set a conservative interim per-grade allocation for t1_g4 / intermediario / 2028
+// (enrollment split 20/20/30/30/35/34/29/30/30, capacity 358, occupancy 72.1%).
+// Phase 15S.2 superseded those interim values with Finance workbook source values
+// (16/16/28/32/36/40/36/32/22, capacity 348, occupancy 74.1%).
+//
+// This validator now confirms that Phase 15S.2 supersession is in place.
+// It does NOT assert the old Phase 15S.1 interim values.
 //
 // Validates:
-//   A. Enrollment totals and per-grade distribution (checks 1–11)
-//   B. Capacity, occupancy, and pending-decomposition note (checks 12–15)
+//   A. Phase 15S.2 enrollment totals and per-grade distribution (checks 1–11)
+//   B. Phase 15S.2 capacity, occupancy, and supersession confirmation (checks 12–15)
 //   C. G4 staffing integrity (checks 16–21)
 //   D. Sibling-grade section integrity (checks 22–25)
 //   E. DRE engine and workbook output (checks 26–28)
-//   F. OfferScenariosTab UI alignment (checks 29–31)
+//   F. OfferScenariosTab UI alignment with Phase 15S.2 values (checks 29–31)
 //   G. Canonical t1_g3 fixture unchanged (check 32)
 //   H. Protected-file scope (checks 33–39)
 //
@@ -206,8 +214,8 @@ const payrollHcFor = (year: number, rolePrefix: string): number => {
 };
 
 // ── Section A: Enrollment totals and per-grade distribution ───────────────────
-console.log("\n=== Phase 15S.1 Validation (39 checks) ===\n");
-console.log("Section A — Enrollment totals and per-grade distribution:");
+console.log("\n=== Phase 15S.1 Legacy Supersession Validation (39 checks) ===\n");
+console.log("Section A — Per-grade enrollment (Phase 15S.2 workbook values supersede Phase 15S.1 interim):");
 
 checkEqual(
   " 1. t1_g4 / intermediario / 2028 total enrollment record = 258",
@@ -226,39 +234,39 @@ checkEqual(
   `actual sum: ${perGradeSum}`,
 );
 
-checkEqual(" 3. T1 enrollment = 20", gradeEnrollment("t1"), 20);
-checkEqual(" 4. T2 enrollment = 20", gradeEnrollment("t2"), 20);
-checkEqual(" 5. PK3 enrollment = 30", gradeEnrollment("pk3"), 30);
-checkEqual(" 6. PK4 enrollment = 30", gradeEnrollment("pk4"), 30);
-checkEqual(" 7. Kindergarten enrollment = 35", gradeEnrollment("kindergarten"), 35);
-checkEqual(" 8. G1 enrollment = 34", gradeEnrollment("g1"), 34);
-checkEqual(" 9. G2 enrollment = 29", gradeEnrollment("g2"), 29);
-checkEqual("10. G3 enrollment = 30", gradeEnrollment("g3"), 30);
-checkEqual("11. G4 enrollment = 30", gradeEnrollment("g4"), 30);
+// Phase 15S.1 interim was 20/20/30/30/35/34/29/30/30.
+// Phase 15S.2 replaced with Finance workbook source: 16/16/28/32/36/40/36/32/22.
+checkEqual(" 3. T1 enrollment = 16 (Phase 15S.2 workbook)", gradeEnrollment("t1"), 16);
+checkEqual(" 4. T2 enrollment = 16 (Phase 15S.2 workbook)", gradeEnrollment("t2"), 16);
+checkEqual(" 5. PK3 enrollment = 28 (Phase 15S.2 workbook)", gradeEnrollment("pk3"), 28);
+checkEqual(" 6. PK4 enrollment = 32 (Phase 15S.2 workbook)", gradeEnrollment("pk4"), 32);
+checkEqual(" 7. Kindergarten enrollment = 36 (Phase 15S.2 workbook)", gradeEnrollment("kindergarten"), 36);
+checkEqual(" 8. G1 enrollment = 40 (Phase 15S.2 workbook)", gradeEnrollment("g1"), 40);
+checkEqual(" 9. G2 enrollment = 36 (Phase 15S.2 workbook)", gradeEnrollment("g2"), 36);
+checkEqual("10. G3 enrollment = 32 (Phase 15S.2 workbook)", gradeEnrollment("g3"), 32);
+checkEqual("11. G4 enrollment = 22 (Phase 15S.2 workbook)", gradeEnrollment("g4"), 22);
 
 // ── Section B: Capacity, occupancy, pending-decomposition note ────────────────
 console.log("\nSection B — Capacity, occupancy, and interim-allocation notes:");
 
 checkEqual(
-  "12. t1_g4 / 2028 package-level available capacity = 358",
+  "12. t1_g4 / 2028 package-level available capacity = 348 (Phase 15S.2 workbook)",
   capacityRec?.availableCapacity ?? null,
-  358,
+  348,
 );
 
 const packageOccupancy = (totalEnrollmentRec?.totalEnrollment ?? 0) / (capacityRec?.availableCapacity ?? 1);
 checkTrue(
-  "13. Package-level occupancy = 258 / 358 within tolerance",
-  Math.abs(packageOccupancy - 258 / 358) < TOLERANCE,
-  `actual: ${packageOccupancy.toFixed(10)}, expected: ${(258 / 358).toFixed(10)}`,
+  "13. Package-level occupancy = 258 / 348 within tolerance",
+  Math.abs(packageOccupancy - 258 / 348) < TOLERANCE,
+  `actual: ${packageOccupancy.toFixed(10)}, expected: ${(258 / 348).toFixed(10)}`,
 );
 
-// Check 14 is a documentation check: this validator explicitly notes the pending decomposition.
-// The note appears in the Phase 15S.1 source comments and the DRE workbook README.
-// The check passes because the notation is present (per design; it cannot pass trivially).
+// Check 14: confirm Phase 15S.2 supersession is active (capacity 348, not 358).
 checkTrue(
-  "14. Per-grade capacity decomposition is documented as pending source confirmation",
-  true,
-  "Note: Phase 15S.1 source comments and DRE README explicitly state 'Per-grade capacity decomposition remains pending source confirmation.' Package-level capacity is confirmed at 358; per-grade breakdown is interim.",
+  "14. Phase 15S.2 supersession confirmed: availableCapacity is 348, not the Phase 15S.1 interim 358",
+  (capacityRec?.availableCapacity ?? 0) === 348,
+  `capacityRec.availableCapacity = ${capacityRec?.availableCapacity ?? "not found"}`,
 );
 
 const g4Spc = spcFor("g4");
@@ -291,7 +299,7 @@ checkEqual(
   "18. G4 sections = 2 (sectionCountEngine 2028)",
   sectionFor("g4"),
   2,
-  `enrollment=30, studentsPerClass=24, ceil(30/24)=2`,
+  `enrollment=22, studentsPerClass=24, ceil(22/24)=1 raw, lifted to 2 via committedSectionsLookup`,
 );
 
 const g4LeadHc = payrollHcFor(2028, "ls_teaching_lead_g4");
@@ -322,25 +330,25 @@ checkEqual(
 console.log("\nSection D — Sibling-grade section integrity:");
 
 checkEqual(
-  "22. PK3 sections = 2 (sectionCountEngine 2028, enrollment=30, spc=18)",
+  "22. PK3 sections = 2 (sectionCountEngine 2028, enrollment=28, spc=18)",
   sectionFor("pk3"),
   2,
 );
 
 checkEqual(
-  "23. PK4 sections = 2 (sectionCountEngine 2028, enrollment=30, spc=18)",
+  "23. PK4 sections = 2 (sectionCountEngine 2028, enrollment=32, spc=18)",
   sectionFor("pk4"),
   2,
 );
 
 checkEqual(
-  "24. Kindergarten sections = 2 (sectionCountEngine 2028, enrollment=35, spc=20)",
+  "24. Kindergarten sections = 2 (sectionCountEngine 2028, enrollment=36, spc=20)",
   sectionFor("kindergarten"),
   2,
 );
 
 checkEqual(
-  "25. G3 sections = 2 (sectionCountEngine 2028, enrollment=30, spc=22)",
+  "25. G3 sections = 2 (sectionCountEngine 2028, enrollment=32, spc=22)",
   sectionFor("g3"),
   2,
 );
@@ -367,10 +375,9 @@ checkEqual(
 const readmeRows = sheetToRows("README");
 const readmeFlat = readmeRows.map((row) => row.filter(Boolean).join(" ")).join("\n");
 checkTrue(
-  "28. DRE workbook README contains Phase 15S.1 interim allocation and capacity caveat",
-  readmeFlat.includes("258-learner conservative interim per-grade allocation") &&
-    readmeFlat.includes("Per-grade capacity decomposition remains pending source confirmation"),
-  readmeFlat.includes("258-learner") ? "caveat found" : "caveat NOT found — README missing Phase 15S.1 note",
+  "28. DRE workbook README contains Phase 15S.2 source-backed values (348 capacity, 74.1% occupancy)",
+  readmeFlat.includes("348") && readmeFlat.includes("74.1%"),
+  readmeFlat.includes("348") ? "Phase 15S.2 capacity found in README" : "Phase 15S.2 content NOT found — README not updated",
 );
 
 // ── Section F: OfferScenariosTab UI alignment ─────────────────────────────────
@@ -386,13 +393,13 @@ checkTrue(
 );
 
 checkTrue(
-  "30. OfferScenariosTab Scenario B modeledCapacity = '358 learners'",
-  offerTab.includes('modeledCapacity: "358 learners"'),
+  "30. OfferScenariosTab Scenario B modeledCapacity = '348 learners' (Phase 15S.2)",
+  offerTab.includes('modeledCapacity: "348 learners"'),
 );
 
 checkTrue(
-  "31. OfferScenariosTab Scenario B impliedOccupancy = '72.1%'",
-  offerTab.includes('impliedOccupancy: "72.1%"'),
+  "31. OfferScenariosTab Scenario B impliedOccupancy = '74.1%' (Phase 15S.2)",
+  offerTab.includes('impliedOccupancy: "74.1%"'),
 );
 
 // ── Section G: Canonical t1_g3 fixture unchanged ──────────────────────────────
@@ -428,7 +435,7 @@ for (const [label, path] of PROTECTED) {
 
 // ── Summary ───────────────────────────────────────────────────────────────────
 console.log(`\n${"─".repeat(60)}`);
-console.log(`Phase 15S.1: ${passCount} passed, ${failCount} failed (39 checks total)`);
+console.log(`Phase 15S.1 Legacy Supersession: ${passCount} passed, ${failCount} failed (39 checks total)`);
 if (failCount > 0) {
   process.exit(1);
 } else {
