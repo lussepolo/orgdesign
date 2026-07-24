@@ -14,21 +14,24 @@ import type {
 export const V10_E1_GOVERNANCE_DATE = "2026-07-24" as const;
 
 export const GOVERNED_G6_CAPTACAO_WORKBOOK = {
-  path: "/Users/lucianapolonen/Downloads/Modelo_Ocupacao_Concept_2028_4sc_T1_G6.xlsx",
+  workbookName: "Modelo_Ocupacao_Concept_2028_4sc_T1_G6.xlsx",
+  evidenceReference: "G6 captação workbook identified by content hash; source workbook is external evidence, not a repository artifact.",
   sha256: "17c933891e3fa57b4b39bf3c22ac84dc71583fc024a41ddacd4aff6647723729",
   enrollmentAuthority:
     "T1-G6 Conservador/Base/Otimista grade-level captação projections and capacity, 2028-2037.",
 } as const;
 
 export const GOVERNED_G4_CAPTACAO_WORKBOOK = {
-  path: "/Users/lucianapolonen/Downloads/Modelo_Ocupacao_Concept_2028_4sc_T1_G4.xlsx",
+  workbookName: "Modelo_Ocupacao_Concept_2028_4sc_T1_G4.xlsx",
+  evidenceReference: "G4 captação workbook identified by content hash; source workbook is external evidence, not a repository artifact.",
   sha256: "73b10ea70cd0ebdc5f43757e621ecd6343a45fbcce4447d1fe1b1e0f8164ae95",
   enrollmentAuthority:
     "T1-G4 Conservador/Base/Otimista grade-level captação projections and capacity, 2028-2037.",
 } as const;
 
 export const GOVERNED_V10_CAPACITY_WORKBOOK = {
-  path: "/Users/lucianapolonen/Downloads/Concept Rio - 20 anos - Org BU - Apresentação v10.xlsx",
+  workbookName: "Concept Rio - 20 anos - Org BU - Apresentação v10.xlsx",
+  evidenceReference: "V10 financial/capacity workbook identified by content hash; source workbook is external evidence, not a repository artifact.",
   sha256: "2e3230ad233c7cd450c1da1fca46da1cb80899e66cdf5ba3d4e9358357a05da0",
   t1g4CapacityEvidence:
     "Receita - Cen. 1 (4)!DN23:DW23 is a 2027-2036 V10 series; DN23=300 is under the 2027 header and is not used as T1-G4 2028 capacity in V10-E1.",

@@ -74,17 +74,17 @@ delete, or clean files.
 
 Source authority:
 - G4 captação/enrollment workbook:
-  `/Users/lucianapolonen/Downloads/Modelo_Ocupacao_Concept_2028_4sc_T1_G4.xlsx`,
+  `Modelo_Ocupacao_Concept_2028_4sc_T1_G4.xlsx`,
   SHA-256 `73b10ea70cd0ebdc5f43757e621ecd6343a45fbcce4447d1fe1b1e0f8164ae95`.
   Sheets: `1. Memória de Cálculo`, `2. PESSIMISTA`, `3. CONSERVADOR`,
   `4. INTERMEDIÁRIO`, `5. OTIMISTA`, `6. Comparativo`.
 - G6 captação/enrollment workbook located by content hash:
-  `/Users/lucianapolonen/Downloads/Modelo_Ocupacao_Concept_2028_4sc_T1_G6.xlsx`,
+  `Modelo_Ocupacao_Concept_2028_4sc_T1_G6.xlsx`,
   SHA-256 `17c933891e3fa57b4b39bf3c22ac84dc71583fc024a41ddacd4aff6647723729`.
   The `(1)` suffix was not required because V10-E1 uses content hash authority.
 - V10 financial/capacity workbook retained as reconciliation evidence only for
   this phase:
-  `/Users/lucianapolonen/Downloads/Concept Rio - 20 anos - Org BU - Apresentação v10.xlsx`,
+  `Concept Rio - 20 anos - Org BU - Apresentação v10.xlsx`,
   SHA-256 `2e3230ad233c7cd450c1da1fca46da1cb80899e66cdf5ba3d4e9358357a05da0`.
 
 Implemented contract:

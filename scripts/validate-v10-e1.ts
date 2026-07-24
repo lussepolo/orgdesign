@@ -1,5 +1,7 @@
 import { createHash } from "node:crypto";
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
+import { homedir } from "node:os";
+import { join } from "node:path";
 import XLSX from "xlsx";
 import { occupancyOptions } from "../src/features/rio-scenario-resilience/data/occupancyOptions";
 import { OCCUPANCY_LABELS } from "../src/components/dreSimulator/dreLeverLabels";
@@ -56,6 +58,7 @@ const WORKBOOK_BY_PACKAGE = {
   t1_g4: GOVERNED_G4_CAPTACAO_WORKBOOK,
   t1_g6: GOVERNED_G6_CAPTACAO_WORKBOOK,
 } as const;
+const WORKBOOK_EVIDENCE_DIR = process.env.RIO_V10_E1_WORKBOOK_DIR ?? join(homedir(), "Downloads");
 const EXPECTED_2028_TOTALS = {
   t1_g4: { conservador: 238, base: 258, otimista: 300 },
   t1_g6: { conservador: 238, base: 258, otimista: 300 },
@@ -183,13 +186,17 @@ function collectShimExports(path: string): string[] {
 }
 
 const workbooks = Object.fromEntries(
-  ACTIVE_PACKAGES.map((packageId) => [packageId, XLSX.readFile(WORKBOOK_BY_PACKAGE[packageId].path, { cellFormula: true })]),
+  ACTIVE_PACKAGES.map((packageId) => {
+    const workbookPath = join(WORKBOOK_EVIDENCE_DIR, WORKBOOK_BY_PACKAGE[packageId].workbookName);
+    return [packageId, XLSX.readFile(workbookPath, { cellFormula: true })];
+  }),
 ) as Record<"t1_g4" | "t1_g6", XLSX.WorkBook>;
 
 for (const packageId of ACTIVE_PACKAGES) {
   const workbook = WORKBOOK_BY_PACKAGE[packageId];
-  check(`${packageId}_workbook_exists`, existsSync(workbook.path), workbook.path);
-  check(`${packageId}_workbook_hash`, sha256(workbook.path) === workbook.sha256, sha256(workbook.path));
+  const workbookPath = join(WORKBOOK_EVIDENCE_DIR, workbook.workbookName);
+  check(`${packageId}_workbook_exists`, existsSync(workbookPath), workbook.workbookName);
+  check(`${packageId}_workbook_hash`, sha256(workbookPath) === workbook.sha256, sha256(workbookPath));
   check(
     `${packageId}_sheet_structure`,
     ["1. Memória de Cálculo", "2. PESSIMISTA", "3. CONSERVADOR", "4. INTERMEDIÁRIO", "5. OTIMISTA", "6. Comparativo"].every((sheet) =>
