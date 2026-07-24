@@ -34,8 +34,8 @@ function fail(checkId: Phase15DLeverPropagationCheckId, note: string): Phase15DL
 // S1-S8: see IMPLEMENTATION.md Phase 15D.2 scenario matrix. All IDs are valid,
 // already-supported production IDs (no invented scenario IDs).
 const S1_CANONICAL_90M: CapitalDecisionEngineInput = {
-  openingPackageId: "t1_g3",
-  occupancyScenarioId: "intermediario",
+  openingPackageId: "t1_g6",
+  occupancyScenarioId: "base",
   tuitionScenarioId: "bp1_division_differentiated",
   orgDesignOptionId: "balanced_experience",
   capexOptionId: "capex_90m_brl",
@@ -48,7 +48,7 @@ const S2_CANONICAL_100M: CapitalDecisionEngineInput = {
 
 const S3_PESSIMISTA_100M: CapitalDecisionEngineInput = {
   ...S2_CANONICAL_100M,
-  occupancyScenarioId: "pessimista",
+  occupancyScenarioId: "conservador",
 };
 
 const S4_OTIMISTA_100M: CapitalDecisionEngineInput = {
@@ -137,7 +137,7 @@ export function runPhase15DLeverPropagationValidation(): Phase15DLeverPropagatio
     p3.npvBRL! < p2.npvBRL! && p3.compactValue === "20+" && p2.compactValue !== "20+"
       ? pass(
           "lever_occupancy_pessimista_propagates",
-          `S3 (pessimista) npvBRL=${p3.npvBRL} < S2 npvBRL=${p2.npvBRL}; ` +
+          `S3 (conservador) npvBRL=${p3.npvBRL} < S2 npvBRL=${p2.npvBRL}; ` +
             `S3 compactValue="${p3.compactValue}" vs S2 compactValue="${p2.compactValue}".`,
         )
       : fail(

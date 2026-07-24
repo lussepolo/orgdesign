@@ -11,7 +11,7 @@
 //   to 2038–2047 with the same enrollment value.
 // - Each 2037 active-grade record (per package × grade) is carried forward to 2038–2047
 //   with the same activeStatus.
-// - Occupancy scenarios remain DISTINCT: pessimista / intermediario / otimista each
+// - Captação scenarios remain DISTINCT: conservador / base / otimista each
 //   carry forward their own 2037 values independently.
 //
 // These records are NOT Finance-entered annual source records.
@@ -29,10 +29,8 @@ import type {
   EnrollmentByYearAndGradeRecord,
   ActiveGradeByYearRecord,
 } from "./openingPackageOccupancySourceDataContract";
-import {
-  OPENING_PACKAGE_ENROLLMENT_BY_YEAR_AND_GRADE_RECORDS,
-  OPENING_PACKAGE_ACTIVE_GRADE_BY_YEAR_RECORDS,
-} from "./openingPackageOccupancySourceData";
+import { OPENING_PACKAGE_ACTIVE_GRADE_BY_YEAR_RECORDS } from "./openingPackageOccupancySourceData";
+import { GOVERNED_ENROLLMENT_BY_YEAR_AND_GRADE_RECORDS } from "./governedCaptacaoCapacitySourceData";
 
 export const MATURE_STATE_BASELINE_YEAR = 2037 as const;
 export const MATURE_STATE_TARGET_YEARS = [
@@ -51,7 +49,7 @@ const MATURE_STATE_PROVENANCE_NOTE =
 // Carry each forward to 2038–2047 unchanged: the mature-state enrollment structure
 // is stable. Each scenario's values remain independent (occupancy lever preserved).
 
-const baseline2037Enrollment = OPENING_PACKAGE_ENROLLMENT_BY_YEAR_AND_GRADE_RECORDS.filter(
+const baseline2037Enrollment = GOVERNED_ENROLLMENT_BY_YEAR_AND_GRADE_RECORDS.filter(
   (r) => r.year === MATURE_STATE_BASELINE_YEAR,
 );
 
@@ -84,7 +82,7 @@ export const MATURE_STATE_ENROLLMENT_RECORDS: ReadonlyArray<EnrollmentByYearAndG
 // Carry forward to 2038–2047: the full grade structure continues.
 
 const baseline2037ActiveGrades = OPENING_PACKAGE_ACTIVE_GRADE_BY_YEAR_RECORDS.filter(
-  (r) => r.year === MATURE_STATE_BASELINE_YEAR,
+  (r) => (r.packageId === "t1_g4" || r.packageId === "t1_g6") && r.year === MATURE_STATE_BASELINE_YEAR,
 );
 
 const derivedActiveGradeRecords: ActiveGradeByYearRecord[] = [];
@@ -113,12 +111,14 @@ export const MATURE_STATE_ACTIVE_GRADE_RECORDS: ReadonlyArray<ActiveGradeByYearR
 // direct-year source.
 
 export const COMBINED_ENROLLMENT_RECORDS: ReadonlyArray<EnrollmentByYearAndGradeRecord> = [
-  ...OPENING_PACKAGE_ENROLLMENT_BY_YEAR_AND_GRADE_RECORDS,
+  ...GOVERNED_ENROLLMENT_BY_YEAR_AND_GRADE_RECORDS,
   ...MATURE_STATE_ENROLLMENT_RECORDS,
 ];
 
 export const COMBINED_ACTIVE_GRADE_RECORDS: ReadonlyArray<ActiveGradeByYearRecord> = [
-  ...OPENING_PACKAGE_ACTIVE_GRADE_BY_YEAR_RECORDS,
+  ...OPENING_PACKAGE_ACTIVE_GRADE_BY_YEAR_RECORDS.filter(
+    (record) => record.packageId === "t1_g4" || record.packageId === "t1_g6",
+  ),
   ...MATURE_STATE_ACTIVE_GRADE_RECORDS,
 ];
 
@@ -131,7 +131,7 @@ export const MATURE_STATE_CARRY_FORWARD_SUMMARY = {
   enrollmentRecordsDerived: derivedEnrollmentRecords.length,
   activeGradeRecordsDerived: derivedActiveGradeRecords.length,
   combinedEnrollmentRecordCount:
-    OPENING_PACKAGE_ENROLLMENT_BY_YEAR_AND_GRADE_RECORDS.length +
+    GOVERNED_ENROLLMENT_BY_YEAR_AND_GRADE_RECORDS.length +
     derivedEnrollmentRecords.length,
   combinedActiveGradeRecordCount:
     OPENING_PACKAGE_ACTIVE_GRADE_BY_YEAR_RECORDS.length +

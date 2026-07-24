@@ -39,8 +39,8 @@ import { ScenarioComparisonPanel } from "./ScenarioComparisonPanel";
 // input on first load so the view shows a calculated result rather than a
 // blocked empty state.
 const DEFAULT_INPUT: CapitalDecisionEngineInput = {
-  openingPackageId: "t1_g3",
-  occupancyScenarioId: "intermediario",
+  openingPackageId: "t1_g6",
+  occupancyScenarioId: "base",
   tuitionScenarioId: "bp1_division_differentiated",
   orgDesignOptionId: "balanced_experience",
   capexOptionId: "capex_100m_brl",

@@ -26,8 +26,8 @@ const LEVER_EXPLANATIONS = [
     effect: "Changes grade-span scope and operational scale. A wider opening package expands enrollment capacity but activates fixed cost commitments earlier in the ramp.",
   },
   {
-    axis: "Occupancy Scenario",
-    effect: "Changes enrollment realization risk. Pessimista and Otimista bound the revenue sensitivity range; Intermediário serves as the planning reference.",
+    axis: "Captação Scenario",
+    effect: "Changes governed enrollment-projection risk. Conservador and Otimista bound the active revenue sensitivity range; Base serves as the planning reference.",
   },
   {
     axis: "Tuition Scenario",
@@ -54,7 +54,7 @@ const TRADE_OFF_LENSES = [
   {
     lens: "Revenue sensitivity",
     description:
-      "Occupancy scenario governs how much of licensed capacity converts to enrolled learners. The spread between Pessimista and Otimista bounds the revenue planning range.",
+      "Captação scenario governs the enrollment projection consumed by Receita and DRE. The spread between Conservador and Otimista bounds the current active revenue planning range.",
   },
   {
     lens: "Operating-model complexity",
@@ -82,9 +82,9 @@ const DECISION_QUESTIONS = [
       "Which opening package best matches the acceptable ramp-up risk and capital activation timeline?",
   },
   {
-    lens: "Occupancy",
+    lens: "Captação",
     question:
-      "Which occupancy scenario should be treated as the planning reference for enrollment commitments?",
+      "Which captação scenario should be treated as the planning reference for enrollment commitments?",
   },
   {
     lens: "Tuition architecture",

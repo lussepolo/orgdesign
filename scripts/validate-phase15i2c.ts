@@ -19,7 +19,7 @@ import { readFileSync } from "fs";
 
 const CANONICAL = {
   openingPackageId: "t1_g3" as const,
-  occupancyScenarioId: "intermediario" as const,
+  occupancyScenarioId: "base" as const,
   tuitionScenarioId: "bp1_division_differentiated" as const,
   orgDesignOptionId: "balanced_experience",
 };

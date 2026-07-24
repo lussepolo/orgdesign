@@ -76,7 +76,7 @@ import type { FopagEngineOutput } from "../src/features/rio-scenario-resilience/
 // ── Fixture selections ────────────────────────────────────────────────────────
 const FIXTURE_SELECTIONS: DreScenarioSimulatorSelections = {
   openingPackageId: "t1_g4",
-  occupancyScenarioId: "intermediario",
+  occupancyScenarioId: "base",
   tuitionScenarioId: "bp3_ey_to_ms_unified",
   orgDesignOptionId: "balanced_experience",
 };

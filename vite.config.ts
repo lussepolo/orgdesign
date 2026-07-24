@@ -11,9 +11,20 @@ export default defineConfig(({mode}) => {
       'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
     },
     resolve: {
-      alias: {
-        '@': path.resolve(__dirname, '.'),
-      },
+      alias: [
+        {
+          find: /^lucide-react$/,
+          replacement: path.resolve(__dirname, 'src/lib/lucide-react-build-shim.ts'),
+        },
+        {
+          find: /^recharts$/,
+          replacement: path.resolve(__dirname, 'src/lib/recharts-build-shim.ts'),
+        },
+        {
+          find: '@',
+          replacement: path.resolve(__dirname, '.'),
+        },
+      ],
     },
     server: {
       port: 3001,

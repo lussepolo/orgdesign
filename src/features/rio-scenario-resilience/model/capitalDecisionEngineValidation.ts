@@ -24,7 +24,7 @@
 //
 // Phase 15B.2 scenario-mismatch note (see capitalDecisionEngine.ts header):
 // calculateDre()'s 2028-2047 ebitda/receita_operacional_liquida for the
-// canonical validation scenario (t1_g3 / intermediario /
+// canonical validation scenario (t1_g6 / base /
 // bp1_division_differentiated / balanced_experience) do not numerically
 // reproduce the workbook's PnL!236/273 cached values, because the scenario's
 // 2028 numero_de_alunos (228) differs from the workbook baseline's PnL!221
@@ -67,8 +67,8 @@ import type {
 } from "./capitalDecisionEngineValidationContract";
 
 const VALIDATION_INPUT_BASE = {
-  openingPackageId: "t1_g3" as const,
-  occupancyScenarioId: "intermediario" as const,
+  openingPackageId: "t1_g6" as const,
+  occupancyScenarioId: "base" as const,
   tuitionScenarioId: "bp1_division_differentiated" as const,
   orgDesignOptionId: "balanced_experience",
 };

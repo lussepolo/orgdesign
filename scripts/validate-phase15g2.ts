@@ -26,7 +26,7 @@ const stub: BuildResultFn = (_input) => ({} as InvestmentInterpretationResult);
 
 const SEL_A: DreScenarioSimulatorSelections = {
   openingPackageId: "t1_g3",
-  occupancyScenarioId: "intermediario",
+  occupancyScenarioId: "base",
   tuitionScenarioId: "bp1_division_differentiated",
   orgDesignOptionId: "balanced_experience",
 };
@@ -112,7 +112,7 @@ expect("17. duplicate at capacity returns already_present not limit_reached",
   rDupAtFull.result.status, "already_present");
 // Import a truly new selection when full — should get limit_reached
 const rNewAtFull = transitionImportFromDre(state, {
-  ...SEL_B, openingPackageId: "t1_g3", occupancyScenarioId: "pessimista",
+  ...SEL_B, openingPackageId: "t1_g6", occupancyScenarioId: "conservador",
   tuitionScenarioId: "bp2_ey_ls_unified", orgDesignOptionId: "premium_experience",
 }, stub);
 expect("18. new import at capacity returns limit_reached", rNewAtFull.result.status, "limit_reached");
@@ -150,7 +150,7 @@ const mon1 = transitionImportFromDre(INITIAL_WORKSPACE_STATE, SEL_A, stub).nextS
 const mon2 = transitionImportFromDre(mon1, SEL_B, stub).nextState;
 // Remove first, then import a new one — ordinal must not reset
 const mon3 = transitionRemoveScenario(mon2, mon2.scenarios[0].id);
-const mon4 = transitionImportFromDre(mon3, { ...SEL_A, occupancyScenarioId: "pessimista" }, stub).nextState;
+const mon4 = transitionImportFromDre(mon3, { ...SEL_A, occupancyScenarioId: "conservador" }, stub).nextState;
 // nextScenarioOrdinal was 3 before the new import (two prior imports); scenario name must be "Scenario 3".
 expectTrue("25. monotonic ordinal — name reflects pre-remove count",
   mon4.scenarios[mon4.scenarios.length - 1].name === "Scenario 3");

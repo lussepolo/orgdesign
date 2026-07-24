@@ -33,7 +33,7 @@
 //    24.  Payroll comparison includes all three org design versions (columns present)
 //    25.  Only orgDesignOptionId varies across the three model runs
 //    26.  openingPackageId remains constant (t1_g4)
-//    27.  occupancyScenarioId remains constant (intermediario)
+//    27.  occupancyScenarioId remains constant (base)
 //    28.  tuitionScenarioId remains constant (bp3_ey_to_ms_unified)
 //
 //   Section E — Numeric integrity (checks 29–34)
@@ -85,7 +85,7 @@ import type { DreWorkingScenarioOrgDesignOptionId } from "../src/features/rio-sc
 // ── Fixture selections ────────────────────────────────────────────────────────
 const FIXTURE_SELECTIONS: DreScenarioSimulatorSelections = {
   openingPackageId: "t1_g4",
-  occupancyScenarioId: "intermediario",
+  occupancyScenarioId: "base",
   tuitionScenarioId: "bp3_ey_to_ms_unified",
   orgDesignOptionId: "balanced_experience",
 };
@@ -266,7 +266,7 @@ for (const _year of RECEITA_PROJECTION_YEARS) {
 }
 checkTrue("25. Only orgDesignOptionId varies (receita_operacional_liquida identical across all three variants)", _revenueIdentical);
 checkEqual("26. openingPackageId = t1_g4", threeVersionPayroll.minimum.fopagOutput.openingPackageId, "t1_g4");
-checkEqual("27. occupancyScenarioId = intermediario", threeVersionPayroll.balanced.fopagOutput.occupancyScenarioId, "intermediario");
+checkEqual("27. occupancyScenarioId = base", threeVersionPayroll.balanced.fopagOutput.occupancyScenarioId, "base");
 // tuitionScenarioId constant: numero_de_alunos (enrollment) must be identical across all three DRE outputs
 // (enrollment is tuition × occupancy × opening driven; org design does not affect it)
 let _enrollmentIdentical = true;

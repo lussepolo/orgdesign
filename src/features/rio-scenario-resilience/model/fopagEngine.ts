@@ -2,6 +2,11 @@ import { buildPayrollAdapterInput } from "./payrollAdapter";
 import { resolveGrowthFactor, roundCurrency } from "../../../lib/payroll/core";
 import { ANNUAL_ADJUSTMENT } from "../../../constants";
 import { SIMULATOR_PROJECTION_YEARS } from "./simulatorProjectionHorizonContract";
+import { assertSupportedDreEnrollmentCapacityLeverInput } from "./dreEnrollmentCapacityLeverContract";
+import {
+  assertOccupancyScenarioId,
+  type OpeningPackageId,
+} from "./openingPackageOccupancySourceDataContract";
 import type {
   FopagByRoleSourceTypeEntry,
   FopagCalculatedRecord,
@@ -32,12 +37,17 @@ const BLOCKING_ADAPTER_DIAGNOSTIC_TYPES = new Set<PayrollAdapterDiagnosticType>(
 
 export function calculateFopag(input: FopagEngineInput): FopagEngineOutput {
   const { openingPackageId, occupancyScenarioId, orgDesignOptionId } = input;
+  const canonicalOccupancyScenarioId = assertOccupancyScenarioId(occupancyScenarioId);
+  assertSupportedDreEnrollmentCapacityLeverInput({
+    openingPackageId: openingPackageId as OpeningPackageId,
+    occupancyScenarioId: canonicalOccupancyScenarioId,
+  });
 
   // ── Step 1: Get adapter output ──────────────────────────────────────────────
   // Do not bypass the adapter. All staffing records come from buildPayrollAdapterInput().
   const adapterOutput = buildPayrollAdapterInput({
     openingPackageId,
-    occupancyScenarioId,
+    occupancyScenarioId: canonicalOccupancyScenarioId,
     orgDesignOptionId,
   });
 
@@ -172,7 +182,7 @@ export function calculateFopag(input: FopagEngineInput): FopagEngineOutput {
 
     calculatedRecords.push({
       openingPackageId,
-      occupancyScenarioId,
+      occupancyScenarioId: canonicalOccupancyScenarioId,
       orgDesignOptionId,
       year: rec.year,
       roleId: rec.roleId,
@@ -274,7 +284,7 @@ export function calculateFopag(input: FopagEngineInput): FopagEngineOutput {
 
   return {
     openingPackageId,
-    occupancyScenarioId,
+    occupancyScenarioId: canonicalOccupancyScenarioId,
     orgDesignOptionId,
     engineStatus,
     calculationReady,

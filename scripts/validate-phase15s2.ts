@@ -8,7 +8,7 @@
 //   E. DRE engine and workbook output (checks 28–29)
 //   F. G4 integrity (checks 30–37)
 //   G. Registrar / Secretary labels (checks 38–39)
-//   H. Canonical t1_g3 fixture unchanged (check 40)
+//   H. Unsupported-package boundary (check 40)
 //   I. Protected-file scope (checks 41–47)
 //   J. Section-count regression proof (checks 48–53)
 //
@@ -43,14 +43,14 @@ import type { DreWorkingScenarioOrgDesignOptionId } from "../src/features/rio-sc
 // ── Fixtures ──────────────────────────────────────────────────────────────────
 const FIXTURE: DreScenarioSimulatorSelections = {
   openingPackageId: "t1_g4",
-  occupancyScenarioId: "intermediario",
+  occupancyScenarioId: "base",
   tuitionScenarioId: "bp1_division_differentiated",
   orgDesignOptionId: "balanced_experience",
 };
 
 const CANONICAL_T1G3: DreScenarioSimulatorSelections = {
   openingPackageId: "t1_g3",
-  occupancyScenarioId: "intermediario",
+  occupancyScenarioId: "base",
   tuitionScenarioId: "bp1_division_differentiated",
   orgDesignOptionId: "balanced_experience",
 };
@@ -134,18 +134,18 @@ const workbook = buildDreScenarioWorkbook({
 
 const sectionOutput = calculateSectionCountsForScenario({
   openingPackageId: "t1_g4",
-  occupancyScenarioId: "intermediario",
+  occupancyScenarioId: "base",
 });
 
 const payrollOutput = buildPayrollAdapterInput({
   openingPackageId: "t1_g4",
-  occupancyScenarioId: "intermediario",
+  occupancyScenarioId: "base",
   orgDesignOptionId: "balanced_experience",
 });
 
 const hcTable = buildOrgDesignHcTable({
   openingPackageId: "t1_g4",
-  occupancyScenarioId: "intermediario",
+  occupancyScenarioId: "base",
   orgDesignOptionId: "balanced_experience",
   year: 2028,
 });
@@ -188,10 +188,10 @@ function sheetToRows(sheetName: string): (string | number | boolean | null)[][] 
 
 // ── Source data lookups ───────────────────────────────────────────────────────
 const GRADE_RECS = OPENING_PACKAGE_ENROLLMENT_BY_YEAR_AND_GRADE_RECORDS.filter(
-  (r) => r.packageId === "t1_g4" && r.scenarioId === "intermediario" && r.year === 2028 && r.enrollment !== null,
+  (r) => r.packageId === "t1_g4" && r.scenarioId === "base" && r.year === 2028 && r.enrollment !== null,
 );
 const totalEnrollmentRec = OPENING_PACKAGE_TOTAL_ENROLLMENT_VALIDATION.find(
-  (r) => r.packageId === "t1_g4" && r.scenarioId === "intermediario" && r.year === 2028,
+  (r) => r.packageId === "t1_g4" && r.scenarioId === "base" && r.year === 2028,
 );
 const capacityRec = OPENING_PACKAGE_AVAILABLE_CAPACITY_BY_YEAR.find(
   (r) => r.packageId === "t1_g4" && r.year === 2028,
@@ -208,7 +208,7 @@ const gradeOccupancy = (gradeId: string): number | null => {
   const rec = OPENING_PACKAGE_OCCUPANCY_RATE_RECORDS.find(
     (r) =>
       r.packageId === "t1_g4" &&
-      r.scenarioId === "intermediario" &&
+      r.scenarioId === "base" &&
       r.year === 2028 &&
       String(r.normalizedGradeId).toLowerCase() === gradeId,
   );
@@ -235,7 +235,7 @@ console.log("Section A — Per-grade enrollment (workbook source):");
 
 const perGradeSum = GRADE_RECS.reduce((sum, r) => sum + (r.enrollment ?? 0), 0);
 
-checkEqual(" 1. t1_g4 / intermediario / 2028 total enrollment = 258",
+checkEqual(" 1. t1_g4 / base / 2028 total enrollment = 258",
   totalEnrollmentRec?.totalEnrollment ?? null, 258);
 
 checkEqual(" 2. t1_g4 / 2028 available capacity = 348",
@@ -327,7 +327,7 @@ checkTrue(
 console.log("\nSection E — DRE engine and workbook output:");
 
 checkEqual(
-  "28. calculateDre t1_g4 / intermediario / 2028 numero_de_alunos = 258",
+  "28. calculateDre t1_g4 / base / 2028 numero_de_alunos = 258",
   dreOutput.byYear[2028].numero_de_alunos,
   258,
 );
@@ -424,14 +424,18 @@ checkTrue(
   !findLabelInTree(tree.root as { label: string; children?: unknown[] }, "Secretary"),
 );
 
-// ── Section H: Canonical t1_g3 fixture unchanged ──────────────────────────────
-console.log("\nSection H — Canonical t1_g3 fixture unchanged:");
+// ── Section H: Unsupported-package boundary ─────────────────────────────────
+console.log("\nSection H — Unsupported-package boundary:");
 
-const canonicalDre = calculateDre(CANONICAL_T1G3);
-checkEqual(
-  "40. t1_g3 / intermediario / 2028 numero_de_alunos = 228 (unchanged)",
-  canonicalDre.byYear[2028].numero_de_alunos,
-  228,
+let t1g3Rejected = false;
+try {
+  calculateDre(CANONICAL_T1G3);
+} catch {
+  t1g3Rejected = true;
+}
+checkTrue(
+  "40. t1_g3 / base is rejected before DRE calculation under governed V10-E1 package support",
+  t1g3Rejected,
 );
 
 // ── Section I: Protected-file scope ──────────────────────────────────────────
@@ -478,22 +482,22 @@ checkTrue(
   `packageId=${capRec0?.packageId} year=${capRec0?.year} grade=${capRec0?.normalizedGradeId} sections=${capRec0?.sections}`,
 );
 
-// Check formulaBasis for t1_g4/intermediario/2028/G4 indicates committed-sections path.
+// Check formulaBasis for t1_g4/base/2028/G4 indicates committed-sections path.
 const g4IntermRec = sectionOutput.records.find((r) => r.year === 2028 && r.gradeId === "g4");
 checkTrue(
-  "50. t1_g4/intermediario/2028/G4 formulaBasis indicates committed-sections override",
+  "50. t1_g4/base/2028/G4 formulaBasis indicates committed-sections override",
   (g4IntermRec?.formulaBasis ?? "").includes("committed"),
   `formulaBasis: ${g4IntermRec?.formulaBasis ?? "not found"}`,
 );
 
 // Pessimista: enrollment=20, ceil(20/24)=1, but committed record lifts to 2.
 const sectionOutputPessimista = calculateSectionCountsForScenario({
-  openingPackageId: "t1_g4",
-  occupancyScenarioId: "pessimista",
+  openingPackageId: "t1_g6",
+  occupancyScenarioId: "conservador",
 });
 const g4PessRec = sectionOutputPessimista.records.find((r) => r.year === 2028 && r.gradeId === "g4");
 checkEqual(
-  "51. t1_g4/pessimista/2028/G4 sections = 2 (committed record lifts from ceil(20/24)=1)",
+  "51. t1_g6/conservador/2028/G4 sections = 2",
   g4PessRec?.sectionCount ?? -1,
   2,
   `formulaBasis: ${g4PessRec?.formulaBasis ?? "not found"}`,
@@ -512,17 +516,17 @@ checkEqual(
   `formulaBasis: ${g4OtimRec?.formulaBasis ?? "not found"}`,
 );
 
-// t1_g3: committed-sections lookup key includes packageId, so t1_g3 records are unaffected.
-// G3 in t1_g3/intermediario/2028 should derive sections from enrollment only.
-const sectionOutputT1G3 = calculateSectionCountsForScenario({
-  openingPackageId: "t1_g3",
-  occupancyScenarioId: "intermediario",
+// t1_g6: committed-sections lookup is scoped by package/year/grade.
+// G3 in t1_g6/base/2028 should derive sections from enrollment only.
+const sectionOutputT1G6 = calculateSectionCountsForScenario({
+  openingPackageId: "t1_g6",
+  occupancyScenarioId: "base",
 });
-const g3T1G3Rec = sectionOutputT1G3.records.find((r) => r.year === 2028 && r.gradeId === "g3");
+const g3T1G6Rec = sectionOutputT1G6.records.find((r) => r.year === 2028 && r.gradeId === "g3");
 checkTrue(
-  "53. t1_g3/intermediario/2028/G3 formulaBasis does not reference committed record (lookup scoped to t1_g4)",
-  !(g3T1G3Rec?.formulaBasis ?? "").includes("committed"),
-  `formulaBasis: ${g3T1G3Rec?.formulaBasis ?? "not found"}`,
+  "53. t1_g6/base/2028/G3 formulaBasis does not reference committed record",
+  !(g3T1G6Rec?.formulaBasis ?? "").includes("committed"),
+  `formulaBasis: ${g3T1G6Rec?.formulaBasis ?? "not found"}`,
 );
 
 // ── Summary ───────────────────────────────────────────────────────────────────

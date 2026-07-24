@@ -37,6 +37,7 @@ import { useMemo } from "react";
 import { calculateDre } from "../features/rio-scenario-resilience/model/dreEngine";
 import { calculateFopag } from "../features/rio-scenario-resilience/model/fopagEngine";
 import {
+  DRE_ENROLLMENT_LEVER_ACTIVE_OPENING_PACKAGE_IDS,
   DRE_ENROLLMENT_LEVER_OPENING_PACKAGE_IDS,
   DRE_ENROLLMENT_LEVER_OCCUPANCY_SCENARIO_IDS,
 } from "../features/rio-scenario-resilience/model/dreEnrollmentCapacityLeverContract";
@@ -140,6 +141,7 @@ const DEFAULT_SELECTIONS: DreScenarioSimulatorSelections = {
 export const DRE_DEFAULT_SELECTIONS: DreScenarioSimulatorSelections = DEFAULT_SELECTIONS;
 
 export {
+  DRE_ENROLLMENT_LEVER_ACTIVE_OPENING_PACKAGE_IDS,
   DRE_ENROLLMENT_LEVER_OPENING_PACKAGE_IDS,
   DRE_ENROLLMENT_LEVER_OCCUPANCY_SCENARIO_IDS,
   DRE_WORKING_SCENARIO_TUITION_SCENARIO_IDS,

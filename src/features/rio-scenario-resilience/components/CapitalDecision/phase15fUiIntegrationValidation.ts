@@ -40,8 +40,8 @@ function fail(checkId: Phase15FUiValidationCheckId, note: string): Phase15FUiVal
 
 // Same default scenario configuration used by CapitalDecisionView.
 const DEFAULT_INPUT: CapitalDecisionEngineInput = {
-  openingPackageId: "t1_g3",
-  occupancyScenarioId: "intermediario",
+  openingPackageId: "t1_g6",
+  occupancyScenarioId: "base",
   tuitionScenarioId: "bp1_division_differentiated",
   orgDesignOptionId: "balanced_experience",
   capexOptionId: "capex_100m_brl",
@@ -51,7 +51,7 @@ const DEFAULT_INPUT: CapitalDecisionEngineInput = {
 // formatting checks exercise a realistic spread of investment-reference
 // outcomes alongside the default scenario.
 const S1_CANONICAL_90M: CapitalDecisionEngineInput = { ...DEFAULT_INPUT, capexOptionId: "capex_90m_brl" };
-const S3_PESSIMISTA: CapitalDecisionEngineInput = { ...DEFAULT_INPUT, occupancyScenarioId: "pessimista" };
+const S3_PESSIMISTA: CapitalDecisionEngineInput = { ...DEFAULT_INPUT, occupancyScenarioId: "conservador" };
 const S4_OTIMISTA: CapitalDecisionEngineInput = { ...DEFAULT_INPUT, occupancyScenarioId: "otimista" };
 const S5_T1G6: CapitalDecisionEngineInput = { ...DEFAULT_INPUT, openingPackageId: "t1_g6" };
 const S6_BP2: CapitalDecisionEngineInput = { ...DEFAULT_INPUT, tuitionScenarioId: "bp2_ey_ls_unified" };
@@ -59,7 +59,7 @@ const S7_PREMIUM: CapitalDecisionEngineInput = { ...DEFAULT_INPUT, orgDesignOpti
 const S8_MINIMUM: CapitalDecisionEngineInput = { ...DEFAULT_INPUT, orgDesignOptionId: "minimum_experience" };
 
 const SAMPLE_INPUTS: readonly { id: string; input: CapitalDecisionEngineInput }[] = [
-  { id: "default_t1g3_intermediario_bp1_balanced_100m", input: DEFAULT_INPUT },
+  { id: "default_t1g6_base_bp1_balanced_100m", input: DEFAULT_INPUT },
   { id: "S1_canonical_90m", input: S1_CANONICAL_90M },
   { id: "S3_pessimista", input: S3_PESSIMISTA },
   { id: "S4_otimista", input: S4_OTIMISTA },
@@ -103,12 +103,12 @@ export function runPhase15FUiIntegrationValidation(): Phase15FUiValidationReport
     const labels = new Map(occupancyOptions.map((o) => [o.id, o.label]));
     const idsOk =
       ids.length === 3 &&
-      ids.includes("pessimista") &&
-      ids.includes("intermediario") &&
+      ids.includes("conservador") &&
+      ids.includes("base") &&
       ids.includes("otimista");
     const labelsOk =
-      labels.get("pessimista") === "Pessimista" &&
-      labels.get("intermediario") === "Intermediário" &&
+      labels.get("conservador") === "Conservador" &&
+      labels.get("base") === "Base" &&
       labels.get("otimista") === "Otimista";
     checks.push(
       idsOk && labelsOk

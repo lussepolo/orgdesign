@@ -30,6 +30,7 @@ import { TUITION_SOURCE_RECORDS } from "./tuitionSourceData";
 import { ENROLLMENT_TUITION_GRADE_MAPPING } from "./enrollmentTuitionGradeMapping";
 import { DISCOUNT_SCHEDULE_SOURCE } from "./discountScheduleSourceData";
 import { GRADE_DIVISION_MAP } from "./revenueInputs";
+import { assertSupportedDreEnrollmentCapacityLeverInput } from "./dreEnrollmentCapacityLeverContract";
 
 // Inverse of TUITION_SCENARIO_ID_MAPPING.
 // Calculation-layer TuitionScenarioId → source TuitionSourceScenarioId.
@@ -148,12 +149,13 @@ function addAggregate(
 // 2038–2047: mature-state carry-forward from 2037 (each scenario independently).
 // Grades with null enrollment (inactive) are skipped — no zero-enrollment records produced.
 //
-// Verification reference: {t1_g3, intermediario, bp1_division_differentiated}, t1, 2028
+// Verification reference: {t1_g3, base, bp1_division_differentiated}, t1, 2028
 //   blend = 0.5×91390.04 + 0.5×53463.28 = 72426.66 BRL
 //   gross = 16 × 72426.66 × 1 = 1,158,826.56 BRL
 //   net   = 1,158,826.56 × (1 - 0.20) = 927,061.248 BRL
 export function calculateReceita(key: ReceitaEngineScenarioKey): ReceitaEngineOutput {
   const { openingPackageId, occupancyScenarioId, tuitionScenarioId } = key;
+  assertSupportedDreEnrollmentCapacityLeverInput({ openingPackageId, occupancyScenarioId });
   const sourceScenarioId = CALC_TO_SOURCE_SCENARIO[tuitionScenarioId];
 
   const grainRecords: ReceitaGrainRecord[] = [];

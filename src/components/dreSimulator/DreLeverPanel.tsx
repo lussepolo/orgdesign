@@ -1,13 +1,19 @@
 import { Sliders } from "lucide-react";
 import { Card } from "../common/Card";
 import {
-  DRE_ENROLLMENT_LEVER_OPENING_PACKAGE_IDS,
+  DRE_ENROLLMENT_LEVER_ACTIVE_OPENING_PACKAGE_IDS,
   DRE_ENROLLMENT_LEVER_OCCUPANCY_SCENARIO_IDS,
   DRE_WORKING_SCENARIO_TUITION_SCENARIO_IDS,
   DRE_WORKING_SCENARIO_ORG_DESIGN_OPTION_IDS,
   type DreScenarioSimulatorSelections,
 } from "../../hooks/useDreScenarioSimulator";
 import { OCCUPANCY_LABELS, TUITION_LABELS, ORG_DESIGN_OPTION_LABELS, formatOpeningPackageLabel } from "./dreLeverLabels";
+import { DRE_ENROLLMENT_LEVER_SUPPORTED_SCENARIOS_BY_PACKAGE } from "../../features/rio-scenario-resilience/model/dreEnrollmentCapacityLeverContract";
+import {
+  GOVERNED_AVAILABLE_CAPACITY_BY_YEAR,
+  getGovernedAvailableCapacity,
+  hasGovernedCapacity,
+} from "../../features/rio-scenario-resilience/model/governedCaptacaoCapacitySourceData";
 
 interface DreLeverPanelProps {
   selections: DreScenarioSimulatorSelections;
@@ -18,7 +24,26 @@ const FIELD_LABEL_CLASS = "mb-1 text-[11px] font-semibold uppercase tracking-[0.
 const SELECT_CLASS =
   "w-full rounded-xl border border-cockpit-border bg-cockpit-panel px-3 py-2 text-sm font-medium text-cockpit-ink outline-none transition focus:border-cockpit-teal-muted";
 
+function packageOptionLabel(id: DreScenarioSimulatorSelections["openingPackageId"]): string {
+  const supportedScenarios = DRE_ENROLLMENT_LEVER_SUPPORTED_SCENARIOS_BY_PACKAGE[id];
+  if (supportedScenarios.length > 0) return `${formatOpeningPackageLabel(id)} (${id})`;
+  if (hasGovernedCapacity(id)) return `${formatOpeningPackageLabel(id)} (${id}) - capacity only`;
+  return `${formatOpeningPackageLabel(id)} (${id}) - unavailable`;
+}
+
 export default function DreLeverPanel({ selections, onChange }: DreLeverPanelProps) {
+  const activePackageSelected = (DRE_ENROLLMENT_LEVER_ACTIVE_OPENING_PACKAGE_IDS as readonly string[]).includes(
+    selections.openingPackageId,
+  );
+  const currentPackageSupported =
+    DRE_ENROLLMENT_LEVER_SUPPORTED_SCENARIOS_BY_PACKAGE[selections.openingPackageId].includes(
+      selections.occupancyScenarioId,
+    );
+  const t1g4Capacity = getGovernedAvailableCapacity("t1_g4", 2028);
+  const t1g6Capacity = GOVERNED_AVAILABLE_CAPACITY_BY_YEAR
+    .filter((record) => record.packageId === "t1_g6")
+    .map((record) => record.availableCapacity);
+
   return (
     <Card
       title="Scenario levers"
@@ -32,22 +57,32 @@ export default function DreLeverPanel({ selections, onChange }: DreLeverPanelPro
         <label className="block">
           <div className={FIELD_LABEL_CLASS}>Opening Package</div>
           <select
-            value={selections.openingPackageId}
+            value={activePackageSelected ? selections.openingPackageId : ""}
             onChange={(event) =>
               onChange({ openingPackageId: event.target.value as DreScenarioSimulatorSelections["openingPackageId"] })
             }
             className={SELECT_CLASS}
           >
-            {DRE_ENROLLMENT_LEVER_OPENING_PACKAGE_IDS.map((id) => (
+            {!activePackageSelected && (
+              <option value="" disabled>
+                Retired package - select T1-G4 or T1-G6
+              </option>
+            )}
+            {DRE_ENROLLMENT_LEVER_ACTIVE_OPENING_PACKAGE_IDS.map((id) => (
               <option key={id} value={id}>
-                {formatOpeningPackageLabel(id)} ({id})
+                {packageOptionLabel(id)}
               </option>
             ))}
           </select>
+          {!currentPackageSupported && (
+            <p className="mt-2 text-xs font-semibold text-amber-700">
+              Retired opening packages require selecting T1-G4 or T1-G6 before enrollment-dependent outputs are calculated.
+            </p>
+          )}
         </label>
 
         <label className="block">
-          <div className={FIELD_LABEL_CLASS}>Occupancy Scenario</div>
+          <div className={FIELD_LABEL_CLASS}>Captação Scenario</div>
           <select
             value={selections.occupancyScenarioId}
             onChange={(event) =>
@@ -102,6 +137,16 @@ export default function DreLeverPanel({ selections, onChange }: DreLeverPanelPro
             ))}
           </select>
         </label>
+      </div>
+      <div className="mt-4 grid grid-cols-1 gap-2 text-xs text-cockpit-meta sm:grid-cols-2">
+        <p>
+          T1-G4 is governed by its own captação workbook: {t1g4Capacity} capacity in 2028, with
+          Conservador, Base, and Otimista enrollment scenarios.
+        </p>
+        <p>
+          T1-G6 governed capacity progresses from {t1g6Capacity[0]} to {t1g6Capacity[t1g6Capacity.length - 1]};
+          occupancy is derived from package-specific enrollment divided by same-year capacity.
+        </p>
       </div>
     </Card>
   );

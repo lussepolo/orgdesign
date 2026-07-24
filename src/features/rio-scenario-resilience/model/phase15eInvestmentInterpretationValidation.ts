@@ -139,8 +139,8 @@ function buildPhase15CResult(overrides: {
 }
 
 const SYNTHETIC_SCENARIO_INPUT: CapitalDecisionEngineInput = {
-  openingPackageId: "t1_g3",
-  occupancyScenarioId: "intermediario",
+  openingPackageId: "t1_g6",
+  occupancyScenarioId: "base",
   tuitionScenarioId: "bp1_division_differentiated",
   orgDesignOptionId: "balanced_experience",
   capexOptionId: "capex_100m_brl",
@@ -163,14 +163,14 @@ function interpret(phase15CResult: Phase15CResult, scenarioInput: CapitalDecisio
 // ── S1-S8: Phase 15D.2 production scenario matrix (reused) ──────────────────
 
 const S1_CANONICAL_90M: CapitalDecisionEngineInput = {
-  openingPackageId: "t1_g3",
-  occupancyScenarioId: "intermediario",
+  openingPackageId: "t1_g6",
+  occupancyScenarioId: "base",
   tuitionScenarioId: "bp1_division_differentiated",
   orgDesignOptionId: "balanced_experience",
   capexOptionId: "capex_90m_brl",
 };
 const S2_CANONICAL_100M: CapitalDecisionEngineInput = { ...S1_CANONICAL_90M, capexOptionId: "capex_100m_brl" };
-const S3_PESSIMISTA_100M: CapitalDecisionEngineInput = { ...S2_CANONICAL_100M, occupancyScenarioId: "pessimista" };
+const S3_PESSIMISTA_100M: CapitalDecisionEngineInput = { ...S2_CANONICAL_100M, occupancyScenarioId: "conservador" };
 const S4_OTIMISTA_100M: CapitalDecisionEngineInput = { ...S2_CANONICAL_100M, occupancyScenarioId: "otimista" };
 const S5_T1G6_100M: CapitalDecisionEngineInput = { ...S2_CANONICAL_100M, openingPackageId: "t1_g6" };
 const S6_BP2_100M: CapitalDecisionEngineInput = { ...S2_CANONICAL_100M, tuitionScenarioId: "bp2_ey_ls_unified" };

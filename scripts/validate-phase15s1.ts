@@ -1,6 +1,6 @@
 // Phase 15S.1 — Legacy Supersession Validator (39 checks).
 //
-// Phase 15S.1 set a conservative interim per-grade allocation for t1_g4 / intermediario / 2028
+// Phase 15S.1 set a conservative interim per-grade allocation for t1_g4 / base / 2028
 // (enrollment split 20/20/30/30/35/34/29/30/30, capacity 358, occupancy 72.1%).
 // Phase 15S.2 superseded those interim values with Finance workbook source values
 // (16/16/28/32/36/40/36/32/22, capacity 348, occupancy 74.1%).
@@ -46,14 +46,14 @@ import type { FopagEngineOutput } from "../src/features/rio-scenario-resilience/
 // ── Fixture ───────────────────────────────────────────────────────────────────
 const FIXTURE: DreScenarioSimulatorSelections = {
   openingPackageId: "t1_g4",
-  occupancyScenarioId: "intermediario",
+  occupancyScenarioId: "base",
   tuitionScenarioId: "bp1_division_differentiated",
   orgDesignOptionId: "balanced_experience",
 };
 
 const CANONICAL_T1G3: DreScenarioSimulatorSelections = {
   openingPackageId: "t1_g3",
-  occupancyScenarioId: "intermediario",
+  occupancyScenarioId: "base",
   tuitionScenarioId: "bp1_division_differentiated",
   orgDesignOptionId: "balanced_experience",
 };
@@ -137,11 +137,11 @@ const workbook = buildDreScenarioWorkbook({
 
 const sectionOutput = calculateSectionCountsForScenario({
   openingPackageId: "t1_g4",
-  occupancyScenarioId: "intermediario",
+  occupancyScenarioId: "base",
 });
 const payrollOutput = buildPayrollAdapterInput({
   openingPackageId: "t1_g4",
-  occupancyScenarioId: "intermediario",
+  occupancyScenarioId: "base",
   orgDesignOptionId: "balanced_experience",
 });
 
@@ -180,10 +180,10 @@ function sheetToRows(sheetName: string): (string | number | boolean | null)[][] 
 
 // ── Source data lookups ───────────────────────────────────────────────────────
 const GRADE_RECS_T1G4_INTERMEDIARIO_2028 = OPENING_PACKAGE_ENROLLMENT_BY_YEAR_AND_GRADE_RECORDS.filter(
-  (r) => r.packageId === "t1_g4" && r.scenarioId === "intermediario" && r.year === 2028 && r.enrollment !== null,
+  (r) => r.packageId === "t1_g4" && r.scenarioId === "base" && r.year === 2028 && r.enrollment !== null,
 );
 const totalEnrollmentRec = OPENING_PACKAGE_TOTAL_ENROLLMENT_VALIDATION.find(
-  (r) => r.packageId === "t1_g4" && r.scenarioId === "intermediario" && r.year === 2028,
+  (r) => r.packageId === "t1_g4" && r.scenarioId === "base" && r.year === 2028,
 );
 const capacityRec = OPENING_PACKAGE_AVAILABLE_CAPACITY_BY_YEAR.find(
   (r) => r.packageId === "t1_g4" && r.year === 2028,
@@ -218,7 +218,7 @@ console.log("\n=== Phase 15S.1 Legacy Supersession Validation (39 checks) ===\n"
 console.log("Section A — Per-grade enrollment (Phase 15S.2 workbook values supersede Phase 15S.1 interim):");
 
 checkEqual(
-  " 1. t1_g4 / intermediario / 2028 total enrollment record = 258",
+  " 1. t1_g4 / base / 2028 total enrollment record = 258",
   totalEnrollmentRec?.totalEnrollment ?? null,
   258,
 );
@@ -358,7 +358,7 @@ console.log("\nSection E — DRE engine and workbook output:");
 
 const dreNumeroDeAlunos2028 = dreOutput.byYear[2028].numero_de_alunos;
 checkEqual(
-  "26. calculateDre t1_g4 / intermediario / bp1 / balanced: numero_de_alunos 2028 = 258",
+  "26. calculateDre t1_g4 / base / bp1 / balanced: numero_de_alunos 2028 = 258",
   dreNumeroDeAlunos2028,
   258,
 );
@@ -407,7 +407,7 @@ console.log("\nSection G — Canonical t1_g3 fixture unchanged:");
 
 const canonicalDre = calculateDre(CANONICAL_T1G3);
 checkEqual(
-  "32. t1_g3 / intermediario canonical fixture: numero_de_alunos 2028 = 228 (unchanged)",
+  "32. t1_g3 / base canonical fixture: numero_de_alunos 2028 = 228 (unchanged)",
   canonicalDre.byYear[2028].numero_de_alunos,
   228,
 );

@@ -18,7 +18,7 @@ export interface OccupancyOption {
 }
 
 export const occupancyOptions: readonly OccupancyOption[] = [
-  { id: "pessimista", label: "Pessimista" },
-  { id: "intermediario", label: "Intermediário" },
+  { id: "conservador", label: "Conservador" },
+  { id: "base", label: "Base" },
   { id: "otimista", label: "Otimista" },
 ] as const;

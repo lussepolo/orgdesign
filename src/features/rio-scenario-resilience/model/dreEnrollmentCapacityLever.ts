@@ -13,21 +13,22 @@
 
 import type { ScenarioDecisionLeverSelections } from "./scenarioDecisionLeverContract";
 import type {
-  OccupancyScenarioId,
   OpeningPackageId,
 } from "./openingPackageOccupancySourceDataContract";
-import type { DreEnrollmentCapacityLeverInput } from "./dreEnrollmentCapacityLeverContract";
+import {
+  normalizeDreEnrollmentCapacityLeverInput,
+  type DreEnrollmentCapacityLeverInput,
+} from "./dreEnrollmentCapacityLeverContract";
 
 export function resolveEnrollmentCapacityLeverInput(
   selections: ScenarioDecisionLeverSelections,
 ): DreEnrollmentCapacityLeverInput | null {
   const openingPackageId = selections.openingGrades.selectedOptionId as OpeningPackageId | null;
-  const occupancyScenarioId =
-    selections.occupancyEnrollment.selectedOptionId as OccupancyScenarioId | null;
+  const occupancyScenarioId = selections.occupancyEnrollment.selectedOptionId;
 
   if (openingPackageId === null || occupancyScenarioId === null) {
     return null;
   }
 
-  return { openingPackageId, occupancyScenarioId };
+  return normalizeDreEnrollmentCapacityLeverInput({ openingPackageId, occupancyScenarioId });
 }

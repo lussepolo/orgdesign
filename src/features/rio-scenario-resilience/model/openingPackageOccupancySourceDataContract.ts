@@ -2,6 +2,66 @@ import type { GradeId } from "./revenueInputs";
 
 export type OpeningPackageId = "t1_g3" | "t1_g4" | "t1_g5" | "t1_g6";
 
+export type ActiveOpeningPackageId = "t1_g4" | "t1_g6";
+
+export type RetiredOpeningPackageId = "t1_g3" | "t1_g5";
+
+export const OPENING_PACKAGE_IDS: readonly OpeningPackageId[] = [
+  "t1_g3",
+  "t1_g4",
+  "t1_g5",
+  "t1_g6",
+] as const;
+
+export const ACTIVE_OPENING_PACKAGE_IDS: readonly ActiveOpeningPackageId[] = [
+  "t1_g4",
+  "t1_g6",
+] as const;
+
+export const RETIRED_OPENING_PACKAGE_IDS: readonly RetiredOpeningPackageId[] = [
+  "t1_g3",
+  "t1_g5",
+] as const;
+
+export function isOpeningPackageId(value: string): value is OpeningPackageId {
+  return (OPENING_PACKAGE_IDS as readonly string[]).includes(value);
+}
+
+export function isActiveOpeningPackageId(value: string): value is ActiveOpeningPackageId {
+  return (ACTIVE_OPENING_PACKAGE_IDS as readonly string[]).includes(value);
+}
+
+export function isRetiredOpeningPackageId(value: string): value is RetiredOpeningPackageId {
+  return (RETIRED_OPENING_PACKAGE_IDS as readonly string[]).includes(value);
+}
+
+export type OpeningPackageParseResult =
+  | {
+      status: "active";
+      packageId: ActiveOpeningPackageId;
+      input: string;
+    }
+  | {
+      status: "retired_package";
+      packageId: RetiredOpeningPackageId;
+      input: string;
+    }
+  | {
+      status: "invalid_package";
+      packageId: null;
+      input: string;
+    };
+
+export function parseOpeningPackageId(value: string): OpeningPackageParseResult {
+  if (isActiveOpeningPackageId(value)) {
+    return { status: "active", packageId: value, input: value };
+  }
+  if (isRetiredOpeningPackageId(value)) {
+    return { status: "retired_package", packageId: value, input: value };
+  }
+  return { status: "invalid_package", packageId: null, input: value };
+}
+
 export type OpeningPackageSourceAuthority = "Head of Finance";
 
 export type OpeningPackageApprovalStatus =
@@ -17,12 +77,77 @@ export type OpeningPackageSourceUse =
   | "blocked";
 
 export type OccupancyScenarioId =
-  | "intermediario"
-  | "pessimista"
+  | "conservador"
+  | "base"
   | "otimista";
+
+export type RetiredOccupancyScenarioId = "pessimista";
+
+export type OccupancySourceScenarioId =
+  | OccupancyScenarioId
+  | RetiredOccupancyScenarioId;
+
+export type LegacyOccupancyScenarioId =
+  | OccupancyScenarioId
+  | "intermediario"
+  | RetiredOccupancyScenarioId;
+
+export const OCCUPANCY_SCENARIO_IDS: readonly OccupancyScenarioId[] = [
+  "conservador",
+  "base",
+  "otimista",
+] as const;
+
+export const LEGACY_OCCUPANCY_SCENARIO_IDS: readonly LegacyOccupancyScenarioId[] = [
+  ...OCCUPANCY_SCENARIO_IDS,
+  "intermediario",
+] as const;
+
+export function isOccupancyScenarioId(value: string): value is OccupancyScenarioId {
+  return (OCCUPANCY_SCENARIO_IDS as readonly string[]).includes(value);
+}
+
+export function normalizeOccupancyScenarioId(value: string): OccupancyScenarioId | null {
+  if (value === "intermediario") return "base";
+  return isOccupancyScenarioId(value) ? value : null;
+}
+
+export type OccupancyScenarioParseResult =
+  | {
+      status: "canonical" | "normalized_legacy";
+      scenarioId: OccupancyScenarioId;
+      input: string;
+    }
+  | {
+      status: "retired_scenario" | "invalid_scenario";
+      scenarioId: null;
+      input: string;
+    };
+
+export function parseOccupancyScenarioId(value: string): OccupancyScenarioParseResult {
+  if (value === "intermediario") {
+    return { status: "normalized_legacy", scenarioId: "base", input: value };
+  }
+  if (value === "pessimista") {
+    return { status: "retired_scenario", scenarioId: null, input: value };
+  }
+  if (isOccupancyScenarioId(value)) {
+    return { status: "canonical", scenarioId: value, input: value };
+  }
+  return { status: "invalid_scenario", scenarioId: null, input: value };
+}
+
+export function assertOccupancyScenarioId(value: string): OccupancyScenarioId {
+  const normalized = normalizeOccupancyScenarioId(value);
+  if (normalized === null) {
+    throw new Error(`Unsupported occupancyScenarioId: ${value}`);
+  }
+  return normalized;
+}
 
 export type OccupancyScenarioSourceLabel =
   | "Intermediário"
+  | "Conservador"
   | "Pessimista"
   | "Otimista";
 
@@ -180,7 +305,7 @@ export interface OpeningPackageMatureStateExtensionRule {
 }
 
 export interface PhysicalCapacityCapRecord {
-  value: 740;
+  value: number;
   sourceStatus: OpeningPackageApprovalStatus;
   mappingStatus: OpeningPackageMappingStatus;
   notes?: string;
@@ -197,7 +322,7 @@ export interface StudentsPerClassRecord {
 
 export interface ScenarioLabelMappingRecord {
   sourceLabel: OccupancyScenarioSourceLabel;
-  scenarioId: OccupancyScenarioId;
+  scenarioId: OccupancySourceScenarioId;
   sourceStatus: OpeningPackageApprovalStatus;
   mappingStatus: OpeningPackageMappingStatus;
   notes?: string;
@@ -256,7 +381,7 @@ export interface AvailableCapacityByYearRecord {
   packageId: OpeningPackageId;
   year: OpeningPackageProjectionYear;
   availableCapacity: number;
-  physicalCapacityCap: 740;
+  physicalCapacityCap: number;
   sourceStatus: OpeningPackageApprovalStatus;
   mappingStatus: OpeningPackageMappingStatus;
   isCarryForwardYear: boolean;
@@ -273,7 +398,7 @@ export interface CapacityByYearAndGradeRecord {
   gradeCapacity: number | null;
   studentsPerClass: number | null;
   sections: number | null;
-  physicalCapacityCap: 740;
+  physicalCapacityCap: number;
   sourceStatus: OpeningPackageApprovalStatus;
   mappingStatus: OpeningPackageMappingStatus;
   isCarryForwardYear: boolean;
@@ -291,7 +416,7 @@ export type OccupancyRateUnitConvention =
 // contract does not convert decimal or percentage values or populate records.
 export interface OccupancyRateRecord {
   packageId: OpeningPackageId;
-  scenarioId: OccupancyScenarioId;
+  scenarioId: OccupancySourceScenarioId;
   year: OpeningPackageProjectionYear;
   sourceGradeLabel: SourceGradeLabel;
   normalizedGradeId: OpeningPackageGradeId;
@@ -311,7 +436,7 @@ export interface OccupancyRateRecord {
 // and provenance fields to distinguish them from placeholder records.
 export interface EnrollmentByYearAndGradeRecord {
   packageId: OpeningPackageId;
-  scenarioId: OccupancyScenarioId;
+  scenarioId: OccupancySourceScenarioId;
   year: OpeningPackageProjectionYear;
   sourceGradeLabel: SourceGradeLabel;
   normalizedGradeId: OpeningPackageGradeId;
@@ -334,7 +459,7 @@ export interface EnrollmentByYearAndGradeRecord {
 // populate records.
 export interface TotalEnrollmentValidationRecord {
   packageId: OpeningPackageId;
-  scenarioId: OccupancyScenarioId;
+  scenarioId: OccupancySourceScenarioId;
   year: OpeningPackageProjectionYear;
   totalEnrollment: number | null;
   sourceStatus: OpeningPackageApprovalStatus;

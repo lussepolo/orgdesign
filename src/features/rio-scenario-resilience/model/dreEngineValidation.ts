@@ -1,7 +1,7 @@
 // DRE engine validation — Phase 13A (2026-06-09).
 //
 // 20 checks across structural wiring and behavioral correctness of calculateDre().
-// Behavioral scenario: t1_g3 / intermediario / bp1_division_differentiated / balanced_experience.
+// Behavioral scenario: t1_g6 / base / bp1_division_differentiated / balanced_experience.
 // No spreadsheet numeric backtest of computed subtotals — structural identity checks only.
 // CALCULATION_CAN_BEGIN remains false (inputReadinessRegistry.ts).
 
@@ -20,8 +20,8 @@ import { DRE_OUTRAS_RECEITAS_BASE_PER_LEARNER } from "./dreScenarioAdapters";
 import { FINANCE_SOURCE_CLOSURE_COMPLETE } from "./dreGovernanceReadiness";
 
 const VALIDATION_INPUT = {
-  openingPackageId: "t1_g3" as const,
-  occupancyScenarioId: "intermediario" as const,
+  openingPackageId: "t1_g6" as const,
+  occupancyScenarioId: "base" as const,
   tuitionScenarioId: "bp1_division_differentiated" as const,
   orgDesignOptionId: "balanced_experience",
 };
@@ -607,7 +607,7 @@ export function runDreEngineValidation(): DreEngineValidationReport {
     checks,
     scopeNote:
       "Phase 13A (2026-06-09): DRE + EBITDA engine structural and behavioral validation. " +
-      "Behavioral scenario: t1_g3 / intermediario / bp1_division_differentiated / balanced_experience. " +
+      "Behavioral scenario: t1_g6 / base / bp1_division_differentiated / balanced_experience. " +
       "Checks 4–8: DRE-native signed-addition identities verified for all 20 projection years. " +
       "Check 9: ROL structural non-equivalence with netReceitaAfterDiscount confirmed (Phase 12H). " +
       "Check 10: FOPAG sign translation verified against raw engine output. " +

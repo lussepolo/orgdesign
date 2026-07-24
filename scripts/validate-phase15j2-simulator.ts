@@ -9,18 +9,18 @@
 //     2. 3 occupancy scenarios declared
 //     3. 5 tuition scenarios declared
 //     4. 3 org-design options declared
-//     5. 180 combinations (4 × 3 × 5 × 3)
+//     5. 90 governed active combinations (2 × 3 × 5 × 3)
 //
-//   Section B — 180-scenario finite outputs (checks 6-14)
-//     6.  All 180 scenarios produce learner count > 0 for 2028
-//     7.  All 180 scenarios produce non-zero Receita Operacional Líquida 2028
-//     8.  All 180 scenarios produce ROL for years 2029-2037 (no silent drop)
-//     9.  All 180 scenarios produce EBITDA values across all available years
+//   Section B — 90-scenario finite outputs (checks 6-14)
+//     6.  All 90 governed scenarios produce learner count > 0 for 2028
+//     7.  All 90 governed scenarios produce non-zero Receita Operacional Líquida 2028
+//     8.  All 90 governed scenarios produce ROL for years 2029-2037 (no silent drop)
+//     9.  All 90 governed scenarios produce EBITDA values across all available years
 //    10.  EBITDA positive by 2032 in at least one scenario (sanity)
-//    11.  No NaN across all 180 × all year-output fields
-//    12.  No Infinity across all 180 × all year-output fields
+//    11.  No NaN across all 90 × all year-output fields
+//    12.  No Infinity across all 90 × all year-output fields
 //    13.  No silent-zero ROL for 2029+ in any scenario
-//    14.  Aggregate combination count is exactly 180
+//    14.  Aggregate governed combination count is exactly 90
 //
 //   Section C — Governance metadata (checks 15-19)
 //    15.  F02 is NOT in openItems (resolved)
@@ -31,13 +31,13 @@
 //
 //   Section D — Capital Decision matrix (checks 20-21)
 //    20.  2 CAPEX options declared (capex_90m_brl + capex_100m_brl)
-//    21.  All 360 DRE × CAPEX combinations produce a result with
+//    21.  All 180 governed DRE × CAPEX combinations produce a result with
 //         calculationReadiness === "structurally_calculated"
 //
 //   Section E — DRE-to-Capital EBITDA parity (checks 22-23)
 //    22.  capitalResult.ebitdaByYear[year] === dreResult.byYear[year].ebitda
-//         for all years, all 360 combinations (max delta = 0)
-//    23.  Max absolute delta across all 360 × all years is exactly 0
+//         for all years, all 180 governed combinations (max delta = 0)
+//    23.  Max absolute delta across all 180 × all years is exactly 0
 //
 //   Section F — CAPEX-EBITDA boundary (checks 24-25)
 //    24.  No DRE year-result field contains "capex" in its key name
@@ -70,6 +70,7 @@ import {
 import {
   DRE_ENROLLMENT_LEVER_OPENING_PACKAGE_IDS,
   DRE_ENROLLMENT_LEVER_OCCUPANCY_SCENARIO_IDS,
+  DRE_ENROLLMENT_LEVER_SUPPORTED_SCENARIOS_BY_PACKAGE,
 } from "../src/features/rio-scenario-resilience/model/dreEnrollmentCapacityLeverContract";
 import {
   DRE_WORKING_SCENARIO_TUITION_SCENARIO_IDS,
@@ -85,6 +86,10 @@ const CAPEX_OPTION_IDS: readonly CapexOptionId[] = [
   "capex_90m_brl",
   "capex_100m_brl",
 ] as const;
+
+const ACTIVE_OPENING_PACKAGE_IDS = DRE_ENROLLMENT_LEVER_OPENING_PACKAGE_IDS.filter(
+  (id) => DRE_ENROLLMENT_LEVER_SUPPORTED_SCENARIOS_BY_PACKAGE[id].length > 0,
+);
 
 // ── Test harness ──────────────────────────────────────────────────────────────
 
@@ -131,8 +136,8 @@ function readFile(path: string): string {
 // ── Canonical fixture ─────────────────────────────────────────────────────────
 
 const CANONICAL_DRE = {
-  openingPackageId: "t1_g3" as const,
-  occupancyScenarioId: "intermediario" as const,
+  openingPackageId: "t1_g4" as const,
+  occupancyScenarioId: "base" as const,
   tuitionScenarioId: "bp1_division_differentiated" as const,
   orgDesignOptionId: "balanced_experience" as const,
 };
@@ -146,10 +151,10 @@ console.log("\nSection A — DRE Matrix Completeness");
 
 // Check 1
 checkEqual(
-  "dre_matrix_4_opening_packages",
-  DRE_ENROLLMENT_LEVER_OPENING_PACKAGE_IDS.length,
-  4,
-  "Expected t1_g3, t1_g4, t1_g5, t1_g6",
+  "dre_matrix_2_active_opening_packages",
+  ACTIVE_OPENING_PACKAGE_IDS.length,
+  2,
+  "Expected active governed packages t1_g4 and t1_g6",
 );
 
 // Check 2
@@ -157,7 +162,7 @@ checkEqual(
   "dre_matrix_3_occupancy_scenarios",
   DRE_ENROLLMENT_LEVER_OCCUPANCY_SCENARIO_IDS.length,
   3,
-  "Expected intermediario, pessimista, otimista",
+  "Expected conservador, base, otimista",
 );
 
 // Check 3
@@ -178,15 +183,15 @@ checkEqual(
 
 // Check 5
 const declaredCombinations =
-  DRE_ENROLLMENT_LEVER_OPENING_PACKAGE_IDS.length *
+  ACTIVE_OPENING_PACKAGE_IDS.length *
   DRE_ENROLLMENT_LEVER_OCCUPANCY_SCENARIO_IDS.length *
   DRE_WORKING_SCENARIO_TUITION_SCENARIO_IDS.length *
   DRE_WORKING_SCENARIO_ORG_DESIGN_OPTION_IDS.length;
 
-checkEqual("dre_matrix_180_combinations_declared", declaredCombinations, 180);
+checkEqual("dre_matrix_90_combinations_declared", declaredCombinations, 90);
 
-// ── Section B: 180-scenario finite outputs ────────────────────────────────────
-console.log("\nSection B — 180-Scenario Finite Outputs");
+// ── Section B: 90-scenario finite outputs ─────────────────────────────────────
+console.log("\nSection B — 90 Governed Scenario Finite Outputs");
 
 let scenarioCount = 0;
 let zeroLearner2028Count = 0;
@@ -196,8 +201,7 @@ let nanCount = 0;
 let infinityCount = 0;
 let ebitdaPositiveBy2032Count = 0;
 
-// Enumerate all 108 combinations and run calculateDre on each
-for (const openingPackageId of DRE_ENROLLMENT_LEVER_OPENING_PACKAGE_IDS) {
+for (const openingPackageId of ACTIVE_OPENING_PACKAGE_IDS) {
   for (const occupancyScenarioId of DRE_ENROLLMENT_LEVER_OCCUPANCY_SCENARIO_IDS) {
     for (const tuitionScenarioId of DRE_WORKING_SCENARIO_TUITION_SCENARIO_IDS) {
       for (const orgDesignOptionId of DRE_WORKING_SCENARIO_ORG_DESIGN_OPTION_IDS) {
@@ -249,7 +253,7 @@ for (const openingPackageId of DRE_ENROLLMENT_LEVER_OPENING_PACKAGE_IDS) {
 
 // Check 6
 checkEqual(
-  "all_108_scenarios_learner_gt0_2028",
+  "all_90_scenarios_learner_gt0_2028",
   zeroLearner2028Count,
   0,
   "Every scenario must produce numero_de_alunos > 0 for 2028",
@@ -257,7 +261,7 @@ checkEqual(
 
 // Check 7
 checkEqual(
-  "all_108_scenarios_rol_nonzero_2028",
+  "all_90_scenarios_rol_nonzero_2028",
   zeroROL2028Count,
   0,
   "Every scenario must produce receita_operacional_liquida != 0 for 2028",
@@ -265,7 +269,7 @@ checkEqual(
 
 // Check 8
 checkEqual(
-  "all_108_scenarios_rol_nonzero_2029_2037",
+  "all_90_scenarios_rol_nonzero_2029_2037",
   zeroROLAfter2028Count,
   0,
   "No silent-zero ROL for years 2029-2037 in any scenario",
@@ -273,8 +277,8 @@ checkEqual(
 
 // Check 9
 checkTrue(
-  "all_180_scenarios_ebitda_present_all_years",
-  scenarioCount === 180 && nanCount === 0,
+  "all_90_scenarios_ebitda_present_all_years",
+  scenarioCount === 90 && nanCount === 0,
   `scenarioCount=${scenarioCount}, nanCount=${nanCount}`,
 );
 
@@ -286,10 +290,10 @@ checkTrue(
 );
 
 // Check 11
-checkEqual("no_nan_across_108_scenarios", nanCount, 0);
+checkEqual("no_nan_across_90_scenarios", nanCount, 0);
 
 // Check 12
-checkEqual("no_infinity_across_108_scenarios", infinityCount, 0);
+checkEqual("no_infinity_across_90_scenarios", infinityCount, 0);
 
 // Check 13
 checkEqual(
@@ -300,7 +304,7 @@ checkEqual(
 );
 
 // Check 14
-checkEqual("dre_180_combinations_executed", scenarioCount, 180);
+checkEqual("dre_90_combinations_executed", scenarioCount, 90);
 
 // ── Section C: Governance metadata ───────────────────────────────────────────
 console.log("\nSection C — Governance Metadata");
@@ -362,11 +366,11 @@ checkEqual(
   `Expected capex_90m_brl and capex_100m_brl, got: ${CAPEX_OPTION_IDS.join(", ")}`,
 );
 
-// Check 21: all 360 DRE × CAPEX combinations produce structurally_calculated
+// Check 21: all 180 governed DRE × CAPEX combinations produce structurally_calculated
 let capitalCount = 0;
 let capitalNotCalculatedCount = 0;
 
-for (const openingPackageId of DRE_ENROLLMENT_LEVER_OPENING_PACKAGE_IDS) {
+for (const openingPackageId of ACTIVE_OPENING_PACKAGE_IDS) {
   for (const occupancyScenarioId of DRE_ENROLLMENT_LEVER_OCCUPANCY_SCENARIO_IDS) {
     for (const tuitionScenarioId of DRE_WORKING_SCENARIO_TUITION_SCENARIO_IDS) {
       for (const orgDesignOptionId of DRE_WORKING_SCENARIO_ORG_DESIGN_OPTION_IDS) {
@@ -389,8 +393,8 @@ for (const openingPackageId of DRE_ENROLLMENT_LEVER_OPENING_PACKAGE_IDS) {
 }
 
 checkTrue(
-  "all_360_dre_capex_combinations_calculate",
-  capitalCount === 360 && capitalNotCalculatedCount === 0,
+  "all_180_governed_dre_capex_combinations_calculate",
+  capitalCount === 180 && capitalNotCalculatedCount === 0,
   `combinations=${capitalCount}, not_calculated=${capitalNotCalculatedCount}`,
 );
 
@@ -400,7 +404,7 @@ console.log("\nSection E — DRE-to-Capital EBITDA Parity");
 let maxDelta = 0;
 let parityFailCount = 0;
 
-for (const openingPackageId of DRE_ENROLLMENT_LEVER_OPENING_PACKAGE_IDS) {
+for (const openingPackageId of ACTIVE_OPENING_PACKAGE_IDS) {
   for (const occupancyScenarioId of DRE_ENROLLMENT_LEVER_OCCUPANCY_SCENARIO_IDS) {
     for (const tuitionScenarioId of DRE_WORKING_SCENARIO_TUITION_SCENARIO_IDS) {
       for (const orgDesignOptionId of DRE_WORKING_SCENARIO_ORG_DESIGN_OPTION_IDS) {
@@ -442,7 +446,7 @@ checkEqual(
   "dre_capital_ebitda_parity_zero_failures",
   parityFailCount,
   0,
-  "capitalResult.ebitdaByYear[yr] must equal dreResult.byYear[yr].ebitda for all 360 × all years",
+  "capitalResult.ebitdaByYear[yr] must equal dreResult.byYear[yr].ebitda for all 180 governed × all years",
 );
 
 // Check 23
@@ -450,7 +454,7 @@ checkEqual(
   "dre_capital_ebitda_max_delta_zero",
   maxDelta,
   0,
-  `Max absolute delta across all 360 combinations × all years: ${maxDelta}`,
+  `Max absolute delta across all 180 governed combinations × all years: ${maxDelta}`,
 );
 
 // ── Section F: CAPEX-EBITDA boundary ─────────────────────────────────────────

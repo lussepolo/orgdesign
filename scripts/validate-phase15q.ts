@@ -305,7 +305,7 @@ console.log("\nSection F — rj4/rj5 DRE Calculation Coverage");
 
 const DRE_FIXTURE_BASE = {
   openingPackageId: "t1_g3" as const,
-  occupancyScenarioId: "intermediario" as const,
+  occupancyScenarioId: "base" as const,
   orgDesignOptionId: "balanced_experience" as const,
 };
 

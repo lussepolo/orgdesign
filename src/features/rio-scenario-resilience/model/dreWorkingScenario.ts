@@ -38,18 +38,18 @@ export const WORKING_SCENARIO_RATIFICATION_STATUS: DreScenarioSelectionRatificat
   "technical_validation_fixture";
 
 // One complete, typed decision-lever combination using only existing valid option IDs.
-// Same combination as VALIDATION_INPUT in dreEngineValidation.ts (Phase 13A).
+// Same combination as VALIDATION_INPUT in dreEngineValidation.ts.
 // RATIFICATION STATUS: technical_validation_fixture (Phase 13G) — NOT board-ratified.
 export const WORKING_SCENARIO_SELECTIONS: ScenarioDecisionLeverSelections = {
   ...EMPTY_SCENARIO_DECISION_LEVER_SELECTIONS,
   openingGrades: {
     ...EMPTY_SCENARIO_DECISION_LEVER_SELECTIONS.openingGrades,
-    selectedOptionId: "t1_g3",
+    selectedOptionId: "t1_g6",
     selectionStatus: "needs_mapping",
   },
   occupancyEnrollment: {
     ...EMPTY_SCENARIO_DECISION_LEVER_SELECTIONS.occupancyEnrollment,
-    selectedOptionId: "intermediario",
+    selectedOptionId: "base",
     selectionStatus: "needs_mapping",
   },
   tuition: {

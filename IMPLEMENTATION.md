@@ -62,6 +62,153 @@ decision layer must:
   break-even" — that is a Phase 15 capital-decision concept and has not been
   computed.
 
+## Phase V10-E1 — Governed captação and package-specific capacity migration
+
+Status: **implemented with deterministic validator, lint, build, and browser QA
+closure**. Governance date:
+2026-07-24. Entry branch/HEAD: `main` /
+`d743616916d8b3b4b1708cd9e3ef25c08b0ad00f`. The worktree was already dirty
+at entry from interrupted/superseded work and unrelated audit/payroll files;
+V10-E1 preserved those changes and did not stage, commit, push, restore,
+delete, or clean files.
+
+Source authority:
+- G4 captação/enrollment workbook:
+  `/Users/lucianapolonen/Downloads/Modelo_Ocupacao_Concept_2028_4sc_T1_G4.xlsx`,
+  SHA-256 `73b10ea70cd0ebdc5f43757e621ecd6343a45fbcce4447d1fe1b1e0f8164ae95`.
+  Sheets: `1. Memória de Cálculo`, `2. PESSIMISTA`, `3. CONSERVADOR`,
+  `4. INTERMEDIÁRIO`, `5. OTIMISTA`, `6. Comparativo`.
+- G6 captação/enrollment workbook located by content hash:
+  `/Users/lucianapolonen/Downloads/Modelo_Ocupacao_Concept_2028_4sc_T1_G6.xlsx`,
+  SHA-256 `17c933891e3fa57b4b39bf3c22ac84dc71583fc024a41ddacd4aff6647723729`.
+  The `(1)` suffix was not required because V10-E1 uses content hash authority.
+- V10 financial/capacity workbook retained as reconciliation evidence only for
+  this phase:
+  `/Users/lucianapolonen/Downloads/Concept Rio - 20 anos - Org BU - Apresentação v10.xlsx`,
+  SHA-256 `2e3230ad233c7cd450c1da1fca46da1cb80899e66cdf5ba3d4e9358357a05da0`.
+
+Implemented contract:
+- Active captação scenarios are exactly `conservador`, `base`, `otimista`, in
+  that order. UI labels are Conservador, Base, Otimista.
+- `intermediario` is accepted only as legacy serialized input and normalizes to
+  `base`. New runtime arrays and selectors do not serialize `intermediario`.
+- `pessimista` is retired and rejected as `retired_scenario`; it is not
+  normalized to another scenario and is absent from current selectors/contracts.
+- `base` preserves the former Intermediário projection from the package-specific
+  captação workbook without numerical recalculation.
+- Active governed opening packages are exactly `t1_g4` and `t1_g6`. `t1_g3`
+  and `t1_g5` remain type-compatible identifiers but are explicitly rejected
+  before enrollment-dependent calculation. The active selector space is
+  `2 x 3 x 5 x 3 = 90` combinations.
+- T1-G4 enrollment is governed for 2028-2037. Annual totals are:
+  Conservador `238, 286, 340, 391, 437, 481, 526, 566, 607, 624`;
+  Base `258, 314, 365, 414, 460, 500, 542, 586, 630, 646`;
+  Otimista `300, 356, 403, 444, 490, 537, 583, 630, 679, 696`.
+- T1-G6 enrollment is governed for 2028-2037. Annual totals are:
+  Conservador `238, 282, 335, 387, 436, 485, 531, 553, 573, 593`;
+  Base `258, 309, 361, 417, 468, 511, 552, 574, 597, 618`;
+  Otimista `300, 367, 425, 471, 516, 563, 611, 636, 657, 675`.
+- T1-G4 capacity is governed by its own captação workbook row 33:
+  `348, 396, 446, 496, 546, 596, 646, 696, 740, 740`.
+  T1-G4 2028 values are capacity `348`, Conservador `238`, Base `258`,
+  Otimista `300`.
+- T1-G6 capacity is governed by its own captação workbook row 33:
+  `446, 496, 546, 596, 646, 696, 740, 740, 740, 740`.
+- T1-G3 and T1-G5 capacity/enrollment are not inferred from any other package.
+- Occupancy is derived only where both governed enrollment and same-package,
+  same-year governed capacity exist; unavailable enrollment is never converted
+  to zero.
+- Capacity remains package/year-specific and scenario-, tuition-, and
+  org-design-invariant.
+
+Architecture selected: **governed static series**. The G6 captação workbook
+and G4 captação workbook contain static governed outputs/written methodology
+for the audited scenario matrices, and reconstructing cohort formulas would
+require undocumented assumptions. Financial and payroll formulas were not
+changed.
+
+Capacity reconciliation:
+- The earlier `358` reference is incorrect for the supplied G4 captação
+  workbook. Direct workbook search found no `358`; the 2028 available capacity
+  is `348`.
+- V10 `Receita - Cen. 1 (4)!DN23 = 300` is under the workbook's 2027 header and
+  must not be used as T1-G4 2028 capacity. The G4 captação workbook uses `348`
+  for 2028.
+- The captação workbooks show maximum physical capacity `740`, while V10
+  contains later-year 746-seat capacity evidence from grade/classroom capacity
+  reconciliation. V10-E1 uses the captação workbook package capacity series and
+  records `746` as a remaining reconciliation item, not active runtime capacity.
+- The captação workbook Base total of `258` remains governing for T1-G4. The
+  financial-workbook `259` remains a separate unresolved financial
+  reconciliation point and does not replace captação data in V10-E1.
+
+Files created for V10-E1:
+- `src/features/rio-scenario-resilience/model/governedCaptacaoCapacitySourceData.ts`
+- `src/lib/lucide-react-build-shim.ts`
+- `src/lib/recharts-build-shim.ts`
+- `scripts/validate-v10-e1.ts`
+- `tests/v10e1/v10-e1.run.ts`
+
+Current V10-E1 files modified include:
+- `package.json`
+- `src/features/rio-scenario-resilience/model/openingPackageOccupancySourceDataContract.ts`
+- `src/features/rio-scenario-resilience/model/dreEnrollmentCapacityLeverContract.ts`
+- `src/features/rio-scenario-resilience/model/matureStateCarryForwardSourceData.ts`
+- `src/features/rio-scenario-resilience/model/receitaEngine.ts`
+- `src/features/rio-scenario-resilience/model/fopagEngine.ts`
+- `src/features/rio-scenario-resilience/model/sectionCountEngine.ts`
+- `src/index.css`
+- `vite.config.ts`
+- DRE simulator label/export/UI files under `src/components/dreSimulator/`
+- Current validation fixtures that referenced retired scenarios.
+
+Validation evidence:
+- `npm run validate:v10-e1`: 100/100 passed. It verifies both workbook hashes,
+  every implemented G4/G6 grade/year value, annual totals, package-specific
+  capacity series, active scenario contract, legacy `intermediario -> base`,
+  retired `pessimista`, unsupported T1-G3/T1-G5 rejection, 90 selector
+  combinations, downstream Receita/section reachability, and no financial or
+  payroll formula mechanism changes. It also verifies that the bounded Lucide
+  and Recharts build shims cover the actual source import surface and that the
+  Tailwind v4 source boundary is scoped to `src`.
+- `npm run lint`: passed after correcting TypeScript import/type issues.
+- `npm run validate:phase15g2`: 25/25 passed.
+- `npm run validate:phase15j2-simulator`: 31/31 passed after updating its
+  matrix to the governed 90 DRE combinations and 180 DRE/CAPEX combinations.
+- `npx tsx scripts/validate-phase15s2.ts`: 53/53 passed after preserving its
+  G4/Base evidence checks and replacing the stale T1-G3 calculation assertion
+  with the governed unsupported-package boundary.
+- Build diagnosis: Vite initially stalled during module transformation while
+  traversing broad `lucide-react` and `recharts` entrypoints. V10-E1 added
+  bounded build shims for exactly the symbols imported by the app. `npm run
+  build` then passed, transforming 1173 modules with only the existing
+  large-chunk warning.
+- Browser/Node diagnosis: Vite `GET` responses initially hung even though
+  `HEAD /` returned 200. Tailwind v4 automatic source detection was restricted
+  with `@import "tailwindcss" source(none);` and `@source ".";`, which scopes
+  class discovery to the `src` tree. Node fetch then completed, Playwright
+  reached the app, and `npm run qa:v10-e1` passed 19/19 assertions.
+
+Downstream deltas:
+- T1-G4 and T1-G6 now calculate through the same downstream Receita, DRE,
+  FOPAG, section, staffing, payroll-adapter, and workbook-export paths using
+  package-specific enrollment. Downstream outputs change only through governed
+  captação/capacity inputs; tuition, discount, salary, benefits, encargos,
+  payroll, and DRE formula mechanisms were not changed.
+- T1-G3 and T1-G5 enrollment-dependent calculations fail closed instead of
+  using historical or inferred projections.
+
+- Resolve the separate 740/746 capacity reconciliation if product governance
+  wants V10 classroom-capacity evidence, rather than the captação workbook
+  capacity rows, to govern later-year physical capacity.
+
+Next financial/payroll phase rules recorded for V10-E2: salary adjustment follows
+IPCA + 1 percentage point; 2028 is the unadjusted salary base year; first salary
+adjustment is 2029; benefits escalate separately by 10% annually and must not
+inherit the salary-adjustment rate; the existing 48.5% encargos mechanism remains
+unchanged unless separately governed. These rules were documented only and not
+implemented in V10-E1.
+
 ## Status
 
 - **Phase 14A — DRE Scenario Simulator UI scaffold**: complete.

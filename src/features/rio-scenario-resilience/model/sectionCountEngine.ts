@@ -3,9 +3,10 @@ import {
   COMBINED_ENROLLMENT_RECORDS,
 } from "./matureStateCarryForwardSourceData";
 import {
-  OPENING_PACKAGE_CAPACITY_BY_YEAR_AND_GRADE_RECORDS,
-  OPENING_PACKAGE_STUDENTS_PER_CLASS,
-} from "./openingPackageOccupancySourceData";
+  GOVERNED_CAPACITY_BY_YEAR_AND_GRADE_RECORDS,
+  GOVERNED_STUDENTS_PER_CLASS,
+} from "./governedCaptacaoCapacitySourceData";
+import { assertSupportedDreEnrollmentCapacityLeverInput } from "./dreEnrollmentCapacityLeverContract";
 import type {
   SectionCountDiagnostic,
   SectionCountEngineInput,
@@ -20,6 +21,7 @@ export function calculateSectionCountsForScenario(
   input: SectionCountEngineInput,
 ): SectionCountEngineOutput {
   const { openingPackageId, occupancyScenarioId } = input;
+  assertSupportedDreEnrollmentCapacityLeverInput({ openingPackageId, occupancyScenarioId });
 
   const records: SectionCountRecord[] = [];
   const diagnostics: SectionCountDiagnostic[] = [];
@@ -36,14 +38,14 @@ export function calculateSectionCountsForScenario(
 
   // Build studentsPerClass lookup: lowercase gradeId → studentsPerClass
   const spcLookup = new Map<string, number>();
-  for (const r of OPENING_PACKAGE_STUDENTS_PER_CLASS) {
+  for (const r of GOVERNED_STUDENTS_PER_CLASS) {
     spcLookup.set(String(r.normalizedGradeId).toLowerCase(), r.studentsPerClass);
   }
 
   // Build committed-sections lookup: "packageId:year:gradeId" → sections
   // Used when open rooms exceed what ceil(enrollment/spc) would derive.
   const committedSectionsLookup = new Map<string, number>();
-  for (const r of OPENING_PACKAGE_CAPACITY_BY_YEAR_AND_GRADE_RECORDS) {
+  for (const r of GOVERNED_CAPACITY_BY_YEAR_AND_GRADE_RECORDS) {
     if (r.packageId !== openingPackageId) continue;
     if (r.sections === null) continue;
     committedSectionsLookup.set(
@@ -170,8 +172,8 @@ export function calculateSectionCountsForScenario(
         ? "committed_sections_from_capacity_record"
         : "ceil_enrollment_div_studentsPerClass_capped_at_2",
       capacityConstraintSource: committedSections > rawSections
-        ? "OPENING_PACKAGE_CAPACITY_BY_YEAR_AND_GRADE_RECORDS; maxSectionsPerGrade = 2 (workbook cap)"
-        : "OPENING_PACKAGE_STUDENTS_PER_CLASS; maxSectionsPerGrade = 2 (workbook cap)",
+        ? "GOVERNED_CAPACITY_BY_YEAR_AND_GRADE_RECORDS; maxSectionsPerGrade = 2 (workbook cap)"
+        : "GOVERNED_STUDENTS_PER_CLASS; maxSectionsPerGrade = 2 (workbook cap)",
       sourceNotes:
         `rawSections = ceil(${r.enrollment}/${spc}) = ${rawSections}; ` +
         (committedSections > rawSections

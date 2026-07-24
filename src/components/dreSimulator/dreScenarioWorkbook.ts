@@ -92,8 +92,8 @@ const YEARS = RECEITA_PROJECTION_YEARS;
 
 // Kept in sync with DreLeverPanel.tsx / OrgDesignPanel.tsx / OrgDesignSensitivityPanel.tsx.
 const OCCUPANCY_LABELS: Record<string, string> = {
-  pessimista: "Pessimista (Conservative)",
-  intermediario: "Intermediário (Base)",
+  conservador: "Conservador",
+  base: "Base",
   otimista: "Otimista (Optimistic)",
 };
 
@@ -500,7 +500,7 @@ function buildReadmeSheet(vm: DreScenarioWorkbookViewModel): XLSX.WorkSheet {
     [],
     ["Phase 15S.2 — Scenario B / T1_G4 source-backed values:"],
     [
-      "Scenario B / T1_G4 now uses the Finance workbook source for 2028 Intermediário: 258 learners, 348 available capacity, and 74.1% occupancy. " +
+      "Scenario B / T1_G4 now uses the Finance workbook source for 2028 Base: 258 learners, 348 available capacity, and 74.1% occupancy. " +
         "The per-grade allocation is source-backed: T1 16, T2 16, PK3 28, PK4 32, Kindergarten 36, G1 40, G2 36, G3 32, G4 22. " +
         "Grade 4 remains a two-section Lower School opening package based on 48 available seats.",
     ],
@@ -1048,10 +1048,10 @@ function buildScenarioSensitivityMatrixSheet(vm: DreScenarioWorkbookViewModel): 
     [
       "Scope note",
       "This is a partial sensitivity matrix: it varies only the org-design option, holding " +
-        "opening package, occupancy scenario, and tuition scenario fixed at the currently " +
+        "opening package, captação scenario, and tuition scenario fixed at the currently " +
         "selected values (org-design options do not change numero_de_alunos or " +
         "receita_operacional_liquida — only payroll/EBITDA). It is not the full " +
-        "108-combination (opening x occupancy x tuition x org-design) matrix; that is " +
+        "90-combination (opening x captação x tuition x org-design) matrix; that is " +
         "deferred to Phase 14C or later.",
     ],
     [],

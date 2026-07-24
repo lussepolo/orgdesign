@@ -2,9 +2,9 @@
 // Labels only — no calculation logic, no new data.
 
 export const OCCUPANCY_LABELS: Record<string, string> = {
-  pessimista: "Pessimista (Conservative)",
-  intermediario: "Intermediário (Base)",
-  otimista: "Otimista (Optimistic)",
+  conservador: "Conservador",
+  base: "Base",
+  otimista: "Otimista",
 };
 
 export const TUITION_LABELS: Record<string, string> = {

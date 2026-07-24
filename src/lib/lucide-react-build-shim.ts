@@ -1,0 +1,75 @@
+import type { ForwardRefExoticComponent, RefAttributes, SVGProps } from "react";
+
+export type LucideIcon = ForwardRefExoticComponent<
+  Omit<SVGProps<SVGSVGElement>, "ref"> &
+    RefAttributes<SVGSVGElement> & {
+      size?: string | number;
+      absoluteStrokeWidth?: boolean;
+    }
+>;
+
+export { default as Activity } from "lucide-react/dist/esm/icons/activity.js";
+export { default as AlertCircle } from "lucide-react/dist/esm/icons/circle-alert.js";
+export { default as AlertTriangle } from "lucide-react/dist/esm/icons/triangle-alert.js";
+export { default as ArrowDown } from "lucide-react/dist/esm/icons/arrow-down.js";
+export { default as ArrowLeft } from "lucide-react/dist/esm/icons/arrow-left.js";
+export { default as ArrowRight } from "lucide-react/dist/esm/icons/arrow-right.js";
+export { default as ArrowUp } from "lucide-react/dist/esm/icons/arrow-up.js";
+export { default as Baby } from "lucide-react/dist/esm/icons/baby.js";
+export { default as BarChart3 } from "lucide-react/dist/esm/icons/chart-column.js";
+export { default as BookOpen } from "lucide-react/dist/esm/icons/book-open.js";
+export { default as Briefcase } from "lucide-react/dist/esm/icons/briefcase.js";
+export { default as Building2 } from "lucide-react/dist/esm/icons/building-2.js";
+export { default as Calculator } from "lucide-react/dist/esm/icons/calculator.js";
+export { default as CalendarDays } from "lucide-react/dist/esm/icons/calendar-days.js";
+export { default as Check } from "lucide-react/dist/esm/icons/check.js";
+export { default as CheckCircle2 } from "lucide-react/dist/esm/icons/circle-check.js";
+export { default as ChevronDown } from "lucide-react/dist/esm/icons/chevron-down.js";
+export { default as ChevronRight } from "lucide-react/dist/esm/icons/chevron-right.js";
+export { default as ChevronUp } from "lucide-react/dist/esm/icons/chevron-up.js";
+export { default as ClipboardList } from "lucide-react/dist/esm/icons/clipboard-list.js";
+export { default as Clock } from "lucide-react/dist/esm/icons/clock.js";
+export { default as Coffee } from "lucide-react/dist/esm/icons/coffee.js";
+export { default as Compass } from "lucide-react/dist/esm/icons/compass.js";
+export { default as Copy } from "lucide-react/dist/esm/icons/copy.js";
+export { default as Cpu } from "lucide-react/dist/esm/icons/cpu.js";
+export { default as Database } from "lucide-react/dist/esm/icons/database.js";
+export { default as DollarSign } from "lucide-react/dist/esm/icons/dollar-sign.js";
+export { default as Download } from "lucide-react/dist/esm/icons/download.js";
+export { default as FileText } from "lucide-react/dist/esm/icons/file-text.js";
+export { default as GitBranch } from "lucide-react/dist/esm/icons/git-branch.js";
+export { default as Globe } from "lucide-react/dist/esm/icons/globe.js";
+export { default as GraduationCap } from "lucide-react/dist/esm/icons/graduation-cap.js";
+export { default as Grid2x2 } from "lucide-react/dist/esm/icons/grid-2x2.js";
+export { default as Heart } from "lucide-react/dist/esm/icons/heart.js";
+export { default as HelpCircle } from "lucide-react/dist/esm/icons/circle-question-mark.js";
+export { default as Home } from "lucide-react/dist/esm/icons/home.js";
+export { default as Info } from "lucide-react/dist/esm/icons/info.js";
+export { default as Languages } from "lucide-react/dist/esm/icons/languages.js";
+export { default as Layers } from "lucide-react/dist/esm/icons/layers.js";
+export { default as Layers3 } from "lucide-react/dist/esm/icons/layers.js";
+export { default as LayoutDashboard } from "lucide-react/dist/esm/icons/layout-dashboard.js";
+export { default as LayoutGrid } from "lucide-react/dist/esm/icons/layout-grid.js";
+export { default as Lightbulb } from "lucide-react/dist/esm/icons/lightbulb.js";
+export { default as Microscope } from "lucide-react/dist/esm/icons/microscope.js";
+export { default as Music } from "lucide-react/dist/esm/icons/music.js";
+export { default as Palette } from "lucide-react/dist/esm/icons/palette.js";
+export { default as PieChart } from "lucide-react/dist/esm/icons/chart-pie.js";
+export { default as Radar } from "lucide-react/dist/esm/icons/radar.js";
+export { default as RefreshCw } from "lucide-react/dist/esm/icons/refresh-cw.js";
+export { default as Scale } from "lucide-react/dist/esm/icons/scale.js";
+export { default as School } from "lucide-react/dist/esm/icons/school.js";
+export { default as Search } from "lucide-react/dist/esm/icons/search.js";
+export { default as Send } from "lucide-react/dist/esm/icons/send.js";
+export { default as Settings2 } from "lucide-react/dist/esm/icons/settings-2.js";
+export { default as ShieldCheck } from "lucide-react/dist/esm/icons/shield-check.js";
+export { default as Sliders } from "lucide-react/dist/esm/icons/sliders-vertical.js";
+export { default as SlidersHorizontal } from "lucide-react/dist/esm/icons/sliders-horizontal.js";
+export { default as Sparkles } from "lucide-react/dist/esm/icons/sparkles.js";
+export { default as Table } from "lucide-react/dist/esm/icons/table.js";
+export { default as Target } from "lucide-react/dist/esm/icons/target.js";
+export { default as Telescope } from "lucide-react/dist/esm/icons/telescope.js";
+export { default as TrendingUp } from "lucide-react/dist/esm/icons/trending-up.js";
+export { default as Users } from "lucide-react/dist/esm/icons/users.js";
+export { default as X } from "lucide-react/dist/esm/icons/x.js";
+export { default as Zap } from "lucide-react/dist/esm/icons/zap.js";

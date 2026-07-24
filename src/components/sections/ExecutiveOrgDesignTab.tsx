@@ -29,7 +29,7 @@ const ORG_DESIGN_OPTION_MAP: Record<ExecutiveOrgScenario, string> = {
   premium: "premium_experience",
 };
 
-const OCCUPANCY_SCENARIO_ID = "intermediario" as const;
+const OCCUPANCY_SCENARIO_ID = "base" as const;
 
 const nodeVariantClasses: Record<OrgTreeNodeVariant, string> = {
   base: "border-slate-200 bg-white",
@@ -460,7 +460,7 @@ const ExecutiveOrgDesignTab = () => {
           <code className="rounded bg-slate-200 px-1 text-[10px]">calculateFopag()</code> / payrollAdapter. EY and LS
           grade staffing is section-driven: sections = min(ceil(enrollment / studentsPerClass), 2), sourced from{" "}
           <code className="rounded bg-slate-200 px-1 text-[10px]">sectionCountEngine</code> under occupancy scenario{" "}
-          <span className="font-bold">intermediario</span>. Org Design Extension roles carry HC 1 from activation year
+          <span className="font-bold">base</span>. Org Design Extension roles carry HC 1 from activation year
           2028 per org design source contract. MS and HS educator pools are readiness-layer planning envelopes
           (instructional-capacity only; not payroll authorization). Opening scenario:{" "}
           <span className="font-bold">{openingGradeLabel}</span>. Do not modify headcount directly — change the model
