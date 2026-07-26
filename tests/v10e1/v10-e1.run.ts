@@ -144,7 +144,7 @@ async function runQa(page: Page): Promise<void> {
   await scenarioSelect.selectOption("base");
   await page.waitForTimeout(400);
   updatedBody = await page.locator("body").innerText();
-  check("t1_g6_capacity_740_visible", updatedBody.includes("740"), updatedBody.match(/T1-G6[^\n]+/)?.[0] ?? "body checked");
+  check("t1_g6_capacity_746_visible", updatedBody.includes("746"), updatedBody.match(/T1-G6[^\n]+/)?.[0] ?? "body checked");
   check("t1_g4_governed_message_visible", /T1-G4 is governed by its own captação workbook/i.test(updatedBody), "T1-G4 message checked");
   check("no_active_pessimista_text", !updatedBody.includes("Pessimista"), "current DRE tab body checked");
   check("no_js_errors", jsErrors.length === 0, JSON.stringify(jsErrors));

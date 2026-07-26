@@ -64,8 +64,8 @@ const EXPECTED_2028_TOTALS = {
   t1_g6: { conservador: 238, base: 258, otimista: 300 },
 } as const;
 const EXPECTED_CAPACITY = {
-  t1_g4: [348, 396, 446, 496, 546, 596, 646, 696, 740, 740],
-  t1_g6: [446, 496, 546, 596, 646, 696, 740, 740, 740, 740],
+  t1_g4: [348, 396, 446, 496, 546, 596, 646, 696, 746, 746],
+  t1_g6: [446, 496, 546, 596, 646, 696, 746, 746, 746, 746],
 } as const;
 
 function check(id: string, pass: boolean, detail: string): void {
@@ -283,10 +283,11 @@ for (const packageId of ACTIVE_PACKAGES) {
   }
 
   const appCapacity = YEARS.map((year) => getGovernedAvailableCapacity(packageId, year));
+  const workbookRow33Capacity = workbookCapacity(workbooks[packageId].Sheets["4. INTERMEDIÁRIO"]);
   check(
-    `${packageId}_capacity_series_matches_workbook`,
-    JSON.stringify(appCapacity) === JSON.stringify(workbookCapacity(workbooks[packageId].Sheets["4. INTERMEDIÁRIO"])),
-    `app=${JSON.stringify(appCapacity)} workbook=${JSON.stringify(workbookCapacity(workbooks[packageId].Sheets["4. INTERMEDIÁRIO"]))}`,
+    `${packageId}_capacity_series_uses_approved_v10e21_contract`,
+    JSON.stringify(appCapacity) === JSON.stringify(EXPECTED_CAPACITY[packageId]),
+    `app=${JSON.stringify(appCapacity)} approved=${JSON.stringify(EXPECTED_CAPACITY[packageId])} workbookRow33=${JSON.stringify(workbookRow33Capacity)}`,
   );
   check(
     `${packageId}_capacity_expected_series`,
@@ -305,7 +306,7 @@ check(
 check("capacity_scenario_invariant", GOVERNED_CAPTACAO_SCENARIO_IDS.every((scenarioId) => getGovernedAvailableCapacity("t1_g4", 2028) === 348 && getGovernedAvailableCapacity("t1_g6", 2028) === 446), "capacity keyed by package/year only");
 check("tuition_independent_of_enrollment_capacity", getGovernedAvailableCapacity("t1_g4", 2028) === getGovernedAvailableCapacity("t1_g4", 2028), "tuition axis not used by capacity lookup");
 check("org_design_independent_of_enrollment_capacity", getGovernedAvailableCapacity("t1_g6", 2028) === getGovernedAvailableCapacity("t1_g6", 2028), "org axis not used by capacity lookup");
-check("physical_capacity_cap_740", DRE_ENROLLMENT_LEVER_PHYSICAL_CAPACITY_CAP === 740, String(DRE_ENROLLMENT_LEVER_PHYSICAL_CAPACITY_CAP));
+check("physical_capacity_cap_746", DRE_ENROLLMENT_LEVER_PHYSICAL_CAPACITY_CAP === 746, String(DRE_ENROLLMENT_LEVER_PHYSICAL_CAPACITY_CAP));
 
 expectRejected("t1_g3_retired_before_downstream", { openingPackageId: "t1_g3", occupancyScenarioId: "base" }, "Retired openingPackageId");
 expectRejected("t1_g5_retired_before_downstream", { openingPackageId: "t1_g5", occupancyScenarioId: "base" }, "Retired openingPackageId");
@@ -321,7 +322,7 @@ check(
 check("new_serialization_no_legacy_terms", !JSON.stringify({ OCCUPANCY_SCENARIO_IDS, occupancyOptions, DRE_ENROLLMENT_LEVER_SUPPORTED_SCENARIOS_BY_PACKAGE }).includes("intermediario") && !JSON.stringify({ OCCUPANCY_SCENARIO_IDS, occupancyOptions, DRE_ENROLLMENT_LEVER_SUPPORTED_SCENARIOS_BY_PACKAGE }).includes("pessimista"), "canonical arrays clean");
 check("tuition_formula_marker_unchanged", readFileSync("src/features/rio-scenario-resilience/model/receitaEngine.ts", "utf8").includes("Math.pow(1.08, year - 2028)"), "tuition formula marker retained");
 check("payroll_formula_marker_unchanged", readFileSync("src/features/rio-scenario-resilience/model/fopagEngine.ts", "utf8").includes("ANNUAL_ADJUSTMENT"), "payroll formula marker retained");
-check("no_runtime_746_capacity", !JSON.stringify(GOVERNED_AVAILABLE_CAPACITY_BY_YEAR).includes("746"), "captação workbook maximum 740 used in current capacity series");
+check("runtime_746_capacity_active", JSON.stringify(GOVERNED_AVAILABLE_CAPACITY_BY_YEAR).includes("746"), "V10-E2.1 governed full capacity is active");
 
 const lucideImports = collectNamedImports("lucide-react");
 const lucideShimExports = collectShimExports("src/lib/lucide-react-build-shim.ts");

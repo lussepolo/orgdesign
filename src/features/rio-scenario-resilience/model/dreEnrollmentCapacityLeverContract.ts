@@ -175,7 +175,7 @@ export function assertSupportedDreEnrollmentCapacityLeverInput(
   }
 }
 
-// V10-E1 governed captação workbook maximum physical capacity. Reference value
-// only; available capacity is resolved by package/year records in
+// V10-E2.1 approved full-campus capacity. Reference value only; available
+// capacity is resolved by package/year records in
 // governedCaptacaoCapacitySourceData.ts.
-export const DRE_ENROLLMENT_LEVER_PHYSICAL_CAPACITY_CAP = 740 as const;
+export const DRE_ENROLLMENT_LEVER_PHYSICAL_CAPACITY_CAP = 746 as const;

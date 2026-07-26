@@ -36,7 +36,7 @@ export const GOVERNED_V10_CAPACITY_WORKBOOK = {
   t1g4CapacityEvidence:
     "Receita - Cen. 1 (4)!DN23:DW23 is a 2027-2036 V10 series; DN23=300 is under the 2027 header and is not used as T1-G4 2028 capacity in V10-E1.",
   t1g6CapacityEvidence:
-    "V10 contains 746-seat later-year capacity evidence; V10-E1 keeps captação-workbook capacity at 740 pending explicit 740/746 reconciliation.",
+    "V10-E2.1 governance establishes 746-seat full-campus capacity from the approved grade-capacity table.",
 } as const;
 
 export const GOVERNED_DIRECT_YEARS = [
@@ -70,7 +70,7 @@ const DIRECT_CAPACITY_METADATA = {
   isCarryForwardYear: false,
   carryForwardSource: "not_selected",
   blockingReason: "none",
-  physicalCapacityCap: 740,
+  physicalCapacityCap: 746,
 } as const;
 
 const GRADE_LABELS = [
@@ -135,6 +135,11 @@ const GRADE_CAPACITY_BY_GRADE: Readonly<Record<GovernedCapacityGradeId, number>>
   G12: 50,
 };
 
+export const GOVERNED_FULL_CAMPUS_CAPACITY = GRADE_LABELS.reduce(
+  (sum, [, normalizedGradeId]) => sum + GRADE_CAPACITY_BY_GRADE[normalizedGradeId],
+  0,
+);
+
 export const GOVERNED_STUDENTS_PER_CLASS: readonly StudentsPerClassRecord[] =
   GRADE_LABELS.map(([sourceGradeLabel, normalizedGradeId]) => ({
     sourceGradeLabel,
@@ -146,41 +151,42 @@ export const GOVERNED_STUDENTS_PER_CLASS: readonly StudentsPerClassRecord[] =
       "V10 workbook capacity evidence, max students per classroom from revenue/capacity scenario sections.",
   }));
 
-const T1_G4_CAPACITY_SERIES = [
-  348, 396, 446, 496, 546, 596, 646, 696, 740, 740,
-] as const;
-
-const T1_G6_CAPACITY_SERIES = [
-  446, 496, 546, 596, 646, 696, 740, 740, 740, 740,
-] as const;
-
-const CAPACITY_SERIES_BY_PACKAGE = {
-  t1_g4: T1_G4_CAPACITY_SERIES,
-  t1_g6: T1_G6_CAPACITY_SERIES,
+const ACTIVE_GRADE_COUNT_BY_PACKAGE_AND_YEAR = {
+  t1_g4: [9, 10, 11, 12, 13, 14, 15, 16, 17, 17],
+  t1_g6: [11, 12, 13, 14, 15, 16, 17, 17, 17, 17],
 } as const satisfies Partial<Record<OpeningPackageId, readonly number[]>>;
 
+function activeGradeCount(packageId: "t1_g4" | "t1_g6", yearIndex: number): number {
+  return ACTIVE_GRADE_COUNT_BY_PACKAGE_AND_YEAR[packageId][yearIndex];
+}
+
+function annualCapacityForActiveGradeCount(activeGrades: number): number {
+  return GRADE_LABELS.slice(0, activeGrades).reduce(
+    (sum, [, normalizedGradeId]) => sum + GRADE_CAPACITY_BY_GRADE[normalizedGradeId],
+    0,
+  );
+}
+
 export const GOVERNED_AVAILABLE_CAPACITY_BY_YEAR: readonly AvailableCapacityByYearRecord[] =
-  Object.entries(CAPACITY_SERIES_BY_PACKAGE).flatMap(([packageId, series]) =>
+  (["t1_g4", "t1_g6"] as const).flatMap((packageId) =>
     GOVERNED_DIRECT_YEARS.map((year, index) => ({
-      packageId: packageId as OpeningPackageId,
+      packageId,
       year,
-      availableCapacity: series[index],
+      availableCapacity: annualCapacityForActiveGradeCount(activeGradeCount(packageId, index)),
       ...DIRECT_CAPACITY_METADATA,
       notes:
         packageId === "t1_g4"
-          ? "G4 captação workbook row 33: available capacity by year; 2028 capacity is 348."
-          : "G6 captação workbook row 33: available capacity by year; maximum physical capacity is 740.",
+          ? "G4 package-specific capacity derived from approved grade-capacity table; Grade 12 activates in 2036."
+          : "G6 package-specific capacity derived from approved grade-capacity table; Grade 12 activates in 2034.",
     })),
   );
 
 function activeGradeCapacityRecords(packageId: "t1_g4" | "t1_g6"): CapacityByYearAndGradeRecord[] {
-  const series = CAPACITY_SERIES_BY_PACKAGE[packageId];
   const records: CapacityByYearAndGradeRecord[] = [];
   for (const [sourceGradeLabel, normalizedGradeId] of GRADE_LABELS) {
     for (const [index, year] of GOVERNED_DIRECT_YEARS.entries()) {
-      const cumulativeCapacity = GRADE_LABELS.slice(0, GRADE_LABELS.findIndex(([, id]) => id === normalizedGradeId) + 1)
-        .reduce((sum, [, gradeId]) => sum + GRADE_CAPACITY_BY_GRADE[gradeId], 0);
-      const active = cumulativeCapacity <= series[index];
+      const gradeIndex = GRADE_LABELS.findIndex(([, id]) => id === normalizedGradeId);
+      const active = gradeIndex < activeGradeCount(packageId, index);
       records.push({
         packageId,
         year,
@@ -191,8 +197,8 @@ function activeGradeCapacityRecords(packageId: "t1_g4" | "t1_g6"): CapacityByYea
         sections: active ? 2 : null,
         ...DIRECT_CAPACITY_METADATA,
         notes: active
-          ? "Grade capacity from direct package-specific captação workbook capacity section."
-          : "Grade not active in the direct package-specific captação workbook capacity section for this year.",
+          ? "Grade capacity from approved package-specific grade activation and grade-capacity table."
+          : "Grade not active in the approved package-specific grade activation schedule for this year.",
       });
     }
   }

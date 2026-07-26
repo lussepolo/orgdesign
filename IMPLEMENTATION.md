@@ -3797,3 +3797,45 @@ The detailed F-code source-governance list rendered by `DreAssumptionStatusPanel
 | `npm run validate:phase15j2-simulator` | ✓ 31/31 |
 | `npm run validate:phase15j` | ✓ 21/21 |
 - Not pushed
+---
+
+## Phase V10-E2.1 Grade-Level Capacity Reconciliation and Grade 12 Activation Correction (2026-07-24)
+
+### Scope
+
+This correction supersedes the V10-E1 runtime capacity ceiling of 740 for active Rio opening packages. It updates only the governed capacity architecture for `t1_g4` and `t1_g6`; enrollment matrices, tuition, discounts, Receita formulas, DRE formulas, payroll, salary, benefits, encargos, viability, CAPEX, and org-design scenario semantics remain unchanged.
+
+### Approved Capacity Contract
+
+- Full build-out capacity is 746 learners.
+- Grade 12 capacity is 50 learners: 25 learners per room across 2 rooms.
+- The previous 740 terminal value was a defect because it excluded the final 50-seat Grade 12 activation and left active grade-level capacity sums at 696 after full build-out.
+- Grade 12 activates in 2036 for `t1_g4`.
+- Grade 12 activates in 2034 for `t1_g6`.
+
+### Corrected Annual Capacity Series
+
+| Opening package | 2028 | 2029 | 2030 | 2031 | 2032 | 2033 | 2034 | 2035 | 2036 | 2037 |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| `t1_g4` | 348 | 396 | 446 | 496 | 546 | 596 | 646 | 696 | 746 | 746 |
+| `t1_g6` | 446 | 496 | 546 | 596 | 646 | 696 | 746 | 746 | 746 | 746 |
+
+Annual capacity is now derived from the same approved grade-capacity table and package/year activation counts used by the grade-level capacity records, so active grade-capacity sums reconcile exactly to annual capacity for every active package/year.
+
+### Validator Evidence
+
+| Gate | Result |
+|---|---|
+| `npm run validate:v10-e2` | 309/309 |
+| `npm run validate:v10-e1` | 100/100 |
+| `npm run lint` | clean |
+| `npm run build` | built in 2.21s |
+| `git diff --check` | clean |
+
+### Files Changed
+
+- `src/features/rio-scenario-resilience/model/governedCaptacaoCapacitySourceData.ts`
+- `src/features/rio-scenario-resilience/model/dreEnrollmentCapacityLeverContract.ts`
+- `scripts/validate-v10-e2.ts`
+- `scripts/validate-v10-e1.ts`
+- `IMPLEMENTATION.md`
