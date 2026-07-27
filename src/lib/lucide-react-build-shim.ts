@@ -54,6 +54,7 @@ export { default as Lightbulb } from "lucide-react/dist/esm/icons/lightbulb.js";
 export { default as Microscope } from "lucide-react/dist/esm/icons/microscope.js";
 export { default as Music } from "lucide-react/dist/esm/icons/music.js";
 export { default as Palette } from "lucide-react/dist/esm/icons/palette.js";
+export { default as PackageCheck } from "lucide-react/dist/esm/icons/package-check.js";
 export { default as PieChart } from "lucide-react/dist/esm/icons/chart-pie.js";
 export { default as Radar } from "lucide-react/dist/esm/icons/radar.js";
 export { default as RefreshCw } from "lucide-react/dist/esm/icons/refresh-cw.js";

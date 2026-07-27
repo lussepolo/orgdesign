@@ -58,7 +58,7 @@ function gradeDisplayName(gradeId: string): string {
   return GRADE_DISPLAY_NAMES[gradeId] ?? gradeId;
 }
 
-function getBoardDisplayLabel(rec: FopagCalculatedRecord): string {
+export function getBoardDisplayLabel(rec: FopagCalculatedRecord): string {
   if (rec.roleId === "secretary") return "Registrar";
   if (rec.roleId === "language_acquisition_coach") return "Language Acquisition and Performance Coach";
   if (rec.roleId === "led") return "Learning Experience Designer";
@@ -87,7 +87,7 @@ function getBoardDisplayLabel(rec: FopagCalculatedRecord): string {
   return rec.roleName;
 }
 
-function getDivisionArea(rec: FopagCalculatedRecord, isHubActive: boolean): string {
+export function getDivisionArea(rec: FopagCalculatedRecord, isHubActive: boolean): string {
   const { roleSourceType, roleId } = rec;
 
   if (roleSourceType === "baseline_leadership") return "Leadership";
@@ -116,7 +116,7 @@ function getDivisionArea(rec: FopagCalculatedRecord, isHubActive: boolean): stri
   return "Learning Ecosystem";
 }
 
-function getRoleGroupOrHub(rec: FopagCalculatedRecord, divisionArea: string): string {
+export function getRoleGroupOrHub(rec: FopagCalculatedRecord, divisionArea: string): string {
   if (divisionArea === "Learning Experience Design Hub") return "Learning Experience Design Hub";
 
   const eyMatch = rec.roleId.match(/^ey_(?:teaching_lead|learning_assistant|learning_monitor)_(.+)$/);
@@ -131,7 +131,7 @@ function getRoleGroupOrHub(rec: FopagCalculatedRecord, divisionArea: string): st
   return divisionArea;
 }
 
-function getSourceTypeLabel(roleSourceType: string): string {
+export function getSourceTypeLabel(roleSourceType: string): string {
   const labels: Record<string, string> = {
     baseline_leadership: "Baseline – Leadership",
     baseline_backoffice: "Baseline – Back-Office",

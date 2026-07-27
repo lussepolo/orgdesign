@@ -22,6 +22,7 @@ import {
   DollarSign,
   GitBranch,
   PieChart,
+  PackageCheck,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { clsx, type ClassValue } from 'clsx';
@@ -45,13 +46,14 @@ import StaffingTab from "./components/sections/StaffingTab";
 import LoadTab from "./components/sections/LoadTab";
 import AboutModal from "./components/sections/AboutModal";
 import DreScenarioSimulatorTab from "./components/sections/DreScenarioSimulatorTab";
+import PayrollExportMatrixTab from "./components/sections/PayrollExportMatrixTab";
 import { RioScenarioResiliencePreview } from "./features/rio-scenario-resilience/RioScenarioResiliencePreview";
 import { useCapitalDecisionWorkspace } from "./features/rio-scenario-resilience/hooks/useCapitalDecisionWorkspace";
 import { DRE_DEFAULT_SELECTIONS } from "./hooks/useDreScenarioSimulator";
 import type { DreScenarioSimulatorSelections } from "./hooks/useDreScenarioSimulator";
 
 // --- Types ---
-export type TabId = "cover" | "staffing" | "offer-scenarios" | "executive-org-design" | "hr" | "early-years" | "lower-school" | "ms" | "hs" | "load" | "payroll" | "viability" | "dre-scenario-simulator" | "capital-decision";
+export type TabId = "cover" | "staffing" | "offer-scenarios" | "executive-org-design" | "hr" | "early-years" | "lower-school" | "ms" | "hs" | "load" | "payroll" | "viability" | "dre-scenario-simulator" | "capital-decision" | "payroll-export-matrix";
 
 const APP_TAB_ORDER: TabId[] = [
   "cover",
@@ -67,6 +69,7 @@ const APP_TAB_ORDER: TabId[] = [
   "viability",
   "dre-scenario-simulator",
   "capital-decision",
+  "payroll-export-matrix",
 ];
 
 // --- Components ---
@@ -215,6 +218,7 @@ export default function App() {
             <TabButton active={activeTab === "viability"} onClick={() => setActiveTab("viability")} label="Viability Simulator" icon={Scale} />
             <TabButton active={activeTab === "dre-scenario-simulator"} onClick={() => setActiveTab("dre-scenario-simulator")} label="DRE Scenario Simulator" icon={PieChart} />
             <TabButton active={activeTab === "capital-decision"} onClick={() => setActiveTab("capital-decision")} label="Decisão de Capital" icon={Scale} />
+            <TabButton active={activeTab === "payroll-export-matrix"} onClick={() => setActiveTab("payroll-export-matrix")} label="Matriz de Exportação de Folha" icon={PackageCheck} />
           </nav>
 
           <div className="flex items-center gap-2 md:gap-4">
@@ -260,6 +264,7 @@ export default function App() {
               {activeTab === "viability" && "Viability Decision Simulator"}
               {activeTab === "dre-scenario-simulator" && "DRE Scenario Simulator"}
               {activeTab === "capital-decision" && "Decisão de Capital"}
+              {activeTab === "payroll-export-matrix" && "Matriz de Exportação de Folha"}
             </h2>
             <p className="text-slate-500 mt-2 max-w-2xl mx-auto md:mx-0">
               {activeTab === "hr" && "Detailed ownership, hiring profiles, and strategic cluster models for Middle and High School."}
@@ -275,6 +280,7 @@ export default function App() {
               {activeTab === "viability" && "Board-facing baseline plus directional sensitivity and threshold planning signals; not a final financial model."}
               {activeTab === "dre-scenario-simulator" && "Operating scenario layer for Rio's 2028 opening model."}
               {activeTab === "capital-decision" && "CAPEX analysis and scenario comparison via DRE-owned configurations."}
+              {activeTab === "payroll-export-matrix" && "Exportação governada dos doze cenários de folha (G4/G6 × Balanced/Lean × Ocupação)."}
             </p>
           </div>
         )}
@@ -308,6 +314,7 @@ export default function App() {
                 onNavigateToDre={() => setActiveTab("dre-scenario-simulator")}
               />
             )}
+            {activeTab === "payroll-export-matrix" && <PayrollExportMatrixTab />}
 
             {activeTab !== "cover" && (
               <div className="mt-16 pt-8 border-t border-slate-200 flex flex-col md:flex-row items-center justify-between gap-4">
@@ -317,7 +324,7 @@ export default function App() {
                   </button>
                 </div>
                 <div className="flex items-center gap-4">
-                  {activeTab !== "capital-decision" ? (
+                  {activeTab !== APP_TAB_ORDER[APP_TAB_ORDER.length - 1] ? (
                     <button onClick={() => { const currentIndex = APP_TAB_ORDER.indexOf(activeTab); if (currentIndex < APP_TAB_ORDER.length - 1) setActiveTab(APP_TAB_ORDER[currentIndex + 1]); }} className="flex items-center gap-2 px-8 py-3 bg-slate-900 rounded-2xl text-sm font-bold text-white hover:bg-slate-800 transition-all shadow-lg shadow-slate-200">
                       NEXT SECTION<ArrowRight className="h-4 w-4" />
                     </button>

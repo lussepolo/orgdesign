@@ -41,6 +41,7 @@
     "validate:v10-f1b": "tsx scripts/validate-v10-f1b.ts",
     "validate:v10-p1": "tsx scripts/validate-v10-p1.ts",
     "validate:v10-f2": "tsx scripts/validate-v10-f2.ts",
+    "validate:v10-x1": "tsx scripts/validate-v10-x1-payroll-export-matrix.ts",
     "qa:v10-e1": "tsx tests/v10e1/v10-e1.run.ts"
   },
   "dependencies": {
@@ -50,6 +51,7 @@
     "clsx": "^2.1.1",
     "dotenv": "^17.2.3",
     "express": "^4.21.2",
+    "jszip": "^3.10.1",
     "lucide-react": "^0.546.0",
     "motion": "^12.23.24",
     "react": "^19.0.0",

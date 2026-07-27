@@ -4729,3 +4729,156 @@ from V10-F2, unaffected by this phase).
 scripts/validate-phase15t2.ts` — 20/20 pass (script not yet aliased in `package.json`;
 ran directly). `npm run lint` (`tsc --noEmit`) and `npm run build` (vite) — clean, 0
 errors. `git diff --cached --check` and `git diff --check` — clean, no whitespace errors.
+
+## Phase V10-X1 — G4/G6 Balanced and Lean Payroll Export Matrix (2026-07-27)
+
+### Purpose
+
+A permanent application export capability for twelve governed payroll scenarios
+(2 opening packages × 2 Org Design scenarios × 3 occupancy scenarios), consuming the
+existing canonical opening-package, occupancy, Org Design, FOPAG, and DRE engines with
+no parallel payroll model and no formula changes.
+
+### Twelve-scenario matrix and mappings
+
+| # | Início | Folha | Ocupação | Internal IDs |
+|---|---|---|---|---|
+| 1-3 | G4 | Balanced | Conservadora/Base/Otimista | `t1_g4` / `balanced_experience` / `conservador,base,otimista` |
+| 4-6 | G6 | Balanced | Conservadora/Base/Otimista | `t1_g6` / `balanced_experience` / same |
+| 7-9 | G4 | Lean | Conservadora/Base/Otimista | `t1_g4` / `minimum_experience` / same |
+| 10-12 | G6 | Lean | Conservadora/Base/Otimista | `t1_g6` / `minimum_experience` / same |
+
+- Folha Balanced = `balanced_experience` (no independent model).
+- Folha Lean = `minimum_experience` (display label only; the app's own posture text
+  already calls Minimum "Lean Opening Model" — `executiveOrgDesignModel.ts`). No separate
+  Lean Org Design model exists; `VALID_ORG_DESIGN_OPTIONS` has exactly three members
+  (`minimum_experience`, `balanced_experience`, `premium_experience`).
+- Ocupação Conservadora/Base/Otimista = `conservador`/`base`/`otimista`. `pessimista` is a
+  retired occupancy id — `assertOccupancyScenarioId()` throws on it — and is structurally
+  unreachable anywhere in this matrix.
+- Fixed lever (identical across all 12 exports): `tuitionScenarioId =
+  "bp1_division_differentiated"`. `calculateFopag()` takes no tuition parameter at all —
+  isolation is structural, not merely runtime-toggled. Empirically confirmed: FOPAG payroll
+  components are byte-identical across two different tuition scenarios for the same
+  opening/occupancy/org-design combination, all 20 years (`validate:v10-x1`).
+- Model horizon: 2028–2047 (`SIMULATOR_PROJECTION_YEARS`), verified non-placeholder for
+  2038-2047 by direct engine calls (all 20 years show distinct, growing `totalPayroll`).
+
+### Canonical calculation path (no reimplementation)
+
+`calculateFopag()` (`fopagEngine.ts`) → `buildPayrollAdapterInput()` (`payrollAdapter.ts`,
+section counts from `sectionCountEngine.ts`, role activation from
+`orgDesignPayrollActivation.ts`) → per-record salary/benefits base-year normalization and
+growth via `src/lib/payroll/payrollGrowth.ts` (`toSalaryBase2028`, `salaryMonthlyForYear`,
+`laborChargesMonthlyForSalary`, `benefitsMonthlyForYear`) → `FopagCalculatedRecord[]` /
+`FopagYearTotals[]`. `calculateDre()` (`dreEngine.ts`) consumes the same `calculateFopag()`
+output for the DRE payroll bridge. All governed formulas (`salaryMonthly(2028)=base`,
+`×1.059^(year-2028)` after; `encargos=salary×0.485`; `salaryAndCharges=salaryMonthly×1.485×13`;
+`benefitsMonthly(2028)=base`, `×1.10^(year-2028)` after; `benefitsAnnual=monthly×12`)
+were verified to already exist verbatim in `payrollGrowth.ts`/`fopagEngine.ts` — zero
+discrepancy against spec, zero reimplementation.
+
+### New files
+
+- `src/features/rio-scenario-resilience/model/payrollExportMatrixContract.ts` — single
+  source of truth for the 12 scenario records (IDs, labels, filenames, horizon, fixed
+  levers).
+- `payrollExportScenarioAdapter.ts` — the one runtime harness
+  (`buildPayrollExportScenarioResult`) every consumer calls; wraps `calculateFopag()` +
+  `calculateDre()` with no independent calculation.
+- `payrollExportWorkbookBuilder.ts` — builds the 7 required sheets (Scenario Summary,
+  FOPAG Headcount Plan, FOPAG Role Audit, FOPAG Payroll Projection, Payroll Detail, DRE
+  Payroll Bridge, Source and Formula Governance) per scenario. Role annual totals are
+  derived algebraically from the engine's own authoritative annualized figures
+  (`rec.grossLaborAnnualAfterGrowth` / `rec.benefitsAnnualAfterGrowth`, both already
+  roundCurrency'd), not recomputed bottom-up, guaranteeing exact reconciliation (Annual
+  Salary + Annual Encargos + Annual Benefits = `rec.totalAnnualPayrollAfterGrowth`, zero
+  rounding drift). Formula cells use the `{t,v,f}` pattern already established in
+  `dreScenarioWorkbook.ts` (cached value + live formula string): role totals (in-sheet
+  formula), annual column totals (`SUMIF` over Payroll Detail), Scenario Summary totals
+  (cross-sheet reference to FOPAG Payroll Projection), DRE difference and reconciliation
+  status (`IF(ABS(diff)<0.01,"OK","MISMATCH")`).
+- `payrollExportSummaryWorkbookBuilder.ts` — `Rio_Matriz_Folha_Resumo.xlsx`, one row per
+  scenario, wide year-column format, built from the same detail functions as the detailed
+  workbooks.
+- `payrollExportManifest.ts` — `scenario-manifest.json` builder.
+- `payrollExportZip.ts` — ZIP packaging via `jszip` (new dependency; no client-side ZIP
+  library previously existed in the app).
+- `src/components/sections/PayrollExportMatrixTab.tsx` — "Matriz de Exportação de Folha"
+  UI: 12-row table (Início/Folha/Ocupação/Status/Baixar XLSX) plus one batch "Baixar os 12
+  cenários" button producing a single ZIP via `URL.createObjectURL`. Concurrent-generation
+  guard via `isBusy` state; loading/error states; PT-BR labels only, no internal IDs shown.
+- `scripts/validate-v10-x1-payroll-export-matrix.ts` (`npm run validate:v10-x1`) — 39
+  checks across matrix completeness, semantic mapping, filename contract, role visibility,
+  runtime reconciliation, workbook structure, formula traceability, scenario isolation,
+  governance invariance, and ZIP/manifest reconciliation.
+
+### Export-layer-only completeness fix (not a calculation change)
+
+The canonical adapter can omit a role/year entirely (no record at all, not even an audit
+row) when a grade does not exist yet for a given opening package's first governed year —
+e.g. `ls_teaching_lead_g5` has no 2028 record for `t1_g4` (Grade 5 does not open until year
+2 of the G4 package). `payrollExportWorkbookBuilder.ts`'s `fillMissingYearRecords()`
+synthesizes a zero row (HC=0, payroll=0, `isAuditRow=true`, explicit source note) for such
+gaps so the export's own role×year grid stays complete per spec — `calculateFopag()` is
+never modified, bypassed, or double-called; every year that DOES have a record is passed
+through unchanged.
+
+### Occupancy invariance (documented, not manufactured)
+
+For all 3 opening-package/org-design combinations checked, and confirmed structurally for
+all 20 years and all grades in both packages (`sectionCountEngine.ts` — `calculateSectionCountsForScenario`),
+Conservadora/Base/Otimista produce identical section counts and therefore identical
+payroll, even though enrollment genuinely differs across the three scenarios (e.g. PK3 2028:
+26/28/32 students for G6). Cause: `sectionCount = min(max(rawSections, committedSections), 2)`
+— the workbook's 2-section-per-grade cap — saturates at 2 for all three occupancy variants
+in every governed year for both packages (0 section-count differences found across 200
+records per package). This is a structural property of the current governed capacity
+configuration, not an export defect; no artificial payroll differentiation was introduced.
+
+### Runtime reconciliation
+
+All 12 scenarios' FOPAG year totals and DRE enrollment figures were cross-checked against
+independent, freshly-computed `calculateFopag()`/`calculateDre()` calls (not the cached
+scenario-result objects) — exact match, 0 discrepancy. DRE Payroll Bridge reconciles to
+0 (within R$0.01) for all 12 scenarios × 20 years = 240 year/scenario combinations.
+
+### Validation evidence
+
+`npm run validate:v10-x1` (39/39), `validate:v10-p1` (58/58), `validate:v10-f2` (76/76),
+`validate:v10-f1b`, `validate:v10-e1`, `validate:v10-e2`, `validate:phase15j2-simulator`
+(31/31) — all pass, 0 failures, both in the primary tree and in an isolated
+`git worktree` built from a bounded `git diff --cached --binary` patch applied to clean
+`HEAD` (856efc5b82a9d9abf713bf5f341bcb2e6dae8391) followed by `npm ci`. `npm run lint`
+(`tsc --noEmit`) and `npm run build` (vite) — clean, 0 errors, in both trees. `git diff
+--check` — clean. Programmatic generation test: all 12 workbooks + summary + manifest
+round-trip through `XLSX.write`/`XLSX.read` successfully; ZIP builds and reopens with
+exactly 14 entries; permanent delivery to
+`~/Downloads/Rio_Matriz_Folha_G4_G6_Balanced_Lean/` produced exactly 15 files (12
+detailed workbooks + summary + manifest + ZIP), SHA-256 and size recorded for each.
+
+### Exact files changed
+
+New: `payrollExportMatrixContract.ts`, `payrollExportScenarioAdapter.ts`,
+`payrollExportWorkbookBuilder.ts`, `payrollExportSummaryWorkbookBuilder.ts`,
+`payrollExportManifest.ts`, `payrollExportZip.ts`, `PayrollExportMatrixTab.tsx`,
+`scripts/validate-v10-x1-payroll-export-matrix.ts`. Modified: `App.tsx` (new tab wiring),
+`orgDesignHcTableAdapter.ts` (4 functions changed from private to exported —
+`getBoardDisplayLabel`, `getDivisionArea`, `getRoleGroupOrHub`, `getSourceTypeLabel` —
+visibility-only, zero behavioral change, a hard compile dependency of the new export
+layer; this diff pre-existed in the working tree before this phase and is included here
+because it is required for the bounded patch to build at clean HEAD), `lucide-react-build-shim.ts`
+(added `PackageCheck` icon export), `package.json`/`package-lock.json` (added `jszip`
+dependency + `validate:v10-x1` script).
+
+### Known limitations
+
+- Not a whole-platform workbook-lineage certification — scoped to the 12-scenario payroll
+  export matrix only.
+- The `fillMissingYearRecords` synthetic-zero-row mechanism is export-layer display
+  completeness only; it does not change any runtime calculation and only activates for
+  role/year combinations the canonical adapter never emits a record for at all.
+- Large pre-existing unrelated dirty/untracked work in the repository (Phase 15T/15U.2,
+  Receita/capital/viability/payroll-governance work, forensic audit docs) was inventoried
+  and deliberately left untouched — none of it was staged, committed, or depended upon by
+  this phase's bounded patch (confirmed empirically via the isolated worktree lint/build).
