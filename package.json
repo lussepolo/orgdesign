@@ -39,6 +39,7 @@
     "validate:v10-e1": "tsx scripts/validate-v10-e1.ts",
     "validate:v10-e2": "tsx scripts/validate-v10-e2.ts",
     "validate:v10-f1b": "tsx scripts/validate-v10-f1b.ts",
+    "validate:v10-p1": "tsx scripts/validate-v10-p1.ts",
     "qa:v10-e1": "tsx tests/v10e1/v10-e1.run.ts"
   },
   "dependencies": {

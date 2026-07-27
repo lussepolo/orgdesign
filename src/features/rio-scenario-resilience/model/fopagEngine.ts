@@ -1,6 +1,14 @@
 import { buildPayrollAdapterInput } from "./payrollAdapter";
-import { resolveGrowthFactor, roundCurrency } from "../../../lib/payroll/core";
-import { ANNUAL_ADJUSTMENT } from "../../../constants";
+import { roundCurrency } from "../../../lib/payroll/core";
+import {
+  toSalaryBase2028,
+  toBenefitsBase2028,
+  resolveSalaryGrowthFactor,
+  resolveBenefitsGrowthFactor,
+  salaryMonthlyForYear,
+  benefitsMonthlyForYear,
+  laborChargesMonthlyForSalary,
+} from "../../../lib/payroll/payrollGrowth";
 import { SIMULATOR_PROJECTION_YEARS } from "./simulatorProjectionHorizonContract";
 import { assertSupportedDreEnrollmentCapacityLeverInput } from "./dreEnrollmentCapacityLeverContract";
 import {
@@ -18,10 +26,14 @@ import type {
 } from "./fopagEngineContract";
 import type { PayrollAdapterDiagnosticType } from "./payrollAdapterContract";
 
-// Approved v1 base year for payroll growth formula (Phase 8E, Luciana 2026-06-03).
-// resolveGrowthFactor(year, GROWTH_BASE_YEAR, ANNUAL_ADJUSTMENT) = Math.pow(1.06, year - 2028 + 1).
-// 2028 → 1.06; 2029 → 1.1236. Formula continues through 2047 (Phase 11B).
-const GROWTH_BASE_YEAR = 2028 as const;
+// V10-P1 (2026-07-26): salary and benefits escalation are separate canonical
+// tracks from src/lib/payroll/payrollGrowth.ts, governed by the v10 workbook
+// PnL row 12 (Dissídio, salary) and row 13 (Benefícios, benefits). Base year
+// 2028; salary escalates 5.9%/yr from 2029, benefits escalates 10%/yr from
+// 2029. Formula continues through 2047 (Phase 11B horizon extension).
+// Superseded the prior single-factor ANNUAL_ADJUSTMENT=1.06 convention
+// (Phase 8E) which applied the same 6% growth to both salary and benefits
+// every year — see docs/audits/rio-resilience for the V10-P1 audit.
 
 // Full 20-year simulator horizon: 2028–2047.
 // 2028–2037: direct workbook years. 2038–2047: mature-state carry-forward.
@@ -155,13 +167,20 @@ export function calculateFopag(input: FopagEngineInput): FopagEngineOutput {
     // isAuditRow: included for completeness but not added to allocation totals.
     const isAuditRow = !rec.active || rec.headcountOrFte === 0;
 
-    // Growth factor: resolveGrowthFactor(year, 2028, 1.06).
-    // activeFrom=2028 ensures the guard year < activeFrom never suppresses a projection year.
-    // Inactivity is already expressed by headcountOrFte=0 (isAuditRow=true).
-    const payrollGrowthFactor = resolveGrowthFactor(
+    // V10-P1: explicit 2028 base normalization, then independent salary and
+    // benefits escalation tracks (src/lib/payroll/payrollGrowth.ts).
+    const salaryBase2028 = toSalaryBase2028(rec.grossMonthly);
+    const benefitsBase2028 = toBenefitsBase2028(rec.benefitsMonthly);
+    const salaryGrowthFactor = resolveSalaryGrowthFactor(rec.year);
+    const benefitsGrowthFactor = resolveBenefitsGrowthFactor(rec.year);
+
+    const grossMonthlyAfterGrowth = salaryMonthlyForYear(salaryBase2028, rec.year);
+    const laborChargesMonthlyAfterGrowth = laborChargesMonthlyForSalary(
+      grossMonthlyAfterGrowth,
+    );
+    const benefitsMonthlyAfterGrowth = benefitsMonthlyForYear(
+      benefitsBase2028,
       rec.year,
-      GROWTH_BASE_YEAR,
-      ANNUAL_ADJUSTMENT,
     );
 
     const grossLaborAnnualBeforeGrowth = roundCurrency(
@@ -171,10 +190,12 @@ export function calculateFopag(input: FopagEngineInput): FopagEngineOutput {
       rec.benefitsMonthly * 12 * rec.headcountOrFte,
     );
     const grossLaborAnnualAfterGrowth = roundCurrency(
-      grossLaborAnnualBeforeGrowth * payrollGrowthFactor,
+      (grossMonthlyAfterGrowth + laborChargesMonthlyAfterGrowth) *
+        13 *
+        rec.headcountOrFte,
     );
     const benefitsAnnualAfterGrowth = roundCurrency(
-      benefitsAnnualBeforeGrowth * payrollGrowthFactor,
+      benefitsMonthlyAfterGrowth * 12 * rec.headcountOrFte,
     );
     const totalAnnualPayrollAfterGrowth = roundCurrency(
       grossLaborAnnualAfterGrowth + benefitsAnnualAfterGrowth,
@@ -194,7 +215,8 @@ export function calculateFopag(input: FopagEngineInput): FopagEngineOutput {
       grossMonthly: rec.grossMonthly,
       laborChargesMonthly: rec.laborChargesMonthly,
       benefitsMonthly: rec.benefitsMonthly,
-      payrollGrowthFactor,
+      salaryGrowthFactor,
+      benefitsGrowthFactor,
       grossLaborAnnualBeforeGrowth,
       benefitsAnnualBeforeGrowth,
       grossLaborAnnualAfterGrowth,
@@ -297,10 +319,17 @@ export function calculateFopag(input: FopagEngineInput): FopagEngineOutput {
     implementationNote:
       "Phase 8I FOPAG calculation engine (2026-06-03). " +
       "Phase 11B (2026-06-07): extended to full simulator horizon 2028–2047. " +
+      "V10-P1 (2026-07-26): salary and benefits are independent canonical growth " +
+      "tracks from src/lib/payroll/payrollGrowth.ts, governed by v10 workbook PnL " +
+      "row 12 (Dissídio) / row 13 (Benefícios). Explicit 2028 bases (salaryBase2028, " +
+      "benefitsBase2028) via a one-time ×1.06 conversion from stored role figures; " +
+      "salaryGrowthFactor = 1.0 at 2028, ×1.059^(year-2028) after; benefitsGrowthFactor " +
+      "= 1.0 at 2028, ×1.10^(year-2028) after. Encargos = salaryMonthly × 48.5%, " +
+      "recomputed from the escalated salary each year (not a separately-grown stored " +
+      "literal). Supersedes the prior single-factor ANNUAL_ADJUSTMENT=1.06 convention " +
+      "(Phase 8E), which applied identical 6% growth to salary and benefits every year. " +
       "Computes FOPAG_DIRETO, FOLHA_DIRETA, BENEFITS, and TOTAL_PAYROLL annual totals by year. " +
-      "Growth formula: resolveGrowthFactor(year, 2028, ANNUAL_ADJUSTMENT=1.06) from src/lib/payroll/core.ts — " +
-      "yields Math.pow(1.06, year - 2028 + 1): 2028→1.06, 2029→1.1236, 2047→...; continues through 2047. " +
-      "Annualization: (grossMonthly + laborChargesMonthly) × 13 × hc before growth; benefitsMonthly × 12 × hc before growth. " +
+      "Annualization: (grossMonthly + laborChargesMonthly) × 13 × hc after growth; benefitsMonthly × 12 × hc after growth. " +
       "FOPAG_DIRETO = sum grossLaborAnnualAfterGrowth for FOPAG_DIRETO records. " +
       "FOLHA_DIRETA = sum grossLaborAnnualAfterGrowth for FOLHA_DIRETA records. " +
       "BENEFITS = sum benefitsAnnualAfterGrowth for all active records. " +
@@ -314,7 +343,10 @@ export function calculateFopag(input: FopagEngineInput): FopagEngineOutput {
       "Phase 8I FOPAG engine implementation (2026-06-03). Approved: Luciana 2026-06-03. " +
       "Phase 11B (2026-06-07): 2038–2047 powered by mature-state carry-forward from 2037 baseline. " +
       "Consumes payrollAdapter.ts buildPayrollAdapterInput() output — do not bypass adapter. " +
-      "Finance-validated payroll growth convention (ANNUAL_ADJUSTMENT=1.06, base year=2028, Phase 8E). " +
+      "V10-P1 (2026-07-26): governed by v10 workbook (Concept Rio - 20 anos - Org BU - " +
+      "Apresentação v10.xlsx, SHA-256 2e3230ad233c7cd450c1da1fca46da1cb80899e66cdf5ba3d4e9358357a05da0), " +
+      "PnL row 12/13. Base year 2028; salary 5.9%/yr from 2029; benefits 10%/yr from 2029; " +
+      "independent tracks, no shared growth factor. Supersedes Phase 8E's single ANNUAL_ADJUSTMENT=1.06. " +
       "calculationReady is scenario-specific: true when adapter returns 'assembled' and no blocking diagnostics exist. " +
       "CALCULATION_CAN_BEGIN remains false pending complete board model (Receita, OPEX/CAPEX, EBITDA, governance layers).",
   };

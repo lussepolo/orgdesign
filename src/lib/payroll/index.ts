@@ -9,7 +9,6 @@ export type {
 export {
   roundCurrency,
   safeNumber,
-  resolveGrowthFactor,
   annualSalaryBurden,
   annualBenefitsOnly,
   annualGrossAndLaborOnly,
@@ -22,6 +21,25 @@ export {
   getRoleCollectionYearTotals,
   getRoleCollectionTimelineTotals,
 } from "./core";
+
+export {
+  PAYROLL_BASE_YEAR_2028,
+  SALARY_2027_TO_2028_CONVERSION_RATE,
+  SALARY_ESCALATION_RATE_2029_PLUS,
+  BENEFITS_ESCALATION_RATE_2029_PLUS,
+  ENCARGOS_RATE,
+  V10_PAYROLL_SOURCE_SALARY,
+  V10_PAYROLL_SOURCE_BENEFITS,
+  V10_SALARY_RATE_BY_YEAR,
+  V10_BENEFITS_RATE_BY_YEAR,
+  toSalaryBase2028,
+  toBenefitsBase2028,
+  resolveSalaryGrowthFactor,
+  resolveBenefitsGrowthFactor,
+  salaryMonthlyForYear,
+  benefitsMonthlyForYear,
+  laborChargesMonthlyForSalary,
+} from "./payrollGrowth";
 
 export type {
   PayrollScenario,

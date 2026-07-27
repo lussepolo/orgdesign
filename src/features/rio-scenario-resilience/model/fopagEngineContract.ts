@@ -67,13 +67,16 @@ export interface FopagCalculatedRecord {
   grossMonthly: number;
   laborChargesMonthly: number;
   benefitsMonthly: number;
-  // Growth factor: resolveGrowthFactor(year, 2028, 1.06) = Math.pow(1.06, year - 2028 + 1).
-  // 2028 → 1.06; 2029 → 1.1236. Approved v1 convention (Phase 8E, Luciana 2026-06-03).
-  payrollGrowthFactor: number;
-  grossLaborAnnualBeforeGrowth: number; // (gross + labor) × 13 × hc
-  benefitsAnnualBeforeGrowth: number;   // benefits × 12 × hc
-  grossLaborAnnualAfterGrowth: number;  // grossLaborAnnualBeforeGrowth × growthFactor
-  benefitsAnnualAfterGrowth: number;    // benefitsAnnualBeforeGrowth × growthFactor
+  // V10-P1 (2026-07-26): independent salary/benefits growth tracks — see
+  // src/lib/payroll/payrollGrowth.ts. 1.0 at 2028; salary ×1.059^(year-2028),
+  // benefits ×1.10^(year-2028) thereafter. Supersedes the single Phase 8E
+  // ANNUAL_ADJUSTMENT=1.06 factor previously shared by both.
+  salaryGrowthFactor: number;
+  benefitsGrowthFactor: number;
+  grossLaborAnnualBeforeGrowth: number; // (gross + labor) × 13 × hc, pre-2028-normalization stored figures
+  benefitsAnnualBeforeGrowth: number;   // benefits × 12 × hc, pre-2028-normalization stored figures
+  grossLaborAnnualAfterGrowth: number;  // (salaryMonthly + laborChargesMonthly) × 13 × hc, after growth
+  benefitsAnnualAfterGrowth: number;    // benefitsMonthly × 12 × hc, after growth
   totalAnnualPayrollAfterGrowth: number; // grossLabor + benefits after growth
   // isAuditRow: true when headcountOrFte=0 or active=false. Included for audit
   // completeness but excluded from FOPAG_DIRETO / FOLHA_DIRETA / BENEFITS totals.

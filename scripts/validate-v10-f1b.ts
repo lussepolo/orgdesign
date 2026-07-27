@@ -251,13 +251,20 @@ check(
   "DRE adapter does not substitute the superseded workbook v9 value of 259",
 );
 
-// ── Section I: payroll formula marker unchanged ─────────────────────────────
+// ── Section I: payroll formula marker ───────────────────────────────────────
+// Originally asserted fopagEngine.ts was untouched by this (discount-only)
+// phase, via the presence of the old shared ANNUAL_ADJUSTMENT marker. V10-P1
+// (2026-07-26, separately governed) legitimately supersedes that single-factor
+// convention with independent salary/benefits growth tracks — so the marker
+// itself is now stale. Updated to assert the new canonical module is wired in,
+// rather than asserting non-modification of a file this later phase is
+// explicitly authorized to change.
 check(
-  "payroll_formula_marker_unchanged",
+  "payroll_formula_uses_v10_p1_canonical_module",
   readFileSync("src/features/rio-scenario-resilience/model/fopagEngine.ts", "utf8").includes(
-    "ANNUAL_ADJUSTMENT",
+    "lib/payroll/payrollGrowth",
   ),
-  "fopagEngine.ts payroll formula marker retained — not touched by this phase",
+  "fopagEngine.ts sources salary/benefits growth from the V10-P1 canonical payrollGrowth module",
 );
 check(
   "tuition_formula_marker_unchanged",

@@ -1,4 +1,12 @@
-import { ANNUAL_ADJUSTMENT } from "../../constants";
+import {
+  toSalaryBase2028,
+  toBenefitsBase2028,
+  salaryMonthlyForYear,
+  benefitsMonthlyForYear,
+  laborChargesMonthlyForSalary,
+  resolveSalaryGrowthFactor,
+  resolveBenefitsGrowthFactor,
+} from "./payrollGrowth";
 
 export type AllocationModel = "FOPAG_DIRETO" | "FOLHA_DIRETA";
 
@@ -17,7 +25,6 @@ export interface PayrollRoleLike {
 
 export interface PayrollEngineOptions {
   withBenefits: boolean;
-  annualAdjustment?: number;
 }
 
 export interface RoleYearProjection {
@@ -29,7 +36,8 @@ export interface RoleYearProjection {
   year: number;
   activeFrom: number;
   headcount: number;
-  growthFactor: number;
+  salaryGrowthFactor: number;
+  benefitsGrowthFactor: number;
 
   grossMonthlyPerPerson: number;
   laborMonthlyPerPerson: number;
@@ -71,10 +79,7 @@ export interface PayrollYearTotals {
 
 const DEFAULT_OPTIONS: PayrollEngineOptions = {
   withBenefits: true,
-  annualAdjustment: ANNUAL_ADJUSTMENT,
 };
-
-const COMPENSATION_SCALE_BASE_YEAR = 2028;
 
 export function roundCurrency(value: number): number {
   return Math.round((value + Number.EPSILON) * 100) / 100;
@@ -82,15 +87,6 @@ export function roundCurrency(value: number): number {
 
 export function safeNumber(value: unknown): number {
   return typeof value === "number" && Number.isFinite(value) ? value : 0;
-}
-
-export function resolveGrowthFactor(
-  year: number,
-  activeFrom: number,
-  annualAdjustment: number,
-): number {
-  if (year < activeFrom) return 0;
-  return Math.pow(annualAdjustment, year - COMPENSATION_SCALE_BASE_YEAR + 1);
 }
 
 export function annualSalaryBurden(
@@ -156,32 +152,34 @@ export function getProjectedMonthlyComponentsPerPerson(
   laborMonthly: number;
   benefitsMonthly: number;
   loadedMonthly: number;
-  growthFactor: number;
+  salaryGrowthFactor: number;
+  benefitsGrowthFactor: number;
 } {
   const resolved = { ...DEFAULT_OPTIONS, ...options };
-  const annualAdjustment = safeNumber(resolved.annualAdjustment) || 1;
-  const growthFactor = resolveGrowthFactor(
-    year,
-    role.activeFrom,
-    annualAdjustment,
-  );
 
-  if (growthFactor === 0) {
+  if (year < role.activeFrom) {
     return {
       grossMonthly: 0,
       laborMonthly: 0,
       benefitsMonthly: 0,
       loadedMonthly: 0,
-      growthFactor: 0,
+      salaryGrowthFactor: 0,
+      benefitsGrowthFactor: 0,
     };
   }
 
-  const grossMonthly = roundCurrency(safeNumber(role.grossMonthly) * growthFactor);
-  const laborMonthly = roundCurrency(
-    safeNumber(role.laborChargesMonthly) * growthFactor,
-  );
+  // Explicit 2028 base-year normalization (V10-P1) — applied once, independently
+  // for salary and benefits — then escalated year-over-year from separate tracks.
+  const salaryBase2028 = toSalaryBase2028(safeNumber(role.grossMonthly));
+  const benefitsBase2028 = toBenefitsBase2028(safeNumber(role.benefitsMonthly));
+
+  const salaryGrowthFactor = resolveSalaryGrowthFactor(year);
+  const benefitsGrowthFactor = resolveBenefitsGrowthFactor(year);
+
+  const grossMonthly = roundCurrency(salaryMonthlyForYear(salaryBase2028, year));
+  const laborMonthly = roundCurrency(laborChargesMonthlyForSalary(grossMonthly));
   const rawBenefitsMonthly = roundCurrency(
-    safeNumber(role.benefitsMonthly) * growthFactor,
+    benefitsMonthlyForYear(benefitsBase2028, year),
   );
   const benefitsMonthly = resolved.withBenefits ? rawBenefitsMonthly : 0;
 
@@ -190,7 +188,8 @@ export function getProjectedMonthlyComponentsPerPerson(
     laborMonthly,
     benefitsMonthly,
     loadedMonthly: roundCurrency(grossMonthly + laborMonthly + benefitsMonthly),
-    growthFactor,
+    salaryGrowthFactor,
+    benefitsGrowthFactor,
   };
 }
 
@@ -224,7 +223,8 @@ export function getRoleYearProjection(
     year,
     activeFrom: role.activeFrom,
     headcount,
-    growthFactor: perPerson.growthFactor,
+    salaryGrowthFactor: perPerson.salaryGrowthFactor,
+    benefitsGrowthFactor: perPerson.benefitsGrowthFactor,
 
     grossMonthlyPerPerson: perPerson.grossMonthly,
     laborMonthlyPerPerson: perPerson.laborMonthly,

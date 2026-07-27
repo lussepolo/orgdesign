@@ -3797,6 +3797,112 @@ The detailed F-code source-governance list rendered by `DreAssumptionStatusPanel
 | `npm run validate:phase15j2-simulator` | ✓ 31/31 |
 | `npm run validate:phase15j` | ✓ 21/21 |
 - Not pushed
+
+---
+
+## Phase 2 Forensic Reconciliation
+
+**Date:** 2026-07-21
+**Audited HEAD:** `d743616916d8b3b4b1708cd9e3ef25c08b0ad00f`
+**Status:** BLOCKED
+**Authoritative workbook (Phase 1 subject):** Concept Rio - 20 anos - Org BU - Apresentação v9.xlsx
+**Application source workbooks:** OPEX assumptions from vCR v7 (2).xlsx; capital bridge parity fixture from vBU v8 (2).xlsx; governance SoT from vBU v8 (1).xlsx
+
+**Scope:** 39 calculations across enrollment, revenue, discount mechanisms, payroll, 17 OPEX lines, EBITDA, below-EBITDA bridge, DCF, IRR, payback, and sensitivity.
+
+**Primary blockers (5):**
+
+1. Phase 1 captured formula lineage for only 6 of 39 required calculations; 33 are NOT TRACEABLE.
+2. No mutually aligned scenario can be confirmed — A218 (enrollment selector) identity not read; AD11 (tuition scenario) source not captured.
+3. Workbook version mismatch across audit chain (v7, v8, v8.2, v9) — cross-version consistency unconfirmed.
+4. `reajuste_despesas` growth factor present in workbook formula C233 but omitted in application (pending Finance source).
+5. WACC rates (13.25% / 12%) not independently confirmed from any workbook cell read in Phase 1.
+
+**Known formula-structure results:**
+
+| Match level | Calculations |
+|---|---|
+| EXACT FORMULA AND INPUT MATCH | Financial result (= 0) |
+| STRUCTURAL ANALOGY ONLY | EBITDA three-component sum; DCF cumulative-product discount factor; IRR Newton-Raphson; TIR exponent convention |
+| OUTPUT MATCH (circular) | D&A 2028 = –R$4,689,518.38 (same v7 extraction used both sides) |
+| NOT TRACEABLE | 33 of 39 |
+
+**Next action:** Targeted Phase 1 evidence recovery — re-read A218 enrollment selector source, AD11 tuition scenario source, WACC rate cells (PnL row 305/306), and scalar VPL formula cell; confirm v9 OPEX values against v7/v8 extractions.
+
+**Archive:** [docs/audits/rio-resilience/phase-2-forensic-reconciliation-d743616.md](docs/audits/rio-resilience/phase-2-forensic-reconciliation-d743616.md)
+
+---
+
+## Phase V10-E1 Final Stabilization — Package Retirement, Build, and Browser QA (2026-07-24)
+
+### Scope
+
+This stabilization loop continues the governed V10-E1 captação migration without changing tuition, discount, Receita, DRE, salary, benefits, encargos, payroll, enrollment, or capacity formulas.
+
+### Package contract
+
+- Recognized opening package identifiers remain `t1_g3`, `t1_g4`, `t1_g5`, and `t1_g6`.
+- Active governed opening packages are exactly `t1_g4` and `t1_g6`.
+- Retired opening packages are exactly `t1_g3` and `t1_g5`.
+- Unknown package identifiers remain distinct from retired package identifiers.
+- Retired packages do not normalize to G4, G6, or the default package.
+- Retired packages are rejected before enrollment, capacity, occupancy, Receita, DRE, section formation, staffing, payroll, or operational export.
+- Active selectors show only T1-G4 and T1-G6. G3 and G5 remain retained for historical and persisted-data recognition.
+
+### Scenario and capacity authority
+
+- Active captação scenarios remain exactly `conservador`, `base`, and `otimista`, in that order.
+- Legacy `intermediario` normalizes to `base` only at the compatibility boundary.
+- Legacy `pessimista` remains retired and rejected.
+- V10-E1 runtime capacity remains governed by the captação workbooks and capped at 740.
+- The 746 classroom/grade-capacity evidence remains separate reconciliation evidence for a later governed capacity decision; it is not an active V10-E1 runtime replacement.
+- The active selector space remains `2 packages x 3 scenarios x 5 tuition options x 3 org designs = 90` combinations.
+
+### Build and browser QA stabilization
+
+- Production build previously stalled in Vite transform with the process sleeping at 0% CPU and an esbuild child process idle.
+- `lsof` showed broad root-barrel dependency traversal through `lucide-react` and then `recharts`.
+- Added exact Vite aliases for bare `lucide-react` and `recharts` imports to repository-local build shims that export only the symbols used by the app.
+- Direct `npx vite build --debug` then completed in 18.49s with 1173 modules transformed.
+- Exact `npm run build` completed in 2.24s with only the existing large-chunk warning.
+- Browser QA previously timed out at `page.goto` because Vite dev `GET` responses hung while `HEAD /` returned 200.
+- Diagnosed `GET /`, `/@vite/client`, `/src/main.tsx`, and `/src/index.css`; each hung before source scoping.
+- Changed Tailwind v4 import to `@import "tailwindcss" source(none);` plus `@source ".";` in `src/index.css` so automatic source detection is restricted to the app source tree.
+- After the source-scope fix, `curl GET /` returned 200 with 1061 bytes in 0.029s, Node `fetch` returned 200 with 1061 bytes, and Playwright committed the page and read title `Strategic Organizational Architecture`.
+
+### Files changed in this stabilization loop
+
+- `src/features/rio-scenario-resilience/model/openingPackageOccupancySourceDataContract.ts`
+- `src/features/rio-scenario-resilience/model/dreEnrollmentCapacityLeverContract.ts`
+- `src/hooks/useDreScenarioSimulator.ts`
+- `src/components/dreSimulator/DreLeverPanel.tsx`
+- `scripts/validate-v10-e1.ts`
+- `tests/v10e1/v10-e1.run.ts`
+- `src/index.css`
+- `vite.config.ts`
+- `src/lib/lucide-react-build-shim.ts`
+- `src/lib/recharts-build-shim.ts`
+- `IMPLEMENTATION.md`
+
+### Validation results
+
+| Gate | Result |
+|---|---|
+| `git diff --check` | clean |
+| `npm run validate:v10-e1` | 100/100 |
+| `npm run validate:phase15g2` | 25/25 |
+| `npm run validate:phase15j2-simulator` | 31/31 |
+| `npx tsx scripts/validate-phase15s2.ts` | 53/53 |
+| `npm run lint` | clean |
+| `npx vite build --debug` | built in 18.49s |
+| `npm run build` | built in 2.24s |
+| `npm run qa:v10-e1` | 19/19 |
+
+### Out of scope
+
+- No tuition, discount, Receita, DRE, salary, benefits, encargos, payroll, enrollment, or capacity formula mechanism was changed in this stabilization loop.
+- The next financial/payroll phase retains the already recorded governed rules: salary adjustment follows IPCA + 1 percentage point; 2028 is the unadjusted salary base year; first salary adjustment occurs in 2029; benefits escalate independently by 10%; existing 48.5% encargos remains unchanged unless separately governed.
+
 ---
 
 ## Phase V10-E2.1 Grade-Level Capacity Reconciliation and Grade 12 Activation Correction (2026-07-24)
@@ -3946,3 +4052,230 @@ for 2028) remains 258 and never substitutes 259.
 
 See `docs/audits/rio-resilience/phase-v10-f1a-revenue-governance-decision-packet.md` for full
 evidence and the decision form.
+
+
+
+## Phase V10-P1 — V10 Payroll Escalation and Benefits Separation (2026-07-26)
+
+Implements the project-owner governance decision that the v10 workbook governs salary
+escalation and benefits escalation as **two independent mechanisms**, distinct from
+(and not to be confused with) the one-time 2027→2028 conversion.
+
+### Governing source
+
+`Concept Rio - 20 anos - Org BU - Apresentação v10.xlsx`, SHA-256
+`2e3230ad233c7cd450c1da1fca46da1cb80899e66cdf5ba3d4e9358357a05da0`, sheet `PnL`:
+
+- Row 12, "Dissídio" (salary): `E12` = 6.0% (2028), `F12:N12` = 5.9% flat (2029–2037).
+  `E12` is formula `=E11+1%`; `F12:N12` chain `=<prior col>+1%`, all resolving to 5.9%.
+- Row 13, "Benefícios": `D13:N13` = 10% flat, **hardcoded** (not formula-derived) for
+  every year 2027–2037.
+
+Direct workbook trace (`Org. Design Cargos` → `Cenários Org Design` → `Org. Design `
+sheets) confirms the 2028 salary base (`Org. Design !Z`, "Salário Base 2028") is the
+`Org. Design Cargos` 2027 "Salário Posição" × 1.06 exactly (Head of School:
+51167.45 × 1.06 = 54237.497, matching the workbook's "Parâmetros 2028" column to the
+cent), then escalates via `=<prior>×(1+PnL!F12)` etc. from 2029. Benefits
+(`Org. Design !BW`, "2028") is **not** a clean 2027×1.10 conversion — the workbook's own
+2028 benefits base is a separately-assembled component total (VT/VA/A.M./A.O./seguro de
+vida), not a flat percentage of the 2027 total — but the 10% rate is confirmed to apply
+only from 2029 onward (`BX = BW×(1+PnL!F13)`).
+
+### Application role-provenance audit (Section 5)
+
+Cross-checked every runtime role's stored `grossMonthly` (in `src/constants/teaching.ts`,
+`src/constants/leadership.ts`, and the duplicated copies in
+`payrollRoleCostSourceData.ts`) against the v10 workbook's `Org. Design Cargos` 2027
+sheet. Every directly-mapped role matches to the cent (Head of School, EY/LS/MS/HS
+Coordinator, Counselor, Ed Tech Coordinator, Ops Coordinator, all Back Office roles,
+Master/Specialist/Associate Educator levels, Learning Assistant/Monitor, Learning Exp
+Designer). **Salary classification: Case A (confirmed 2027 source)** for every directly
+mapped role. A small number of roles have no direct v10 mapping (Inspirational/
+Distinguished Educator levels, Nursing Intern, Assistente Financeiro) — **Case E, no
+direct v10 role mapping** — their stored figures are preserved unchanged (no role-level
+replacement was in scope; see Section 7).
+
+Stored `benefitsMonthly` does **not** cross-check cleanly against any single v10
+conversion factor for any role (the deltas vs. the workbook's 2027 `BenefMes` column vary
+in both magnitude and direction across roles — not a flat 6%, 10%, or any other uniform
+rate). **Benefits classification: Case D (unclear provenance)** for every role,
+uniformly. Per the Case D rule, the existing effective 2028 benefits amount
+(`stored × 1.06` — the same conversion the pre-migration runtime formula already
+produced) is preserved as the **provisional** `benefitsBase2028`, documented as an
+inherited effective value, not asserted as a certified v10 benefits conversion.
+
+### Canonical mechanism (`src/lib/payroll/payrollGrowth.ts`, new)
+
+Six separate, independently named mechanisms (no shared generic factor):
+
+1. `toSalaryBase2028(stored)` = `stored × 1.06` — one-time base normalization.
+2. `resolveSalaryGrowthFactor(year)` / `salaryMonthlyForYear(base, year)` — 1.0 at/before
+   2028, `× 1.059^(year-2028)` after.
+3. `toBenefitsBase2028(stored)` = `stored × 1.06` — provisional base normalization
+   (Case D preservation, see above — not a certified 1.10 conversion).
+4. `resolveBenefitsGrowthFactor(year)` / `benefitsMonthlyForYear(base, year)` — 1.0
+   at/before 2028, `× 1.10^(year-2028)` after.
+5. `laborChargesMonthlyForSalary(salaryMonthly)` = `salaryMonthly × 0.485` (encargos —
+   never applied to benefits).
+6. Annualization: salary+encargos × 13 months; benefits × 12 months (unchanged
+   convention, now applied to the correctly-split monthly figures).
+
+`src/lib/payroll/core.ts` (`getProjectedMonthlyComponentsPerPerson`, System A — drives
+Payroll Projection UI, Payroll Comparison, exports) and
+`src/features/rio-scenario-resilience/model/fopagEngine.ts` (`calculateFopag`, System B —
+drives the DRE Scenario Simulator, Minimum/Balanced/Premium payroll, FOPAG exports, DRE
+Payroll Bridge) both now import and apply these six mechanisms directly, replacing the
+prior single `ANNUAL_ADJUSTMENT = 1.06` factor (`src/constants/teaching.ts`) that was
+applied identically to salary and benefits every year.
+
+**Prior defect corrected in passing:** the old `resolveGrowthFactor(year, activeFrom,
+rate) = rate^(year-2028+1)` used an off-by-one exponent (`+1`), meaning the 2028 factor
+was `1.06^1`, not `1.0` — i.e. stored role figures were already being treated as a
+pre-2028 (2027-basis) amount requiring one conversion multiplication at 2028, then
+(incorrectly) continuing to compound at a flat 6%/year forever after, for both salary and
+benefits. The new mechanism makes the 2028 base-year conversion explicit
+(`toSalaryBase2028`/`toBenefitsBase2028`) and separates the correct go-forward rates
+(5.9% salary, 10% benefits) from 2029, rather than folding a conversion and an ongoing
+rate into one exponent.
+
+### 2028 payroll preservation result (corrected V10-P1.1, 2026-07-27)
+
+**Correction to this section, made in the V10-P1.1 closure pass:** the original text
+below claimed 2028 payroll was reproduced "exactly" and attributed the aggregate gap to
+the encargos derivation basis (stored labor-charge literal vs. `salaryMonthly × 0.485`).
+Both claims were wrong. The V10-P1.1 audit performed a complete (not sampled) role-level
+reconciliation: for all 61 distinct runtime roles active in 2028, across all three
+org-design scenarios, stored `laborChargesMonthly` equals `round(grossMonthly × 0.485)`
+to the cent — zero discrepancy, in every case. The encargos derivation-basis change has
+**no economic effect at 2028**; it was never the source of the gap.
+
+2028 payroll is **preserved economically, with a disclosed rounding variance**, not
+preserved exactly. The pre-migration formula rounded the combined (salary + encargos)
+annual sum once before applying the single shared 1.06 growth factor, then rounded again
+after. The V10-P1 formula grows salary and derives encargos from the grown salary as
+separate tracks, summing only once at the final annual total. The old formula's
+intermediate quantity (a rounded combined pre-growth annual total, fed through a single
+shared factor) is not constructed by the new formula at all — no rounding-order choice
+within the new structure reaches bit-exact equality with the old value, because the new
+structure is deliberately not built around that intermediate. This is the intended effect
+of separating salary and benefits escalation (the purpose of V10-P1), not a defect.
+
+Measured variance (`t1_g4`/`base`, all three org-design scenarios, exact pre-migration
+formula reconstructed with its original two-stage rounding):
+
+| Scenario | Old 2028 total | New 2028 total | Delta |
+|---|---|---|---|
+| Minimum | R$16,212,104.80 | R$16,212,105.29 | R$0.49 |
+| Balanced | R$16,712,088.48 | R$16,712,088.96 | R$0.48 |
+| Premium | R$17,038,856.69 | R$17,038,857.19 | R$0.50 |
+
+Maximum single role-level annual delta: R$0.21 (`clerk`, headcount 4, all three
+scenarios). Maximum per-role-month delta: R$0.0054 (`clerk`) — below the R$0.01/role-month
+threshold for every one of the 48 (Minimum), 50 (Balanced), and 51 (Premium) active 2028
+records checked. The benefits component of every role's total is
+unchanged by the reformulation (confirmed to the cent for all 2028 records) — the entire
+variance lives in the salary+encargos annualization path. See
+`scripts/validate-v10-p1.ts` (`fopag_2028_total_payroll_preserved`,
+`fopag_2028_role_level_annual_delta_within_bound`,
+`fopag_2028_role_month_delta_under_one_cent`,
+`fopag_2028_benefits_component_unchanged_by_reformulation`,
+`runtime_roster_stored_encargos_matches_48_5pct_exactly`) for the enforced bounds.
+
+Escalation diverges from 2029 onward as intended (salary 5.9%/yr, benefits 10%/yr, no
+longer a flat 6%/yr for both).
+
+Four roles activate after 2028 (`ms_principal` 2031, `hs_principal` 2034,
+`finance_assistant` 2031, `hs_pool` 2034) and have no 2028 payroll to preserve under
+either formula; their escalation is now correctly governed by the new rates from their
+own activation year forward.
+
+### Role-level base-salary protection
+
+No role-level base salary was replaced with a v10 workbook value. The audit above is
+provenance classification only — role-name-similarity mapping, averaging, or archetype
+substitution were explicitly out of scope (Section 7) and were not performed. Roles
+without a direct v10 mapping (Case E) retain their existing stored figures unchanged.
+
+### Headcount and scenario invariance
+
+Role activation years, headcount, allocation model, and Minimum/Balanced/Premium scenario
+membership are untouched — verified at runtime: every `FopagCalculatedRecord`'s
+`headcountOrFte`/`allocationModel` is confirmed to pass through unchanged from
+`payrollAdapter.ts`'s (untouched) output for all 1238 role-year records checked in
+`validate:v10-p1`.
+
+### Runtime/export reconciliation
+
+No export file needed modification. `FopagEngineOutput.yearTotals`,
+`dreScenarioWorkbook.ts`'s Payroll Comparison/Detail/Delta Analysis/DRE Payroll Bridge/
+FOPAG Headcount Plan/Role Audit/Payroll Projection sheets, and
+`payrollGovernanceWorkbookAdapter.ts`'s assumption-row export all consume the corrected
+`grossLaborAnnualAfterGrowth`/`benefitsAnnualAfterGrowth`/`totalAnnualPayrollAfterGrowth`
+fields on `FopagCalculatedRecord` without any code change, since those field names and
+shapes are unchanged — only their internal computation was corrected. Verified via
+`validate:v10-p1`'s `fopag_yearTotals_reconcile_with_record_level_fields` check and by
+re-running the full existing DRE/capital regression suite (90-scenario matrix,
+`validate:phase15j2-simulator`), which passed unchanged.
+
+### Out-of-scope, disclosed
+
+`src/hooks/useStaffingLogic.ts` (drives `StaffingTab.tsx`) retains its own fused
+salary+benefits `Math.pow(ANNUAL_ADJUSTMENT, year-2028+1)` growth calculation,
+independent of the canonical mechanism above. `StaffingTab` was deliberately removed from
+primary navigation and `APP_TAB_ORDER` in Phase 15N ("Hide staffing model from primary
+navigation") and is not reachable via the live app UI — it is not a governed board-facing
+payroll surface today, so it was not brought into the V10-P1 canonical mechanism. This is
+a disclosed exception, not a silent gap: if `StaffingTab` is ever restored to primary
+navigation, its growth calculation should be migrated to the same canonical
+`payrollGrowth.ts` mechanism at that time. `src/constants/leadership.ts`'s `.costs` field
+(populated via its own `projectMonthly()` growth reimplementation) has zero read sites
+anywhere in the codebase (confirmed via `grep`) — genuinely dead code, left untouched.
+
+The untracked `payrollGovernanceWorkbookAdapter.ts` (pre-existing uncommitted work, not
+part of this phase) contains a `CALC_TRACE` prose string describing the pre-V10-P1 single
+shared `growthFactor` formula; that string is now stale but was not edited here, to avoid
+mixing V10-P1 changes into another in-progress uncommitted file's provenance — flagged
+for a follow-up documentation pass.
+
+### Files changed
+
+- `src/lib/payroll/payrollGrowth.ts` (new) — canonical mechanism.
+- `src/lib/payroll/core.ts` — `getProjectedMonthlyComponentsPerPerson` rewritten to use
+  the canonical mechanism; removed `resolveGrowthFactor` and the `annualAdjustment`
+  option (never overridden by any caller); `RoleYearProjection.growthFactor` split into
+  `salaryGrowthFactor`/`benefitsGrowthFactor`.
+- `src/lib/payroll/index.ts` — re-exports updated accordingly.
+- `src/features/rio-scenario-resilience/model/fopagEngine.ts` — `calculateFopag`
+  rewritten to use the canonical mechanism; documentation strings updated.
+- `src/features/rio-scenario-resilience/model/fopagEngineContract.ts` —
+  `FopagCalculatedRecord.payrollGrowthFactor` split into
+  `salaryGrowthFactor`/`benefitsGrowthFactor`.
+- `scripts/validate-v10-p1.ts` (new) — bounded validator, `npm run validate:v10-p1`.
+- `package.json` — added the `validate:v10-p1` script.
+- `scripts/validate-v10-f1b.ts` — updated one stale assertion (`payroll_formula_marker_
+  unchanged`, which checked for the literal presence of `ANNUAL_ADJUSTMENT` in
+  `fopagEngine.ts` as a proxy for "payroll untouched by the discount phase") to instead
+  assert the new canonical module is wired in, since V10-P1 is a separately governed
+  phase explicitly authorized to change that file.
+
+### Validation evidence
+
+`npm run validate:v10-p1` — 52/52 pass (source contract, base provenance, 2028
+preservation, salary/benefits factor correctness at 2028/2029/2030/2031/2037, track
+separation, encargos formula, headcount/allocation passthrough, yearTotals
+reconciliation, domain invariance spot-check). `npm run validate:v10-f1b`,
+`validate:v10-e1`, `validate:v10-e2` — all pass unchanged. `npm run lint` (tsc --noEmit)
+and `npm run build` (vite) — clean. Existing payroll-adjacent regression suite
+(`validate:phase15i2-packet`, `validate:phase15j2-simulator`, `validate:phase15m`,
+`validate:phase15n`) — all pass unchanged.
+
+### Remaining payroll governance items (not addressed by this phase)
+
+- Role-level base-salary discrepancies for Case E roles (Inspirational/Distinguished
+  Educator, Nursing Intern, Assistente Financeiro) have no direct v10 mapping and were
+  not reconciled — separate role-level governance backlog per Section 7.
+- `useStaffingLogic.ts` / `StaffingTab.tsx` growth calculation remains on the pre-V10-P1
+  single-factor convention (disclosed exception above).
+- `payrollGovernanceWorkbookAdapter.ts`'s `CALC_TRACE` prose is now stale (documents the
+  pre-V10-P1 shared-factor formula) — follow-up documentation fix needed once that
+  pre-existing uncommitted file is otherwise finalized.
