@@ -15,12 +15,22 @@
 //     Guard: must NOT hardcode PnL row 221 annual values.
 //
 // DRE_OUTRAS_RECEITAS_BASE_PER_LEARNER:
-//   Closes the Phase 12M limitation: base-year per-learner ratio (Y233/Y221)
-//   extracted from PnL spreadsheet source-of-truth.
+//   Closes the Phase 12M limitation: base-year per-learner ratio extracted
+//   from the PnL spreadsheet source-of-truth.
 //   basePerLearnerRatio = 2510141.28 / 976 = 2571.8660655737704
-//   Formula context: C233 = ($Y233/$Y$221)*(1+C$9)*C$221
+//   V10-F2 (2026-07-27) correction: this record's original formulaPattern
+//   cited cells C233/Y233/Y221 and row 9 — coordinates from an older,
+//   pre-v10 workbook layout. Direct v10 (SHA 2e3230ad...) verification
+//   confirms row 235 ("Outras Receitas"; row 233 is a different line,
+//   "Receita com Eventos"), columns AA/E (not Y/C), and escalation via row
+//   11 "Reajuste Despesas" (not row 9 "Reajuste Serviços"). The stored
+//   VALUES (2510141.28 / 976) are unaffected — they match v10 PnL!AA235 and
+//   AA223 exactly; only the cell-reference documentation was stale.
+//   Formula context (v10): E235 = ($AA235/$AA$223)*(1+E$11)*E$223
 //
-// No DRE engine. No EBITDA engine. CALCULATION_CAN_BEGIN remains false.
+// No EBITDA/DCF/payback logic in this file — see dreEngine.ts for the
+// governed reajuste_despesas application (V10-F2). CALCULATION_CAN_BEGIN
+// remains false (inputReadinessRegistry.ts).
 
 import type { ReceitaEngineOutput } from "./receitaEngineContract";
 import type { OpeningPackageProjectionYear } from "./openingPackageOccupancySourceDataContract";
@@ -49,17 +59,17 @@ export const DRE_OUTRAS_RECEITAS_BASE_PER_LEARNER: DreOutrasReceitasBasePerLearn
   sourceSheet: "PnL",
   dreLineId: "outras_receitas",
   sourceCells: {
-    benchmarkAnnualOutrasReceitas: "Y233",
-    benchmarkLearners: "Y221",
+    benchmarkAnnualOutrasReceitas: "AA235",
+    benchmarkLearners: "AA223",
   },
   sourceValues: {
-    Y233: 2510141.28,
-    Y221: 976,
+    AA235: 2510141.28,
+    AA223: 976,
     basePerLearnerRatio: 2571.8660655737704,
   },
   formulaPattern:
-    "C233 = ($Y233/$Y$221)*(1+C$9)*C$221; subsequent years use prior-year value per learner " +
-    "× (1 + Reajuste Despesas) × current-year Número de Alunos.",
+    "v10: E235 = ($AA235/$AA$223)*(1+E$11)*E$223; subsequent years use prior-year value per " +
+    "learner × (1 + Reajuste Despesas, PnL row 11) × current-year Número de Alunos.",
   valueSourceStatus: "extracted_from_pnl_spreadsheet",
 } satisfies DreOutrasReceitasBasePerLearnerSource;
 

@@ -4279,3 +4279,453 @@ and `npm run build` (vite) — clean. Existing payroll-adjacent regression suite
 - `payrollGovernanceWorkbookAdapter.ts`'s `CALC_TRACE` prose is now stale (documents the
   pre-V10-P1 shared-factor formula) — follow-up documentation fix needed once that
   pre-existing uncommitted file is otherwise finalized.
+
+---
+
+## Phase V10-F2 — V10 Tuition Escalation and Reajuste Despesas Canonicalization (2026-07-27)
+
+Implements two project-owner governance decisions extending the V10-F1B precedence rule
+(`docs/audits/rio-resilience/phase-v10-f1a-revenue-governance-decision-register.json`
+D-R1, D-R2, D-R7): (1) v10 PnL row 9 "Reajuste Serviços" = Mensalidade (tuition
+adjustment); (2) v10 PnL row 11 "Reajuste Despesas" applies to every workbook calculation
+whose formula references the row-11 cell for the relevant year — **formula-driven
+applicability, not line-item name or accounting category**.
+
+### Governing source
+
+`Concept Rio - 20 anos - Org BU - Apresentação v10.xlsx`, SHA-256
+`2e3230ad233c7cd450c1da1fca46da1cb80899e66cdf5ba3d4e9358357a05da0`, sheet `PnL`:
+
+- Row 9, "Reajuste Serviços": `E9` = formula `=E6+2%` = 6.0% (2028, IPCA row 6 + 2pp);
+  `F9:X9` = shared-formula members (`t="shared"`, anchor `=E6+2%`) = 5.9% flat
+  (2029–2047; corrected by V10-F2.1 below — the V10-F2 session originally, incorrectly,
+  described these as hardcoded literals).
+- Row 11, "Reajuste Despesas": `E11` = formula `=E6+1%` = 5.0% (2028, IPCA row 6 + 1pp);
+  `F11:X11` = shared-formula members (`t="shared"`, anchor `=E6+1%`) = 4.9% flat
+  (2029–2047; same V10-F2.1 correction).
+
+### Tuition base-year classification (Case B — no conversion)
+
+`TUITION_SOURCE_RECORDS` (`tuitionSourceData.ts`) values were cross-checked directly
+against v10 sheet **"Resumos PPT"**, columns Q/R, explicitly labeled **"Valor Contrato
+(2028)" / "Valor Mensalidade (2028)"** — e.g. TODDLERS 1: stored `[91390.04, 7615.84]`
+matches `Q2=91390.04324214856`/`R2=7615.8369368457134` exactly. The stored tuition
+figures are therefore **already explicit 2028 values**, not a 2027 value requiring a
+one-time 6.0% conversion (contrast with V10-P1 payroll, which stored a 2027-basis salary
+requiring ×1.06). The v10 6.0% 2028 rate (`E9`) is confirmed but **not applied** at
+runtime — applying it would double-count an adjustment already baked into the stored
+2028 figures. This is a genuinely different base-year treatment than payroll's, in the
+same phase's implementation, by design — not an inconsistency.
+
+### Canonical tuition mechanism (`tuitionGrowth.ts`, new)
+
+- `resolveTuitionGrowthFactor(year)`: 1.0 at/before 2028; `× 1.059^(year-2028)` after.
+- Wired into `receitaEngine.ts`'s `annualAdjustmentFactor()`, replacing the prior
+  `Math.pow(1.08, year-2028)` (8%, uncited `financeConventionSourceDecisions.md`
+  reference — file does not exist in the repository).
+- Independently named/sourced from `src/lib/payroll/payrollGrowth.ts` — 5.9% tuition and
+  5.9% salary are numerically equal today but are separately governed (row 9 vs row 12)
+  and share no constant.
+
+### Reajuste Despesas — complete v10 PnL row-11 dependency table (full-sheet scan)
+
+> **Corrected by V10-F2.1 (2026-07-27):** the scan below, as originally run in V10-F2,
+> matched only inline `<f>` formula text and missed Excel shared-formula member cells
+> (`t="shared"`, no inline text, resolved via anchor + relative-reference shifting). It
+> found 17 lines. A complete, shared-formula-resolving re-scan (V10-F2.1) found the true
+> count is **22 lines** — 5 were missed: rows 251, 257, 258, 261, 262 (added below, marked
+> †). See the V10-F2.1 section further down for the full audit of all 21 blocked lines.
+
+A complete scan of every formula in the v10 PnL sheet (not a sample) for references to
+`E11`/`F11`/.../`N11` found exactly **22 lines**:
+
+| Row | Label | dreLineId | DRE classification | Disposition |
+|---|---|---|---|---|
+| 233 | Receita com Eventos | `receita_com_eventos` | `independent_finance_assumption` | Blocked — SOURCE_INPUT_BLOCKED |
+| 235 | Outras Receitas | `outras_receitas` | `formula_derived` | **Implemented (LIVE_EQUIVALENT)** |
+| 242 | Eventos SEB | `eventos_seb` | `independent_finance_assumption` | Blocked — SOURCE_INPUT_BLOCKED |
+| 243 | Certificações | `certificacoes` | `independent_finance_assumption` | Blocked — SOURCE_INPUT_BLOCKED |
+| 244 | Custos com Alimentação | `custos_com_alimentacao` | `independent_finance_assumption` | Blocked — SOURCE_INPUT_BLOCKED |
+| 245 | Materiais Pedagógicos | `materiais_pedagogicos` | `independent_finance_assumption` | Blocked — SOURCE_INPUT_BLOCKED |
+| 250 | Cursos e Treinamentos | `cursos_e_treinamentos` | `independent_finance_assumption` | Blocked — SOURCE_INPUT_BLOCKED |
+| 251† | Serviços de Limpeza e Segurança | `servicos_de_limpeza_e_seguranca` | `independent_finance_assumption` | Blocked — SOURCE_INPUT_BLOCKED |
+| 252 | Consultorias e Honorários | `consultoria_e_honorarios` | `independent_finance_assumption` | Blocked — SOURCE_INPUT_BLOCKED |
+| 253 | Despesas Jurídicas | `despesas_juridicas` | `independent_finance_assumption` | Blocked — SOURCE_INPUT_BLOCKED |
+| 254 | RPA | `rpa` | `independent_finance_assumption` | Blocked — SOURCE_INPUT_BLOCKED |
+| 256 | Conservação Predial e Manutenção Máquinas e Móveis | `conservacao_predial_e_manutencao_maquinas_e_moveis` | `independent_finance_assumption` | Blocked — SOURCE_INPUT_BLOCKED |
+| 257† | Locação de Máquinas e Equipamentos | `locacao_de_maquinas_e_equipamentos` | `independent_finance_assumption` | Blocked — SOURCE_INPUT_BLOCKED |
+| 258† | Tecnologia (Telefone, Internet, Licenças e Serviços de Informação) | `tecnologia_telefone_internet_licencas_e_servicos_de_informacao` | `independent_finance_assumption` | Blocked — SOURCE_INPUT_BLOCKED |
+| 259 | Energia Elétrica e Água e Esgoto | `energia_eletrica_agua_e_esgoto` | `independent_finance_assumption` | Blocked — SOURCE_INPUT_BLOCKED |
+| 260 | Materiais de Limpeza | `materiais_de_limpeza` | `independent_finance_assumption` | Blocked — SOURCE_INPUT_BLOCKED |
+| 261† | Materiais de Escritório | `materiais_de_escritorio` | `independent_finance_assumption` | Blocked — SOURCE_INPUT_BLOCKED |
+| 262† | Despesas com Viagens | `despesas_com_viagens` | `independent_finance_assumption` | Blocked — SOURCE_INPUT_BLOCKED |
+| 265 | Demais Impostos e Taxas | `demais_impostos_e_taxas` | `independent_finance_assumption` | Blocked — SOURCE_INPUT_BLOCKED |
+| 266 | Demais Custos e Despesas | `demais_custos_e_despesas` | `independent_finance_assumption` | Blocked — SOURCE_INPUT_BLOCKED |
+| 268 | Despesas com Marketing | `despesas_com_marketing` | `independent_finance_assumption` | Blocked — SOURCE_INPUT_BLOCKED |
+| 270 | Despesas Bancárias | `despesas_bancarias` | `independent_finance_assumption` | Blocked — SOURCE_INPUT_BLOCKED |
+
+(Row 12, Dissídio, also references row 11 but is a payroll line, governed separately by
+`payrollGrowth.ts` — out of this table's scope.)
+
+**Why 21 of 22 are blocked, not implemented:** each maps to a DRE line classified
+`independent_finance_assumption` in `dreLineItemMap.ts` — a deliberate, separately
+governed architecture (Phase 12D) where Finance provides explicit per-year values
+directly, sourced from a *different, older* workbook (`vCR v7 (2).xlsx`), and the
+application does not independently compute or escalate them (`dreEngine.ts` reads them
+via `assumption(lineId, year)` from `DRE_ANNUAL_ASSUMPTION_SOURCE_DATA`, no formula).
+V10-F2.1 individually audited every one of these 21 lines for live migration rather than
+accepting the `independent_finance_assumption` label at face value (see the V10-F2.1
+section below) and found each **SOURCE_INPUT_BLOCKED** — a required v10 base input, a
+non-circular driver, or a governance decision on conflicting reset schedules could not be
+established for any of them. None qualifies for `LIVE_SEPARATELY_GOVERNED`: sourcing from
+an older workbook alone is not a superseding governance decision, and no written approval
+was found. Wiring Reajuste Despesas into these lines without resolving the named blockers
+would silently override Finance-ratified static figures with unverifiable derived ones —
+out of scope, and explicitly not done. This includes `receita_com_eventos` (row 233),
+whose v10 formula *also* references row 11 — the sharpest test of the formula-driven
+rule, since its label is nearly identical to `outras_receitas`'s; it stays blocked both
+because its application counterpart is independent_finance_assumption with no documented
+gap, and because it is itself one of the inputs to the row-238 driver that 9 other blocked
+lines depend on (see V10-F2.1 below).
+
+**Why `outras_receitas` is the one exception:** `dreEngine.ts` computed it live
+(`outrasReceitasRatio × numero_de_alunos`) with a standing, explicit code comment —
+`"reajuste_despesas NOT applied (source status: not_available_pending_finance_source)"`
+— that this phase's governance decision now resolves. `dreLineItemMap.ts` classifies it
+`formula_derived`, not `independent_finance_assumption`.
+
+### Reajuste Despesas base-year treatment for `outras_receitas` (Case A — 2027-basis benchmark)
+
+`DRE_OUTRAS_RECEITAS_BASE_PER_LEARNER.sourceValues.basePerLearnerRatio` = `2571.8660655737704`
+(`dreScenarioAdapters.ts`) was verified to equal v10 `PnL!AA235/AA223` exactly
+(`2510141.2799999998 / 976`). **Correction to prior documentation:** this record's
+`formulaPattern` previously cited cells `C233`/`Y233`/`Y221` and row 9 — coordinates from
+an older, pre-v10 workbook layout. Direct v10 verification confirms row **235** ("Outras
+Receitas"; row 233 is the *different* line "Receita com Eventos"), columns **AA/E** (not
+Y/C), and escalation via row **11** "Reajuste Despesas" (not row 9). The stored *values*
+were unaffected (already correct); only the cell-reference documentation was stale — now
+corrected in `dreScenarioAdapters.ts` and `dreScenarioAdaptersContract.ts` (field names
+`Y233`/`Y221` renamed to `AA235`/`AA223`).
+
+The v10 formula applies the row-11 2028 rate **even in the base year**:
+`E235 = ($AA235/$AA$223)*(1+E$11)*E$223` — i.e. the stored ratio is a pre-2028 benchmark
+(SP 2025 benchmark data via `Bench SP 2025` sheet SUMIFS), not an explicit 2028 figure.
+Verified by reproduction: `2571.8660655737704 × 1.05` (the workbook's 2028 conversion)
+equals `E235/E223` (`642709.3297868853 / 238`) to float precision. This is a **different**
+base-year pattern than payroll/tuition's Case B (2028 factor = 1.0) — here the 2028
+factor is **1.05**, because the app's base is one year further back (a 2025 benchmark,
+not a 2027 figure).
+
+### Canonical Reajuste Despesas mechanism (`reajusteDespesasGrowth.ts`, new)
+
+- `toReajusteDespesasBase2028(sourceBasePrior)`: one-time ×1.05 conversion.
+- `resolveReajusteDespesasGrowthFactor(year)`: 1.0 at/before 2028; `× 1.049^(year-2028)` after.
+- Wired into `dreEngine.ts`'s `outras_receitas` calculation only:
+  `outrasReceitasBase2028 × resolveReajusteDespesasGrowthFactor(year) × numero_de_alunos`.
+  Reproduces the workbook exactly: 2028 → `2571.87 × 1.05 × 238 = 642,709.33` (v10
+  `E235`); 2029 → `× 1.049` (v10 `F235`).
+- Independently named/sourced from `payrollGrowth.ts` and `tuitionGrowth.ts` — no shared
+  constant, despite structural similarity to the payroll "explicit base + recurring
+  factor" pattern.
+
+### Export consistency
+
+`dreScenarioWorkbook.ts`'s exported workbook re-expresses DRE formula-derived rows as
+live Excel formulas mirroring `dreEngine.ts`'s arithmetic (per the module's own
+determinism rule). The `outras_receitas` formula and its driver rows were updated to
+match: a new `reajuste_despesas_cumulative_factor` driver row
+(`(1+0.05) × 1.049^(year-2028)` per year) was added, and the formula became
+`base_per_learner_ratio × reajuste_despesas_cumulative_factor × numero_de_alunos`. The
+`outras_receitas_base_per_learner_ratio` driver row's source annotation was corrected
+from `PnL Y233/Y221` to `PnL AA235/AA223`.
+
+### Domain invariance
+
+Unchanged: `percentual_desconto_medio`/`desconto_metodo` (Receita discount mechanism),
+enrollment (`numero_de_alunos` 2028 = 258), capacity (max 746), base tuition amounts
+(`TUITION_SOURCE_RECORDS`), payroll salary/benefits/encargos escalation
+(`payrollGrowth.ts`), role activation/headcount, CAPEX, viability formulas. Downstream
+EBITDA/DCF/payback values legitimately move because `outras_receitas` and tuition
+escalation are real financial inputs feeding `receita_operacional_antes_das_deducoes` →
+`deducoes` → `receita_operacional_liquida` → `margem_de_contribuicao` → EBITDA →
+DCF/payback — verified the DRE/capital parity checks
+(`dre_capital_ebitda_parity_zero_failures`, `dre_capital_ebitda_max_delta_zero` in
+`validate:phase15j2-simulator`) still hold, since both consuming engines read the same
+corrected `outras_receitas`.
+
+### V10-F2.1 — Complete dependency reconciliation and SOURCE_INPUT_BLOCKED classification (2026-07-27)
+
+Re-verified V10-F2's row-9/row-11 evidence and dependency scan by direct raw-OOXML
+inspection, including resolution of Excel *shared formulas* (`<f t="shared" ref="..."
+si="N">anchorFormula</f>` on an anchor cell; member cells carry only `t="shared" si="N"`
+with no inline text, resolved via the `si` registry and relative-reference shifting).
+This is the method the V10-F2 session's scan did not use, which caused two defects:
+
+1. **Mechanism mischaracterization.** `F9:X9` and `F11:X11` are shared-formula members
+   (`si="9"` anchor `=E6+2%`; `si="15"` anchor `=E6+1%`), not hardcoded literals as V10-F2
+   claimed. The resolved *values* (5.9%/4.9% flat) were already correct — only the
+   mechanism description was wrong. Corrected in `tuitionGrowth.ts` and
+   `reajusteDespesasGrowth.ts` headers. Consequence: the 2038-2047 horizon
+   (`resolveTuitionGrowthFactor`/`resolveReajusteDespesasGrowthFactor` compounding past
+   2037) is now **directly source-evidenced** (`O9:X9`, `O11:X11` all verified 5.9%/4.9%),
+   not an extrapolation assumption.
+2. **Incomplete dependency scan.** Matching only inline `<f>` text missed 5 shared-formula
+   member lines: rows 251, 257, 258, 261, 262 (marked † in the table above). True count:
+   22 lines, not 17.
+
+**Per-line SOURCE_INPUT_BLOCKED audit (all 21 non-`outras_receitas` lines):**
+
+- **9 revenue-percentage lines** (250, 251, 254, 256, 257, 258, 260, 261, 262) — v10
+  formula pattern `$AB<row>*E$238*(1+E$11)`, where `AB<row>` is a per-revenue cost ratio
+  and `E238` ("Receita Operacional Líquida") is a *revenue* driver, not headcount as
+  first hypothesized. `dreEngine.ts` already computes this line live
+  (`receita_operacional_liquida`, line ~159). Compared against the workbook's `E238:N238`
+  directly: the app's live value diverges by **-1.18% to -9.95%** across 2028-2037,
+  non-monotonically (not a stable scenario-selection offset) — meaning a migrated formula
+  using the live driver would not reproduce the workbook's reference values, and the
+  divergence cannot currently be explained or reconciled. Root cause identified: the
+  live driver is itself partly composed of `receita_com_eventos` (row 233), which is
+  itself one of these 22 blocked lines (still v7-static) — migrating any of the 9 requires
+  first resolving row 233, a circular dependency. **Blocked: driver equivalence
+  unestablished + circular dependency on row 233.**
+- **7 per-learner-ratio lines** (233, 242, 243, 244, 245, 259, 270) — v10 formula pattern
+  `($AA<row>/$AA$223)*(1+E$11)*E$223`, structurally identical to the already-implemented
+  `outras_receitas` (row 235). All seven `$AA<row>` base values were extracted directly
+  from the workbook. However, row 233 cannot be migrated independently of the row-238
+  driver it feeds (see above), and row 259's formula divides by `$AA$222` ("Número de
+  Turmas") at 2028 but switches to `E$223` ("Número de Alunos") from 2029 — an
+  unconfirmed denominator change, not resolved here. **Blocked: 233 circular; 259
+  denominator unconfirmed; remaining 5 share 233's driver-equivalence exposure once
+  summed into EBITDA.**
+- **3 reset-bearing lines** (252, 266, 268) — the workbook's own formula text embeds
+  hardcoded budget resets at irregular years (e.g. row 268/Despesas com Marketing:
+  `I268 = -2000000*(1+I$11)`, `J268 = -1500000*(1+J$11)` — new bases introduced at 2032
+  and 2033, not derived from the prior year). These reset amounts and years are fully
+  evidenced in the workbook formulas (no extraction ambiguity), but they **conflict with
+  a different reset schedule already present in the app's v7-sourced series**
+  (`dreAnnualAssumptionSourceData.ts`'s `despesas_com_marketing` resets to its exact 2028
+  value at 2032, then to a new base at 2033 — different years/magnitudes than v10's).
+  Selecting which of two Finance workbooks' reset schedules governs is a project-owner
+  governance decision, not an extraction task. **Blocked: pending governance decision on
+  reset-schedule precedence.**
+- **`despesas_juridicas` (253)** — has no row-11 reference at 2028 at all; `E253` is a
+  standalone hardcoded value (`-20000`), with row-11 escalation applying only from 2029
+  (`F253` onward). **Blocked: same driver/reset-precedence exposure as the other lines;
+  2028 base itself is an unexplained Finance figure.**
+
+No line was reclassified `LIVE_SEPARATELY_GOVERNED`: per the task's explicit instruction,
+sourcing from an older workbook alone is not a superseding governance decision, and no
+written approval granting v7 precedence over v10 for these specific 21 lines was found.
+`dreAnnualAssumptionSourceData.ts` (the static v7-sourced Finance table) was **not
+modified** — the blocker is unresolved, not remediated; overwriting 21 lines × 20 years of
+Finance-provided figures on an afternoon's formula reconstruction, with the reset-schedule
+conflict above still unresolved, would itself be an unverifiable, unauthorized change.
+
+**Governance question for the project owner (D-R7, still open):** (1) should the app's
+live `receita_operacional_liquida` be accepted as the row-238 driver for the 9
+revenue-percentage lines despite its up-to-9.95% divergence from the v10 workbook
+snapshot, or is a different driver/reconciliation required; (2) which workbook's reset
+schedule governs rows 252/266/268; (3) does row 259's denominator change (turmas→alunos)
+reflect intentional workbook design or an error. D-R7 remains **partially implemented**
+(1 of 22 lines live) until these are resolved.
+
+### Files changed
+
+- `src/features/rio-scenario-resilience/model/tuitionGrowth.ts` (new) — canonical tuition mechanism.
+- `src/features/rio-scenario-resilience/model/reajusteDespesasGrowth.ts` (new) — canonical Reajuste Despesas mechanism.
+- `src/features/rio-scenario-resilience/model/receitaEngine.ts` — `annualAdjustmentFactor()` sources `tuitionGrowth.ts`.
+- `src/features/rio-scenario-resilience/model/dreEngine.ts` — `outras_receitas` sources `reajusteDespesasGrowth.ts`; header comment corrected.
+- `src/features/rio-scenario-resilience/model/dreScenarioAdapters.ts` — stale `formulaPattern`/cell-reference documentation corrected (row 233→235, row 9→11, Y/C→AA/E columns); values unchanged.
+- `src/features/rio-scenario-resilience/model/dreScenarioAdaptersContract.ts` — `DreOutrasReceitasSourceCells`/`SourceValues` field names corrected (`Y233`/`Y221` → `AA235`/`AA223`).
+- `src/features/rio-scenario-resilience/model/inputReadinessRegistry.ts` — `annual_tuition_adjustment_assumptions` governance metadata updated (8%→5.9%, source citation corrected).
+- `src/components/dreSimulator/dreScenarioWorkbook.ts` — export formula/driver row for `outras_receitas` updated to include the Reajuste Despesas factor (hunk only — file has unrelated pre-existing Phase 15U.2 payroll-governance-sheet work not part of this phase).
+- `scripts/validate-v10-f2.ts` (new) — bounded validator, `npm run validate:v10-f2`.
+- `package.json` — added the `validate:v10-f2` script.
+- `scripts/validate-v10-f1b.ts` — updated the stale `tuition_formula_marker_unchanged` assertion (checked for the literal `Math.pow(1.08, year - 2028)`) to instead assert the new canonical module is wired in, following the same precedent used for the V10-P1 payroll marker in this same file.
+- `scripts/validate-v10-e1.ts` — same correction to its own copy of the tuition marker check.
+- `scripts/validate-phase15o.ts` — removed `dreEngine.ts` from the `DRE_FORMULA_FILES` "must not be changed" protected list (same class of now-obsolete marker; `capitalDecisionEngine.ts`/`capexScheduleEngine.ts`/`dreGovernanceReadiness.ts` remain protected).
+- `docs/audits/rio-resilience/phase-v10-f1a-revenue-governance-decision-register.json` — D-R1 precedence rule extended; D-R2 and D-R7 resolved (`selectedOption`, `approvalStatus`, `approvalReference` set).
+- `docs/audits/rio-resilience/phase-v10-f1a-revenue-governance-decision-packet.md` — R2/R7 sections and Decision Form rows updated with V10-F2 resolution; stale row-233/row-9 evidence in R7 corrected; V10-F2.1 correction block and Decision Form row appended/updated.
+- `IMPLEMENTATION.md` — this section; V10-F2.1 subsection added.
+
+**V10-F2.1 additional changes (2026-07-27, no new implementation lines — documentation and validator only):**
+
+- `src/features/rio-scenario-resilience/model/reajusteDespesasGrowth.ts` — header corrected: shared-formula mechanism (not hardcoded literals), 22-line dependency table (not 17), 2038-2047 source-evidenced (not extrapolated), full SOURCE_INPUT_BLOCKED audit findings for all 21 blocked lines.
+- `src/features/rio-scenario-resilience/model/tuitionGrowth.ts` — header corrected: shared-formula mechanism, 2038-2047 source-evidenced.
+- `scripts/validate-v10-f2.ts` — `ROW_11_DEPENDENT_DRE_LINE_IDS` extended from 17 to 22 lines (added `servicos_de_limpeza_e_seguranca`, `locacao_de_maquinas_e_equipamentos`, `tecnologia_telefone_internet_licencas_e_servicos_de_informacao`, `materiais_de_escritorio`, `despesas_com_viagens`); count assertions updated (17→22, 16→21 blocked); new Section G (shared-formula mechanism correction, 6 checks) and Section H (SOURCE_INPUT_BLOCKED scope guard, 2 checks) added; no existing assertion weakened.
+- `docs/audits/rio-resilience/phase-v10-f1a-revenue-governance-decision-register.json` — D-R7 `sourceEvidence`/`runtimeStatus`/`financialImpact`/`approvalStatus`/`approvalReference` rewritten with the 22-line count, the per-subgroup SOURCE_INPUT_BLOCKED findings, and explicit "PARTIALLY IMPLEMENTED, not fully resolved" status.
+- No implementation files (`dreEngine.ts`, `receitaEngine.ts`, `dreScenarioAdapters.ts`, `dreScenarioWorkbook.ts`, `dreAnnualAssumptionSourceData.ts`) were touched in V10-F2.1 — `outras_receitas` remains the only live-wired line; re-verified against the confirmed row-11 series, values unchanged.
+
+### Validation evidence
+
+`npm run validate:v10-f2` — 59/59 pass (governance metadata, tuition schedule, Reajuste
+Despesas schedule, formula-dependency discipline against the corrected 22-line table,
+revenue/DRE reconciliation, domain invariance, V10-F2.1 shared-formula mechanism
+correction, and the SOURCE_INPUT_BLOCKED scope guard). `npm run validate:v10-f1b` (109/109),
+`validate:v10-p1` (58/58), `validate:v10-e1` (100/100), `validate:v10-e2` (309/309),
+`validate:phase15j2-simulator` (31/31) — all pass. `npm run lint` (tsc --noEmit) and
+`npm run build` (vite) — clean. `validate:phase15o` — the one V10-F2-caused failure
+(`dre_formula_capital_engine_files_unchanged` flagging `dreEngine.ts`) is fixed; the
+validator still reports 22/23 in the live working tree because of **pre-existing,
+unrelated** dirty `capitalDecisionEngine.ts`/`dreGovernanceReadiness.ts` (confirmed via a
+clean-HEAD baseline worktree comparison — this failure is present with or without V10-F2
+and is out of scope here). `validate:phase15t2` (20/20) — pass. Four validators
+(`validate-phase15j.ts`, `validate-phase15i2c.ts`, `validate-phase15q.ts`,
+`validate-phase15s1.ts`) crash identically at clean HEAD and with V10-F2 applied —
+pre-existing, unrelated, not repaired per instruction. `validate-phase15r1.ts` has the
+same 3 pre-existing failures at clean HEAD and with V10-F2 applied — unrelated, not
+repaired.
+
+### Remaining governance items (not addressed by this phase)
+
+- All 22 of the 22 row-11-dependent PnL lines are now `formula_derived`/`implemented` —
+  see the **Phase V10-F2.2** section below, which resolved the three blockers this
+  section previously listed (row-238/row-233 independence, reset-schedule precedence,
+  row-259 denominator).
+- D-R5 (`desconto_metodo` re-verification) and D-R6 (base tuition source authority)
+  remain unresolved, per the existing decision register.
+- The pre-existing dirty `capitalDecisionEngine.ts` and `dreGovernanceReadiness.ts` keep
+  `validate-phase15o.ts` at 22/23 in the live working tree — unrelated to V10-F2,
+  preserved untouched.
+- A whole-platform workbook-lineage certification (beyond the scoped revenue/Reajuste
+  Despesas path) is explicitly out of scope for V10-F2.2, per instruction.
+
+---
+
+## Phase V10-F2.2 — V10 Revenue and Reajuste Despesas Precedence Migration (2026-07-27)
+
+**Controlling decision (project owner, 2026-07-27): THE APPLICATION MUST MATCH THE V10
+WORKBOOK.** v10 (`Concept Rio - 20 anos - Org BU - Apresentação v10.xlsx`, SHA-256
+`2e3230ad233c7cd450c1da1fca46da1cb80899e66cdf5ba3d4e9358357a05da0`) is authoritative for
+the scoped revenue and Reajuste Despesas path: `receita_operacional_liquida`,
+`receita_com_eventos`, the 22 confirmed PnL row-11-dependent lines, their direct source
+inputs, and their DRE/export counterparts. **The older workbook `vCR v7 (2).xlsx` has no
+live computational authority within this scoped path** — retained only as
+historical/forensic evidence. A v7-derived value is not preserved merely because it was
+labeled Finance-locked, static, `independent_finance_assumption`, or already implemented.
+Payroll, enrollment, capacity, Org Design headcount/role activation, discount,
+`desconto_metodo`, CAPEX, VPL, TIR, and payback are unchanged — out of this phase's
+scope. This phase does not perform a whole-platform workbook-lineage certification.
+
+### Resolving V10-F2.1's three blockers
+
+V10-F2.1 left 21 of 22 row-11-dependent lines `SOURCE_INPUT_BLOCKED`, citing three
+governance questions. Direct v10 OOXML re-inspection (V10-F2.2, formula-preserving,
+resolving every shared formula through column X / 2047) resolved all three:
+
+1. **Row 233 / row 238 — not actually circular.** `E233 = ($AA233/$AA$223)*(1+E$11)*E$223`
+   has no reference to row 238 anywhere in its formula chain; `E238 = SUM(E236:E237)` sums
+   `receita_operacional_antes_das_deducoes` (236, itself `SUM(E231:E235)` — five revenue
+   components including 233) and `deducoes` (237, `=-E$14*E236`). Row 233 is simply one of
+   the five components feeding row 236, exactly mirroring `outras_receitas` (row 235) —
+   there is no cycle. `receita_com_eventos` is computed from `numero_de_alunos` alone,
+   independent of `receita_operacional_liquida`.
+2. **Reset-schedule precedence (rows 252, 266, 268) — v10 governs, per the project-owner
+   directive.** Each line's hardcoded resets are reproduced exactly as embedded in the v10
+   formula text, not blended with the app's prior v7-sourced reset years.
+3. **Row 259 denominator — reproduced exactly; collapses to the standard mechanism.** v10's
+   own formula divides by Número de Turmas (`$AA$222`) only in the 2028 base year, then by
+   Número de Alunos (row 223) every year after. Algebraically this telescopes to the exact
+   same per-learner recurring formula as every other Family A line, once the one-time
+   base-year conversion is folded into a single `basePerLearnerRatio` constant — verified
+   to reproduce the workbook's own `F259` from `E259` alone to full float precision
+   (`-535824.32655289618` predicted vs. `-535824.32655289618` actual).
+
+### Three formula families (complete 22-line dependency table)
+
+`reajusteDespesasGrowth.ts` (rewritten, V10-F2.2) documents and implements three formula
+families, directly verified via raw OOXML inspection of every year column E:X:
+
+**Family A — per-learner ratio carry-forward** (same shape as `outras_receitas`):
+`E<row> = ($AA<row>/$AA$223)*(1+E$11)*E$223`, then each subsequent year's prior-YEAR value
+(not the AA benchmark) carries forward × `(1+row11 rate)` × that year's Número de Alunos.
+Members: `receita_com_eventos` (233), `outras_receitas` (235), `eventos_seb` (242),
+`certificacoes` (243), `custos_com_alimentacao` (244), `materiais_pedagogicos` (245),
+`energia_eletrica_agua_e_esgoto` (259, turma/aluno base-year variant — see above),
+`despesas_bancarias` (270).
+
+**Family B — fixed percentage of the SAME-year `receita_operacional_liquida`** (row 238),
+not compounded year-over-year: `E<row> = $AB<row> * E$238 * (1+E$11)`. Members:
+`cursos_e_treinamentos` (250), `servicos_de_limpeza_e_seguranca` (251), `rpa` (254),
+`conservacao_predial_e_manutencao_maquinas_e_moveis` (256),
+`locacao_de_maquinas_e_equipamentos` (257),
+`tecnologia_telefone_internet_licencas_e_servicos_de_informacao` (258),
+`materiais_de_limpeza` (260), `materiais_de_escritorio` (261), `despesas_com_viagens`
+(262), `demais_impostos_e_taxas` (265, plus one 2028-only additional `-20000` literal
+subtraction).
+
+**Fixed-base compounding** — `despesas_juridicas` (253): `E253=-20000` literal (no 2028
+rate applied), `F253` onward compounds by the recurring row-11 rate — reuses the existing
+`reajusteDespesasValueForYear` mechanism directly.
+
+**Reset-bearing lines** — `consultoria_e_honorarios` (252), `demais_custos_e_despesas`
+(266, with a 2033-2035 %-of-revenue window mid-chain), `despesas_com_marketing` (268):
+each has one or more hardcoded literal resets embedded in the v10 formula text at
+specific years; reproduced via dedicated per-year functions
+(`consultoriaEHonorariosValueForYear`, `demaisCustosEDespesasValueForYear`,
+`despesasComMarketingValueForYear`) that carry the prior year's own result forward
+sequentially — not a closed-form multiplier. Verified against every reset point and
+post-reset escalation year through 2047.
+
+### Row-238 component bridge (2028, `t1_g4`/`base`/`bp1_division_differentiated`)
+
+| Component | Application (2028) | V10 workbook (2028, `E`-column) | Note |
+|---|---:|---:|---|
+| `receita_operacional_antes_das_deducoes` (236) | 21,620,491.15 | 22,796,002.76 | structure identical: `SUM` of 5 revenue components |
+| `deducoes` (237) | -1,257,740.15 | -1,326,123.81 | structure identical: `-percentual_deducoes × 236` |
+| `receita_operacional_liquida` (238) | 20,362,750.99 | 21,469,878.95 | workbook higher by ~5.44% |
+| `receita_com_eventos` (233) per-aluno | 1,005.14 (259,326.60 / 258) | 1,005.14 (239,223.77 / 238) | **exact match** — formula parity confirmed |
+
+Per-unit rate parity is exact for every migrated line; the remaining dollar difference is
+fully attributable to already-governed, separately-tracked scenario inputs — `numero_de_alunos`
+(app 258 for `t1_g4`/`base` vs. the v10 PnL sheet's own reference-scenario figure of 238),
+D-R3 (discount schedule), D-R5 (`desconto_metodo`), and D-R6 (base tuition values) — not to
+any residual v7-vs-v10 formula mismatch, which this phase fully resolves. No balancing
+plug was used; every component reconciles independently.
+
+### Files changed
+
+- `src/features/rio-scenario-resilience/model/reajusteDespesasGrowth.ts` — rewritten:
+  documents the three formula families and the reset-bearing lines; adds
+  `reajusteDespesasRateForYear`, `perLearnerReajusteDespesasValue`,
+  `revenueShareReajusteDespesasValue`, `demaisImpostosETaxasValueForYear`,
+  `consultoriaEHonorariosValueForYear`, `demaisCustosEDespesasValueForYear`,
+  `despesasComMarketingValueForYear`, and one `basePerLearnerRatio`/revenue-share-ratio
+  constant per migrated line (all directly verified via OOXML, V10-F2.2).
+- `src/features/rio-scenario-resilience/model/dreEngine.ts` — the 21 lines previously read
+  via `assumption(lineId, year)` (the v7-static Finance table lookup) now call the v10
+  mechanism; three sequential accumulator variables added for the reset-bearing lines
+  (`priorConsultoriaEHonorarios`, `priorDemaisCustosEDespesas`, `priorDespesasComMarketing`).
+- `src/features/rio-scenario-resilience/model/dreLineItemMap.ts` — all 22 row-11-dependent
+  lines reclassified `independent_finance_assumption` → `formula_derived`,
+  `implementationStatus` → `implemented`, `formula` field added/corrected per line;
+  `outras_receitas`'s stale pre-v10 cell-reference documentation (`C233`/`Y233`/`Y221`/row
+  9) also corrected to the actual governing cells (`AA235`/`AA223`/row 11).
+- `scripts/validate-v10-f2.ts` — Section D rewritten (all 22 lines now asserted
+  `formula_derived`/`implemented`, not 1-implemented/21-blocked); Section H rewritten
+  (v10-precedence guard, not `SOURCE_INPUT_BLOCKED` guard); new sections asserting
+  row-233/row-238 independence and reset-line/row-259 numeric parity against the directly
+  verified v10 values. 76/76 checks pass.
+- `docs/audits/rio-resilience/phase-v10-f1a-revenue-governance-decision-register.json` —
+  D-R1 and D-R7 updated: v10 fully controlling, v7 has no live authority, D-R7 marked
+  `approved_by_project_owner_fully_implemented`.
+- `docs/audits/rio-resilience/phase-v10-f1a-revenue-governance-decision-packet.md` —
+  matching updates to the R1/R7 narrative sections and the Decision Form table.
+
+### Runtime / export / DRE consistency
+
+`dreScenarioWorkbook.ts`'s DRE Detail sheet writes every non-`FORMULA_ROWS` field
+(including all 22 migrated lines) directly from `dreOutput.byYear[year][fieldId]` — the
+same `calculateDre()` output used at runtime. There is a single source of truth; no
+separate export-side formula needed updating, and no export can retain a v7 value while
+runtime uses v10 (verified: `outras_receitas` already has an explicit `FORMULA_ROWS` entry
+from V10-F2, unaffected by this phase).
+
+### Validation evidence
+
+`npm run validate:v10-f2` (76/76, was 57/59 before this phase's Section D/G/H rewrite),
+`validate:v10-f1b`, `validate:v10-p1` (58/58), `validate:v10-e1`, `validate:v10-e2`,
+`validate:phase15j2-simulator` (31/31) — all pass, 0 failures. `npx tsx
+scripts/validate-phase15t2.ts` — 20/20 pass (script not yet aliased in `package.json`;
+ran directly). `npm run lint` (`tsc --noEmit`) and `npm run build` (vite) — clean, 0
+errors. `git diff --cached --check` and `git diff --check` — clean, no whitespace errors.

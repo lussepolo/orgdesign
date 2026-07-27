@@ -21,6 +21,10 @@ import { DRE_LINE_ITEM_MAP } from "../../features/rio-scenario-resilience/model/
 import { DRE_REVENUE_DRIVER_SOURCE_DATA } from "../../features/rio-scenario-resilience/model/dreRevenueDriverSourceData";
 import { DRE_COST_DRIVER_SOURCE_DATA } from "../../features/rio-scenario-resilience/model/dreCostDriverSourceData";
 import { DRE_OUTRAS_RECEITAS_BASE_PER_LEARNER } from "../../features/rio-scenario-resilience/model/dreScenarioAdapters";
+import {
+  REAJUSTE_DESPESAS_2028_CONVERSION_RATE,
+  resolveReajusteDespesasGrowthFactor,
+} from "../../features/rio-scenario-resilience/model/reajusteDespesasGrowth";
 import { RECEITA_PROJECTION_YEARS } from "../../features/rio-scenario-resilience/model/receitaEngineContract";
 import { ORG_DESIGN_PAYROLL_ACTIVATION } from "../../features/rio-scenario-resilience/model/orgDesignPayrollActivation";
 import { WORKING_SCENARIO_RATIFICATION_STATUS } from "../../features/rio-scenario-resilience/model/dreWorkingScenario";
@@ -239,6 +243,21 @@ function constantAcrossYears(value: number): Record<number, number> {
   return out;
 }
 
+// V10-F2: Reajuste Despesas cumulative factor, per year — folds the one-time
+// 2028 conversion (×1.05, PnL row 11 E-column) and the recurring 4.9%/yr
+// escalation (2029+) into a single per-year multiplier, so the exported
+// outras_receitas formula stays a simple 2-driver product matching
+// dreEngine.ts's arithmetic (outrasReceitasBase2028 × growthFactor × alunos,
+// with the base2028 conversion factored out into this column instead).
+function reajusteDespesasCumulativeFactorByYear(): Record<number, number> {
+  const out: Record<number, number> = {};
+  for (const year of YEARS) {
+    out[year] =
+      (1 + REAJUSTE_DESPESAS_2028_CONVERSION_RATE) * resolveReajusteDespesasGrowthFactor(year);
+  }
+  return out;
+}
+
 const DRIVER_ROWS: DriverRow[] = [
   {
     id: "percentual_desconto_medio",
@@ -286,7 +305,13 @@ const DRIVER_ROWS: DriverRow[] = [
     id: "outras_receitas_base_per_learner_ratio",
     label: "Outras Receitas Base/Aluno (driver)",
     values: constantAcrossYears(DRE_OUTRAS_RECEITAS_BASE_PER_LEARNER.sourceValues.basePerLearnerRatio),
-    source: "DRE_OUTRAS_RECEITAS_BASE_PER_LEARNER (PnL Y233/Y221, Phase 12N, constant)",
+    source: "DRE_OUTRAS_RECEITAS_BASE_PER_LEARNER (PnL AA235/AA223, Phase 12N, constant)",
+  },
+  {
+    id: "reajuste_despesas_cumulative_factor",
+    label: "Reajuste Despesas — Fator Acumulado (driver)",
+    values: reajusteDespesasCumulativeFactorByYear(),
+    source: "reajusteDespesasGrowth.ts (PnL row 11, Phase V10-F2): 1.05 one-time × 1.049^(year-2028)",
   },
 ];
 
@@ -314,7 +339,7 @@ const FORMULA_ROWS: Record<string, FormulaBuilder> = {
   receita_com_material_didatico: (m, c) =>
     `${ref(m, "numero_de_alunos", c)}*${ref(m, "ticket_material", c)}*12`,
   outras_receitas: (m, c) =>
-    `${ref(m, "outras_receitas_base_per_learner_ratio", c)}*${ref(m, "numero_de_alunos", c)}`,
+    `${ref(m, "outras_receitas_base_per_learner_ratio", c)}*${ref(m, "reajuste_despesas_cumulative_factor", c)}*${ref(m, "numero_de_alunos", c)}`,
   receita_operacional_antes_das_deducoes: (m, c) =>
     [
       "receita_de_ensino_liquida",

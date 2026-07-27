@@ -10,13 +10,13 @@
 export type DreAdapterValueSourceStatus = "extracted_from_pnl_spreadsheet";
 
 export interface DreOutrasReceitasSourceCells {
-  readonly benchmarkAnnualOutrasReceitas: "Y233";
-  readonly benchmarkLearners: "Y221";
+  readonly benchmarkAnnualOutrasReceitas: "AA235";
+  readonly benchmarkLearners: "AA223";
 }
 
 export interface DreOutrasReceitasSourceValues {
-  readonly Y233: number;
-  readonly Y221: number;
+  readonly AA235: number;
+  readonly AA223: number;
   readonly basePerLearnerRatio: number;
 }
 

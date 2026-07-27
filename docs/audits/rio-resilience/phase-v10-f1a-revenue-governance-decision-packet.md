@@ -81,6 +81,27 @@ governs unless a specific row is superseded by written Finance confirmation").
 > implementation decision, not a Finance signature, and does not extend to tuition escalation
 > (D-R2), base tuition (D-R6), `reajuste_despesas` (D-R7), enrollment (D-R8), or any other
 > assumption. See D-R1 in the Decision Form below.
+>
+> **Further update — Phase V10-F2 (2026-07-27, project owner):** the precedence rule is
+> extended to also cover tuition escalation (D-R2, PnL row 9 "Reajuste Serviços" = Mensalidade)
+> and Reajuste Despesas (D-R7, PnL row 11) **for lines whose actual v10 formula references the
+> corresponding row-11 annual cell** — formula-driven, not a blanket OPEX rule. v10 still does
+> NOT govern base tuition (D-R6), enrollment (D-R8, already separately closed), or any
+> assumption not explicitly named. See R2 and R7 below and D-R2/D-R7 in the Decision Form.
+>
+> **Controlling update — Phase V10-F2.2 (2026-07-27, project owner): THE APPLICATION MUST
+> MATCH THE V10 WORKBOOK.** v10 is now authoritative for the complete scoped revenue and
+> Reajuste Despesas path (`receita_operacional_liquida`, `receita_com_eventos`, and all 22
+> confirmed PnL row-11-dependent lines, plus their direct source inputs, DRE/export
+> counterparts, and the already-completed v10 tuition mechanism). **The older workbook `vCR
+> v7 (2).xlsx` has no live computational authority within this scoped path** — it may be
+> retained only as historical/forensic evidence of the application's prior source. A prior
+> v7-derived value is NOT preserved merely because it was labeled Finance-locked, static,
+> `independent_finance_assumption`, or already implemented; where v7 and v10 differed, the
+> live application was migrated to v10 (D-R7, now fully implemented — see R7 below). This
+> does not extend v10's authority to base tuition (D-R6), enrollment (D-R8), or any
+> assumption not explicitly named, and does not perform a whole-platform workbook-lineage
+> certification (out of this phase's scope).
 
 ---
 
@@ -129,6 +150,17 @@ tuition, escalation swapped via `actualGross(y) × (1+r)^(y-2028) / 1.08^(y-2028
 R$85.7M–95.5M higher than either workbook-evidenced alternative over 2029–2037 for this single
 opening package/scenario. Not a recommendation of newest-file precedence — v9 is older than
 v10 and is included on equal footing.
+
+> **Update — Phase V10-F2 (2026-07-27, project owner):** the project owner confirmed
+> **Reajuste Serviços = Mensalidade** (tuition adjustment). The **v10 5.9%** alternative
+> (`wb_v10_59pct`) is now implemented: `receitaEngine.ts` sources escalation from the new
+> canonical `tuitionGrowth.ts` module. **Base-year treatment is Case B, not a conversion**:
+> `TUITION_SOURCE_RECORDS` values were verified directly against v10 sheet "Resumos PPT"
+> columns Q/R, explicitly labeled "Valor Contrato (2028)" / "Valor Mensalidade (2028)" — the
+> stored figures are already explicit 2028 values, so the 6.0% 2028 rate (`E9`) is **not**
+> applied at runtime (applying it would double-count an adjustment already baked into the
+> stored figures). Runtime factor: 1.0 at 2028, `1.059^(year-2028)` from 2029. The 8%
+> convention above is retired. See D-R2 in the Decision Form.
 
 ---
 
@@ -300,6 +332,112 @@ The two workbooks agree on the **formula** (IPCA+1pp) but disagree on the **IPCA
 
 No extrapolation to OPEX has been made, per instruction.
 
+> **Update — Phase V10-F2 (2026-07-27, project owner):** the project owner confirmed
+> **Reajuste Despesas applies to every workbook calculation whose formula references PnL row
+> 11 for the relevant year** — formula-driven applicability, not line-item name or category.
+> A complete (not sampled) scan of every formula in the v10 PnL sheet found exactly **17**
+> lines referencing row 11 (see `reajusteDespesasGrowth.ts` module header and
+> IMPLEMENTATION.md for the full dependency table). Two corrections to this section's
+> original evidence: the line is **"Outras Receitas" at row 235**, not row 233 (row 233 is a
+> different line, "Receita com Eventos" — it also references row 11, per the same scan, but
+> is discussed separately below); and the base cells are **`AA235`/`AA223`**, not `Y233`/`Y221`
+> (older-workbook coordinates; the stored ratio value, 2,571.87, is unchanged and verified
+> exact against v10). Of the 17 row-11-dependent lines, only `outras_receitas` has a
+> live-formula application counterpart in `dreEngine.ts` (`formula_derived`, with a standing
+> documented gap, `reajuste_despesas NOT applied`) — now closed by this phase. The other 16,
+> including `receita_com_eventos` (row 233), map to DRE lines classified
+> `independent_finance_assumption` — Finance-locked static per-year values from a separate,
+> earlier workbook (`vCR v7 (2).xlsx`) — and are **not** overridden by this decision; wiring
+> Reajuste Despesas into them would silently replace Finance-ratified figures and is out of
+> scope. Runtime formula for `outras_receitas`: `explicitBase2028 = 2,571.87 × 1.05` (one-time
+> PnL!E11 conversion), then `× 1.049^(year-2028)` from 2029, `× numero_de_alunos(year)`. See
+> D-R7 in the Decision Form.
+
+> **Update — Phase V10-F2.1 (2026-07-27, project owner):** two corrections to the V10-F2
+> update above, plus a completed audit.
+>
+> 1. **Dependency count corrected: 22, not 17.** The V10-F2 scan matched only inline `<f>`
+>    formula text and missed cells that are Excel *shared-formula members*
+>    (`t="shared" si="..."`, no inline text, resolved via the anchor cell + relative-reference
+>    shifting). A complete shared-formula-resolving scan found 5 additional row-11-dependent
+>    lines: `servicos_de_limpeza_e_seguranca` (251), `locacao_de_maquinas_e_equipamentos`
+>    (257), `tecnologia_telefone_internet_licencas_e_servicos_de_informacao` (258),
+>    `materiais_de_escritorio` (261), `despesas_com_viagens` (262).
+> 2. **F9:N9 and F11:N11 are formula-derived, not hardcoded literals.** Both rows extend as
+>    shared formulas (`=<col>6+2%` / `=<col>6+1%`, off IPCA row 6) through column X (2047) —
+>    the resolved *values* (5.9% / 4.9% flat) were already correct in V10-F2; only the
+>    mechanism description was wrong. The 2038-2047 horizon is now directly source-evidenced,
+>    not extrapolated.
+> 3. **All 21 non-`outras_receitas` lines individually audited for live migration — all found
+>    SOURCE_INPUT_BLOCKED, none migrated.** Nine lines (250/251/254/256/257/258/260/261/262)
+>    key off v10 `PnL!E238:N238` ("Receita Operacional Líquida"); the live application
+>    counterpart (`dreEngine.ts` `receita_operacional_liquida`) diverges from the workbook
+>    values by -1.18% to -9.95% across 2028-2037 (non-monotonic — not a stable scenario
+>    offset), and that driver is itself fed by row 233 (also in this 22-line set), which is
+>    unmigrated v7-static data — a circular dependency. Seven lines
+>    (233/242/243/244/245/259/270) follow the same ratio pattern already proven for
+>    `outras_receitas`, but 233 cannot migrate independently of the row-238 driver it feeds,
+>    and 259 has an unconfirmed denominator change (`AA222` "Número de Turmas" at 2028 vs.
+>    `AA223` "Número de Alunos" from 2029). Three lines (252/266/268) have hardcoded budget
+>    resets embedded directly in the v10 workbook's own formula text at irregular years,
+>    which conflict with a *different* reset schedule already present in the app's
+>    v7-sourced series — selecting between two Finance workbooks' reset schedules is a
+>    governance decision, not an extraction task. `despesas_juridicas` (253) has no row-11
+>    reference at 2028 at all (standalone hardcoded value; escalation applies 2029+ only).
+>    An older workbook extraction alone is not treated as a superseding governance decision
+>    for any of these 21 lines — none is reclassified `LIVE_SEPARATELY_GOVERNED` without an
+>    actual written approval, which was not found.
+>
+> **D-R7 status: PARTIALLY IMPLEMENTED, not fully resolved.** 1 of 22 lines (`outras_receitas`)
+> is live; 21 remain blocked pending a project-owner decision on: whether to accept the app's
+> live `receita_operacional_liquida` as the row-238 driver despite its divergence from the v10
+> workbook snapshot; which workbook's reset schedule governs lines 252/266/268; and the
+> row-259 denominator question. See the updated D-R7 entry in
+> `phase-v10-f1a-revenue-governance-decision-register.json` and
+> `reajusteDespesasGrowth.ts`'s module header for the complete per-line evidence.
+
+> **Update — Phase V10-F2.2 (2026-07-27, project owner): D-R7 is now FULLY IMPLEMENTED.**
+> The project owner made the controlling precedence decision: **v10 governs the scoped
+> revenue path in full; v7 (`vCR v7 (2).xlsx`) has no live computational authority for any
+> of the 22 lines**, regardless of its prior Finance-locked / `independent_finance_assumption`
+> / static labeling. This resolves all three blockers V10-F2.1 recorded:
+>
+> 1. **Row 233 / row 238 "circular dependency" — not actually circular.** Direct v10 OOXML
+>    inspection (V10-F2.2) shows row 233 (`E233 = ($AA233/$AA$223)*(1+E$11)*E$223`) has no
+>    reference to row 238 at all, and row 238 (`=SUM(E236:E237)`) has no reference to row
+>    233's *feeding* line either way that creates a cycle — 233 is simply one of the five
+>    components summed into row 236, which then flows into row 238. `receita_com_eventos`
+>    is now live (Family A, per-learner ratio), computed independently of
+>    `receita_operacional_liquida`.
+> 2. **Reset-schedule precedence (252/266/268): v10 governs, per this phase's precedence
+>    rule.** Each line's hardcoded resets are reproduced exactly as embedded in the v10
+>    formula text (not blended with the app's prior v7-sourced reset years) —
+>    `consultoriaEHonorariosValueForYear`, `demaisCustosEDespesasValueForYear`,
+>    `despesasComMarketingValueForYear` in `reajusteDespesasGrowth.ts`.
+> 3. **Row 259 denominator: reproduced exactly, and it collapses to the standard mechanism.**
+>    The turma-at-2028/aluno-thereafter switch is a genuine v10 formula characteristic, not a
+>    defect. Algebraically it collapses to the same per-learner recurring formula as every
+>    other Family A line once the one-time base-year conversion is folded into a single
+>    constant (verified to reproduce the workbook's own `F259` to full float precision from
+>    `E259` alone).
+>
+> All 22 lines are now `formula_derived`/`implemented` in `dreLineItemMap.ts` and computed
+> live in `dreEngine.ts`. `dreAnnualAssumptionSourceData.ts` (the v7-sourced static table) is
+> retained as historical/forensic evidence only for these 22 lines; it remains the live
+> source only for the 6 lines outside this set (not row-11-dependent — `aluguel_iptu`,
+> `corporativo_bu`, `rateio_corporativo`, `pcld`, `descontos_comerciais`,
+> `despesas_com_isencao`). Row-238 component bridge (2028, `t1_g4`/`base`/`bp1`): app
+> `receita_operacional_liquida` = 20,362,750.99 vs v10 workbook `E238` = 21,469,878.95
+> (workbook higher by ~5.44%). Per-unit rate parity is now exact — e.g. `receita_com_eventos`
+> per-aluno = 1,005.14 in both app and workbook — so the remaining dollar difference is fully
+> attributable to already-governed, separately-tracked scenario inputs (`numero_de_alunos`:
+> app 258 vs. workbook reference-scenario 238; D-R3 discount schedule; D-R5
+> `desconto_metodo`; D-R6 base tuition values), not to any residual v7-vs-v10 formula
+> mismatch. See the updated D-R7 entry in
+> `phase-v10-f1a-revenue-governance-decision-register.json`,
+> `reajusteDespesasGrowth.ts`'s module header, and IMPLEMENTATION.md for the complete
+> per-line evidence and validator results (`scripts/validate-v10-f2.ts`, 76/76 pass).
+
 ---
 
 ## R8. G4 Base 258 versus 259
@@ -395,16 +533,17 @@ discount) coincide in 2028 by construction (2028 = base year, no escalation appl
 
 | Decision ID | Question | Available options | Evidence | Financial impact | Recommended evidence standard | Decision owner | Selected option | Approval date | Approval reference |
 |---|---|---|---|---|---|---|---|---|---|
-| D-R1 | Which workbook governs? | v9 / v10 / newer revision / explicit precedence rule | R1 | Cascades into D-R2–D-R7 | Signed/ratified workbook or written precedence memo | Finance | explicit_precedence_rule: v10 governs percentual_desconto_medio, payroll salary escalation, and benefits escalation ONLY — not a blanket workbook selection | 2026-07-27 | Phase V10-F1B, project owner (Luciana Polonen) |
-| D-R2 | Tuition escalation rate | 8% (app, uncertified) / 5.64% (v9) / 5.9% (v10) | R2 | Up to R$95.5M cumulative gross, 2029–2037, this scenario alone | Signed workbook cell or dated Finance memo superseding it | Finance | | | |
+| D-R1 | Which workbook governs? | v9 / v10 / newer revision / explicit precedence rule | R1 | Cascades into D-R2–D-R7 | Signed/ratified workbook or written precedence memo | Finance | explicit_precedence_rule: v10 governs percentual_desconto_medio, payroll salary escalation, benefits escalation, tuition escalation (Reajuste Serviços/Mensalidade), and Reajuste Despesas for all 22 row-11-dependent lines (fully implemented, V10-F2.2) — v7 has no live computational authority within this scoped path; not a blanket workbook selection | 2026-07-27 | Phase V10-F1B, project owner (Luciana Polonen); extended by Phase V10-F2, project owner (Luciana Polonen); made fully controlling by Phase V10-F2.2, project owner (Luciana Polonen) |
+| D-R2 | Tuition escalation rate | 8% (app, uncertified) / 5.64% (v9) / 5.9% (v10) | R2 | Up to R$95.5M cumulative gross, 2029–2037, this scenario alone | Signed workbook cell or dated Finance memo superseding it | Finance | wb_v10_59pct: 6.0% (2028, not applied — stored tuition already 2028-basis) / 5.9% (2029+, applied) — implemented; NOT Finance-signed | 2026-07-27 | Phase V10-F2, project owner (Luciana Polonen) — project-owner implementation decision pending Finance ratification |
 | D-R3 | `percentual_desconto_medio` schedule | current 12%/12.5% (stale) / v9-v10 ramp (25%→12.5%) / Receita audit-layer / historical Finance-packet (superseded) | R3 | Up to R$3.46M/yr, 2028–2034, this scenario alone | Direct workbook cell read + Finance confirmation the ramp is intentional | Finance | workbook_v10_row224 (25/20/20/18/15/15/15/12.5/12.5/12.5) — implemented; NOT Finance-signed | 2026-07-27 | Phase V10-F1B, project owner (Luciana Polonen) — project-owner implementation decision pending Finance ratification |
 | D-R4 | Disposition of `DISCOUNT_SCHEDULE_SOURCE` (Receita Layer 1) | A. Retire / B. Retain audit-only / C. Make canonical for DRE / D. Reclassify as distinct mechanism | R4 | No current computational impact (audit-only, unread) | Finance + technical-architecture joint decision | Finance + Technical Architect | B. Retain audit-only, now single-sourced from the same canonical v10 schedule (no independent value authority) | 2026-07-27 | Phase V10-F1B, project owner (Luciana Polonen) |
 | D-R5 | `desconto_metodo` validity | Re-verify in governing workbook / retain current 2.8243% pending re-verification | R5 | Unquantified — no independent workbook row re-read exists yet | Direct XML/OOXML row read in the Finance-designated governing workbook | Finance | | | |
 | D-R6 | Base tuition source | Approve current screenshot-transcribed table / provide signed XLSX replacement | R6 | Systemic ~2.7–3.3% gap vs. v9 on 3 of 5 scenarios | Signed Finance spreadsheet, dated | Finance | | | |
-| D-R7 | `reajuste_despesas` annual series | Apply v9-derived 4.64% (2028 only, no series) / apply v10-derived 5.0%/4.9% (2028/2029+, no series) / provide full signed annual series | R7 | Not quantified — no annual series exists to model against | Signed annual index table, 2028–2047, with named index source | Finance | | | |
+| D-R7 | `reajuste_despesas` annual series | Apply v9-derived 4.64% (2028 only, no series) / apply v10-derived 5.0%/4.9% (2028/2029+, no series) / provide full signed annual series | R7 | All 22 lines live (complete 22-line row-11 dependency table, V10-F2.1; all migrated to v10, V10-F2.2) | Signed annual index table, 2028–2047, with named index source | Finance / project owner | apply_v10_2028_2029plus: 5.0% (2028) / 4.9% (2029+) — implemented for all 22 lines; NOT Finance-signed; FULLY IMPLEMENTED | 2026-07-27 | Phase V10-F2, project owner (Luciana Polonen); audited by Phase V10-F2.1; fully implemented by Phase V10-F2.2, project owner (Luciana Polonen) — implementation decision pending Finance ratification |
 | D-R8 | G4 Base 2028 PK3 enrollment | 28 (application/captação) / 29 (financial workbook v9, superseded) | R8 | Historical only — R$91,390 (2028) to R$1.32M cumulative (2028–2037, illustrative) gross, not an active alternative | Finance confirmation of which Finance-provided document is authoritative for PK3 2028 | Project Owner | application_258 (28 PK3, 258 total) | 2026-07-27 | Project-owner decision confirming G4 Base 2028 enrollment of 258 and PK3 enrollment of 28 |
 
-`Selected option`, `Approval date`, and `Approval reference` are intentionally left blank.
+For D-R5 and D-R6 (still unresolved), `Selected option`, `Approval date`, and `Approval
+reference` are intentionally left blank.
 
 ---
 

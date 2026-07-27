@@ -320,7 +320,11 @@ check(
   "legacy intermediario normalizes for governed packages",
 );
 check("new_serialization_no_legacy_terms", !JSON.stringify({ OCCUPANCY_SCENARIO_IDS, occupancyOptions, DRE_ENROLLMENT_LEVER_SUPPORTED_SCENARIOS_BY_PACKAGE }).includes("intermediario") && !JSON.stringify({ OCCUPANCY_SCENARIO_IDS, occupancyOptions, DRE_ENROLLMENT_LEVER_SUPPORTED_SCENARIOS_BY_PACKAGE }).includes("pessimista"), "canonical arrays clean");
-check("tuition_formula_marker_unchanged", readFileSync("src/features/rio-scenario-resilience/model/receitaEngine.ts", "utf8").includes("Math.pow(1.08, year - 2028)"), "tuition formula marker retained");
+// V10-F2 (2026-07-27, separately governed) legitimately supersedes the 8%
+// tuition convention with the v10-governed 5.9%/2029+ mechanism — updated to
+// assert the new canonical module is wired in, following the same precedent
+// applied to the payroll marker in validate-v10-f1b.ts for V10-P1.
+check("tuition_formula_uses_v10_f2_canonical_module", readFileSync("src/features/rio-scenario-resilience/model/receitaEngine.ts", "utf8").includes("tuitionGrowth"), "tuition formula sources the V10-F2 canonical tuitionGrowth module");
 check("payroll_formula_marker_unchanged", readFileSync("src/features/rio-scenario-resilience/model/fopagEngine.ts", "utf8").includes("ANNUAL_ADJUSTMENT"), "payroll formula marker retained");
 check("runtime_746_capacity_active", JSON.stringify(GOVERNED_AVAILABLE_CAPACITY_BY_YEAR).includes("746"), "V10-E2.1 governed full capacity is active");
 

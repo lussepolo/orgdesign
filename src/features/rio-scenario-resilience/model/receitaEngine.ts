@@ -31,6 +31,7 @@ import { ENROLLMENT_TUITION_GRADE_MAPPING } from "./enrollmentTuitionGradeMappin
 import { DISCOUNT_SCHEDULE_SOURCE } from "./discountScheduleSourceData";
 import { GRADE_DIVISION_MAP } from "./revenueInputs";
 import { assertSupportedDreEnrollmentCapacityLeverInput } from "./dreEnrollmentCapacityLeverContract";
+import { resolveTuitionGrowthFactor } from "./tuitionGrowth";
 
 // Inverse of TUITION_SCENARIO_ID_MAPPING.
 // Calculation-layer TuitionScenarioId → source TuitionSourceScenarioId.
@@ -64,13 +65,16 @@ function toGradeId(raw: OpeningPackageGradeId): GradeId {
   return raw.toLowerCase() as GradeId;
 }
 
-// Annual adjustment factor.
-// Base year 2028: factor = 1. Subsequent years: factor = 1.08^(year - 2028).
-// Source: financeConventionSourceDecisions.md §2.5, §2.6; TUITION_ADJUSTMENT_CONVENTION.
-// Formula continues through 2047 — mature-state years are NOT frozen at 2037 BRL values.
+// Annual adjustment factor — V10-F2 (2026-07-27).
+// Canonical v10 tuition escalation: base year 2028 factor = 1 (stored
+// TUITION_SOURCE_RECORDS values are already explicit 2028 figures, verified
+// against v10 workbook "Resumos PPT" columns Q/R "(2028)"); 1.059^(year-2028)
+// for subsequent years (v10 PnL row 9 "Reajuste Serviços" = Mensalidade,
+// F9:N9 = 5.9% flat 2029-2037). Supersedes the prior 8% convention — see
+// tuitionGrowth.ts for full source evidence. Formula continues through 2047 —
+// mature-state years are NOT frozen at 2037 BRL values.
 function annualAdjustmentFactor(year: OpeningPackageProjectionYear): number {
-  if (year === 2028) return 1;
-  return Math.pow(1.08, year - 2028);
+  return resolveTuitionGrowthFactor(year);
 }
 
 // Average effective discount rate for a given year.
@@ -138,7 +142,7 @@ function addAggregate(
 // Formula per grain (grade × year):
 //   1. contractedLearners from COMBINED_ENROLLMENT_RECORDS.
 //   2. baseAnnualGrossContractValueBRL from TUITION_SOURCE_RECORDS (via grade mapping).
-//   3. annualAdjustmentFactor: 1 for 2028; 1.08^(year-2028) for year > 2028. Continues to 2047.
+//   3. annualAdjustmentFactor: 1 for 2028; 1.059^(year-2028) for year > 2028. Continues to 2047.
 //   4. adjustedAnnualGrossContractValueBRL = base × factor.
 //   5. grossReceitaBeforeDiscount = contractedLearners × adjustedAnnualGrossContractValueBRL.
 //   6. averageEffectiveDiscountRate from DISCOUNT_SCHEDULE_SOURCE for the year.

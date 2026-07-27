@@ -11,8 +11,19 @@
 //   desconto_metodo, percentual_deducoes: stored positive → explicit minus applied at usage site.
 //   custo_material_digital_fator: stored positive → explicit minus applied at usage site.
 //
-// Outras Receitas: basePerLearnerRatio × numero_de_alunos.
-// reajuste_despesas NOT applied (source status: not_available_pending_finance_source).
+// V10-F2.2 (2026-07-27) — v10 precedence, all 22 row-11-dependent lines live:
+// per the project owner's v10-governs-scoped-revenue decision, every line
+// whose v10 formula references PnL row 11 ("Reajuste Despesas") is now
+// computed live from the v10-derived formula, replacing the prior
+// `assumption(lineId, year)` v7-static lookup. See reajusteDespesasGrowth.ts
+// module header for the complete 22-line dependency table, the three
+// formula families (A/A-variant/B), the fixed-base compounding line
+// (despesas_juridicas), and the three reset-bearing lines
+// (consultoria_e_honorarios, demais_custos_e_despesas,
+// despesas_com_marketing). dreAnnualAssumptionSourceData.ts (v7-sourced)
+// remains the live source ONLY for lines outside this 22-line set
+// (aluguel_iptu, corporativo_bu, rateio_corporativo, pcld,
+// descontos_comerciais, despesas_com_isencao) — out of this phase's scope.
 // total_folha_de_pagamento (memo_kpi) excluded from total_custos_e_despesas_fixas and EBITDA.
 // below_ebitda rows excluded (never looked up).
 // CALCULATION_CAN_BEGIN remains false (inputReadinessRegistry.ts).
@@ -31,6 +42,35 @@ import {
 import { DRE_REVENUE_DRIVER_SOURCE_DATA } from "./dreRevenueDriverSourceData";
 import { DRE_COST_DRIVER_SOURCE_DATA } from "./dreCostDriverSourceData";
 import { DRE_ANNUAL_ASSUMPTION_SOURCE_DATA } from "./dreAnnualAssumptionSourceData";
+import {
+  resolveReajusteDespesasGrowthFactor,
+  toReajusteDespesasBase2028,
+  perLearnerReajusteDespesasValue,
+  revenueShareReajusteDespesasValue,
+  demaisImpostosETaxasValueForYear,
+  consultoriaEHonorariosValueForYear,
+  demaisCustosEDespesasValueForYear,
+  despesasComMarketingValueForYear,
+  reajusteDespesasValueForYear,
+  RECEITA_COM_EVENTOS_BASE_PER_LEARNER_RATIO,
+  EVENTOS_SEB_BASE_PER_LEARNER_RATIO,
+  CERTIFICACOES_BASE_PER_LEARNER_RATIO,
+  CUSTOS_COM_ALIMENTACAO_BASE_PER_LEARNER_RATIO,
+  MATERIAIS_PEDAGOGICOS_BASE_PER_LEARNER_RATIO,
+  ENERGIA_ELETRICA_AGUA_E_ESGOTO_BASE_PER_LEARNER_RATIO,
+  DESPESAS_BANCARIAS_BASE_PER_LEARNER_RATIO,
+  CURSOS_E_TREINAMENTOS_REVENUE_SHARE_RATIO,
+  SERVICOS_DE_LIMPEZA_E_SEGURANCA_REVENUE_SHARE_RATIO,
+  RPA_REVENUE_SHARE_RATIO,
+  CONSERVACAO_PREDIAL_E_MANUTENCAO_MAQUINAS_E_MOVEIS_REVENUE_SHARE_RATIO,
+  LOCACAO_DE_MAQUINAS_E_EQUIPAMENTOS_REVENUE_SHARE_RATIO,
+  TECNOLOGIA_TELEFONE_INTERNET_LICENCAS_E_SERVICOS_DE_INFORMACAO_REVENUE_SHARE_RATIO,
+  MATERIAIS_DE_LIMPEZA_REVENUE_SHARE_RATIO,
+  MATERIAIS_DE_ESCRITORIO_REVENUE_SHARE_RATIO,
+  DESPESAS_COM_VIAGENS_REVENUE_SHARE_RATIO,
+} from "./reajusteDespesasGrowth";
+
+const DESPESAS_JURIDICAS_BASE_2028 = -20000; // v10 PnL row 253, E253 literal (no 2028 rate applied)
 
 export function calculateDre(input: DreEngineInput): DreEngineOutput {
   const receitaOutput = calculateReceita({
@@ -74,8 +114,12 @@ export function calculateDre(input: DreEngineInput): DreEngineOutput {
   const custoMaterialDigitalFator =
     DRE_COST_DRIVER_SOURCE_DATA.records[0].annualValuesByYear[2028];
 
-  const outrasReceitasRatio =
-    DRE_OUTRAS_RECEITAS_BASE_PER_LEARNER.sourceValues.basePerLearnerRatio;
+  // V10-F2: the stored ratio is a pre-2028 benchmark (v10 PnL!AA235/AA223) —
+  // apply the explicit 2028 Reajuste Despesas conversion (×1.05) once, then
+  // the recurring 4.9%/yr factor per year. See reajusteDespesasGrowth.ts.
+  const outrasReceitasBase2028 = toReajusteDespesasBase2028(
+    DRE_OUTRAS_RECEITAS_BASE_PER_LEARNER.sourceValues.basePerLearnerRatio,
+  );
 
   function assumption(lineId: string, year: number): number {
     return assumptionByLineId.get(lineId)?.[year] ?? 0;
@@ -86,6 +130,14 @@ export function calculateDre(input: DreEngineInput): DreEngineOutput {
   }
 
   const byYear = {} as Record<OpeningPackageProjectionYear, DreYearResult>;
+
+  // V10-F2.2: reset-bearing row-11-dependent lines (PnL rows 252/266/268)
+  // carry their own prior-year result forward through the reset chain — see
+  // reajusteDespesasGrowth.ts. RECEITA_PROJECTION_YEARS is ascending, so a
+  // simple sequential accumulator per line is sufficient.
+  let priorConsultoriaEHonorarios: number | undefined;
+  let priorDemaisCustosEDespesas: number | undefined;
+  let priorDespesasComMarketing: number | undefined;
 
   for (const year of RECEITA_PROJECTION_YEARS) {
     const fopagYt = fopagByYear.get(year);
@@ -121,13 +173,21 @@ export function calculateDre(input: DreEngineInput): DreEngineOutput {
     // desconto_metodo_rate is positive → explicit minus makes result negative.
     const descontos_metodo_de_assinatura = -desconto_metodo_rate * receitas_com_ensino_regular;
 
-    // independent Finance assumption, positive revenue
-    const receita_com_eventos = assumption("receita_com_eventos", year);
+    // V10-F2.2: v10 PnL row 233, Family A (per-learner ratio carry-forward) —
+    // see reajusteDespesasGrowth.ts. Confirmed independent of row 238 (no
+    // circular dependency).
+    const receita_com_eventos = perLearnerReajusteDespesasValue(
+      RECEITA_COM_EVENTOS_BASE_PER_LEARNER_RATIO,
+      numero_de_alunos,
+      year,
+    );
 
     const receita_com_material_didatico = numero_de_alunos * ticket_material * 12;
 
-    // reajuste_despesas not applied — see outrasReceitasReajusteNote
-    const outras_receitas = outrasReceitasRatio * numero_de_alunos;
+    // V10-F2: reajuste_despesas now applied — see module header and
+    // reajusteDespesasGrowth.ts for the governed formula and source evidence.
+    const outras_receitas =
+      outrasReceitasBase2028 * resolveReajusteDespesasGrowthFactor(year) * numero_de_alunos;
 
     const receita_operacional_antes_das_deducoes =
       receita_de_ensino_liquida +
@@ -158,11 +218,28 @@ export function calculateDre(input: DreEngineInput): DreEngineOutput {
     // FOPAG values always positive → negate once
     const fopag_direto_clt_pj = -(fopagYt?.fopagDireto ?? 0);
 
-    // annual Finance assumption values already negative — use directly
-    const eventos_seb = assumption("eventos_seb", year);
-    const certificacoes = assumption("certificacoes", year);
-    const custos_com_alimentacao = assumption("custos_com_alimentacao", year);
-    const materiais_pedagogicos = assumption("materiais_pedagogicos", year);
+    // V10-F2.2: v10 PnL rows 242/243/244/245, Family A (per-learner ratio
+    // carry-forward) — see reajusteDespesasGrowth.ts.
+    const eventos_seb = perLearnerReajusteDespesasValue(
+      EVENTOS_SEB_BASE_PER_LEARNER_RATIO,
+      numero_de_alunos,
+      year,
+    );
+    const certificacoes = perLearnerReajusteDespesasValue(
+      CERTIFICACOES_BASE_PER_LEARNER_RATIO,
+      numero_de_alunos,
+      year,
+    );
+    const custos_com_alimentacao = perLearnerReajusteDespesasValue(
+      CUSTOS_COM_ALIMENTACAO_BASE_PER_LEARNER_RATIO,
+      numero_de_alunos,
+      year,
+    );
+    const materiais_pedagogicos = perLearnerReajusteDespesasValue(
+      MATERIAIS_PEDAGOGICOS_BASE_PER_LEARNER_RATIO,
+      numero_de_alunos,
+      year,
+    );
 
     const total_custo_direto =
       fopag_direto_clt_pj +
@@ -183,33 +260,85 @@ export function calculateDre(input: DreEngineInput): DreEngineOutput {
     // memo_kpi — present for board readability; excluded from the total below
     const total_folha_de_pagamento = fopag_direto_clt_pj + folha_de_pagamento;
 
-    // 17 independent Finance assumption rows — already negative, use directly
-    const cursos_e_treinamentos = assumption("cursos_e_treinamentos", year);
-    const servicos_de_limpeza_e_seguranca = assumption("servicos_de_limpeza_e_seguranca", year);
-    const consultoria_e_honorarios = assumption("consultoria_e_honorarios", year);
-    const despesas_juridicas = assumption("despesas_juridicas", year);
-    const rpa = assumption("rpa", year);
+    // V10-F2.2: rows 250/251/254/256/257/258/260/261/262 — v10 PnL Family B
+    // (fixed % of same-year receita_operacional_liquida). Row 252 is a
+    // reset-bearing line (its own function). aluguel_iptu, corporativo_bu,
+    // rateio_corporativo are NOT row-11-dependent (out of this phase's
+    // scope) — remain sourced from the v7-static Finance assumption table.
+    const cursos_e_treinamentos = revenueShareReajusteDespesasValue(
+      CURSOS_E_TREINAMENTOS_REVENUE_SHARE_RATIO,
+      receita_operacional_liquida,
+      year,
+    );
+    const servicos_de_limpeza_e_seguranca = revenueShareReajusteDespesasValue(
+      SERVICOS_DE_LIMPEZA_E_SEGURANCA_REVENUE_SHARE_RATIO,
+      receita_operacional_liquida,
+      year,
+    );
+    const consultoria_e_honorarios = consultoriaEHonorariosValueForYear(
+      year,
+      priorConsultoriaEHonorarios,
+    );
+    priorConsultoriaEHonorarios = consultoria_e_honorarios;
+    // V10-F2.2: v10 PnL row 253 — fixed-base compounding (E253=-20000
+    // literal, no 2028 rate; F253 onward compounds by the recurring row-11
+    // rate). Reuses the existing base2028→factor mechanism directly.
+    const despesas_juridicas = reajusteDespesasValueForYear(DESPESAS_JURIDICAS_BASE_2028, year);
+    const rpa = revenueShareReajusteDespesasValue(RPA_REVENUE_SHARE_RATIO, receita_operacional_liquida, year);
     const aluguel_iptu = assumption("aluguel_iptu", year);
-    const conservacao_predial_e_manutencao_maquinas_e_moveis = assumption(
-      "conservacao_predial_e_manutencao_maquinas_e_moveis",
+    const conservacao_predial_e_manutencao_maquinas_e_moveis = revenueShareReajusteDespesasValue(
+      CONSERVACAO_PREDIAL_E_MANUTENCAO_MAQUINAS_E_MOVEIS_REVENUE_SHARE_RATIO,
+      receita_operacional_liquida,
       year,
     );
-    const locacao_de_maquinas_e_equipamentos = assumption(
-      "locacao_de_maquinas_e_equipamentos",
+    const locacao_de_maquinas_e_equipamentos = revenueShareReajusteDespesasValue(
+      LOCACAO_DE_MAQUINAS_E_EQUIPAMENTOS_REVENUE_SHARE_RATIO,
+      receita_operacional_liquida,
       year,
     );
-    const tecnologia_telefone_internet_licencas_e_servicos_de_informacao = assumption(
-      "tecnologia_telefone_internet_licencas_e_servicos_de_informacao",
+    const tecnologia_telefone_internet_licencas_e_servicos_de_informacao =
+      revenueShareReajusteDespesasValue(
+        TECNOLOGIA_TELEFONE_INTERNET_LICENCAS_E_SERVICOS_DE_INFORMACAO_REVENUE_SHARE_RATIO,
+        receita_operacional_liquida,
+        year,
+      );
+    // V10-F2.2: v10 PnL row 259 — Family A variant (turma/aluno base-year
+    // switch, collapses to the same per-learner mechanism — see
+    // reajusteDespesasGrowth.ts module header).
+    const energia_eletrica_agua_e_esgoto = perLearnerReajusteDespesasValue(
+      ENERGIA_ELETRICA_AGUA_E_ESGOTO_BASE_PER_LEARNER_RATIO,
+      numero_de_alunos,
       year,
     );
-    const energia_eletrica_agua_e_esgoto = assumption("energia_eletrica_agua_e_esgoto", year);
-    const materiais_de_limpeza = assumption("materiais_de_limpeza", year);
-    const materiais_de_escritorio = assumption("materiais_de_escritorio", year);
-    const despesas_com_viagens = assumption("despesas_com_viagens", year);
+    const materiais_de_limpeza = revenueShareReajusteDespesasValue(
+      MATERIAIS_DE_LIMPEZA_REVENUE_SHARE_RATIO,
+      receita_operacional_liquida,
+      year,
+    );
+    const materiais_de_escritorio = revenueShareReajusteDespesasValue(
+      MATERIAIS_DE_ESCRITORIO_REVENUE_SHARE_RATIO,
+      receita_operacional_liquida,
+      year,
+    );
+    const despesas_com_viagens = revenueShareReajusteDespesasValue(
+      DESPESAS_COM_VIAGENS_REVENUE_SHARE_RATIO,
+      receita_operacional_liquida,
+      year,
+    );
     const corporativo_bu = assumption("corporativo_bu", year);
     const rateio_corporativo = assumption("rateio_corporativo", year);
-    const demais_impostos_e_taxas = assumption("demais_impostos_e_taxas", year);
-    const demais_custos_e_despesas = assumption("demais_custos_e_despesas", year);
+    // V10-F2.2: v10 PnL row 265 — Family B plus a 2028-only -20000 literal.
+    const demais_impostos_e_taxas = demaisImpostosETaxasValueForYear(
+      receita_operacional_liquida,
+      year,
+    );
+    // V10-F2.2: v10 PnL row 266 — reset-bearing line (own function).
+    const demais_custos_e_despesas = demaisCustosEDespesasValueForYear(
+      year,
+      priorDemaisCustosEDespesas,
+      receita_operacional_liquida,
+    );
+    priorDemaisCustosEDespesas = demais_custos_e_despesas;
 
     // total_folha_de_pagamento (memo_kpi) intentionally excluded
     const total_custos_e_despesas_fixas =
@@ -234,9 +363,19 @@ export function calculateDre(input: DreEngineInput): DreEngineOutput {
       demais_custos_e_despesas;
 
     // ── Sales expenses ────────────────────────────────────────────────────────
-    const despesas_com_marketing = assumption("despesas_com_marketing", year);
+    // V10-F2.2: v10 PnL row 268 — reset-bearing line (own function).
+    const despesas_com_marketing = despesasComMarketingValueForYear(
+      year,
+      priorDespesasComMarketing,
+    );
+    priorDespesasComMarketing = despesas_com_marketing;
     const pcld = assumption("pcld", year);
-    const despesas_bancarias = assumption("despesas_bancarias", year);
+    // V10-F2.2: v10 PnL row 270 — Family A (per-learner ratio carry-forward).
+    const despesas_bancarias = perLearnerReajusteDespesasValue(
+      DESPESAS_BANCARIAS_BASE_PER_LEARNER_RATIO,
+      numero_de_alunos,
+      year,
+    );
     const descontos_comerciais = assumption("descontos_comerciais", year);
     // canonical join key "despesas_com_sinistro" (corrected PnL label: Despesas com Isenção)
     const despesas_com_sinistro = assumption("despesas_com_sinistro", year);
@@ -320,11 +459,11 @@ export function calculateDre(input: DreEngineInput): DreEngineOutput {
     input,
     byYear,
     outrasReceitasReajusteNote:
-      "Outras Receitas computed as basePerLearnerRatio × numero_de_alunos only. " +
-      "reajuste_despesas (DRIVER_LINE_MAP driverId 'reajuste_despesas') is not applied: " +
-      "its annualValuesStatus is 'not_available_pending_finance_source' in dreLineItemMap.ts. " +
-      "Full PnL benchmark formula: C233 = ($Y233/$Y$221)*(1+C$9)*C$221; " +
-      "the (1+C$9) reajuste term is omitted pending Finance source confirmation.",
+      "V10-F2.2 (2026-07-27): all 22 v10 PnL row-11-dependent lines are now live-formula, " +
+      "not just outras_receitas — see reajusteDespesasGrowth.ts module header for the complete " +
+      "dependency table and the three formula families. outras_receitas itself: " +
+      "basePerLearnerRatio × Reajuste Despesas growth factor × numero_de_alunos; v10 formula " +
+      "E235 = ($AA235/$AA$223)*(1+E$11)*E$223 (dreScenarioAdapters.ts DRE_OUTRAS_RECEITAS_BASE_PER_LEARNER).",
     descontosMetodoFormulaNote:
       "descontos_metodo_de_assinatura computed as −desconto_metodo × receitas_com_ensino_regular. " +
       "Formula base confirmed from PnL workbook: C230 = −C$13 × C225, where C225 = receitas_com_ensino_regular " +

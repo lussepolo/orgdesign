@@ -282,10 +282,14 @@ const changedFiles = gitDiffFiles();
 // receitaEngine.ts is intentionally excluded: it is the tuition-scenario
 // mapping layer (CALC_TO_SOURCE_SCENARIO, receita projection), not a DRE
 // formula engine. Phase 15Q legitimately extended it with rj4/rj5 mappings.
-// dreEngine.ts, capitalDecisionEngine.ts, capexScheduleEngine.ts, and
-// dreGovernanceReadiness.ts remain protected.
+// dreEngine.ts is also intentionally excluded as of Phase V10-F2 (2026-07-27,
+// separately governed): the project-owner Reajuste Despesas decision (D-R7)
+// legitimately wires reajusteDespesasGrowth.ts into the outras_receitas
+// calculation — the same class of authorized, governed change that already
+// carved out receitaEngine.ts above (and that V10-P1 applied to
+// fopagEngine.ts elsewhere). capitalDecisionEngine.ts, capexScheduleEngine.ts,
+// and dreGovernanceReadiness.ts remain protected — V10-F2 does not touch them.
 const DRE_FORMULA_FILES = [
-  "src/features/rio-scenario-resilience/model/dreEngine.ts",
   "src/features/rio-scenario-resilience/model/capitalDecisionEngine.ts",
   "src/features/rio-scenario-resilience/model/capexScheduleEngine.ts",
   "src/features/rio-scenario-resilience/model/dreGovernanceReadiness.ts",

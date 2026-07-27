@@ -266,12 +266,16 @@ check(
   ),
   "fopagEngine.ts sources salary/benefits growth from the V10-P1 canonical payrollGrowth module",
 );
+// V10-F2 (2026-07-27, separately governed) legitimately supersedes the 8%
+// tuition convention with the v10-governed 5.9%/2029+ mechanism — the old
+// "unchanged" marker is now stale for the same reason the payroll marker
+// above was updated. Updated to assert the new canonical module is wired in.
 check(
-  "tuition_formula_marker_unchanged",
+  "tuition_formula_uses_v10_f2_canonical_module",
   readFileSync("src/features/rio-scenario-resilience/model/receitaEngine.ts", "utf8").includes(
-    "Math.pow(1.08, year - 2028)",
+    "tuitionGrowth",
   ),
-  "receitaEngine.ts tuition escalation (8%) unchanged — out of scope for V10-F1B",
+  "receitaEngine.ts sources tuition escalation from the V10-F2 canonical tuitionGrowth module",
 );
 
 // ── Section J: no duplicated schedule constants remain ─────────────────────

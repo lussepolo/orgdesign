@@ -492,22 +492,25 @@ const DRE_LINE_ITEM_MAP_DATA: readonly DreLineItemRecord[] = [
     dreLineId: "receita_com_eventos",
     displayLabelPt: "Receita com Eventos",
     section: "revenue",
-    classification: "independent_finance_assumption",
-    sourceType: "finance_dre_table_annual_values",
+    classification: "formula_derived",
+    sourceType: "formula_layer",
+    formula:
+      "v10 PnL row 233 (Family A, per-learner ratio carry-forward): E233 = ($AA233/$AA$223)*(1+E$11)*E$223, then prior-year value × (1+row11 rate) × Número de Alunos each subsequent year. basePerLearnerRatio=957.2779713114753 (V10-F2.2, reajusteDespesasGrowth.ts).",
     directScenarioDriver: false,
-    scenarioSensitivity: "independent_of_board_decision_levers",
+    scenarioSensitivity: "indirect_via_formula_dependency",
     signConvention: "positive_revenue",
     subtotalRole: "component_line",
     horizon: "2028-2047",
     preOpsTreatment: "excluded_no_pre_ops_value",
     perpetuityTreatment: "excluded_horizon_ends_2047",
-    implementationStatus: "requires_finance_source_confirmation",
+    implementationStatus: "implemented",
     includedInEbitda: true,
     notes:
       "Phase 12B (Luciana): on Finance's explicit independent-annual-value list. " +
       "Does not move with capacity, tuition, org design, or CAPEX decisions. " +
       "Annual values must be sourced from the Finance DRE table directly, not " +
-      "calculated.",
+      "calculated." +
+      " V10-F2.2 (2026-07-27, project owner): migrated from independent_finance_assumption (Finance-locked v7-static annual value) to formula_derived, per the project-owner decision that v10 governs every formula referencing PnL row 11 (Reajuste Despesas) for its year — formula-driven, not by line-item name or category. The v7 workbook value is retained in dreAnnualAssumptionSourceData.ts as historical/forensic evidence only; it has no live computational authority for this line. See reajusteDespesasGrowth.ts module header for the complete 22-line dependency table.",
   },
   {
     dreLineId: "receita_com_material_didatico",
@@ -539,8 +542,10 @@ const DRE_LINE_ITEM_MAP_DATA: readonly DreLineItemRecord[] = [
     classification: "formula_derived",
     sourceType: "formula_layer",
     formula:
-      "C233 = ($Y233/$Y$221)*(1+C$9)*C$221 — (base-year per-learner ratio) × " +
-      "(1 + Reajuste Despesas index) × Número de Alunos",
+      "v10 PnL row 235 (Family A, per-learner ratio carry-forward): E235 = " +
+      "($AA235/$AA$223)*(1+E$11)*E$223 — (base-year per-learner ratio) × " +
+      "(1 + Reajuste Despesas index) × Número de Alunos. basePerLearnerRatio=" +
+      "2571.8660655737704 (dreScenarioAdapters.ts DRE_OUTRAS_RECEITAS_BASE_PER_LEARNER).",
     directScenarioDriver: false,
     scenarioSensitivity: "indirect_via_formula_dependency",
     signConvention: "positive_revenue",
@@ -548,17 +553,20 @@ const DRE_LINE_ITEM_MAP_DATA: readonly DreLineItemRecord[] = [
     horizon: "2028-2047",
     preOpsTreatment: "excluded_no_pre_ops_value",
     perpetuityTreatment: "excluded_horizon_ends_2047",
-    implementationStatus: "mapped_pending_engine_implementation",
+    implementationStatus: "implemented",
     includedInEbitda: true,
     notes:
       "Phase 12B (Luciana): formula text not provided — flagged formula-candidate " +
       "pending confirmation only. Sign inferred as positive_revenue from its " +
       "additive role and 'Receitas' naming. " +
-      "Phase 12M (2026-06-09): formula confirmed from PnL spreadsheet source " +
-      "(C233 = ($Y233/$Y$221)*(1+C$9)*C$221). Resolution: resolved_by_spreadsheet_source_authority " +
-      "(see dreScenarioAdapterDesign.ts outrasReceitasResolution). " +
-      "Limitation: base-year per-learner ratio (Y233/Y221) not separately extracted — " +
-      "adapter cannot be wired until the ratio is available from Finance.",
+      "Phase 12M (2026-06-09): formula confirmed from PnL spreadsheet source. " +
+      "V10-F2 (2026-07-27): base-year per-learner ratio (AA235/AA223) extracted and wired " +
+      "live in dreEngine.ts; reajuste_despesas (row 11) now applied. V10-F2.2 (2026-07-27): " +
+      "corrected stale cell-reference documentation — the governing cells are v10 PnL " +
+      "AA235/AA223/E11 (not the older C233/Y233/Y221/row-9 coordinates this record " +
+      "previously cited; row 233 is the different line receita_com_eventos, also live as " +
+      "of V10-F2.2). See reajusteDespesasGrowth.ts module header for the complete 22-line " +
+      "row-11 dependency table.",
   },
   {
     dreLineId: "receita_operacional_antes_das_deducoes",
@@ -701,77 +709,89 @@ const DRE_LINE_ITEM_MAP_DATA: readonly DreLineItemRecord[] = [
     dreLineId: "eventos_seb",
     displayLabelPt: "Eventos SEB",
     section: "direct_costs",
-    classification: "independent_finance_assumption",
-    sourceType: "finance_dre_table_annual_values",
+    classification: "formula_derived",
+    sourceType: "formula_layer",
+    formula:
+      "v10 PnL row 242 (Family A, per-learner ratio carry-forward), same mechanism as row 233/235. basePerLearnerRatio=-3159.782704918033 (V10-F2.2, reajusteDespesasGrowth.ts).",
     directScenarioDriver: false,
-    scenarioSensitivity: "independent_of_board_decision_levers",
+    scenarioSensitivity: "indirect_via_formula_dependency",
     signConvention: "negative_cost_or_deduction",
     subtotalRole: "component_line",
     horizon: "2028-2047",
     preOpsTreatment: "excluded_no_pre_ops_value",
     perpetuityTreatment: "excluded_horizon_ends_2047",
-    implementationStatus: "requires_finance_source_confirmation",
+    implementationStatus: "implemented",
     includedInEbitda: true,
     notes:
       "Phase 12B (Luciana): on Finance's explicit independent-annual-value list. " +
-      "Does not move with capacity, tuition, org design, or CAPEX decisions.",
+      "Does not move with capacity, tuition, org design, or CAPEX decisions." +
+      " V10-F2.2 (2026-07-27, project owner): migrated from independent_finance_assumption (Finance-locked v7-static annual value) to formula_derived, per the project-owner decision that v10 governs every formula referencing PnL row 11 (Reajuste Despesas) for its year — formula-driven, not by line-item name or category. The v7 workbook value is retained in dreAnnualAssumptionSourceData.ts as historical/forensic evidence only; it has no live computational authority for this line. See reajusteDespesasGrowth.ts module header for the complete 22-line dependency table.",
   },
   {
     dreLineId: "certificacoes",
     displayLabelPt: "Certificações",
     section: "direct_costs",
-    classification: "independent_finance_assumption",
-    sourceType: "finance_dre_table_annual_values",
+    classification: "formula_derived",
+    sourceType: "formula_layer",
+    formula:
+      "v10 PnL row 243 (Family A, per-learner ratio carry-forward). basePerLearnerRatio=-140.96352459016393 (V10-F2.2, reajusteDespesasGrowth.ts).",
     directScenarioDriver: false,
-    scenarioSensitivity: "independent_of_board_decision_levers",
+    scenarioSensitivity: "indirect_via_formula_dependency",
     signConvention: "negative_cost_or_deduction",
     subtotalRole: "component_line",
     horizon: "2028-2047",
     preOpsTreatment: "excluded_no_pre_ops_value",
     perpetuityTreatment: "excluded_horizon_ends_2047",
-    implementationStatus: "requires_finance_source_confirmation",
+    implementationStatus: "implemented",
     includedInEbitda: true,
     notes:
       "Phase 12B (Luciana): on Finance's explicit independent-annual-value list. " +
-      "Does not move with capacity, tuition, org design, or CAPEX decisions.",
+      "Does not move with capacity, tuition, org design, or CAPEX decisions." +
+      " V10-F2.2 (2026-07-27, project owner): migrated from independent_finance_assumption (Finance-locked v7-static annual value) to formula_derived, per the project-owner decision that v10 governs every formula referencing PnL row 11 (Reajuste Despesas) for its year — formula-driven, not by line-item name or category. The v7 workbook value is retained in dreAnnualAssumptionSourceData.ts as historical/forensic evidence only; it has no live computational authority for this line. See reajusteDespesasGrowth.ts module header for the complete 22-line dependency table.",
   },
   {
     dreLineId: "custos_com_alimentacao",
     displayLabelPt: "Custos com Alimentação",
     section: "direct_costs",
-    classification: "independent_finance_assumption",
-    sourceType: "finance_dre_table_annual_values",
+    classification: "formula_derived",
+    sourceType: "formula_layer",
+    formula:
+      "v10 PnL row 244 (Family A, per-learner ratio carry-forward). basePerLearnerRatio=-54.4734118852459 (V10-F2.2, reajusteDespesasGrowth.ts).",
     directScenarioDriver: false,
-    scenarioSensitivity: "independent_of_board_decision_levers",
+    scenarioSensitivity: "indirect_via_formula_dependency",
     signConvention: "negative_cost_or_deduction",
     subtotalRole: "component_line",
     horizon: "2028-2047",
     preOpsTreatment: "excluded_no_pre_ops_value",
     perpetuityTreatment: "excluded_horizon_ends_2047",
-    implementationStatus: "requires_finance_source_confirmation",
+    implementationStatus: "implemented",
     includedInEbitda: true,
     notes:
       "Phase 12B (Luciana): on Finance's explicit independent-annual-value list. " +
-      "Does not move with capacity, tuition, org design, or CAPEX decisions.",
+      "Does not move with capacity, tuition, org design, or CAPEX decisions." +
+      " V10-F2.2 (2026-07-27, project owner): migrated from independent_finance_assumption (Finance-locked v7-static annual value) to formula_derived, per the project-owner decision that v10 governs every formula referencing PnL row 11 (Reajuste Despesas) for its year — formula-driven, not by line-item name or category. The v7 workbook value is retained in dreAnnualAssumptionSourceData.ts as historical/forensic evidence only; it has no live computational authority for this line. See reajusteDespesasGrowth.ts module header for the complete 22-line dependency table.",
   },
   {
     dreLineId: "materiais_pedagogicos",
     displayLabelPt: "Materiais Pedagógicos",
     section: "direct_costs",
-    classification: "independent_finance_assumption",
-    sourceType: "finance_dre_table_annual_values",
+    classification: "formula_derived",
+    sourceType: "formula_layer",
+    formula:
+      "v10 PnL row 245 (Family A, per-learner ratio carry-forward). basePerLearnerRatio=-938.9024999999999 (V10-F2.2, reajusteDespesasGrowth.ts).",
     directScenarioDriver: false,
-    scenarioSensitivity: "independent_of_board_decision_levers",
+    scenarioSensitivity: "indirect_via_formula_dependency",
     signConvention: "negative_cost_or_deduction",
     subtotalRole: "component_line",
     horizon: "2028-2047",
     preOpsTreatment: "excluded_no_pre_ops_value",
     perpetuityTreatment: "excluded_horizon_ends_2047",
-    implementationStatus: "requires_finance_source_confirmation",
+    implementationStatus: "implemented",
     includedInEbitda: true,
     notes:
       "Phase 12B (Luciana): on Finance's explicit independent-annual-value list. " +
-      "Does not move with capacity, tuition, org design, or CAPEX decisions.",
+      "Does not move with capacity, tuition, org design, or CAPEX decisions." +
+      " V10-F2.2 (2026-07-27, project owner): migrated from independent_finance_assumption (Finance-locked v7-static annual value) to formula_derived, per the project-owner decision that v10 governs every formula referencing PnL row 11 (Reajuste Despesas) for its year — formula-driven, not by line-item name or category. The v7 workbook value is retained in dreAnnualAssumptionSourceData.ts as historical/forensic evidence only; it has no live computational authority for this line. See reajusteDespesasGrowth.ts module header for the complete 22-line dependency table.",
   },
   {
     dreLineId: "total_custo_direto",
@@ -921,16 +941,18 @@ const DRE_LINE_ITEM_MAP_DATA: readonly DreLineItemRecord[] = [
     dreLineId: "cursos_e_treinamentos",
     displayLabelPt: "Cursos e Treinamentos",
     section: "fixed_costs_and_expenses",
-    classification: "independent_finance_assumption",
-    sourceType: "finance_dre_table_annual_values",
+    classification: "formula_derived",
+    sourceType: "formula_layer",
+    formula:
+      "v10 PnL row 250 (Family B): E250 = $AB250*E$238*(1+E$11) — fixed % of the SAME-year Receita Operacional Líquida (row 238), not compounded year-over-year. revenueShareRatio=-0.01524176109183518 (V10-F2.2, reajusteDespesasGrowth.ts).",
     directScenarioDriver: false,
-    scenarioSensitivity: "independent_of_board_decision_levers",
+    scenarioSensitivity: "indirect_via_formula_dependency",
     signConvention: "negative_cost_or_deduction",
     subtotalRole: "component_line",
     horizon: "2028-2047",
     preOpsTreatment: "excluded_no_pre_ops_value",
     perpetuityTreatment: "excluded_horizon_ends_2047",
-    implementationStatus: "requires_finance_source_confirmation",
+    implementationStatus: "implemented",
     includedInEbitda: true,
     serviceContractsCategory: false,
     costLineCategory: "general_operating_cost",
@@ -939,22 +961,25 @@ const DRE_LINE_ITEM_MAP_DATA: readonly DreLineItemRecord[] = [
     sourceAuthority: "v8_pnl_dre_row",
     notes:
       "Phase 12B (Luciana): on Finance's explicit independent-annual-value list. " +
-      "Does not move with capacity, tuition, org design, or CAPEX decisions.",
+      "Does not move with capacity, tuition, org design, or CAPEX decisions." +
+      " V10-F2.2 (2026-07-27, project owner): migrated from independent_finance_assumption (Finance-locked v7-static annual value) to formula_derived, per the project-owner decision that v10 governs every formula referencing PnL row 11 (Reajuste Despesas) for its year — formula-driven, not by line-item name or category. The v7 workbook value is retained in dreAnnualAssumptionSourceData.ts as historical/forensic evidence only; it has no live computational authority for this line. See reajusteDespesasGrowth.ts module header for the complete 22-line dependency table.",
   },
   {
     dreLineId: "servicos_de_limpeza_e_seguranca",
     displayLabelPt: "Serviços de Limpeza e Segurança",
     section: "fixed_costs_and_expenses",
-    classification: "independent_finance_assumption",
-    sourceType: "finance_dre_table_annual_values",
+    classification: "formula_derived",
+    sourceType: "formula_layer",
+    formula:
+      "v10 PnL row 251 (Family B, fixed % of same-year Receita Operacional Líquida). revenueShareRatio=-0.035083371833752458 (V10-F2.2, reajusteDespesasGrowth.ts).",
     directScenarioDriver: false,
-    scenarioSensitivity: "independent_of_board_decision_levers",
+    scenarioSensitivity: "indirect_via_formula_dependency",
     signConvention: "negative_cost_or_deduction",
     subtotalRole: "component_line",
     horizon: "2028-2047",
     preOpsTreatment: "excluded_no_pre_ops_value",
     perpetuityTreatment: "excluded_horizon_ends_2047",
-    implementationStatus: "requires_finance_source_confirmation",
+    implementationStatus: "implemented",
     includedInEbitda: true,
     serviceContractsMappingStatus: "not_mapped_independent_finance_assumption",
     serviceContractsCategory: true,
@@ -969,22 +994,25 @@ const DRE_LINE_ITEM_MAP_DATA: readonly DreLineItemRecord[] = [
       "seguranca' exactly (serviceContractsSourceDataContract.ts). Despite the name " +
       "match, Phase 12B classifies this row as sourced from the Finance DRE table " +
       "directly, not from the Service Contracts engine — recorded here precisely to " +
-      "prevent the row being double-counted as both later.",
+      "prevent the row being double-counted as both later." +
+      " V10-F2.2 (2026-07-27, project owner): migrated from independent_finance_assumption (Finance-locked v7-static annual value) to formula_derived, per the project-owner decision that v10 governs every formula referencing PnL row 11 (Reajuste Despesas) for its year — formula-driven, not by line-item name or category. The v7 workbook value is retained in dreAnnualAssumptionSourceData.ts as historical/forensic evidence only; it has no live computational authority for this line. See reajusteDespesasGrowth.ts module header for the complete 22-line dependency table.",
   },
   {
     dreLineId: "consultoria_e_honorarios",
     displayLabelPt: "Consultoria e Honorários",
     section: "fixed_costs_and_expenses",
-    classification: "independent_finance_assumption",
-    sourceType: "finance_dre_table_annual_values",
+    classification: "formula_derived",
+    sourceType: "formula_layer",
+    formula:
+      "v10 PnL row 252 — reset-bearing line: E=-30000*(1+E11); F=-50000*(1+F11) fresh literal; G=(F252-20000)*(1+G11); H=G252*(1+H11); I=(H252-15000)*(1+I11); J..X compound. Reproduced exactly via consultoriaEHonorariosValueForYear (V10-F2.2, reajusteDespesasGrowth.ts) — not a closed-form multiplier.",
     directScenarioDriver: false,
-    scenarioSensitivity: "independent_of_board_decision_levers",
+    scenarioSensitivity: "indirect_via_formula_dependency",
     signConvention: "negative_cost_or_deduction",
     subtotalRole: "component_line",
     horizon: "2028-2047",
     preOpsTreatment: "excluded_no_pre_ops_value",
     perpetuityTreatment: "excluded_horizon_ends_2047",
-    implementationStatus: "requires_finance_source_confirmation",
+    implementationStatus: "implemented",
     includedInEbitda: true,
     serviceContractsMappingStatus: "not_mapped_independent_finance_assumption",
     serviceContractsCategory: true,
@@ -998,22 +1026,25 @@ const DRE_LINE_ITEM_MAP_DATA: readonly DreLineItemRecord[] = [
       "FLAG: dreLineId matches ServiceContractsSourceLineId 'consultoria_e_" +
       "honorarios' exactly. Despite the name match, Phase 12B classifies this row " +
       "as sourced from the Finance DRE table directly, not from the Service " +
-      "Contracts engine — recorded here precisely to prevent double-counting.",
+      "Contracts engine — recorded here precisely to prevent double-counting." +
+      " V10-F2.2 (2026-07-27, project owner): migrated from independent_finance_assumption (Finance-locked v7-static annual value) to formula_derived, per the project-owner decision that v10 governs every formula referencing PnL row 11 (Reajuste Despesas) for its year — formula-driven, not by line-item name or category. The v7 workbook value is retained in dreAnnualAssumptionSourceData.ts as historical/forensic evidence only; it has no live computational authority for this line. See reajusteDespesasGrowth.ts module header for the complete 22-line dependency table.",
   },
   {
     dreLineId: "despesas_juridicas",
     displayLabelPt: "Despesas Jurídicas",
     section: "fixed_costs_and_expenses",
-    classification: "independent_finance_assumption",
-    sourceType: "finance_dre_table_annual_values",
+    classification: "formula_derived",
+    sourceType: "formula_layer",
+    formula:
+      "v10 PnL row 253 — fixed-base compounding: E253=-20000 literal (no 2028 rate applied), F253 onward compounds by the recurring row-11 rate (reajusteDespesasValueForYear(-20000, year), V10-F2.2, reajusteDespesasGrowth.ts).",
     directScenarioDriver: false,
-    scenarioSensitivity: "independent_of_board_decision_levers",
+    scenarioSensitivity: "indirect_via_formula_dependency",
     signConvention: "negative_cost_or_deduction",
     subtotalRole: "component_line",
     horizon: "2028-2047",
     preOpsTreatment: "excluded_no_pre_ops_value",
     perpetuityTreatment: "excluded_horizon_ends_2047",
-    implementationStatus: "requires_finance_source_confirmation",
+    implementationStatus: "implemented",
     includedInEbitda: true,
     serviceContractsCategory: false,
     costLineCategory: "general_operating_cost",
@@ -1022,22 +1053,25 @@ const DRE_LINE_ITEM_MAP_DATA: readonly DreLineItemRecord[] = [
     sourceAuthority: "v8_pnl_dre_row",
     notes:
       "Phase 12B (Luciana): on Finance's explicit independent-annual-value list. " +
-      "Does not move with capacity, tuition, org design, or CAPEX decisions.",
+      "Does not move with capacity, tuition, org design, or CAPEX decisions." +
+      " V10-F2.2 (2026-07-27, project owner): migrated from independent_finance_assumption (Finance-locked v7-static annual value) to formula_derived, per the project-owner decision that v10 governs every formula referencing PnL row 11 (Reajuste Despesas) for its year — formula-driven, not by line-item name or category. The v7 workbook value is retained in dreAnnualAssumptionSourceData.ts as historical/forensic evidence only; it has no live computational authority for this line. See reajusteDespesasGrowth.ts module header for the complete 22-line dependency table.",
   },
   {
     dreLineId: "rpa",
     displayLabelPt: "RPA",
     section: "fixed_costs_and_expenses",
-    classification: "independent_finance_assumption",
-    sourceType: "finance_dre_table_annual_values",
+    classification: "formula_derived",
+    sourceType: "formula_layer",
+    formula:
+      "v10 PnL row 254 (Family B, fixed % of same-year Receita Operacional Líquida). revenueShareRatio=-0.00064755831479743216 (V10-F2.2, reajusteDespesasGrowth.ts).",
     directScenarioDriver: false,
-    scenarioSensitivity: "independent_of_board_decision_levers",
+    scenarioSensitivity: "indirect_via_formula_dependency",
     signConvention: "negative_cost_or_deduction",
     subtotalRole: "component_line",
     horizon: "2028-2047",
     preOpsTreatment: "excluded_no_pre_ops_value",
     perpetuityTreatment: "excluded_horizon_ends_2047",
-    implementationStatus: "requires_finance_source_confirmation",
+    implementationStatus: "implemented",
     includedInEbitda: true,
     serviceContractsCategory: false,
     costLineCategory: "general_operating_cost",
@@ -1046,7 +1080,8 @@ const DRE_LINE_ITEM_MAP_DATA: readonly DreLineItemRecord[] = [
     sourceAuthority: "v8_pnl_dre_row",
     notes:
       "Phase 12B (Luciana): on Finance's explicit independent-annual-value list. " +
-      "Does not move with capacity, tuition, org design, or CAPEX decisions.",
+      "Does not move with capacity, tuition, org design, or CAPEX decisions." +
+      " V10-F2.2 (2026-07-27, project owner): migrated from independent_finance_assumption (Finance-locked v7-static annual value) to formula_derived, per the project-owner decision that v10 governs every formula referencing PnL row 11 (Reajuste Despesas) for its year — formula-driven, not by line-item name or category. The v7 workbook value is retained in dreAnnualAssumptionSourceData.ts as historical/forensic evidence only; it has no live computational authority for this line. See reajusteDespesasGrowth.ts module header for the complete 22-line dependency table.",
   },
   {
     dreLineId: "aluguel_iptu",
@@ -1076,16 +1111,18 @@ const DRE_LINE_ITEM_MAP_DATA: readonly DreLineItemRecord[] = [
     dreLineId: "conservacao_predial_e_manutencao_maquinas_e_moveis",
     displayLabelPt: "Conservação Predial e Manutenção Máquinas e Móveis",
     section: "fixed_costs_and_expenses",
-    classification: "independent_finance_assumption",
-    sourceType: "finance_dre_table_annual_values",
+    classification: "formula_derived",
+    sourceType: "formula_layer",
+    formula:
+      "v10 PnL row 256 (Family B, fixed % of same-year Receita Operacional Líquida). revenueShareRatio=-0.019179217245907331 (V10-F2.2, reajusteDespesasGrowth.ts).",
     directScenarioDriver: false,
-    scenarioSensitivity: "independent_of_board_decision_levers",
+    scenarioSensitivity: "indirect_via_formula_dependency",
     signConvention: "negative_cost_or_deduction",
     subtotalRole: "component_line",
     horizon: "2028-2047",
     preOpsTreatment: "excluded_no_pre_ops_value",
     perpetuityTreatment: "excluded_horizon_ends_2047",
-    implementationStatus: "requires_finance_source_confirmation",
+    implementationStatus: "implemented",
     includedInEbitda: true,
     serviceContractsMappingStatus: "not_mapped_independent_finance_assumption",
     serviceContractsCategory: true,
@@ -1100,22 +1137,25 @@ const DRE_LINE_ITEM_MAP_DATA: readonly DreLineItemRecord[] = [
       "manutencao_maquinas_e_moveis' exactly. Despite the name match, Phase 12B " +
       "classifies this row as sourced from the Finance DRE table directly, not " +
       "from the Service Contracts engine — recorded here precisely to prevent " +
-      "double-counting.",
+      "double-counting." +
+      " V10-F2.2 (2026-07-27, project owner): migrated from independent_finance_assumption (Finance-locked v7-static annual value) to formula_derived, per the project-owner decision that v10 governs every formula referencing PnL row 11 (Reajuste Despesas) for its year — formula-driven, not by line-item name or category. The v7 workbook value is retained in dreAnnualAssumptionSourceData.ts as historical/forensic evidence only; it has no live computational authority for this line. See reajusteDespesasGrowth.ts module header for the complete 22-line dependency table.",
   },
   {
     dreLineId: "locacao_de_maquinas_e_equipamentos",
     displayLabelPt: "Locação de Máquinas e Equipamentos",
     section: "fixed_costs_and_expenses",
-    classification: "independent_finance_assumption",
-    sourceType: "finance_dre_table_annual_values",
+    classification: "formula_derived",
+    sourceType: "formula_layer",
+    formula:
+      "v10 PnL row 257 (Family B, fixed % of same-year Receita Operacional Líquida). revenueShareRatio=-0.0028964087174190678 (V10-F2.2, reajusteDespesasGrowth.ts).",
     directScenarioDriver: false,
-    scenarioSensitivity: "independent_of_board_decision_levers",
+    scenarioSensitivity: "indirect_via_formula_dependency",
     signConvention: "negative_cost_or_deduction",
     subtotalRole: "component_line",
     horizon: "2028-2047",
     preOpsTreatment: "excluded_no_pre_ops_value",
     perpetuityTreatment: "excluded_horizon_ends_2047",
-    implementationStatus: "requires_finance_source_confirmation",
+    implementationStatus: "implemented",
     includedInEbitda: true,
     serviceContractsMappingStatus: "not_mapped_independent_finance_assumption",
     serviceContractsCategory: true,
@@ -1129,22 +1169,25 @@ const DRE_LINE_ITEM_MAP_DATA: readonly DreLineItemRecord[] = [
       "FLAG: dreLineId matches ServiceContractsSourceLineId 'locacao_de_maquinas_e_" +
       "equipamentos' exactly. Despite the name match, Phase 12B classifies this row " +
       "as sourced from the Finance DRE table directly, not from the Service " +
-      "Contracts engine — recorded here precisely to prevent double-counting.",
+      "Contracts engine — recorded here precisely to prevent double-counting." +
+      " V10-F2.2 (2026-07-27, project owner): migrated from independent_finance_assumption (Finance-locked v7-static annual value) to formula_derived, per the project-owner decision that v10 governs every formula referencing PnL row 11 (Reajuste Despesas) for its year — formula-driven, not by line-item name or category. The v7 workbook value is retained in dreAnnualAssumptionSourceData.ts as historical/forensic evidence only; it has no live computational authority for this line. See reajusteDespesasGrowth.ts module header for the complete 22-line dependency table.",
   },
   {
     dreLineId: "tecnologia_telefone_internet_licencas_e_servicos_de_informacao",
     displayLabelPt: "Tecnologia, Telefone, Internet, Licenças e Serviços de Informação",
     section: "fixed_costs_and_expenses",
-    classification: "independent_finance_assumption",
-    sourceType: "finance_dre_table_annual_values",
+    classification: "formula_derived",
+    sourceType: "formula_layer",
+    formula:
+      "v10 PnL row 258 (Family B, fixed % of same-year Receita Operacional Líquida). revenueShareRatio=-0.0057781233386285527 (V10-F2.2, reajusteDespesasGrowth.ts).",
     directScenarioDriver: false,
-    scenarioSensitivity: "independent_of_board_decision_levers",
+    scenarioSensitivity: "indirect_via_formula_dependency",
     signConvention: "negative_cost_or_deduction",
     subtotalRole: "component_line",
     horizon: "2028-2047",
     preOpsTreatment: "excluded_no_pre_ops_value",
     perpetuityTreatment: "excluded_horizon_ends_2047",
-    implementationStatus: "requires_finance_source_confirmation",
+    implementationStatus: "implemented",
     includedInEbitda: true,
     serviceContractsMappingStatus: "pending_row_level_reconciliation",
     serviceContractsCategory: true,
@@ -1159,22 +1202,25 @@ const DRE_LINE_ITEM_MAP_DATA: readonly DreLineItemRecord[] = [
       "'tecnologia' (serviceContractsSourceDataContract.ts) — partial name overlap, not " +
       "an exact match. Marked pending_row_level_reconciliation rather than " +
       "not_mapped_independent_finance_assumption because the scope difference between " +
-      "the two labels is not yet resolved; do not assume they cover the same value.",
+      "the two labels is not yet resolved; do not assume they cover the same value." +
+      " V10-F2.2 (2026-07-27, project owner): migrated from independent_finance_assumption (Finance-locked v7-static annual value) to formula_derived, per the project-owner decision that v10 governs every formula referencing PnL row 11 (Reajuste Despesas) for its year — formula-driven, not by line-item name or category. The v7 workbook value is retained in dreAnnualAssumptionSourceData.ts as historical/forensic evidence only; it has no live computational authority for this line. See reajusteDespesasGrowth.ts module header for the complete 22-line dependency table.",
   },
   {
     dreLineId: "energia_eletrica_agua_e_esgoto",
     displayLabelPt: "Energia Elétrica, Água e Esgoto",
     section: "fixed_costs_and_expenses",
-    classification: "independent_finance_assumption",
-    sourceType: "finance_dre_table_annual_values",
+    classification: "formula_derived",
+    sourceType: "formula_layer",
+    formula:
+      "v10 PnL row 259 (Family A variant): 2028 (E259) divides the AA benchmark by Número de Turmas ($AA$222), every subsequent year divides by Número de Alunos instead — algebraically collapses to the same per-learner recurring mechanism as Family A once expressed as a single per-aluno basePerLearnerRatio=-1725.0771840500906 (verified exact against v10 F259, V10-F2.2, reajusteDespesasGrowth.ts).",
     directScenarioDriver: false,
-    scenarioSensitivity: "independent_of_board_decision_levers",
+    scenarioSensitivity: "indirect_via_formula_dependency",
     signConvention: "negative_cost_or_deduction",
     subtotalRole: "component_line",
     horizon: "2028-2047",
     preOpsTreatment: "excluded_no_pre_ops_value",
     perpetuityTreatment: "excluded_horizon_ends_2047",
-    implementationStatus: "requires_finance_source_confirmation",
+    implementationStatus: "implemented",
     includedInEbitda: true,
     serviceContractsMappingStatus: "not_mapped_independent_finance_assumption",
     serviceContractsCategory: true,
@@ -1190,22 +1236,25 @@ const DRE_LINE_ITEM_MAP_DATA: readonly DreLineItemRecord[] = [
       "label includes an extra conjunction 'e' ('Água e Esgoto') not present in the " +
       "engine's source-line id. Despite the close match, Phase 12B classifies this " +
       "row as sourced from the Finance DRE table directly — recorded here precisely " +
-      "to prevent double-counting.",
+      "to prevent double-counting." +
+      " V10-F2.2 (2026-07-27, project owner): migrated from independent_finance_assumption (Finance-locked v7-static annual value) to formula_derived, per the project-owner decision that v10 governs every formula referencing PnL row 11 (Reajuste Despesas) for its year — formula-driven, not by line-item name or category. The v7 workbook value is retained in dreAnnualAssumptionSourceData.ts as historical/forensic evidence only; it has no live computational authority for this line. See reajusteDespesasGrowth.ts module header for the complete 22-line dependency table.",
   },
   {
     dreLineId: "materiais_de_limpeza",
     displayLabelPt: "Materiais de Limpeza",
     section: "fixed_costs_and_expenses",
-    classification: "independent_finance_assumption",
-    sourceType: "finance_dre_table_annual_values",
+    classification: "formula_derived",
+    sourceType: "formula_layer",
+    formula:
+      "v10 PnL row 260 (Family B, fixed % of same-year Receita Operacional Líquida). revenueShareRatio=-0.00458243327385781 (V10-F2.2, reajusteDespesasGrowth.ts).",
     directScenarioDriver: false,
-    scenarioSensitivity: "independent_of_board_decision_levers",
+    scenarioSensitivity: "indirect_via_formula_dependency",
     signConvention: "negative_cost_or_deduction",
     subtotalRole: "component_line",
     horizon: "2028-2047",
     preOpsTreatment: "excluded_no_pre_ops_value",
     perpetuityTreatment: "excluded_horizon_ends_2047",
-    implementationStatus: "requires_finance_source_confirmation",
+    implementationStatus: "implemented",
     includedInEbitda: true,
     serviceContractsMappingStatus: "not_mapped_independent_finance_assumption",
     serviceContractsCategory: true,
@@ -1219,22 +1268,25 @@ const DRE_LINE_ITEM_MAP_DATA: readonly DreLineItemRecord[] = [
       "FLAG: dreLineId matches ServiceContractsSourceLineId 'materiais_de_limpeza' " +
       "exactly. Despite the name match, Phase 12B classifies this row as sourced " +
       "from the Finance DRE table directly, not from the Service Contracts engine " +
-      "— recorded here precisely to prevent double-counting.",
+      "— recorded here precisely to prevent double-counting." +
+      " V10-F2.2 (2026-07-27, project owner): migrated from independent_finance_assumption (Finance-locked v7-static annual value) to formula_derived, per the project-owner decision that v10 governs every formula referencing PnL row 11 (Reajuste Despesas) for its year — formula-driven, not by line-item name or category. The v7 workbook value is retained in dreAnnualAssumptionSourceData.ts as historical/forensic evidence only; it has no live computational authority for this line. See reajusteDespesasGrowth.ts module header for the complete 22-line dependency table.",
   },
   {
     dreLineId: "materiais_de_escritorio",
     displayLabelPt: "Materiais de Escritório",
     section: "fixed_costs_and_expenses",
-    classification: "independent_finance_assumption",
-    sourceType: "finance_dre_table_annual_values",
+    classification: "formula_derived",
+    sourceType: "formula_layer",
+    formula:
+      "v10 PnL row 261 (Family B, fixed % of same-year Receita Operacional Líquida). revenueShareRatio=-0.0022622603373758845 (V10-F2.2, reajusteDespesasGrowth.ts).",
     directScenarioDriver: false,
-    scenarioSensitivity: "independent_of_board_decision_levers",
+    scenarioSensitivity: "indirect_via_formula_dependency",
     signConvention: "negative_cost_or_deduction",
     subtotalRole: "component_line",
     horizon: "2028-2047",
     preOpsTreatment: "excluded_no_pre_ops_value",
     perpetuityTreatment: "excluded_horizon_ends_2047",
-    implementationStatus: "requires_finance_source_confirmation",
+    implementationStatus: "implemented",
     includedInEbitda: true,
     serviceContractsMappingStatus: "not_mapped_independent_finance_assumption",
     serviceContractsCategory: true,
@@ -1248,22 +1300,25 @@ const DRE_LINE_ITEM_MAP_DATA: readonly DreLineItemRecord[] = [
       "FLAG: dreLineId matches ServiceContractsSourceLineId 'materiais_de_escritorio' " +
       "exactly. Despite the name match, Phase 12B classifies this row as sourced " +
       "from the Finance DRE table directly, not from the Service Contracts engine " +
-      "— recorded here precisely to prevent double-counting.",
+      "— recorded here precisely to prevent double-counting." +
+      " V10-F2.2 (2026-07-27, project owner): migrated from independent_finance_assumption (Finance-locked v7-static annual value) to formula_derived, per the project-owner decision that v10 governs every formula referencing PnL row 11 (Reajuste Despesas) for its year — formula-driven, not by line-item name or category. The v7 workbook value is retained in dreAnnualAssumptionSourceData.ts as historical/forensic evidence only; it has no live computational authority for this line. See reajusteDespesasGrowth.ts module header for the complete 22-line dependency table.",
   },
   {
     dreLineId: "despesas_com_viagens",
     displayLabelPt: "Despesas com Viagens",
     section: "fixed_costs_and_expenses",
-    classification: "independent_finance_assumption",
-    sourceType: "finance_dre_table_annual_values",
+    classification: "formula_derived",
+    sourceType: "formula_layer",
+    formula:
+      "v10 PnL row 262 (Family B, fixed % of same-year Receita Operacional Líquida). revenueShareRatio=-0.0077915684174368529 (V10-F2.2, reajusteDespesasGrowth.ts).",
     directScenarioDriver: false,
-    scenarioSensitivity: "independent_of_board_decision_levers",
+    scenarioSensitivity: "indirect_via_formula_dependency",
     signConvention: "negative_cost_or_deduction",
     subtotalRole: "component_line",
     horizon: "2028-2047",
     preOpsTreatment: "excluded_no_pre_ops_value",
     perpetuityTreatment: "excluded_horizon_ends_2047",
-    implementationStatus: "requires_finance_source_confirmation",
+    implementationStatus: "implemented",
     includedInEbitda: true,
     serviceContractsCategory: false,
     costLineCategory: "general_operating_cost",
@@ -1272,7 +1327,8 @@ const DRE_LINE_ITEM_MAP_DATA: readonly DreLineItemRecord[] = [
     sourceAuthority: "v8_pnl_dre_row",
     notes:
       "Phase 12B (Luciana): on Finance's explicit independent-annual-value list. " +
-      "Does not move with capacity, tuition, org design, or CAPEX decisions.",
+      "Does not move with capacity, tuition, org design, or CAPEX decisions." +
+      " V10-F2.2 (2026-07-27, project owner): migrated from independent_finance_assumption (Finance-locked v7-static annual value) to formula_derived, per the project-owner decision that v10 governs every formula referencing PnL row 11 (Reajuste Despesas) for its year — formula-driven, not by line-item name or category. The v7 workbook value is retained in dreAnnualAssumptionSourceData.ts as historical/forensic evidence only; it has no live computational authority for this line. See reajusteDespesasGrowth.ts module header for the complete 22-line dependency table.",
   },
   {
     dreLineId: "corporativo_bu",
@@ -1329,16 +1385,18 @@ const DRE_LINE_ITEM_MAP_DATA: readonly DreLineItemRecord[] = [
     dreLineId: "demais_impostos_e_taxas",
     displayLabelPt: "Demais Impostos e Taxas",
     section: "fixed_costs_and_expenses",
-    classification: "independent_finance_assumption",
-    sourceType: "finance_dre_table_annual_values",
+    classification: "formula_derived",
+    sourceType: "formula_layer",
+    formula:
+      "v10 PnL row 265 (Family B plus a 2028-only literal): E265 = $AB265*E$238*(1+E$11) - 20000 (2028 only); F265 onward has no additional term. revenueShareRatio=-0.00089740207118056768 (V10-F2.2, reajusteDespesasGrowth.ts).",
     directScenarioDriver: false,
-    scenarioSensitivity: "independent_of_board_decision_levers",
+    scenarioSensitivity: "indirect_via_formula_dependency",
     signConvention: "negative_cost_or_deduction",
     subtotalRole: "component_line",
     horizon: "2028-2047",
     preOpsTreatment: "excluded_no_pre_ops_value",
     perpetuityTreatment: "excluded_horizon_ends_2047",
-    implementationStatus: "requires_finance_source_confirmation",
+    implementationStatus: "implemented",
     includedInEbitda: true,
     serviceContractsCategory: false,
     costLineCategory: "general_operating_cost",
@@ -1347,22 +1405,25 @@ const DRE_LINE_ITEM_MAP_DATA: readonly DreLineItemRecord[] = [
     sourceAuthority: "v8_pnl_dre_row",
     notes:
       "Phase 12B (Luciana): on Finance's explicit independent-annual-value list. " +
-      "Does not move with capacity, tuition, org design, or CAPEX decisions.",
+      "Does not move with capacity, tuition, org design, or CAPEX decisions." +
+      " V10-F2.2 (2026-07-27, project owner): migrated from independent_finance_assumption (Finance-locked v7-static annual value) to formula_derived, per the project-owner decision that v10 governs every formula referencing PnL row 11 (Reajuste Despesas) for its year — formula-driven, not by line-item name or category. The v7 workbook value is retained in dreAnnualAssumptionSourceData.ts as historical/forensic evidence only; it has no live computational authority for this line. See reajusteDespesasGrowth.ts module header for the complete 22-line dependency table.",
   },
   {
     dreLineId: "demais_custos_e_despesas",
     displayLabelPt: "Demais Custos e Despesas",
     section: "fixed_costs_and_expenses",
-    classification: "independent_finance_assumption",
-    sourceType: "finance_dre_table_annual_values",
+    classification: "formula_derived",
+    sourceType: "formula_layer",
+    formula:
+      "v10 PnL row 266 — reset-bearing line: E=-300000*(1+E11); F,G compound; H=-400000*(1+H11) reset; I compounds; J,K,L(2033-2035)=AB266*Receita Operacional Líquida*(1+rate) (revenueShareRatio=-0.007212912342751795); M..X resume compounding from L. Reproduced exactly via demaisCustosEDespesasValueForYear (V10-F2.2, reajusteDespesasGrowth.ts) — not a closed-form multiplier.",
     directScenarioDriver: false,
-    scenarioSensitivity: "independent_of_board_decision_levers",
+    scenarioSensitivity: "indirect_via_formula_dependency",
     signConvention: "negative_cost_or_deduction",
     subtotalRole: "component_line",
     horizon: "2028-2047",
     preOpsTreatment: "excluded_no_pre_ops_value",
     perpetuityTreatment: "excluded_horizon_ends_2047",
-    implementationStatus: "requires_finance_source_confirmation",
+    implementationStatus: "implemented",
     includedInEbitda: true,
     serviceContractsCategory: false,
     costLineCategory: "general_operating_cost",
@@ -1372,7 +1433,8 @@ const DRE_LINE_ITEM_MAP_DATA: readonly DreLineItemRecord[] = [
     notes:
       "Phase 12B (Luciana): on Finance's explicit independent-annual-value list. " +
       "Last component line of Total Custos e Despesas Fixas's documented " +
-      "'Folha de Pagamento through Demais Custos e Despesas' summation range.",
+      "'Folha de Pagamento through Demais Custos e Despesas' summation range." +
+      " V10-F2.2 (2026-07-27, project owner): migrated from independent_finance_assumption (Finance-locked v7-static annual value) to formula_derived, per the project-owner decision that v10 governs every formula referencing PnL row 11 (Reajuste Despesas) for its year — formula-driven, not by line-item name or category. The v7 workbook value is retained in dreAnnualAssumptionSourceData.ts as historical/forensic evidence only; it has no live computational authority for this line. See reajusteDespesasGrowth.ts module header for the complete 22-line dependency table.",
   },
   {
     dreLineId: "total_custos_e_despesas_fixas",
@@ -1404,20 +1466,23 @@ const DRE_LINE_ITEM_MAP_DATA: readonly DreLineItemRecord[] = [
     dreLineId: "despesas_com_marketing",
     displayLabelPt: "Despesas com Marketing",
     section: "sales_expenses",
-    classification: "independent_finance_assumption",
-    sourceType: "finance_dre_table_annual_values",
+    classification: "formula_derived",
+    sourceType: "formula_layer",
+    formula:
+      "v10 PnL row 268 — reset-bearing line: E=-2000000*(1+E11); F,G,H compound; I=-2000000*(1+I11) reset; J=-1500000*(1+J11) second reset; K..X compound. Reproduced exactly via despesasComMarketingValueForYear (V10-F2.2, reajusteDespesasGrowth.ts) — not a closed-form multiplier.",
     directScenarioDriver: false,
-    scenarioSensitivity: "independent_of_board_decision_levers",
+    scenarioSensitivity: "indirect_via_formula_dependency",
     signConvention: "negative_cost_or_deduction",
     subtotalRole: "component_line",
     horizon: "2028-2047",
     preOpsTreatment: "excluded_no_pre_ops_value",
     perpetuityTreatment: "excluded_horizon_ends_2047",
-    implementationStatus: "requires_finance_source_confirmation",
+    implementationStatus: "implemented",
     includedInEbitda: true,
     notes:
       "Phase 12B (Luciana): on Finance's explicit independent-annual-value list. " +
-      "Does not move with capacity, tuition, org design, or CAPEX decisions.",
+      "Does not move with capacity, tuition, org design, or CAPEX decisions." +
+      " V10-F2.2 (2026-07-27, project owner): migrated from independent_finance_assumption (Finance-locked v7-static annual value) to formula_derived, per the project-owner decision that v10 governs every formula referencing PnL row 11 (Reajuste Despesas) for its year — formula-driven, not by line-item name or category. The v7 workbook value is retained in dreAnnualAssumptionSourceData.ts as historical/forensic evidence only; it has no live computational authority for this line. See reajusteDespesasGrowth.ts module header for the complete 22-line dependency table.",
   },
   {
     dreLineId: "pcld",
@@ -1442,20 +1507,23 @@ const DRE_LINE_ITEM_MAP_DATA: readonly DreLineItemRecord[] = [
     dreLineId: "despesas_bancarias",
     displayLabelPt: "Despesas Bancárias",
     section: "sales_expenses",
-    classification: "independent_finance_assumption",
-    sourceType: "finance_dre_table_annual_values",
+    classification: "formula_derived",
+    sourceType: "formula_layer",
+    formula:
+      "v10 PnL row 270 (Family A, per-learner ratio carry-forward). basePerLearnerRatio=-363.2586782786885 (V10-F2.2, reajusteDespesasGrowth.ts).",
     directScenarioDriver: false,
-    scenarioSensitivity: "independent_of_board_decision_levers",
+    scenarioSensitivity: "indirect_via_formula_dependency",
     signConvention: "negative_cost_or_deduction",
     subtotalRole: "component_line",
     horizon: "2028-2047",
     preOpsTreatment: "excluded_no_pre_ops_value",
     perpetuityTreatment: "excluded_horizon_ends_2047",
-    implementationStatus: "requires_finance_source_confirmation",
+    implementationStatus: "implemented",
     includedInEbitda: true,
     notes:
       "Phase 12B (Luciana): on Finance's explicit independent-annual-value list. " +
-      "Does not move with capacity, tuition, org design, or CAPEX decisions.",
+      "Does not move with capacity, tuition, org design, or CAPEX decisions." +
+      " V10-F2.2 (2026-07-27, project owner): migrated from independent_finance_assumption (Finance-locked v7-static annual value) to formula_derived, per the project-owner decision that v10 governs every formula referencing PnL row 11 (Reajuste Despesas) for its year — formula-driven, not by line-item name or category. The v7 workbook value is retained in dreAnnualAssumptionSourceData.ts as historical/forensic evidence only; it has no live computational authority for this line. See reajusteDespesasGrowth.ts module header for the complete 22-line dependency table.",
   },
   {
     dreLineId: "descontos_comerciais",

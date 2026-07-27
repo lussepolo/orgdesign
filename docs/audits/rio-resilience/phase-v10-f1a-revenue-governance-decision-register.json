@@ -18,41 +18,87 @@
           "label": "Concept Rio - 20 anos - Org BU - Apresentação v10.xlsx",
           "sha256": "2e3230ad233c7cd450c1da1fca46da1cb80899e66cdf5ba3d4e9358357a05da0"
         },
-        { "id": "newer_revision", "label": "A workbook revision not yet reviewed" },
-        { "id": "explicit_precedence_rule", "label": "Finance provides a written precedence rule instead of a single workbook" }
+        {
+          "id": "newer_revision",
+          "label": "A workbook revision not yet reviewed"
+        },
+        {
+          "id": "explicit_precedence_rule",
+          "label": "Finance provides a written precedence rule instead of a single workbook"
+        }
       ],
       "sourceEvidence": "docs/audits/rio-resilience/phase-1-evidence-recovery-v9.md; phase-2-forensic-reconciliation-v9.md; phase-v10-ab-formula-parity-certification.md; phase-v10-c-evidence-resolution-and-implementation-contract.md",
       "runtimeStatus": "neither v9 nor v10 consumed by application at build or run time; application values extracted from an earlier, unidentified pre-v9 workbook (Phase 12J/12K, 2026-06-08/09)",
       "financialImpact": "cascades into D-R2 through D-R7",
       "selectedOption": "explicit_precedence_rule",
-      "precedenceRule": "v10 (SHA 2e3230ad233c7cd450c1da1fca46da1cb80899e66cdf5ba3d4e9358357a05da0) governs percentual_desconto_medio (PnL Row 224), payroll salary escalation, and benefits escalation ONLY. v10 is NOT selected as governing authority for tuition escalation (D-R2), base tuition values (D-R6), reajuste_despesas (D-R7), enrollment (D-R8), or any other financial assumption not explicitly named here.",
+      "precedenceRule": "v10 (SHA 2e3230ad233c7cd450c1da1fca46da1cb80899e66cdf5ba3d4e9358357a05da0) governs exactly: percentual_desconto_medio (PnL Row 224); payroll salary escalation; payroll benefits escalation; tuition escalation via PnL row 9 'Reajuste Serviços' / Mensalidade (D-R2, V10-F2 2026-07-27); and Reajuste Despesas (PnL row 11) for all 22 lines whose actual v10 formula references the corresponding row-11 annual cell (D-R7, fully implemented V10-F2.2 2026-07-27; formula-driven, not line-item-name or category driven). The older workbook 'vCR v7 (2).xlsx' has NO live computational authority for any of these 22 lines as of V10-F2.2 — it is retained only as historical/forensic evidence of the application's prior source; dreAnnualAssumptionSourceData.ts remains its live artifact only for lines outside this 22-line set (aluguel_iptu, corporativo_bu, rateio_corporativo, pcld, descontos_comerciais, despesas_com_isencao — not row-11-dependent, out of scope). v10 is NOT selected as governing authority for base tuition values (D-R6), enrollment (D-R8, already closed at 258/28), or any other financial assumption not explicitly named here. v10 does not govern every financial input.",
       "approvalStatus": "approved_by_project_owner",
-      "approvalReference": "Phase V10-F1B governance decision, project owner (Luciana Polonen), 2026-07-27 — scoped precedence rule, not a blanket workbook selection"
+      "approvalReference": "Phase V10-F1B governance decision, project owner (Luciana Polonen), 2026-07-27 — scoped precedence rule, not a blanket workbook selection; extended by Phase V10-F2, project owner (Luciana Polonen), 2026-07-27, to add tuition escalation and formula-driven Reajuste Despesas; extended by Phase V10-F2.2, project owner (Luciana Polonen), 2026-07-27, to make v10 fully authoritative over the scoped revenue path and remove all live v7 computational authority within it."
     },
     {
       "decisionId": "D-R2",
       "concept": "tuition_escalation_rate",
       "alternatives": [
-        { "id": "app_8pct", "label": "8% compounding from 2029 (current application)", "annualRate": 0.08, "source": "receitaEngine.ts:71-74; cites financeConventionSourceDecisions.md which does not exist in repository" },
-        { "id": "wb_v9_564pct", "label": "5.64% flat, all years", "annualRate": 0.0564, "source": "PnL!C7:V7 'Reajuste Mensalidade', workbook v9, direct XML read" },
-        { "id": "wb_v10_59pct", "label": "5.9% from 2029 (6.0% in 2028)", "annualRate": 0.059, "source": "PnL!F9:N9 'Reajuste Serviços', workbook v10, direct XML read; row-label correspondence to v9 Row 7 unconfirmed" }
+        {
+          "id": "app_8pct",
+          "label": "8% compounding from 2029 (current application)",
+          "annualRate": 0.08,
+          "source": "receitaEngine.ts:71-74; cites financeConventionSourceDecisions.md which does not exist in repository"
+        },
+        {
+          "id": "wb_v9_564pct",
+          "label": "5.64% flat, all years",
+          "annualRate": 0.0564,
+          "source": "PnL!C7:V7 'Reajuste Mensalidade', workbook v9, direct XML read"
+        },
+        {
+          "id": "wb_v10_59pct",
+          "label": "5.9% from 2029 (6.0% in 2028)",
+          "annualRate": 0.059,
+          "source": "PnL!F9:N9 'Reajuste Serviços', workbook v10, direct XML read; row-label correspondence to v9 Row 7 unconfirmed"
+        }
       ],
-      "sourceEvidence": "receitaEngine.ts:71-74; phase-2-forensic-reconciliation-v9.md section D3; phase-v10-c-evidence-resolution-and-implementation-contract.md section D-01",
-      "runtimeStatus": "app_8pct is active; wb_v9_564pct and wb_v10_59pct are not applied anywhere in application code",
-      "financialImpact": "cumulative gross tuition revenue delta 2029-2037, t1_g4/base/bp1 only: v9 -95,509,537 BRL vs app; v10 -85,702,955 BRL vs app",
-      "selectedOption": null,
-      "approvalStatus": "pending",
-      "approvalReference": null
+      "sourceEvidence": "receitaEngine.ts (V10-F2, sources tuitionGrowth.ts); phase-2-forensic-reconciliation-v9.md section D3; phase-v10-c-evidence-resolution-and-implementation-contract.md section D-01",
+      "runtimeStatus": "wb_v10_59pct is active as of V10-F2 (2026-07-27); app_8pct retired; wb_v9_564pct not applied anywhere in application code",
+      "financialImpact": "cumulative gross tuition revenue delta 2029-2037, t1_g4/base/bp1 only: v9 -95,509,537 BRL vs prior app; v10 -85,702,955 BRL vs prior app (now applied)",
+      "selectedOption": "wb_v10_59pct",
+      "approvalStatus": "approved_by_project_owner",
+      "approvalReference": "Project-owner confirmation that Reajuste Serviços means Mensalidade (Phase V10-F2, project owner Luciana Polonen, 2026-07-27). 2028 rate = 6.0% (not applied at runtime — stored tuition figures are already explicit 2028 values per v10 'Resumos PPT' columns Q/R, verified exactly against TUITION_SOURCE_RECORDS; see tuitionGrowth.ts baseYearInterpretation). 2029-2037 rate = 5.9%, applied as the recurring runtime escalation factor."
     },
     {
       "decisionId": "D-R3",
       "concept": "percentual_desconto_medio_schedule",
       "alternatives": [
-        { "id": "current_dre_runtime", "label": "12% (2028-2032), 12.5% (2033-2047) flat", "source": "dreRevenueDriverSourceData.ts, extracted Phase 12J 2026-06-08 from unidentified earlier workbook", "status": "active_runtime_confirmed_stale" },
-        { "id": "workbook_v9_row222", "label": "25/20/20/18/15/15/15/12.5/12.5/12.5 (2028-2037)", "source": "PnL!C222:V222, workbook v9, direct XML read", "status": "source_backed_candidate" },
-        { "id": "workbook_v10_row224", "label": "25/20/20/18/15/15/15/12.5/12.5/12.5 (2028-2037)", "source": "PnL!E224:N224, workbook v10, direct XML read", "status": "source_backed_candidate_independently_matches_v9" },
-        { "id": "receita_audit_layer1", "label": "25/20/20/18/18/15/15/15/12.5/12.5 (2028-2037)", "source": "discountScheduleSourceData.ts DISCOUNT_SCHEDULE_SOURCE, verbal Head-of-Finance message, Phase 15Q correction", "status": "active_but_audit_only_separate_mechanism" },
-        { "id": "historical_finance_packet", "label": "20/20/20/17/15/15/12.5/12.5/12.5/12.5 (2028-2037)", "source": "docs/finance/dre-finance-confirmation-packet.md F04, Phase 15I.2C snapshot", "status": "historical_superseded" }
+        {
+          "id": "current_dre_runtime",
+          "label": "12% (2028-2032), 12.5% (2033-2047) flat",
+          "source": "dreRevenueDriverSourceData.ts, extracted Phase 12J 2026-06-08 from unidentified earlier workbook",
+          "status": "active_runtime_confirmed_stale"
+        },
+        {
+          "id": "workbook_v9_row222",
+          "label": "25/20/20/18/15/15/15/12.5/12.5/12.5 (2028-2037)",
+          "source": "PnL!C222:V222, workbook v9, direct XML read",
+          "status": "source_backed_candidate"
+        },
+        {
+          "id": "workbook_v10_row224",
+          "label": "25/20/20/18/15/15/15/12.5/12.5/12.5 (2028-2037)",
+          "source": "PnL!E224:N224, workbook v10, direct XML read",
+          "status": "source_backed_candidate_independently_matches_v9"
+        },
+        {
+          "id": "receita_audit_layer1",
+          "label": "25/20/20/18/18/15/15/15/12.5/12.5 (2028-2037)",
+          "source": "discountScheduleSourceData.ts DISCOUNT_SCHEDULE_SOURCE, verbal Head-of-Finance message, Phase 15Q correction",
+          "status": "active_but_audit_only_separate_mechanism"
+        },
+        {
+          "id": "historical_finance_packet",
+          "label": "20/20/20/17/15/15/12.5/12.5/12.5/12.5 (2028-2037)",
+          "source": "docs/finance/dre-finance-confirmation-packet.md F04, Phase 15I.2C snapshot",
+          "status": "historical_superseded"
+        }
       ],
       "sourceEvidence": "dreRevenueDriverSourceData.ts; phase-2-forensic-reconciliation-v9.md section D2b; phase-v10-ab-formula-parity-certification.md 'v10 average effective discount schedule'; docs/finance/dre-finance-confirmation-packet.md section 7 (F04)",
       "runtimeStatus": "workbook_v10_row224 is now canonical and consumed by the live DRE (Phase V10-F1B); current_dre_runtime (12%/12.5% flat) retired as of this phase",
@@ -65,10 +111,22 @@
       "decisionId": "D-R4",
       "concept": "receita_layer1_discount_schedule_source_disposition",
       "alternatives": [
-        { "id": "A_retire", "label": "Retire DISCOUNT_SCHEDULE_SOURCE" },
-        { "id": "B_retain_audit_only", "label": "Retain as audit-only evidence (status quo)" },
-        { "id": "C_make_canonical", "label": "Make canonical and used by the DRE" },
-        { "id": "D_reclassify", "label": "Reclassify as a separate, named economic mechanism" }
+        {
+          "id": "A_retire",
+          "label": "Retire DISCOUNT_SCHEDULE_SOURCE"
+        },
+        {
+          "id": "B_retain_audit_only",
+          "label": "Retain as audit-only evidence (status quo)"
+        },
+        {
+          "id": "C_make_canonical",
+          "label": "Make canonical and used by the DRE"
+        },
+        {
+          "id": "D_reclassify",
+          "label": "Reclassify as a separate, named economic mechanism"
+        }
       ],
       "sourceEvidence": "discountScheduleSourceData.ts; dreScenarioAdapters.ts (guard comment); dreEngineValidation.ts (structural non-equivalence check, Phase 12H); dreRevenueDriverSourceData.ts (discountAuthorityResolution note, Phase 12J)",
       "runtimeStatus": "retained audit-only (Phase V10-F1B): DISCOUNT_SCHEDULE_SOURCE no longer holds an independently-maintained rate schedule — it now reads the same canonical v10 Row 224 values as the DRE. It remains structurally excluded from the live DRE handoff (netReceitaAfterDiscount still not consumed by dreScenarioAdapters.ts/dreEngine.ts).",
@@ -81,8 +139,14 @@
       "decisionId": "D-R5",
       "concept": "desconto_metodo_reverification",
       "alternatives": [
-        { "id": "reverify_in_governing_workbook", "label": "Perform direct XML/OOXML re-read of the Descontos Método row in the Finance-designated governing workbook (per D-R1)" },
-        { "id": "retain_pending_reverification", "label": "Retain current 2.8243% runtime value pending re-verification" }
+        {
+          "id": "reverify_in_governing_workbook",
+          "label": "Perform direct XML/OOXML re-read of the Descontos Método row in the Finance-designated governing workbook (per D-R1)"
+        },
+        {
+          "id": "retain_pending_reverification",
+          "label": "Retain current 2.8243% runtime value pending re-verification"
+        }
       ],
       "sourceEvidence": "dreRevenueDriverSourceData.ts driverId 'desconto_metodo' (back-derived from Z13=-Y230/Y225, not a direct annual extraction); absence of any 'assinatura'/'Descontos Método'/row-13-equivalent reference in phase-2-forensic-reconciliation-v9.md or any v10 audit document",
       "runtimeStatus": "active_runtime, not independently re-verified against v9 or v10",
@@ -95,8 +159,14 @@
       "decisionId": "D-R6",
       "concept": "base_tuition_source_authority",
       "alternatives": [
-        { "id": "approve_current_transcription", "label": "Approve current screenshot-transcribed tuition table as-is" },
-        { "id": "provide_signed_replacement", "label": "Finance provides/approves a signed XLSX replacement table" }
+        {
+          "id": "approve_current_transcription",
+          "label": "Approve current screenshot-transcribed tuition table as-is"
+        },
+        {
+          "id": "provide_signed_replacement",
+          "label": "Finance provides/approves a signed XLSX replacement table"
+        }
       ],
       "sourceEvidence": "tuitionSourceData.ts (sourceEvidenceOrigin: screenshot_transcription_based, needsFinanceReview: true on all bp_scenario_1-3 records); docs/finance/dre-finance-confirmation-packet.md section 6 (F03); phase-2-forensic-reconciliation-v9.md section A4 (tuition value gap ~2.7-3.3%)",
       "runtimeStatus": "active_runtime, uncertified",
@@ -109,23 +179,42 @@
       "decisionId": "D-R7",
       "concept": "reajuste_despesas_annual_series",
       "alternatives": [
-        { "id": "apply_v9_2028_only", "label": "Apply v9-derived 4.64% (2028 point value only; no confirmed series)", "source": "PnL!C9, workbook v9, formula IPCA+1%, IPCA=3.64%" },
-        { "id": "apply_v10_2028_2029plus", "label": "Apply v10-derived 5.0% (2028) / 4.9% (2029+, no independently-confirmed full series)", "source": "PnL!E11/F11:N11, workbook v10, formula IPCA+1%, IPCA=4.0%/3.9%" },
-        { "id": "provide_full_signed_series", "label": "Finance provides a full signed annual index series, 2028-2047" }
+        {
+          "id": "apply_v9_2028_only",
+          "label": "Apply v9-derived 4.64% (2028 point value only; no confirmed series)",
+          "source": "PnL!C9, workbook v9, formula IPCA+1%, IPCA=3.64%"
+        },
+        {
+          "id": "apply_v10_2028_2029plus",
+          "label": "Apply v10-derived 5.0% (2028) / 4.9% (2029+, no independently-confirmed full series)",
+          "source": "PnL!E11/F11:N11, workbook v10, formula IPCA+1%, IPCA=4.0%/3.9%"
+        },
+        {
+          "id": "provide_full_signed_series",
+          "label": "Finance provides a full signed annual index series, 2028-2047"
+        }
       ],
-      "sourceEvidence": "dreEngine.ts:15,324-330 (self-documented as not applied); docs/finance/dre-finance-confirmation-packet.md section 5 (F01); phase-2-forensic-reconciliation-v9.md section D4.1 (formula chain IPCA->Reajuste Despesas->Dissídio)",
-      "runtimeStatus": "not_applied_by_design_pending_finance_source",
-      "financialImpact": "not quantified — no annual series exists in any committed source to project against; applies to outras_receitas (supplementary revenue) only per confirmed formula, not to OPEX (not investigated in this phase)",
-      "selectedOption": null,
-      "approvalStatus": "pending",
-      "approvalReference": null
+      "sourceEvidence": "reajusteDespesasGrowth.ts (V10-F2.1, complete shared-formula-resolving v10 PnL row-11 dependency scan — 22 lines, not the prior session's 17); dreEngine.ts (wired for outras_receitas only); scripts/validate-v10-f2.ts; docs/finance/dre-finance-confirmation-packet.md section 5 (F01); phase-2-forensic-reconciliation-v9.md section D4.1 (formula chain IPCA->Reajuste Despesas->Dissidio)",
+      "runtimeStatus": "apply_v10_2028_2029plus is active for all 22 row-11-dependent lines as of V10-F2.2 (2026-07-27). V10-F2.1 identified the complete 22-line dependency table via a full shared-formula-resolving scan. V10-F2.2 (2026-07-27, project-owner v10-precedence decision) resolved all three blockers V10-F2.1 had recorded: (a) row 233 (receita_com_eventos) was confirmed via direct OOXML inspection to be INDEPENDENT of row 238 (no circular dependency) and is now live; (b) rows 252/266/268's hardcoded budget resets are reproduced exactly per the v10 workbook's own formula text (project-owner directive: v10 governs, v7's differing reset schedule has no live authority); (c) row 259's turma-to-aluno base-year denominator switch is reproduced exactly (it algebraically collapses to the same per-learner mechanism as the other Family A lines once the one-time base-year conversion is folded into a single constant — verified to reproduce the workbook's own F259 to full float precision). All 22 lines are now formula_derived/implemented in dreLineItemMap.ts and computed live in dreEngine.ts. dreAnnualAssumptionSourceData.ts (v7-sourced) is retained as historical/forensic evidence only for these 22 lines; it remains the live source only for the 6 out-of-scope lines not row-11-dependent.",
+      "financialImpact": "All 22 row-11-dependent lines: 2028 factor per Family A/B/reset-line rules (5.0% 2028, 4.9% 2029+, or same-year revenue share, or explicit reset literals — see reajusteDespesasGrowth.ts); feeds receita_operacional_antes_das_deducoes / total_custo_direto / total_custos_e_despesas_fixas / total_despesas_com_vendas -> deducoes -> receita_operacional_liquida -> margem_de_contribuicao -> EBITDA -> DCF/payback. Row-238 component bridge (2028, t1_g4/base/bp1): app receita_operacional_liquida=20,362,750.99 vs v10 workbook E238=21,469,878.95 (workbook higher by ~5.44%). Per-unit rate parity is now exact: receita_com_eventos per-aluno = 1,005.14 in both app and workbook; the remaining dollar difference is fully attributable to already-governed, separately-tracked scenario inputs (numero_de_alunos: app 258 vs workbook reference-scenario 238; D-R3 discount schedule; D-R5 desconto_metodo; D-R6 base tuition values) — not to any residual v7-vs-v10 formula mismatch, which this phase fully resolves. Downstream dollar movement on all 22 lines is expected and authorized (V10-F2.2 Section 8/9).",
+      "selectedOption": "apply_v10_2028_2029plus",
+      "approvalStatus": "approved_by_project_owner_fully_implemented",
+      "approvalReference": "Project-owner confirmation that Reajuste Despesas applies to all formulas referencing E11 and its corresponding annual row-11 cells (Phase V10-F2, project owner Luciana Polonen, 2026-07-27). Applicability is formula-driven: every line whose actual v10 formula references the corresponding row-11 annual cell uses the rate; lines not referencing row 11 do not receive it. Phase V10-F2.2 (project owner Luciana Polonen, 2026-07-27): v10 governs the scoped revenue path in full — v7 ('vCR v7 (2).xlsx') has no live computational authority for any of the 22 lines, regardless of its prior Finance-locked/independent_finance_assumption/static labeling. All 22 lines are now live-formula. STATUS: D-R7 is FULLY IMPLEMENTED — 22 of 22 lines are live (formula_derived/implemented in dreLineItemMap.ts). Complete dependency table, formula families, and per-line migration evidence recorded in IMPLEMENTATION.md and reajusteDespesasGrowth.ts."
     },
     {
       "decisionId": "D-R8",
       "concept": "g4_base_2028_pk3_enrollment",
       "alternatives": [
-        { "id": "application_258", "label": "258 total / PK3=28 (77.8% occupancy)", "source": "openingPackageOccupancySourceData.ts" },
-        { "id": "workbook_v9_259", "label": "259 total / PK3=29 (80.6% occupancy)", "source": "PnL!C221=SUM(C149,C171), workbook v9, direct XML read" }
+        {
+          "id": "application_258",
+          "label": "258 total / PK3=28 (77.8% occupancy)",
+          "source": "openingPackageOccupancySourceData.ts"
+        },
+        {
+          "id": "workbook_v9_259",
+          "label": "259 total / PK3=29 (80.6% occupancy)",
+          "source": "PnL!C221=SUM(C149,C171), workbook v9, direct XML read"
+        }
       ],
       "sourceEvidence": "phase-2-forensic-reconciliation-v9.md sections A1, D1; G4 occupancy workbook filename itself contains '_258' (Modelo_Ocupacao_Concept_2028_v5_T1_G4_258.xlsx)",
       "runtimeStatus": "application_258 is governed and active (PK3=28, occupancy 28/36=77.8%); workbook_v9_259 (PK3=29) is superseded and not applied",
