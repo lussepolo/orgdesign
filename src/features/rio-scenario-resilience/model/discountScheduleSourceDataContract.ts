@@ -5,7 +5,9 @@ export type DiscountScheduleApplicationOrder = "after_annual_tuition_adjustment"
 export type DiscountScheduleScope =
   "uniform_all_scenarios_all_grades_all_opening_packages";
 
-export type DiscountScheduleSourceDescription = "Head of Finance message";
+export type DiscountScheduleSourceDescription =
+  | "Head of Finance message"
+  | "v10 workbook PnL Row 224 (project-owner decision, Phase V10-F1B, not Finance-signed)";
 
 // Finance-stated interpretation constraints, preserved as typed boolean literals.
 export interface DiscountScheduleInterpretationFlags {

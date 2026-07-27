@@ -3839,3 +3839,110 @@ Annual capacity is now derived from the same approved grade-capacity table and p
 - `scripts/validate-v10-e2.ts`
 - `scripts/validate-v10-e1.ts`
 - `IMPLEMENTATION.md`
+---
+
+## Phase V10-F1B — V10 Average-Discount Canonicalization (2026-07-27)
+
+### Scope
+
+This phase implements a project-owner governance decision (not a Finance signature) that the
+`v10` workbook governs the average tuition discount schedule (`percentual_desconto_medio` /
+"Bolsa de Estudos"). It replaces a stale Phase 12J extraction with a single canonical source
+read by both the live DRE driver and the audit-only Receita-engine mechanism. Tuition
+escalation, base tuition values, `reajuste_despesas`, enrollment, capacity, payroll, salary
+formulas (beyond the explicitly-scoped precedence rule below), benefits formulas, encargos,
+OPEX, CAPEX, and viability/VPL/TIR/payback are unchanged and out of scope.
+
+### Governing Source
+
+- Workbook: `Concept Rio - 20 anos - Org BU - Apresentação v10.xlsx`
+- SHA-256: `2e3230ad233c7cd450c1da1fca46da1cb80899e66cdf5ba3d4e9358357a05da0`
+- Sheet: `PnL`, Row 224 — "% Desconto Médio"
+- Approval: project owner (Luciana Polonen), 2026-07-27 — **explicitly not Finance-signed or
+  Finance-approved**
+- Precedence scope: this decision governs `percentual_desconto_medio`, payroll salary
+  escalation, and benefits escalation **only**. It does not extend to tuition escalation, base
+  tuition values, `reajuste_despesas`, enrollment, or any other financial assumption.
+
+### Approved Schedule
+
+| Year | 2028 | 2029 | 2030 | 2031 | 2032 | 2033 | 2034 | 2035 | 2036+ |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| Rate | 25.0% | 20.0% | 20.0% | 18.0% | 15.0% | 15.0% | 15.0% | 12.5% | 12.5% (terminal) |
+
+This replaces the prior live-DRE schedule (flat −12% through 2032, −12.5% from 2033), which was
+confirmed stale by direct re-reads of both workbook v9 (`PnL!C222:V222`) and workbook v10
+(`PnL!E224:N224`) in Phase V10-F1/V10-F1A.
+
+### Canonical Source Architecture
+
+- New file `v10AverageDiscountSourceData.ts` is the single source of truth (positive rates,
+  e.g. `0.25`), consumed by:
+  - the live DRE driver `percentual_desconto_medio` in `dreRevenueDriverSourceData.ts`
+    (signed negative at this consumption boundary, preserving the existing repo-wide sign
+    convention documented in `dreEngine.ts`)
+  - the audit-only Receita-engine schedule `DISCOUNT_SCHEDULE_SOURCE` in
+    `discountScheduleSourceData.ts` (positive, preserving its existing sign convention)
+- Neither consumer maintains an independently-duplicated literal rate table.
+- `DISCOUNT_SCHEDULE_SOURCE` / `netReceitaAfterDiscount` remain **audit-only** and structurally
+  excluded from the live DRE handoff — `dreScenarioAdapters.ts` still reads only
+  `grossReceitaBeforeDiscount`. This was verified, not changed.
+- `desconto_metodo` (2.8243%, "Descontos Método de Assinatura") is unchanged and remains a
+  separate, additive deduction off the same gross base (`receitas_com_ensino_regular`) —
+  matching the confirmed PnL formula (`C230 = -C13 × C225`), independent of `percentual_desconto_medio`
+  (`C228 = C222 × C225`). No sequential/compounded discounting was introduced.
+- The Receita-to-DRE gross-revenue handoff (`grossReceitaBeforeDiscount` →
+  `receitas_com_ensino_regular`) was not changed.
+
+### Validator Evidence
+
+| Gate | Result |
+|---|---|
+| `npm run validate:v10-f1b` (new, 109 checks incl. D-R8 regression guard) | 109/109 |
+| `npm run validate:v10-e2` | 309/309 |
+| `npm run validate:v10-e1` | 100/100 |
+| `npx tsx scripts/validate-phase15q.ts` Section C (updated for V10-F1B) | 9/9 |
+| `npx tsx scripts/validate-phase15j2-simulator.ts` | 31/31 |
+| `npm run lint` | clean |
+| `npm run build` | clean |
+| `git diff --check` | clean |
+
+Pre-existing clean-HEAD failures involving retired `t1_g3`/`t1_g5` packages
+(`validate-phase15j.ts`, `validate-phase15i2c.ts`, `validate-phase15s1.ts`, and Section F of
+`validate-phase15q.ts`) were reproduced identically without this patch and are not repaired in
+this phase.
+
+### Files Changed
+
+- `src/features/rio-scenario-resilience/model/v10AverageDiscountSourceData.ts` (new)
+- `src/features/rio-scenario-resilience/model/dreRevenueDriverSourceData.ts`
+- `src/features/rio-scenario-resilience/model/discountScheduleSourceData.ts`
+- `src/features/rio-scenario-resilience/model/discountScheduleSourceDataContract.ts`
+- `scripts/validate-v10-f1b.ts` (new)
+- `scripts/validate-phase15q.ts` (Section C updated to assert canonical values)
+- `package.json` (`validate:v10-f1b` script registration)
+- `docs/audits/rio-resilience/phase-v10-f1a-revenue-governance-decision-packet.md` (D-R1, D-R3,
+  D-R4 updated with the project-owner decision)
+- `docs/audits/rio-resilience/phase-v10-f1a-revenue-governance-decision-register.json` (same)
+- `IMPLEMENTATION.md`
+
+### Unresolved Revenue Decisions (unchanged by this phase)
+
+- D-R2 — tuition escalation rate (8% app / 5.64% v9 / 5.9% v10): unresolved.
+- D-R5 — `desconto_metodo` (2.8243%) re-verification against the governing workbook: unresolved.
+- D-R6 — base tuition source (screenshot-transcribed, not signed): unresolved.
+- D-R7 — `reajuste_despesas` annual series (only 2028 point value evidenced, v9 and v10
+  disagree): unresolved.
+
+### D-R8 — Resolved (Phase V10-F1B.1, 2026-07-27, project-owner decision)
+
+G4 Base 2028 PK3 enrollment is governed: total enrollment = 258, PK3 = 28, PK3 capacity = 36,
+PK3 occupancy = 28/36 = 77.8%. Workbook v9's value (259, PK3 = 29) is superseded evidence,
+retained in the decision packet for the record only — not an active implementation
+alternative. This is a project-owner decision, **not Finance-signed or Finance-approved**.
+Runtime enrollment data was not modified; the value was already correct. A bounded regression
+assertion was added to `validate:v10-f1b` confirming the DRE adapter handoff (`numero_de_alunos`
+for 2028) remains 258 and never substitutes 259.
+
+See `docs/audits/rio-resilience/phase-v10-f1a-revenue-governance-decision-packet.md` for full
+evidence and the decision form.

@@ -19,12 +19,17 @@
 //    13.  ScenarioConfigurationPanel.tsx references annualGrossContractValueBRL
 //
 //   Section C — Discount schedule correction (checks 14–22)
-//    14.  discountScheduleSourceData: 2028 rate = 0.25
+//    Phase V10-F1B (2026-07-27) superseded the Phase 15Q schedule with the
+//    canonical v10 workbook Row 224 schedule (project-owner decision, not
+//    Finance-signed). Checks below assert computed values from
+//    DISCOUNT_SCHEDULE_SOURCE rather than raw source text, since the literal
+//    numbers now derive from v10AverageDiscountSourceData.ts.
+//    14.  discountScheduleSourceData: 2028 rate = 0.25 (unchanged)
 //    15.  discountScheduleSourceData: 2029 rate = 0.20 (unchanged)
-//    16.  discountScheduleSourceData: 2031 rate = 0.18 (was 0.17)
-//    17.  discountScheduleSourceData: 2032 rate = 0.18 (was 0.15)
-//    18.  discountScheduleSourceData: 2034 rate = 0.15 (new explicit)
-//    19.  discountScheduleSourceData: 2035 rate = 0.15 (new explicit)
+//    16.  discountScheduleSourceData: 2031 rate = 0.18 (unchanged)
+//    17.  discountScheduleSourceData: 2032 rate = 0.15 (V10-F1B: was 0.18 under Phase 15Q)
+//    18.  discountScheduleSourceData: 2034 rate = 0.15 (unchanged)
+//    19.  discountScheduleSourceData: 2035 rate = 0.125 (V10-F1B: was 0.15 under Phase 15Q)
 //    20.  discountScheduleSourceData: terminalRateStartYear = 2036
 //    21.  discountScheduleSourceData: terminalRate = 0.125
 //    22.  No stale terminalRateStartYear: 2034 in file (old value removed)
@@ -53,6 +58,7 @@ import { TUITION_SOURCE_RECORDS } from "../src/features/rio-scenario-resilience/
 import { calculateDre } from "../src/features/rio-scenario-resilience/model/dreEngine";
 import { RECEITA_PROJECTION_YEARS } from "../src/features/rio-scenario-resilience/model/receitaEngineContract";
 import { DRE_WORKING_SCENARIO_TUITION_SCENARIO_IDS } from "../src/features/rio-scenario-resilience/model/dreWorkingScenarioContract";
+import { DISCOUNT_SCHEDULE_SOURCE } from "../src/features/rio-scenario-resilience/model/discountScheduleSourceData";
 
 function readFile(path: string): string {
   try {
@@ -206,60 +212,50 @@ console.log("\nSection C — Discount Schedule Correction");
 const discountSrc = readFile(
   "src/features/rio-scenario-resilience/model/discountScheduleSourceData.ts",
 );
+const discountRates = DISCOUNT_SCHEDULE_SOURCE.explicitRatesByYear;
 
 // Check 14
-checkTrue(
-  "discount_2028_rate_0_25",
-  discountSrc.includes("2028: 0.25"),
-  "2028 rate = 0.25",
-);
+checkEqual("discount_2028_rate_0_25", discountRates[2028], 0.25, "2028 rate = 0.25");
 
 // Check 15
-checkTrue(
-  "discount_2029_rate_0_20",
-  discountSrc.includes("2029: 0.20"),
-  "2029 rate = 0.20",
-);
+checkEqual("discount_2029_rate_0_20", discountRates[2029], 0.2, "2029 rate = 0.20");
 
 // Check 16
-checkTrue(
-  "discount_2031_rate_0_18",
-  discountSrc.includes("2031: 0.18"),
-  "2031 rate = 0.18 (corrected from 0.17)",
-);
+checkEqual("discount_2031_rate_0_18", discountRates[2031], 0.18, "2031 rate = 0.18");
 
-// Check 17
-checkTrue(
-  "discount_2032_rate_0_18",
-  discountSrc.includes("2032: 0.18"),
-  "2032 rate = 0.18 (corrected from 0.15)",
+// Check 17 — V10-F1B (2026-07-27): canonical v10 Row 224 value is 0.15, superseding
+// the Phase 15Q value of 0.18 (project-owner decision, not Finance-signed).
+checkEqual(
+  "discount_2032_rate_0_15_v10f1b",
+  discountRates[2032],
+  0.15,
+  "2032 rate = 0.15 (V10-F1B canonical v10 Row 224; was 0.18 under Phase 15Q)",
 );
 
 // Check 18
-checkTrue(
-  "discount_2034_rate_0_15_explicit",
-  discountSrc.includes("2034: 0.15"),
-  "2034 rate = 0.15 (new explicit entry)",
-);
+checkEqual("discount_2034_rate_0_15_explicit", discountRates[2034], 0.15, "2034 rate = 0.15");
 
-// Check 19
-checkTrue(
-  "discount_2035_rate_0_15_explicit",
-  discountSrc.includes("2035: 0.15"),
-  "2035 rate = 0.15 (new explicit entry)",
+// Check 19 — V10-F1B: canonical v10 Row 224 value is 0.125, superseding Phase 15Q's 0.15.
+checkEqual(
+  "discount_2035_rate_0_125_v10f1b",
+  discountRates[2035],
+  0.125,
+  "2035 rate = 0.125 (V10-F1B canonical v10 Row 224; was 0.15 under Phase 15Q)",
 );
 
 // Check 20
-checkTrue(
+checkEqual(
   "discount_terminal_rate_start_2036",
-  discountSrc.includes("terminalRateStartYear: 2036"),
+  DISCOUNT_SCHEDULE_SOURCE.terminalRateStartYear,
+  2036,
   "terminalRateStartYear = 2036",
 );
 
 // Check 21
-checkTrue(
+checkEqual(
   "discount_terminal_rate_0_125",
-  discountSrc.includes("terminalRate: 0.125"),
+  DISCOUNT_SCHEDULE_SOURCE.terminalRate,
+  0.125,
   "terminalRate = 0.125",
 );
 

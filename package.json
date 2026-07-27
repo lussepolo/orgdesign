@@ -38,6 +38,7 @@
     "qa:phase15o": "tsx tests/phase15o/board-visible-flow.run.ts",
     "validate:v10-e1": "tsx scripts/validate-v10-e1.ts",
     "validate:v10-e2": "tsx scripts/validate-v10-e2.ts",
+    "validate:v10-f1b": "tsx scripts/validate-v10-f1b.ts",
     "qa:v10-e1": "tsx tests/v10e1/v10-e1.run.ts"
   },
   "dependencies": {

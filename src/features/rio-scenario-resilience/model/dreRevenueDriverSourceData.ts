@@ -1,4 +1,8 @@
 import type { DreRevenueDriverSourceDataContract } from "./dreRevenueDriverSourceDataContract";
+import {
+  V10_AVERAGE_DISCOUNT_SCHEDULE,
+  V10_AVERAGE_DISCOUNT_SOURCE,
+} from "./v10AverageDiscountSourceData";
 
 // DRE revenue-block driver source-data — Phase 12K (2026-06-09).
 //
@@ -10,6 +14,9 @@ import type { DreRevenueDriverSourceDataContract } from "./dreRevenueDriverSourc
 // Phase 12K (2026-06-09): all 5 previously pending annualValuesByYear records
 // populated from dre_revenue_driver_values_2028_2047_extracted_from_pnl.json.
 // All 6 records now carry exactly 20 annual values (2028–2047), 120 total.
+// Phase V10-F1B (2026-07-27): percentual_desconto_medio re-pointed to the
+// canonical v10AverageDiscountSourceData.ts schedule (project-owner decision,
+// NOT Finance-signed). See discountAuthorityResolution below.
 //
 // Scope: 2028–2047 only. No Perpetuidade. No DRE engine. No EBITDA engine.
 // No calculation. No UI. CALCULATION_CAN_BEGIN remains false.
@@ -19,15 +26,18 @@ export const DRE_REVENUE_DRIVER_SOURCE_DATA = {
   extractedAt: "2026-06-09",
 
   discountAuthorityResolution:
-    "DISCOUNT AUTHORITY SETTLED FOR DRE (Phase 12J): PnL % Desconto Médio " +
-    "(row 222, -12% for 2028-2032, -12.5% for 2033-2047) is the canonical DRE " +
-    "revenue-block source for the Bolsa de Estudos discount. " +
-    "DISCOUNT_SCHEDULE_SOURCE (receitaEngine.ts averageEffectiveDiscountRate, " +
-    "20%→12.5% ramp) is NOT used by the DRE revenue block — it serves the " +
-    "scenario-resilience Receita engine only and is preserved as audit/legacy. " +
-    "The two mechanisms must NOT be collapsed. Finance reconciliation of the two " +
-    "schedules is deferred — cross-mechanism unification remains a future-phase " +
-    "decision. This is a DRE authority settlement only, not a global resolution.",
+    "DISCOUNT AUTHORITY UPDATED FOR DRE (Phase V10-F1B, 2026-07-27): PnL " +
+    "% Desconto Médio is now canonically sourced from v10AverageDiscountSourceData.ts " +
+    "(workbook v10, PnL Row 224 — 25% in 2028 ramping to 12.5% by 2035, terminal " +
+    "12.5% from 2036), a project-owner implementation decision, NOT Finance-signed. " +
+    "This replaces the prior Phase 12J extraction (flat -12%/-12.5%), which was " +
+    "confirmed stale against direct re-reads of both workbook v9 (PnL!C222:V222) and " +
+    "workbook v10 (PnL!E224:N224) — see phase-2-forensic-reconciliation-v9.md D2b. " +
+    "DISCOUNT_SCHEDULE_SOURCE (receitaEngine.ts averageEffectiveDiscountRate) remains " +
+    "excluded from the live DRE handoff and now reads the SAME canonical schedule as " +
+    "this driver, removing the prior independently-duplicated rate table. See " +
+    "docs/audits/rio-resilience/phase-v10-f1a-revenue-governance-decision-packet.md " +
+    "(D-R3, D-R4) for full provenance.",
 
   receitaEngineRoleAfterExtraction:
     "receitaEngine.ts netReceitaAfterDiscount remains audit_only (Phase 12I " +
@@ -50,53 +60,43 @@ export const DRE_REVENUE_DRIVER_SOURCE_DATA = {
     {
       driverId: "percentual_desconto_medio",
       displayLabelPt: "% Desconto Médio",
-      sourceSheet: "PnL",
-      sourceRow: 222,
+      sourceSheet: V10_AVERAGE_DISCOUNT_SOURCE.sheet,
+      sourceRow: V10_AVERAGE_DISCOUNT_SOURCE.row,
       classification: "pnl_spreadsheet_direct_value",
       usedByDreLineIds: ["bolsa_de_estudos"],
       projectionYears: "2028-2047",
-      annualValuesByYear: {
-        2028: -0.12,
-        2029: -0.12,
-        2030: -0.12,
-        2031: -0.12,
-        2032: -0.12,
-        2033: -0.125,
-        2034: -0.125,
-        2035: -0.125,
-        2036: -0.125,
-        2037: -0.125,
-        2038: -0.125,
-        2039: -0.125,
-        2040: -0.125,
-        2041: -0.125,
-        2042: -0.125,
-        2043: -0.125,
-        2044: -0.125,
-        2045: -0.125,
-        2046: -0.125,
-        2047: -0.125,
-      },
+      // Signed negative (existing repo-wide convention for this driver — see
+      // dreEngine.ts sign-convention header comment). Derived from the canonical
+      // positive-rate schedule in v10AverageDiscountSourceData.ts; not duplicated here.
+      annualValuesByYear: Object.fromEntries(
+        Object.entries(V10_AVERAGE_DISCOUNT_SCHEDULE).map(([year, rate]) => [
+          Number(year),
+          -rate,
+        ]),
+      ) as Record<number, number>,
       formulaPattern:
         "C228 = C222 × C225 (Bolsa de Estudos = % Desconto Médio × Receitas com " +
-        "Ensino Regular, signed negative); C222 is a direct spreadsheet input value",
+        "Ensino Regular, signed negative); C222/E224 is a direct spreadsheet input value",
       valueSourceStatus: "extracted_from_pnl_spreadsheet",
       canonicalForDreRevenueBlock: true,
       discountAuthorityNote:
-        "DRE canonical source for Bolsa de Estudos. DISCOUNT_SCHEDULE_SOURCE " +
-        "(receitaEngine.ts averageEffectiveDiscountRate, 20%→12.5% ramp) is the " +
-        "Receita engine's mechanism — a structurally analogous but DIFFERENT " +
-        "schedule; must not be collapsed into this PnL driver. The divergence " +
-        "(-12%/-12.5% vs. 20%→12.5%) is preserved as audit evidence. " +
-        "Cross-mechanism unification is a future Finance decision, deferred.",
+        "DRE canonical source for Bolsa de Estudos (Phase V10-F1B, 2026-07-27): " +
+        "v10 workbook PnL Row 224, project-owner decision, NOT Finance-signed. " +
+        "DISCOUNT_SCHEDULE_SOURCE (receitaEngine.ts averageEffectiveDiscountRate) " +
+        "remains excluded from the live DRE and now reads this SAME canonical " +
+        "schedule (v10AverageDiscountSourceData.ts) — no independently-duplicated " +
+        "rate table remains. Cross-mechanism unification beyond single-sourcing " +
+        "this rate is still a future decision (see decision packet D-R4).",
       notes:
         "Phase 12I (2026-06-08): UPDATED from missing_source_or_formula to " +
         "spreadsheet_source_formula_confirmed in dreRevenueBlockReconciliation.ts. " +
         "Phase 12J (2026-06-08): typed source-data record created; annual values " +
-        "extracted from PnL row 222 (-12% for 2028-2032, -12.5% for 2033-2047). " +
-        "DRE discount authority settled: PnL row 222 is canonical for the DRE " +
-        "revenue block. DISCOUNT_SCHEDULE_SOURCE is NOT the DRE discount source " +
-        "(see discountAuthorityNote). No DRE engine. No EBITDA engine.",
+        "extracted from an earlier, unidentified workbook (flat -12%/-12.5%). " +
+        "Phase 2 forensic reconciliation (2026-07-22) confirmed this extraction " +
+        "stale against direct re-reads of workbook v9 (PnL!C222:V222) and " +
+        "workbook v10 (PnL!E224:N224), both showing an identical ramping schedule " +
+        "(25%→12.5%). Phase V10-F1B (2026-07-27): re-pointed to the canonical v10 " +
+        "Row 224 schedule per project-owner decision. No DRE engine. No EBITDA engine.",
     },
     {
       driverId: "percentual_deducoes",
