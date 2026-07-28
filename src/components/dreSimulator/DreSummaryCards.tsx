@@ -1,6 +1,7 @@
 import { LayoutGrid } from "lucide-react";
 import { Card } from "../common/Card";
-import { formatBRL } from "../../lib/utils";
+import { useLocale } from "../../i18n/useLocale";
+import { formatCurrencyBRL, formatNumber, formatPercent as formatPercentLocale } from "../../i18n/formatters";
 import type { DreEngineOutput } from "../../features/rio-scenario-resilience/model/dreEngineContract";
 import type { OpeningPackageProjectionYear } from "../../features/rio-scenario-resilience/model/openingPackageOccupancySourceDataContract";
 import { RECEITA_PROJECTION_YEARS } from "../../features/rio-scenario-resilience/model/receitaEngineContract";
@@ -11,47 +12,42 @@ interface DreSummaryCardsProps {
   onYearChange: (year: OpeningPackageProjectionYear) => void;
 }
 
-const formatPercent = (value: number | null) =>
-  value === null ? "—" : `${(value * 100).toFixed(1)}%`;
-
-const formatStudents = (value: number) =>
-  new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 0 }).format(value);
-
 // Phase 14B-UI-VISUAL-FIXES: reorganized into a primary headline row (EBITDA
 // and EBITDA Margin emphasized) and a secondary supporting row. All values
 // continue to come straight from dreOutput.byYear[year] — no new
 // calculations.
 export default function DreSummaryCards({ dreOutput, year, onYearChange }: DreSummaryCardsProps) {
+  const { t, locale } = useLocale();
   const result = dreOutput.byYear[year];
   const ebitdaPositiveYear = RECEITA_PROJECTION_YEARS.find((y) => dreOutput.byYear[y].ebitda > 0);
 
   const primaryCards = [
-    { label: "Learners (Número de Alunos)", value: formatStudents(result.numero_de_alunos), emphasis: false },
-    { label: "Receita Operacional Líquida", value: formatBRL(result.receita_operacional_liquida), emphasis: false },
-    { label: "EBITDA", value: formatBRL(result.ebitda), emphasis: true },
-    { label: "EBITDA Margin", value: formatPercent(result.percentual_ebitda), emphasis: true },
+    { label: t("dreSummaryLearnersLabel"), value: formatNumber(result.numero_de_alunos, locale), emphasis: false },
+    { label: t("dreSummaryReceitaLabel"), value: formatCurrencyBRL(result.receita_operacional_liquida, locale), emphasis: false },
+    { label: t("dreSummaryEbitdaLabel"), value: formatCurrencyBRL(result.ebitda, locale), emphasis: true },
+    { label: t("dreSummaryEbitdaMarginLabel"), value: result.percentual_ebitda === null ? "—" : formatPercentLocale(result.percentual_ebitda, locale), emphasis: true },
   ];
 
   const secondaryCards = [
-    { label: "Margem de Contribuição", value: formatBRL(result.margem_de_contribuicao) },
+    { label: t("dreSummaryMargemContribuicaoLabel"), value: formatCurrencyBRL(result.margem_de_contribuicao, locale) },
     {
-      label: "EBITDA-Positive Year (DRE EBITDA > 0)",
-      value: ebitdaPositiveYear ? String(ebitdaPositiveYear) : "Not within horizon",
+      label: t("dreSummaryEbitdaPositiveYearLabel"),
+      value: ebitdaPositiveYear ? String(ebitdaPositiveYear) : t("dreSummaryNotWithinHorizon"),
     },
     {
-      label: "Selected analysis year",
+      label: t("dreSummarySelectedYearLabel"),
       value: String(year),
     },
   ];
 
   return (
     <Card
-      title="DRE Summary"
+      title={t("dreSummaryCardTitle")}
       icon={LayoutGrid}
       className="border-cockpit-border bg-cockpit-card shadow-[0_12px_32px_rgba(15,23,42,0.06)]"
       actions={
         <label className="flex items-center gap-2 text-xs font-semibold text-cockpit-slate">
-          Year
+          {t("dreSummaryYearLabel")}
           <select
             value={year}
             onChange={(event) => onYearChange(Number(event.target.value) as OpeningPackageProjectionYear)}
@@ -67,7 +63,7 @@ export default function DreSummaryCards({ dreOutput, year, onYearChange }: DreSu
       }
     >
       <p className="mb-4 text-sm leading-relaxed text-cockpit-meta">
-        Headline DRE outputs for the selected scenario and year.
+        {t("dreSummaryCardIntro")}
       </p>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">

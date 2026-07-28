@@ -16,6 +16,7 @@ import DreExportButton from "../dreSimulator/DreExportButton";
 import DreGovernanceSummaryPanel from "../dreSimulator/DreGovernanceSummaryPanel";
 import DreBoardReadableExport from "../dreSimulator/DreBoardReadableExport";
 import DreExecutiveInterpretationPanel from "../dreSimulator/DreExecutiveInterpretationPanel";
+import { useLocale } from "../../i18n/useLocale";
 
 interface DreScenarioSimulatorTabProps {
   readonly selections: DreScenarioSimulatorSelections;
@@ -38,6 +39,7 @@ export default function DreScenarioSimulatorTab({
     orgDesignSensitivity,
     defaultSelections,
   } = useDreScenarioSimulator({ selections, onSelectionsChange });
+  const { t } = useLocale();
   const [year, setYear] = useState<OpeningPackageProjectionYear>(LAST_PROJECTION_YEAR);
   const [sendStatus, setSendStatus] = useState<"limit_reached" | null>(null);
 
@@ -72,7 +74,7 @@ export default function DreScenarioSimulatorTab({
             compact
           />
           <p className="text-right text-[10px] leading-tight text-slate-400">
-            Export payroll by org design version — Minimum, Balanced, and Premium. Full FOPAG/Folha Direta.
+            {t("dreScenarioTabExportNote")}
           </p>
         </div>
       </div>
@@ -84,12 +86,12 @@ export default function DreScenarioSimulatorTab({
 
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between rounded-xl border border-blue-100 bg-blue-50 px-4 py-3">
         <p className="text-sm text-blue-700">
-          Send the current DRE scenario configuration to Capital Decision for CAPEX analysis.
+          {t("dreScenarioTabSendIntro")}
         </p>
         <div className="flex items-center gap-3 shrink-0">
           {sendStatus === "limit_reached" && (
             <p className="text-xs font-semibold text-rose-600" role="alert">
-              Capital Decision is at capacity (4 scenarios). Remove a scenario first.
+              {t("dreScenarioTabLimitReached")}
             </p>
           )}
           <button
@@ -98,7 +100,7 @@ export default function DreScenarioSimulatorTab({
             className="flex items-center gap-2 rounded-full bg-blue-600 px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-blue-700 active:scale-95"
           >
             <Send className="h-3.5 w-3.5" />
-            Send to Capital Decision
+            {t("dreScenarioTabSendButton")}
           </button>
         </div>
       </div>

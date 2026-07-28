@@ -16,12 +16,14 @@ import {
   getInvestmentReferenceStatusDisplay,
   getInvestmentReferenceStatusLabel,
 } from "./capitalDecisionViewModel";
+import { useLocale } from "../../../../i18n/useLocale";
 
 export interface InvestmentReferencePanelProps {
   readonly result: InvestmentInterpretationResult;
 }
 
 export function InvestmentReferencePanel({ result }: InvestmentReferencePanelProps) {
+  const { t } = useLocale();
   const statusDisplay = getInvestmentReferenceStatusDisplay(result);
   const statusLabel = getInvestmentReferenceStatusLabel(result.investmentReferenceStatus);
   const irrUnavailable = result.investmentReferenceStatus === "irr_unavailable";
@@ -41,7 +43,7 @@ export function InvestmentReferencePanel({ result }: InvestmentReferencePanelPro
     <section className="space-y-3" aria-labelledby="investment-reference-heading">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h3 id="investment-reference-heading" className="text-sm font-semibold text-slate-900">
-          TIR versus reference WACC
+          {t("capitalInvestmentRefHeader")}
         </h3>
         <Badge variant={blockedUpstream ? "default" : irrUnavailable ? "warning" : "info"}>
           {statusLabel}
@@ -55,30 +57,29 @@ export function InvestmentReferencePanel({ result }: InvestmentReferencePanelPro
         )}
         {result.irrMultipleRootsPossible === true && (
           <p className="mt-2 text-sm leading-6 text-amber-700" role="note">
-            Multiple IRR values are mathematically possible for this cash-flow pattern.
-            The reported TIR may not be a unique root.
+            {t("capitalInvestmentRefMultipleRootsNote")}
           </p>
         )}
       </Card>
 
       <div className="grid gap-4 sm:grid-cols-3">
         <FinancialMetricCard
-          label="TIR"
+          label={t("capitalInvestmentRefTirLabel")}
           value={tirValue}
           unavailable={tirValue === "—"}
           statusText={
             irrUnavailable
-              ? result.irrStatusReason || "TIR could not be calculated for this scenario."
+              ? result.irrStatusReason || t("capitalInvestmentRefTirUnavailable")
               : undefined
           }
         />
         <FinancialMetricCard
-          label="Reference WACC"
+          label={t("capitalInvestmentRefWaccLabel")}
           value={blockedUpstream ? "—" : formatPercentOneDecimal(result.investmentReferenceWaccRate)}
           unavailable={blockedUpstream}
         />
         <FinancialMetricCard
-          label="TIR–WACC spread"
+          label={t("capitalComparisonPanelRowTirWaccSpread")}
           value={spreadValue}
           unavailable={spreadValue === "—"}
         />

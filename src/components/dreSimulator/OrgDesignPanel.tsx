@@ -3,6 +3,7 @@ import { AlertTriangle, ChevronDown, ChevronUp, GitBranch } from "lucide-react";
 import { Card } from "../common/Card";
 import { Badge } from "../common/Badge";
 import { formatBRL } from "../../lib/utils";
+import { useLocale } from "../../i18n/useLocale";
 import { ORG_DESIGN_PAYROLL_ACTIVATION } from "../../features/rio-scenario-resilience/model/orgDesignPayrollActivation";
 import { EXECUTIVE_ORG_SCENARIOS } from "../../features/rio-scenario-resilience/model/executiveOrgDesignModel";
 import type { FopagEngineOutput } from "../../features/rio-scenario-resilience/model/fopagEngineContract";
@@ -50,6 +51,7 @@ export default function OrgDesignPanel({
   orgDesignSensitivity,
   year,
 }: OrgDesignPanelProps) {
+  const { t } = useLocale();
   const [rolesExpanded, setRolesExpanded] = useState(false);
   const [selectedStructureExpanded, setSelectedStructureExpanded] = useState(false);
 
@@ -117,35 +119,34 @@ export default function OrgDesignPanel({
 
   return (
     <Card
-      title="Org Design Operating Model"
+      title={t("dreOrgDesignPanelTitle")}
       icon={GitBranch}
       className="border-cockpit-border bg-cockpit-card shadow-[0_12px_32px_rgba(15,23,42,0.06)]"
     >
       <p className="mb-4 text-sm leading-relaxed text-cockpit-meta">
-        Shows how the selected org-design option maps to role structure and FOPAG impact. This is a
-        scenario input, not a recommendation.
+        {t("dreOrgDesignPanelIntro")}
       </p>
 
       <div className="mb-4 rounded-2xl border border-cockpit-indigo-border bg-cockpit-indigo-fill p-4 text-sm leading-relaxed text-cockpit-slate">
-        The selected org model is{" "}
+        {t("dreOrgDesignPanelModelIs")}{" "}
         <span className="font-semibold text-cockpit-ink">{ORG_DESIGN_OPTION_LABELS[orgDesignOptionId]}</span>
         {executiveScenario && (
           <>
-            , operating under the{" "}
-            <span className="font-semibold text-cockpit-ink">{executiveScenario.posture}</span> posture
+            {t("dreOrgDesignPanelOperatingUnderThe")}{" "}
+            <span className="font-semibold text-cockpit-ink">{executiveScenario.posture}</span>
           </>
         )}
-        . FOPAG total payroll for {year} is{" "}
+        {t("dreOrgDesignPanelFopagTotalFor").replace("{year}", String(year))}{" "}
         <span className="font-semibold text-cockpit-ink">
           {payrollReconciliation.isReconciled && yearTotals ? formatBRL(yearTotals.totalPayroll) : "—"}
         </span>
-        . This reflects the current lever selection, not a recommendation.
+        {t("dreOrgDesignPanelReflectsCurrentLever")}
       </div>
 
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-4">
         <div className="rounded-2xl border border-cockpit-border-soft bg-cockpit-panel p-4">
           <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-cockpit-meta">
-            Selected Org Design
+            {t("dreOrgDesignPanelSelectedOrgDesignLabel")}
           </div>
           <div className="mt-2 text-sm font-bold text-cockpit-ink">
             {ORG_DESIGN_OPTION_LABELS[orgDesignOptionId]}
@@ -153,7 +154,7 @@ export default function OrgDesignPanel({
         </div>
         <div className="rounded-2xl border border-cockpit-border-soft bg-cockpit-panel p-4">
           <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-cockpit-meta">
-            Operating Model / Posture
+            {t("dreOrgDesignPanelPostureLabel")}
           </div>
           <div className="mt-2 text-sm font-bold text-cockpit-ink">
             {executiveScenario?.posture ?? "—"}
@@ -161,7 +162,7 @@ export default function OrgDesignPanel({
         </div>
         <div className="rounded-2xl border border-cockpit-border-soft bg-cockpit-panel p-4">
           <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-cockpit-meta">
-            FOPAG Total Payroll ({year})
+            {t("dreOrgDesignPanelFopagTotalPayrollLabel").replace("{year}", String(year))}
           </div>
           <div className="mt-2 text-sm font-bold text-cockpit-ink">
             {payrollReconciliation.isReconciled && yearTotals ? formatBRL(yearTotals.totalPayroll) : "—"}
@@ -169,13 +170,13 @@ export default function OrgDesignPanel({
         </div>
         <div className="rounded-2xl border border-cockpit-positive-border bg-cockpit-teal-fill p-4">
           <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-cockpit-meta">
-            EBITDA Impact (2047)
+            {t("dreOrgDesignPanelEbitdaImpactLabel")}
           </div>
           <div className="mt-2 text-sm font-bold text-cockpit-teal">
             {sensitivityRow ? formatBRL(sensitivityRow.ebitda2047) : "—"}
           </div>
           <div className="mt-0.5 text-xs text-cockpit-meta">
-            {sensitivityRow ? `${formatPercent(sensitivityRow.percentualEbitda2047)} EBITDA margin` : ""}
+            {sensitivityRow ? `${formatPercent(sensitivityRow.percentualEbitda2047)} ${t("dreOrgDesignPanelEbitdaMarginSuffix")}` : ""}
           </div>
         </div>
       </div>
@@ -184,7 +185,7 @@ export default function OrgDesignPanel({
         <div className="mt-3 grid grid-cols-1 gap-3 lg:grid-cols-3">
           <div className="rounded-2xl border border-cockpit-border-soft bg-cockpit-subtle p-4">
             <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-cockpit-meta">
-              FOPAG Direto ({year})
+              {t("dreOrgDesignPanelFopagDiretoLabel").replace("{year}", String(year))}
             </div>
             <div className="mt-2 text-sm font-bold text-cockpit-ink">
               {yearTotals ? formatBRL(yearTotals.fopagDireto) : "—"}
@@ -192,7 +193,7 @@ export default function OrgDesignPanel({
           </div>
           <div className="rounded-2xl border border-cockpit-border-soft bg-cockpit-subtle p-4">
             <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-cockpit-meta">
-              Folha Direta ({year})
+              {t("dreOrgDesignPanelFolhaDiretaLabel").replace("{year}", String(year))}
             </div>
             <div className="mt-2 text-sm font-bold text-cockpit-ink">
               {yearTotals ? formatBRL(yearTotals.folhaDireta) : "—"}
@@ -200,7 +201,7 @@ export default function OrgDesignPanel({
           </div>
           <div className="rounded-2xl border border-cockpit-border-soft bg-cockpit-subtle p-4">
             <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-cockpit-meta">
-              Benefícios ({year})
+              {t("dreOrgDesignPanelBeneficiosLabel").replace("{year}", String(year))}
             </div>
             <div className="mt-2 text-sm font-bold text-cockpit-ink">
               {yearTotals ? formatBRL(yearTotals.benefits) : "—"}
@@ -212,12 +213,10 @@ export default function OrgDesignPanel({
           <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-cockpit-risk" />
           <div>
             <div className="text-sm font-bold text-cockpit-risk">
-              FOPAG/payroll trace could not be reconciled with the DRE payroll rows
+              {t("dreOrgDesignPanelReconciliationErrorTitle")}
             </div>
             <p className="mt-1 text-sm text-cockpit-slate">
-              {payrollReconciliation.mismatches.length} mismatch(es) detected between the
-              standalone FOPAG trace and the FOPAG-derived rows inside the DRE result for
-              this scenario. Payroll/FOPAG values are withheld until this is resolved.
+              {t("dreOrgDesignPanelReconciliationErrorBody").replace("{n}", String(payrollReconciliation.mismatches.length))}
             </p>
           </div>
         </div>
@@ -230,8 +229,8 @@ export default function OrgDesignPanel({
           className="flex w-full items-center justify-between text-left"
         >
           <span className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-cockpit-meta">
-            Org Design role progression
-            <Badge variant="default">Costing support</Badge>
+            {t("dreOrgDesignPanelRoleProgressionLabel")}
+            <Badge variant="default">{t("dreOrgDesignPanelCostingSupportBadge")}</Badge>
           </span>
           {rolesExpanded ? (
             <ChevronUp className="h-3.5 w-3.5 shrink-0 text-cockpit-meta" />
@@ -242,22 +241,19 @@ export default function OrgDesignPanel({
         {rolesExpanded && (
           <div className="mt-3">
             <p className="text-xs leading-relaxed text-cockpit-meta">
-              Shows which positions are already accounted for and which positions are introduced as
-              the org-design model moves into Minimum, Balanced, and Premium. This is a costing and
-              structure view, not a hiring authorization.
+              {t("dreOrgDesignPanelRoleProgressionIntro")}
             </p>
 
             <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
               <div className="rounded-2xl border border-cockpit-border-soft bg-cockpit-subtle p-3">
                 <div className="flex items-center justify-between">
                   <div className="text-[10px] font-semibold uppercase tracking-[0.12em] text-cockpit-meta">
-                    Already accounted for / baseline structure
+                    {t("dreOrgDesignPanelAlreadyAccountedLabel")}
                   </div>
                   <Badge variant="default">{alreadyAccountedForRoles.length}</Badge>
                 </div>
                 <p className="mt-1 text-[11px] leading-relaxed text-cockpit-meta">
-                  Roles or equivalent leadership/support structures already represented in the
-                  baseline model. These should not be read as new additions.
+                  {t("dreOrgDesignPanelAlreadyAccountedBody")}
                 </p>
                 <ul className="mt-2 max-h-40 space-y-1 overflow-y-auto text-xs text-cockpit-slate">
                   {alreadyAccountedForRoles.map((record) => (
@@ -269,16 +265,16 @@ export default function OrgDesignPanel({
               <div className="rounded-2xl border border-cockpit-indigo-border bg-cockpit-indigo-fill p-3">
                 <div className="flex items-center justify-between">
                   <div className="text-[10px] font-semibold uppercase tracking-[0.12em] text-cockpit-meta">
-                    Added in Minimum Experience
+                    {t("dreOrgDesignPanelAddedMinimumLabel")}
                   </div>
                   <Badge variant="default">{minimumAddedRoles.length}</Badge>
                 </div>
                 <p className="mt-1 text-[11px] leading-relaxed text-cockpit-meta">
-                  Positions introduced in the Minimum Experience model.
+                  {t("dreOrgDesignPanelAddedMinimumBody")}
                 </p>
                 {minimumAddedRoles.length === 0 ? (
                   <p className="mt-2 text-xs text-cockpit-slate">
-                    No Minimum additions identified in the current source data.
+                    {t("dreOrgDesignPanelNoMinimumAdditions")}
                   </p>
                 ) : (
                   <ul className="mt-2 max-h-40 space-y-1 overflow-y-auto text-xs text-cockpit-slate">
@@ -292,16 +288,16 @@ export default function OrgDesignPanel({
               <div className="rounded-2xl border border-cockpit-positive-border bg-cockpit-teal-fill p-3">
                 <div className="flex items-center justify-between">
                   <div className="text-[10px] font-semibold uppercase tracking-[0.12em] text-cockpit-meta">
-                    Added in Balanced Experience
+                    {t("dreOrgDesignPanelAddedBalancedLabel")}
                   </div>
                   <Badge variant="default">{balancedAddedRoles.length}</Badge>
                 </div>
                 <p className="mt-1 text-[11px] leading-relaxed text-cockpit-meta">
-                  Positions introduced when moving from Minimum Experience to Balanced Experience.
+                  {t("dreOrgDesignPanelAddedBalancedBody")}
                 </p>
                 {balancedAddedRoles.length === 0 ? (
                   <p className="mt-2 text-xs text-cockpit-slate">
-                    No Balanced additions identified in the current source data.
+                    {t("dreOrgDesignPanelNoBalancedAdditions")}
                   </p>
                 ) : (
                   <ul className="mt-2 max-h-40 space-y-1 overflow-y-auto text-xs text-cockpit-slate">
@@ -315,16 +311,16 @@ export default function OrgDesignPanel({
               <div className="rounded-2xl border border-cockpit-amber-border bg-cockpit-amber-fill p-3">
                 <div className="flex items-center justify-between">
                   <div className="text-[10px] font-semibold uppercase tracking-[0.12em] text-cockpit-meta">
-                    Added in Premium Experience
+                    {t("dreOrgDesignPanelAddedPremiumLabel")}
                   </div>
                   <Badge variant="default">{premiumAddedRoles.length}</Badge>
                 </div>
                 <p className="mt-1 text-[11px] leading-relaxed text-cockpit-meta">
-                  Positions introduced when moving from Balanced Experience to Premium Experience.
+                  {t("dreOrgDesignPanelAddedPremiumBody")}
                 </p>
                 {premiumAddedRoles.length === 0 ? (
                   <p className="mt-2 text-xs text-cockpit-slate">
-                    No Premium-only additions identified in the current source data.
+                    {t("dreOrgDesignPanelNoPremiumAdditions")}
                   </p>
                 ) : (
                   <ul className="mt-2 max-h-40 space-y-1 overflow-y-auto text-xs text-cockpit-slate">
@@ -338,13 +334,12 @@ export default function OrgDesignPanel({
               <div className="rounded-2xl border border-cockpit-border-soft bg-cockpit-subtle p-3">
                 <div className="flex items-center justify-between">
                   <div className="text-[10px] font-semibold uppercase tracking-[0.12em] text-cockpit-meta">
-                    Progression-dependent roles
+                    {t("dreOrgDesignPanelProgressionDependentLabel")}
                   </div>
                   <Badge variant="default">{progressionDependentRoles.length}</Badge>
                 </div>
                 <p className="mt-1 text-[11px] leading-relaxed text-cockpit-meta">
-                  Roles tied to grade-span opening/progression assumptions, not immediate Minimum
-                  Experience additions.
+                  {t("dreOrgDesignPanelProgressionDependentBody")}
                 </p>
                 <ul className="mt-2 max-h-40 space-y-1 overflow-y-auto text-xs text-cockpit-slate">
                   {progressionDependentRoles.map((record) => (
@@ -361,7 +356,7 @@ export default function OrgDesignPanel({
                 className="flex w-full items-center justify-between text-left"
               >
                 <span className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-cockpit-meta">
-                  Role structure represented in selected option
+                  {t("dreOrgDesignPanelSelectedStructureLabel")}
                   <Badge variant="default">{selectedStructureRoles.length}</Badge>
                 </span>
                 {selectedStructureExpanded ? (
@@ -371,8 +366,7 @@ export default function OrgDesignPanel({
                 )}
               </button>
               <p className="mt-1 text-[11px] leading-relaxed text-cockpit-meta">
-                Shows the role set used for structure and costing under the current org-design lever.
-                This is not a list of newly added roles.
+                {t("dreOrgDesignPanelSelectedStructureBody")}
               </p>
               {selectedStructureExpanded && (
                 <ul className="mt-2 grid max-h-48 grid-cols-1 gap-x-6 gap-y-1 overflow-y-auto text-xs text-cockpit-slate sm:grid-cols-2 lg:grid-cols-3">
@@ -384,8 +378,7 @@ export default function OrgDesignPanel({
             </div>
 
             <p className="mt-3 text-[11px] leading-relaxed text-cockpit-meta">
-              Role progression is derived from the org-design payroll activation source. It is a
-              scenario-structure and costing view, not a hiring authorization.
+              {t("dreOrgDesignPanelFooterNote")}
             </p>
           </div>
         )}

@@ -14,27 +14,30 @@ import type { InvestmentInterpretationResult } from "../../model/investmentInter
 import { formatPercentZeroDecimal } from "./capitalDecisionViewModel";
 import { DRE_LINE_ITEM_MAP } from "../../model/dreLineItemMap";
 import { DRE_ANNUAL_ASSUMPTION_SOURCE_DATA } from "../../model/dreAnnualAssumptionSourceData";
+import { useLocale } from "../../../../i18n/useLocale";
+import { formatCurrencyBRL } from "../../../../i18n/formatters";
+import type { TranslationKey } from "../../../../i18n/localeContract";
 
 export interface MethodologyDisclosureProps {
   readonly result: InvestmentInterpretationResult;
 }
 
-const EXCLUSION_LABELS: Record<string, string> = {
-  receitaRecalculation: "Receita recalculation",
-  fopagRecalculation: "FOPAG recalculation",
-  ebitdaRecalculation: "EBITDA recalculation",
-  fcoRecalculation: "FCO recalculation",
-  capexRecalculation: "CAPEX recalculation",
-  dcfRecalculation: "DCF recalculation",
-  npvRecalculation: "VPL recalculation",
-  irrRecalculation: "TIR recalculation",
-  discountedPaybackRecalculation: "Discounted payback recalculation",
-  tierTaxonomy: "Tier taxonomy",
-  weightedScore: "Weighted/composite score",
-  totalRanking: "Total ranking",
-  overallWinner: "Overall winner / preferred scenario",
-  boardRecommendation: "Board recommendation",
-  uiInterpretation: "UI-generated interpretation",
+const EXCLUSION_LABEL_KEYS: Record<string, TranslationKey> = {
+  receitaRecalculation: "capitalMethodologyExclusionReceitaRecalc",
+  fopagRecalculation: "capitalMethodologyExclusionFopagRecalc",
+  ebitdaRecalculation: "capitalMethodologyExclusionEbitdaRecalc",
+  fcoRecalculation: "capitalMethodologyExclusionFcoRecalc",
+  capexRecalculation: "capitalMethodologyExclusionCapexRecalc",
+  dcfRecalculation: "capitalMethodologyExclusionDcfRecalc",
+  npvRecalculation: "capitalMethodologyExclusionNpvRecalc",
+  irrRecalculation: "capitalMethodologyExclusionIrrRecalc",
+  discountedPaybackRecalculation: "capitalMethodologyExclusionPaybackRecalc",
+  tierTaxonomy: "capitalMethodologyExclusionTierTaxonomy",
+  weightedScore: "capitalMethodologyExclusionWeightedScore",
+  totalRanking: "capitalMethodologyExclusionTotalRanking",
+  overallWinner: "capitalMethodologyExclusionOverallWinner",
+  boardRecommendation: "capitalMethodologyExclusionBoardRecommendation",
+  uiInterpretation: "capitalMethodologyExclusionUiInterpretation",
 };
 
 // Service contract line items: 8 rows with serviceContractsCategory: true.
@@ -56,22 +59,18 @@ const SERVICE_CONTRACT_ITEMS = SERVICE_CONTRACT_LINE_IDS.map(({ dreLineId, displ
   };
 });
 
-function formatBRL(value: number | null): string {
-  if (value === null) return "—";
-  return new Intl.NumberFormat("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(Math.abs(value));
-}
-
 export function MethodologyDisclosure({ result }: MethodologyDisclosureProps) {
+  const { t, locale } = useLocale();
   const { sourceProvenance, explicitExclusions, decisionLevers } = result;
   const waccPercent = formatPercentZeroDecimal(result.investmentReferenceWaccRate);
 
+  function formatBRL(value: number | null): string {
+    if (value === null) return "—";
+    return formatCurrencyBRL(Math.abs(value), locale);
+  }
+
   const exclusionEntries = Object.entries(explicitExclusions).filter(
-    ([key, value]) => value === "excluded" && key in EXCLUSION_LABELS,
+    ([key, value]) => value === "excluded" && key in EXCLUSION_LABEL_KEYS,
   );
 
   const scTotal2028 = SERVICE_CONTRACT_ITEMS.reduce(
@@ -86,58 +85,56 @@ export function MethodologyDisclosure({ result }: MethodologyDisclosureProps) {
   return (
     <details className="rounded-2xl border border-slate-200 bg-white p-4 md:p-6">
       <summary className="cursor-pointer select-none text-sm font-semibold text-slate-900">
-        Methodology and assumptions
+        {t("capitalMethodologyTitle")}
       </summary>
       <div className="mt-4 space-y-4 text-sm leading-6 text-slate-600">
         <div>
           <h4 className="text-xs font-bold uppercase tracking-widest text-slate-400">
-            Reference WACC
+            {t("capitalMethodologyWaccHeader")}
           </h4>
           <p className="mt-1">
-            {waccPercent} ({sourceProvenance.investmentReferenceWaccSource}).
+            {t("capitalMethodologyWaccBody")
+              .replace("{pct}", waccPercent)
+              .replace("{source}", sourceProvenance.investmentReferenceWaccSource)}
           </p>
         </div>
 
         <div>
           <h4 className="text-xs font-bold uppercase tracking-widest text-slate-400">
-            Investment reference rule
+            {t("capitalMethodologyInvestmentRuleHeader")}
           </h4>
           <p className="mt-1">
-            Strict TIR &gt; WACC: a scenario meets the investment reference only when
-            TIR is greater than the reference WACC. TIR equal to WACC does not meet
-            the reference.
+            {t("capitalMethodologyInvestmentRuleBody")}
           </p>
         </div>
 
         <div>
           <h4 className="text-xs font-bold uppercase tracking-widest text-slate-400">
-            Discounted payback horizon
+            {t("capitalMethodologyPaybackHorizonHeader")}
           </h4>
           <p className="mt-1">
-            Evaluated over the 20 operating periods (2028-2047). Payback not
-            recovered within this horizon is reported as "20+", never as a
-            numeric year.
+            {t("capitalMethodologyPaybackHorizonBody")}
           </p>
         </div>
 
         <div>
           <h4 className="text-xs font-bold uppercase tracking-widest text-slate-400">
-            Service Contracts
+            {t("capitalMethodologyServiceContractsHeader")}
           </h4>
           <p className="mt-1">
             {decisionLevers.serviceContracts === "fixed_approved_dre_assumption"
-              ? "Service Contracts use the fixed approved DRE assumptions for this version."
+              ? t("capitalConfigPanelServiceContractsBody")
               : decisionLevers.serviceContracts}
           </p>
           <details className="mt-2 rounded-lg border border-slate-100 bg-slate-50 p-3">
             <summary className="cursor-pointer text-xs font-semibold text-slate-500">
-              Service contract line items (8 rows)
+              {t("capitalMethodologyServiceContractLineItemsSummary")}
             </summary>
             <div className="mt-3 overflow-x-auto">
               <table className="w-full text-xs">
                 <thead>
                   <tr className="text-left text-slate-400">
-                    <th className="pb-1 pr-3 font-medium">Line item</th>
+                    <th className="pb-1 pr-3 font-medium">{t("capitalMethodologyColLineItem")}</th>
                     <th className="pb-1 pr-3 font-medium text-right">2028</th>
                     <th className="pb-1 font-medium text-right">2047</th>
                   </tr>
@@ -151,7 +148,7 @@ export function MethodologyDisclosure({ result }: MethodologyDisclosureProps) {
                     </tr>
                   ))}
                   <tr className="border-t-2 border-slate-200 font-semibold text-slate-700">
-                    <td className="pt-1 pr-3">Total</td>
+                    <td className="pt-1 pr-3">{t("capitalMethodologyColTotal")}</td>
                     <td className="pt-1 pr-3 text-right">{formatBRL(scTotal2028)}</td>
                     <td className="pt-1 text-right">{formatBRL(scTotal2047)}</td>
                   </tr>
@@ -159,19 +156,18 @@ export function MethodologyDisclosure({ result }: MethodologyDisclosureProps) {
               </table>
             </div>
             <p className="mt-2 text-[10px] leading-4 text-slate-400">
-              Values shown as absolute costs (negative sign convention removed for display).
-              Source: Finance workbook PnL sheet — fixed DRE assumptions, not recalculated by simulator.
+              {t("capitalMethodologyServiceContractsNote")}
             </p>
           </details>
         </div>
 
         <div>
           <h4 className="text-xs font-bold uppercase tracking-widest text-slate-400">
-            MS/HS Progression Model
+            {t("capitalMethodologyMsHsHeader")}
           </h4>
           <p className="mt-1">
             {decisionLevers.msHsProgressionModel === "future_upstream_integration_not_wired"
-              ? "The MS/HS Progression Model is not yet connected to the financial simulation."
+              ? t("capitalConfigPanelMsHsBody")
               : decisionLevers.msHsProgressionModel}
           </p>
         </div>
@@ -179,11 +175,11 @@ export function MethodologyDisclosure({ result }: MethodologyDisclosureProps) {
         {exclusionEntries.length > 0 && (
           <div>
             <h4 className="text-xs font-bold uppercase tracking-widest text-slate-400">
-              Explicit exclusions
+              {t("capitalMethodologyExclusionsHeader")}
             </h4>
             <ul className="mt-1 list-disc space-y-1 pl-5">
               {exclusionEntries.map(([key]) => (
-                <li key={key}>{EXCLUSION_LABELS[key]}</li>
+                <li key={key}>{t(EXCLUSION_LABEL_KEYS[key])}</li>
               ))}
             </ul>
           </div>
@@ -191,14 +187,14 @@ export function MethodologyDisclosure({ result }: MethodologyDisclosureProps) {
 
         <div>
           <h4 className="text-xs font-bold uppercase tracking-widest text-slate-400">
-            Source provenance
+            {t("capitalMethodologySourceProvenanceHeader")}
           </h4>
           <ul className="mt-1 space-y-1">
-            <li>Phase 15C commit: {sourceProvenance.phase15cCommit}</li>
-            <li>Phase 15D commit: {sourceProvenance.phase15dCommit}</li>
-            <li>Methodology document: {sourceProvenance.ratifiedMethodologyDoc}</li>
+            <li>{t("capitalMethodologyPhase15cCommit").replace("{value}", sourceProvenance.phase15cCommit)}</li>
+            <li>{t("capitalMethodologyPhase15dCommit").replace("{value}", sourceProvenance.phase15dCommit)}</li>
+            <li>{t("capitalMethodologyMethodologyDoc").replace("{value}", sourceProvenance.ratifiedMethodologyDoc)}</li>
             {sourceProvenance.ratifiedSections.length > 0 && (
-              <li>Ratified sections: {sourceProvenance.ratifiedSections.join(", ")}</li>
+              <li>{t("capitalMethodologyRatifiedSections").replace("{value}", sourceProvenance.ratifiedSections.join(", "))}</li>
             )}
           </ul>
           {sourceProvenance.notes.length > 0 && (

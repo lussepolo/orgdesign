@@ -2,6 +2,7 @@ import { Table } from "lucide-react";
 import { Card } from "../common/Card";
 import type { ViabilityAnnualProjectionRow } from "../../lib/viability/types";
 import { formatBRL } from "../../lib/utils";
+import { useLocale } from "../../i18n/useLocale";
 
 interface ViabilityAnnualProjectionTableProps {
   rows: ViabilityAnnualProjectionRow[];
@@ -10,41 +11,40 @@ interface ViabilityAnnualProjectionTableProps {
 export default function ViabilityAnnualProjectionTable({
   rows,
 }: ViabilityAnnualProjectionTableProps) {
+  const { t } = useLocale();
   return (
     <Card
-      title="Annual Cash Flow Table"
-      subtitle="Year-by-year operating and cash flow view for review and audit"
+      title={t("viabilityAnnualTableTitle")}
+      subtitle={t("viabilityAnnualTableSubtitle")}
       icon={Table}
       className="overflow-hidden"
     >
       <div className="mb-4 rounded-2xl border border-slate-100 bg-slate-50 p-4">
         <p className="text-sm leading-relaxed text-slate-600">
-          This table is the annual audit layer for the active case. It shows the operating path
-          produced from scenario-responsive teaching demand, shared/global non-teaching staffing,
-          selected opex and CAPEX assumptions, and discounted cash flow across the planning horizon.
+          {t("viabilityAnnualTableIntro")}
         </p>
       </div>
       <div className="mb-3 rounded-xl border border-slate-200 bg-white px-3 py-2 text-[11px] font-semibold text-slate-500 sm:hidden">
-        Swipe horizontally to review revenue, opex, cash flow, and margin columns.
+        {t("viabilityAnnualTableSwipeHint")}
       </div>
       <div className="overflow-x-auto rounded-2xl border border-slate-100">
         <table className="min-w-[1180px] text-left">
           <thead>
             <tr className="border-b border-slate-100 bg-slate-50 text-[10px] uppercase tracking-[0.16em] text-slate-400">
-              <th className="px-3 py-3">Year</th>
-              <th className="px-3 py-3 text-right">Students</th>
-              <th className="px-3 py-3 text-right">Sections</th>
-              <th className="px-3 py-3 text-right text-emerald-700">Revenue</th>
-              <th className="px-3 py-3 text-right text-indigo-700">Payroll</th>
-              <th className="px-3 py-3 text-right text-blue-700">Benefits</th>
-              <th className="px-3 py-3 text-right">Other Opex</th>
-              <th className="px-3 py-3 text-right text-slate-700">Total Opex</th>
-              <th className="px-3 py-3 text-right text-teal-700">Operating Result</th>
-              <th className="px-3 py-3 text-right text-amber-700">CAPEX</th>
-              <th className="px-3 py-3 text-right text-teal-700">Free Cash Flow</th>
-              <th className="px-3 py-3 text-right">Discounted FCF</th>
-              <th className="px-3 py-3 text-right">Cumulative Cash</th>
-              <th className="px-3 py-3 text-right">Margin</th>
+              <th className="px-3 py-3">{t("viabilityAnnualTableColYear")}</th>
+              <th className="px-3 py-3 text-right">{t("viabilityAnnualTableColStudents")}</th>
+              <th className="px-3 py-3 text-right">{t("viabilityAnnualTableColSections")}</th>
+              <th className="px-3 py-3 text-right text-emerald-700">{t("viabilityAnnualTableColRevenue")}</th>
+              <th className="px-3 py-3 text-right text-indigo-700">{t("viabilityAnnualTableColPayroll")}</th>
+              <th className="px-3 py-3 text-right text-blue-700">{t("viabilityAnnualTableColBenefits")}</th>
+              <th className="px-3 py-3 text-right">{t("viabilityAnnualTableColOtherOpex")}</th>
+              <th className="px-3 py-3 text-right text-slate-700">{t("viabilityAnnualTableColTotalOpex")}</th>
+              <th className="px-3 py-3 text-right text-teal-700">{t("viabilityAnnualTableColOperatingResult")}</th>
+              <th className="px-3 py-3 text-right text-amber-700">{t("viabilityAnnualTableColCapex")}</th>
+              <th className="px-3 py-3 text-right text-teal-700">{t("viabilityAnnualTableColFreeCashFlow")}</th>
+              <th className="px-3 py-3 text-right">{t("viabilityAnnualTableColDiscountedFcf")}</th>
+              <th className="px-3 py-3 text-right">{t("viabilityAnnualTableColCumulativeCash")}</th>
+              <th className="px-3 py-3 text-right">{t("viabilityAnnualTableColMargin")}</th>
             </tr>
           </thead>
           <tbody>

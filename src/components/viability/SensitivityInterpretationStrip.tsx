@@ -1,6 +1,7 @@
 import { Lightbulb } from "lucide-react";
 import { Card } from "../common/Card";
 import type { SensitivityViewModel } from "../../lib/viability/types";
+import { useLocale } from "../../i18n/useLocale";
 
 interface SensitivityInterpretationStripProps {
   viewModel: SensitivityViewModel;
@@ -9,16 +10,17 @@ interface SensitivityInterpretationStripProps {
 export default function SensitivityInterpretationStrip({
   viewModel,
 }: SensitivityInterpretationStripProps) {
+  const { t } = useLocale();
   return (
     <Card
-      title="Interpretation & Fixed Assumptions"
-      subtitle="Matrix reading guidance and assumptions held constant"
+      title={t("sensitivityInterpretationTitle")}
+      subtitle={t("sensitivityInterpretationSubtitle")}
       icon={Lightbulb}
     >
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.1fr_0.9fr]">
         <div>
           <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">
-            Semantic Contract
+            {t("sensitivityInterpretationSemanticContractLabel")}
           </div>
           <ul className="mt-3 space-y-2 text-sm text-slate-600">
             {viewModel.semantics.map((line) => (
@@ -31,15 +33,14 @@ export default function SensitivityInterpretationStrip({
         <div>
           <div className="mb-3 rounded-2xl border border-amber-100 bg-amber-50 p-4">
             <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-amber-700">
-              Analytical status
+              {t("sensitivityInterpretationAnalyticalStatusLabel")}
             </div>
             <p className="mt-2 text-sm leading-relaxed text-slate-600">
-              Use this view to compare directions and relative pressure points. Treat the current cell
-              values as indicative until the matrix is wired to the full baseline engine.
+              {t("sensitivityInterpretationAnalyticalStatusBody")}
             </p>
           </div>
           <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">
-            Assumptions Held Fixed
+            {t("sensitivityInterpretationFixedLabel")}
           </div>
           <div className="mt-3 space-y-2">
             {viewModel.fixedAssumptions.map((item) => (

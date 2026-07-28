@@ -19,12 +19,14 @@ import {
   getNpvSignText,
   isBlockedUpstream,
 } from "./capitalDecisionViewModel";
+import { useLocale } from "../../../../i18n/useLocale";
 
 export interface ScenarioResultPanelProps {
   readonly scenario: SavedScenario;
 }
 
 export function ScenarioResultPanel({ scenario }: ScenarioResultPanelProps) {
+  const { t } = useLocale();
   const { result } = scenario;
   const blocked = isBlockedUpstream(result);
   const readinessText = getCalculationReadinessText(result);
@@ -35,15 +37,15 @@ export function ScenarioResultPanel({ scenario }: ScenarioResultPanelProps) {
     <section
       className="space-y-6"
       aria-live="polite"
-      aria-label={`Result for ${scenario.name}`}
+      aria-label={t("capitalResultPanelAriaLabel").replace("{name}", scenario.name)}
     >
       {/* 1. Calculation readiness */}
       <Card
-        title="Calculation readiness"
+        title={t("capitalResultPanelReadinessTitle")}
         subtitle={scenario.name}
         actions={
           <Badge variant={result.calculationStatus === "calculated" ? "success" : "danger"}>
-            {result.calculationStatus === "calculated" ? "Calculated" : "Blocked"}
+            {result.calculationStatus === "calculated" ? t("capitalResultPanelCalculated") : t("capitalResultPanelBlocked")}
           </Badge>
         }
       >
@@ -54,8 +56,7 @@ export function ScenarioResultPanel({ scenario }: ScenarioResultPanelProps) {
         <Card>
           <p className="text-sm leading-6 text-slate-700">{result.calculationStatusReason}</p>
           <p className="mt-2 text-sm leading-6 text-slate-500">
-            Investment-reference and financial-output values are unavailable while this
-            scenario's calculation is blocked upstream.
+            {t("capitalResultPanelBlockedUpstreamNote")}
           </p>
         </Card>
       ) : (
@@ -66,7 +67,7 @@ export function ScenarioResultPanel({ scenario }: ScenarioResultPanelProps) {
           {/* 6-7. VPL, discounted payback */}
           <div className="grid gap-4 sm:grid-cols-2">
             <FinancialMetricCard
-              label="VPL"
+              label={t("capitalComparisonPanelRowVpl")}
               value={vpl.compact}
               detail={vpl.detailed !== vpl.compact ? vpl.detailed : undefined}
               statusText={getNpvSignText(result.npvSign)}
@@ -74,7 +75,7 @@ export function ScenarioResultPanel({ scenario }: ScenarioResultPanelProps) {
               ariaLabel={vpl.ariaLabel}
             />
             <FinancialMetricCard
-              label="Discounted payback"
+              label={t("capitalComparisonPanelRowDiscountedPayback")}
               value={payback.value}
               detail={payback.detail ?? undefined}
               unavailable={

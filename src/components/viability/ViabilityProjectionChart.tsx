@@ -3,6 +3,7 @@ import { TrendingUp } from "lucide-react";
 import { Card } from "../common/Card";
 import type { ViabilityProjectionPoint } from "../../lib/viability/types";
 import { cn, formatBRL } from "../../lib/utils";
+import { useLocale } from "../../i18n/useLocale";
 
 interface ViabilityProjectionChartProps {
   series: ViabilityProjectionPoint[];
@@ -17,13 +18,14 @@ export default function ViabilityProjectionChart({
   className,
   collapsed = false,
 }: ViabilityProjectionChartProps) {
+  const { t } = useLocale();
   const firstPoint = series[0];
   const lastPoint = series.at(-1);
 
   return (
     <Card
-      title="Lifetime Operating Profile"
-      subtitle="Revenue and cash generation profile for the active planning case"
+      title={t("viabilityChartTitle")}
+      subtitle={t("viabilityChartSubtitle")}
       icon={TrendingUp}
       actions={actions}
       className={cn(className)}
@@ -32,14 +34,13 @@ export default function ViabilityProjectionChart({
         <div className="space-y-4">
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
             <p className="text-sm leading-relaxed text-slate-600">
-              Profile collapsed. Expand when you want the full chart back in view, or pin it to keep
-              the operating profile nearby while reviewing the annual table.
+              {t("viabilityChartCollapsedNote")}
             </p>
           </div>
           <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
             <div className="rounded-2xl border border-slate-200 bg-white p-4">
               <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">
-                Opening Year Revenue
+                {t("viabilityChartOpeningYearRevenue")}
               </div>
               <div className="mt-2 text-sm font-bold text-slate-900">
                 {firstPoint ? formatBRL(firstPoint.revenueAnnual) : "—"}
@@ -47,7 +48,7 @@ export default function ViabilityProjectionChart({
             </div>
             <div className="rounded-2xl border border-slate-200 bg-white p-4">
               <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">
-                Ending Year Revenue
+                {t("viabilityChartEndingYearRevenue")}
               </div>
               <div className="mt-2 text-sm font-bold text-slate-900">
                 {lastPoint ? formatBRL(lastPoint.revenueAnnual) : "—"}
@@ -55,7 +56,7 @@ export default function ViabilityProjectionChart({
             </div>
             <div className="rounded-2xl border border-slate-200 bg-white p-4">
               <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">
-                Ending Year Free Cash Flow
+                {t("viabilityChartEndingYearFcf")}
               </div>
               <div className="mt-2 text-sm font-bold text-slate-900">
                 {lastPoint ? formatBRL(lastPoint.freeCashFlowAnnual) : "—"}
@@ -67,8 +68,7 @@ export default function ViabilityProjectionChart({
         <div className="space-y-4">
           <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
             <p className="text-sm leading-relaxed text-slate-600">
-              Revenue and free cash flow are shown together so the operating ramp and the resulting
-              cash generation stay readable as one bounded review surface.
+              {t("viabilityChartExpandedNote")}
             </p>
           </div>
 
@@ -96,16 +96,15 @@ export default function ViabilityProjectionChart({
                     formatter={(value: number) => formatBRL(value)}
                     contentStyle={{ borderRadius: 16, borderColor: "#e2e8f0" }}
                   />
-                  <Area type="monotone" dataKey="revenueAnnual" name="Revenue" stroke="#0f766e" fill="url(#revenueFill)" strokeWidth={2.2} />
-                  <Area type="monotone" dataKey="freeCashFlowAnnual" name="Free Cash Flow" stroke="#1d4ed8" fill="url(#cashFlowFill)" strokeWidth={2.2} />
+                  <Area type="monotone" dataKey="revenueAnnual" name={t("viabilityChartRevenueSeries")} stroke="#0f766e" fill="url(#revenueFill)" strokeWidth={2.2} />
+                  <Area type="monotone" dataKey="freeCashFlowAnnual" name={t("viabilityChartFcfSeries")} stroke="#1d4ed8" fill="url(#cashFlowFill)" strokeWidth={2.2} />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
           </div>
 
           <p className="text-xs leading-relaxed text-slate-500">
-            This view combines the live operating path with the active opex, CAPEX, and discounting
-            assumptions to show the financial profile across the planning horizon.
+            {t("viabilityChartFooterNote")}
           </p>
         </div>
       )}

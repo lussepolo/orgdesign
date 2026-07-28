@@ -6,6 +6,7 @@
 // ranking, or recommendation semantics.
 
 import { Badge, Card } from "../../../../components/common";
+import { useLocale } from "../../../../i18n/useLocale";
 
 export interface FinancialMetricCardProps {
   readonly label: string;
@@ -24,11 +25,12 @@ export function FinancialMetricCard({
   unavailable = false,
   ariaLabel,
 }: FinancialMetricCardProps) {
+  const { t } = useLocale();
   return (
     <Card
       className="h-full"
       title={label}
-      actions={unavailable ? <Badge variant="default">Não disponível</Badge> : undefined}
+      actions={unavailable ? <Badge variant="default">{t("capitalMetricCardUnavailableBadge")}</Badge> : undefined}
     >
       <div className="space-y-2">
         <p
@@ -43,7 +45,7 @@ export function FinancialMetricCard({
         {detail && (
           <details className="text-xs text-slate-500">
             <summary className="cursor-pointer select-none font-medium text-slate-500 hover:text-slate-700">
-              Detalhe
+              {t("capitalMetricCardDetailSummary")}
             </summary>
             <p className="mt-1 leading-5">{detail}</p>
           </details>

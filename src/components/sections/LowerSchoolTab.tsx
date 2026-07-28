@@ -2,6 +2,8 @@ import React from "react";
 import { Microscope, School, Search, Users } from "lucide-react";
 import { motion } from "motion/react";
 import { cn } from "../../lib/utils";
+import { useLocale } from "../../i18n/useLocale";
+import type { TranslationKey } from "../../i18n/localeContract";
 
 const Card = ({
   children,
@@ -59,80 +61,83 @@ const Badge = ({
   );
 };
 
-const LOWER_SCHOOL_DATA = [
-  { grade: "Grade 1", focus: "Literacy & Numeracy", model: "Lead + Assistant", ratio: "1:11", max: 44 },
-  { grade: "Grade 2", focus: "Fluency & Inquiry", model: "Lead + Assistant", ratio: "1:11", max: 44 },
-  { grade: "Grade 3", focus: "Critical Thinking", model: "Lead + Assistant", ratio: "1:11", max: 44 },
-  { grade: "Grade 4", focus: "Project-based Learning", model: "Lead + Assistant", ratio: "1:11", max: 48 },
-  { grade: "Grade 5", focus: "Transition & Leadership", model: "Lead + Assistant", ratio: "1:11", max: 48 },
+const LOWER_SCHOOL_DATA: Array<{ gradeKey: TranslationKey; ratio: string; max: number }> = [
+  { gradeKey: "lowerSchoolGrade1", ratio: "1:11", max: 44 },
+  { gradeKey: "lowerSchoolGrade2", ratio: "1:11", max: 44 },
+  { gradeKey: "lowerSchoolGrade3", ratio: "1:11", max: 44 },
+  { gradeKey: "lowerSchoolGrade4", ratio: "1:11", max: 48 },
+  { gradeKey: "lowerSchoolGrade5", ratio: "1:11", max: 48 },
 ];
 
-const LowerSchoolTab = () => (
-  <div className="space-y-8">
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <Card className="lg:col-span-2" title="Lower School Academic Core" icon={School}>
-        <div className="space-y-6">
-          <p className="text-sm text-slate-500 leading-relaxed">
-            Lower School is where the investigative posture of Early Years becomes a disciplined academic practice. Learners are presented with real phenomena, form questions and construct understanding through structured enquiry before conclusions are offered.
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-100">
-              <div className="flex items-center gap-2 mb-2">
-                <Microscope className="h-4 w-4 text-emerald-500" />
-                <h4 className="text-xs font-bold text-slate-900">Scientific Literacy</h4>
+const LowerSchoolTab = () => {
+  const { t } = useLocale();
+  return (
+    <div className="space-y-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <Card className="lg:col-span-2" title={t("lowerSchoolAcademicCoreTitle")} icon={School}>
+          <div className="space-y-6">
+            <p className="text-sm text-slate-500 leading-relaxed">
+              {t("lowerSchoolAcademicCoreIntro")}
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-100">
+                <div className="flex items-center gap-2 mb-2">
+                  <Microscope className="h-4 w-4 text-emerald-500" />
+                  <h4 className="text-xs font-bold text-slate-900">{t("lowerSchoolScientificLiteracyTitle")}</h4>
+                </div>
+                <p className="text-[10px] text-slate-500 leading-relaxed">{t("lowerSchoolScientificLiteracyBody")}</p>
               </div>
-              <p className="text-[10px] text-slate-500 leading-relaxed">Developing the ability to identify scientific issues, explain phenomena, and use evidence-based conclusions.</p>
-            </div>
-            <div className="p-4 rounded-2xl bg-blue-50 border border-blue-100">
-              <div className="flex items-center gap-2 mb-2">
-                <Search className="h-4 w-4 text-blue-500" />
-                <h4 className="text-xs font-bold text-slate-900">Phenomenon-Based</h4>
+              <div className="p-4 rounded-2xl bg-blue-50 border border-blue-100">
+                <div className="flex items-center gap-2 mb-2">
+                  <Search className="h-4 w-4 text-blue-500" />
+                  <h4 className="text-xs font-bold text-slate-900">{t("lowerSchoolPhenomenonBasedTitle")}</h4>
+                </div>
+                <p className="text-[10px] text-slate-500 leading-relaxed">{t("lowerSchoolPhenomenonBasedBody")}</p>
               </div>
-              <p className="text-[10px] text-slate-500 leading-relaxed">Learning through the observation of real-world phenomena, fostering curiosity and deep analytical skills.</p>
             </div>
           </div>
-        </div>
-      </Card>
-      <Card title="Classroom Package" icon={Users}>
-        <div className="space-y-4">
-          <div className="flex justify-between items-center p-3 bg-slate-50 rounded-xl border border-slate-100">
-            <span className="text-[10px] font-bold text-slate-400 uppercase">Reference Educator</span>
-            <Badge variant="purple">1 Lead</Badge>
+        </Card>
+        <Card title={t("lowerSchoolClassroomPackageTitle")} icon={Users}>
+          <div className="space-y-4">
+            <div className="flex justify-between items-center p-3 bg-slate-50 rounded-xl border border-slate-100">
+              <span className="text-[10px] font-bold text-slate-400 uppercase">{t("lowerSchoolReferenceEducatorLabel")}</span>
+              <Badge variant="purple">{t("lowerSchoolOneLeadBadge")}</Badge>
+            </div>
+            <div className="flex justify-between items-center p-3 bg-slate-50 rounded-xl border border-slate-100">
+              <span className="text-[10px] font-bold text-slate-400 uppercase">{t("lowerSchoolLearningAssistantLabel")}</span>
+              <Badge variant="success">{t("lowerSchoolOneAssistantBadge")}</Badge>
+            </div>
+            <p className="text-[10px] text-slate-400 italic">{t("lowerSchoolModelNote")}</p>
+            <p className="text-[10px] text-amber-700 leading-relaxed border-t border-slate-100 pt-3 mt-3">{t("lowerSchoolPlanningPremiseNote")}</p>
           </div>
-          <div className="flex justify-between items-center p-3 bg-slate-50 rounded-xl border border-slate-100">
-            <span className="text-[10px] font-bold text-slate-400 uppercase">Learning Assistant</span>
-            <Badge variant="success">1 Assistant</Badge>
-          </div>
-          <p className="text-[10px] text-slate-400 italic">Dedicated 2-educator model (1 Lead + 1 Assistant) per grade level. Classroom assistants are not shared across homerooms in this planning premise.</p>
-          <p className="text-[10px] text-amber-700 leading-relaxed border-t border-slate-100 pt-3 mt-3">These are planning premises only. Adult-to-learner ratios and classroom package structures are instructional-capacity planning assumptions, not payroll authorization, final FTE, final headcount, or hiring approval.</p>
-        </div>
-      </Card>
+        </Card>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        {LOWER_SCHOOL_DATA.map((item, idx) => (
+          <motion.div key={item.gradeKey} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: idx * 0.05 }}>
+            <Card className="h-full border-t-4 border-emerald-400">
+              <div className="text-[10px] font-bold text-slate-400 uppercase mb-1">{t("lowerSchoolDivisionLabel")}</div>
+              <h3 className="text-lg font-bold text-slate-900 mb-3">{t(item.gradeKey)}</h3>
+              <div className="space-y-3">
+                <div>
+                  <div className="text-[9px] font-bold text-slate-400 uppercase mb-1">{t("lowerSchoolTotalLearnersLabel")}</div>
+                  <div className="text-xs font-bold text-emerald-600">{item.max} {t("lowerSchoolLearnersUnit")}</div>
+                </div>
+                <div>
+                  <div className="text-[9px] font-bold text-slate-400 uppercase mb-1">{t("lowerSchoolLearnersPerSectionLabel")}</div>
+                  <div className="text-xs font-bold text-slate-600">{item.max / 2} {t("lowerSchoolLearnersUnit")}</div>
+                </div>
+                <div>
+                  <div className="text-[9px] font-bold text-slate-400 uppercase mb-1">{t("lowerSchoolRatioLabel")}</div>
+                  <div className="text-xs font-bold text-slate-600">{item.ratio}</div>
+                </div>
+              </div>
+            </Card>
+          </motion.div>
+        ))}
+      </div>
     </div>
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-      {LOWER_SCHOOL_DATA.map((item, idx) => (
-        <motion.div key={item.grade} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: idx * 0.05 }}>
-          <Card className="h-full border-t-4 border-emerald-400">
-            <div className="text-[10px] font-bold text-slate-400 uppercase mb-1">Lower School</div>
-            <h3 className="text-lg font-bold text-slate-900 mb-3">{item.grade}</h3>
-            <div className="space-y-3">
-              <div>
-                <div className="text-[9px] font-bold text-slate-400 uppercase mb-1">Total Learners, 2 Sections</div>
-                <div className="text-xs font-bold text-emerald-600">{item.max} Learners</div>
-              </div>
-              <div>
-                <div className="text-[9px] font-bold text-slate-400 uppercase mb-1">Learners Per Section</div>
-                <div className="text-xs font-bold text-slate-600">{item.max / 2} Learners</div>
-              </div>
-              <div>
-                <div className="text-[9px] font-bold text-slate-400 uppercase mb-1">Ratio</div>
-                <div className="text-xs font-bold text-slate-600">{item.ratio}</div>
-              </div>
-            </div>
-          </Card>
-        </motion.div>
-      ))}
-    </div>
-  </div>
-);
+  );
+};
 
 export default LowerSchoolTab;

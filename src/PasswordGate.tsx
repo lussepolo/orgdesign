@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useLocale } from "./i18n/useLocale";
 
 // --- Configuration ---
 // To change the password, run simpleHash('yournewpassword') in the browser console
@@ -17,6 +18,7 @@ function simpleHash(str: string): string {
 }
 
 export default function PasswordGate({ children }: { children: React.ReactNode }) {
+  const { t } = useLocale();
   const [authenticated, setAuthenticated] = useState(false);
   const [input, setInput] = useState("");
   const [error, setError] = useState(false);
@@ -119,7 +121,7 @@ export default function PasswordGate({ children }: { children: React.ReactNode }
             marginBottom: "0.75rem",
           }}
         >
-          Escola Concept
+          {t("gateInstitution")}
         </p>
 
         {/* Title */}
@@ -133,9 +135,9 @@ export default function PasswordGate({ children }: { children: React.ReactNode }
             marginBottom: "2.5rem",
           }}
         >
-          <span style={{ fontWeight: 500 }}>Rio de Janeiro</span>
+          <span style={{ fontWeight: 500 }}>{t("gateTitleLine1")}</span>
           <br />
-          Strategic Organizational Architecture
+          {t("gateTitleLine2")}
         </h1>
 
         {/* Input */}
@@ -146,7 +148,7 @@ export default function PasswordGate({ children }: { children: React.ReactNode }
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && attempt()}
-            placeholder="Enter access code"
+            placeholder={t("gateInputPlaceholder")}
             autoComplete="off"
             spellCheck={false}
             autoFocus
@@ -188,7 +190,7 @@ export default function PasswordGate({ children }: { children: React.ReactNode }
             transition: "background 0.2s ease, transform 0.15s ease",
           }}
         >
-          Enter
+          {t("gateEnterButton")}
         </button>
 
         {/* Error */}
@@ -203,7 +205,7 @@ export default function PasswordGate({ children }: { children: React.ReactNode }
             opacity: error ? 1 : 0,
           }}
         >
-          Incorrect code. Please try again.
+          {t("gateErrorMessage")}
         </p>
 
         {/* Footer */}
@@ -216,7 +218,7 @@ export default function PasswordGate({ children }: { children: React.ReactNode }
             letterSpacing: "0.05em",
           }}
         >
-          Internal document. Authorized access only.
+          {t("gateFooterNote")}
         </p>
       </div>
     </div>

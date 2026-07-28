@@ -4,6 +4,7 @@ import { Badge } from "../common/Badge";
 import { formatBRL } from "../../lib/utils";
 import type { OrgDesignSensitivityRow } from "../../hooks/useDreScenarioSimulator";
 import { ORG_DESIGN_OPTION_LABELS } from "./dreLeverLabels";
+import { useLocale } from "../../i18n/useLocale";
 
 interface OrgDesignSensitivityPanelProps {
   rows: readonly OrgDesignSensitivityRow[];
@@ -13,30 +14,29 @@ const formatPercent = (value: number | null) =>
   value === null ? "—" : `${(value * 100).toFixed(1)}%`;
 
 export default function OrgDesignSensitivityPanel({ rows }: OrgDesignSensitivityPanelProps) {
+  const { t } = useLocale();
   return (
     <Card
-      title="Org Design Sensitivity"
+      title={t("orgDesignSensitivityTitle")}
       icon={Scale}
       className="border-cockpit-border bg-cockpit-card shadow-[0_12px_32px_rgba(15,23,42,0.06)]"
     >
       <p className="mb-3 text-sm leading-relaxed text-cockpit-meta">
-        2047 EBITDA by org-design option, holding the opening, occupancy, and tuition levers fixed at the
-        current selection.
+        {t("orgDesignSensitivityIntro")}
       </p>
       <div className="mb-4 rounded-2xl border border-cockpit-amber-border bg-cockpit-amber-fill p-4">
         <p className="text-sm leading-relaxed text-cockpit-slate">
-          EBITDA impact only. This is not an educational-quality ranking. A higher EBITDA reflects a
-          lower operating cost impact for this scenario — not automatically a better operating model.
+          {t("orgDesignSensitivityCaution")}
         </p>
       </div>
       <div className="overflow-x-auto rounded-2xl border border-cockpit-border-soft">
         <table className="w-full text-left">
           <thead>
             <tr className="border-b border-cockpit-border-soft bg-cockpit-panel text-[11px] uppercase tracking-[0.1em] text-cockpit-meta">
-              <th className="px-3 py-3">Org Design Option</th>
-              <th className="px-3 py-3 text-right">EBITDA (2047)</th>
-              <th className="px-3 py-3 text-right">% EBITDA (2047)</th>
-              <th className="px-3 py-3 text-right">Status</th>
+              <th className="px-3 py-3">{t("orgDesignSensitivityColOption")}</th>
+              <th className="px-3 py-3 text-right">{t("orgDesignSensitivityColEbitda")}</th>
+              <th className="px-3 py-3 text-right">{t("orgDesignSensitivityColPctEbitda")}</th>
+              <th className="px-3 py-3 text-right">{t("orgDesignSensitivityColStatus")}</th>
             </tr>
           </thead>
           <tbody>
@@ -58,7 +58,7 @@ export default function OrgDesignSensitivityPanel({ rows }: OrgDesignSensitivity
                 </td>
                 <td className="px-3 py-3 text-right">
                   {row.isSelected ? (
-                    <Badge variant="info">Selected</Badge>
+                    <Badge variant="info">{t("orgDesignSensitivitySelectedBadge")}</Badge>
                   ) : (
                     <span className="text-xs text-cockpit-meta">—</span>
                   )}

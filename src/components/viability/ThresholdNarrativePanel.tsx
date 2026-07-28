@@ -1,5 +1,6 @@
 import { FileText } from "lucide-react";
 import { Card } from "../common/Card";
+import { useLocale } from "../../i18n/useLocale";
 
 interface ThresholdNarrativePanelProps {
   narrative: string[];
@@ -8,10 +9,11 @@ interface ThresholdNarrativePanelProps {
 export default function ThresholdNarrativePanel({
   narrative,
 }: ThresholdNarrativePanelProps) {
+  const { t } = useLocale();
   return (
     <Card
-      title="Threshold Narrative"
-      subtitle="Interpretive notes for the threshold view"
+      title={t("thresholdNarrativeTitle")}
+      subtitle={t("thresholdNarrativeSubtitle")}
       icon={FileText}
       className="h-full"
     >

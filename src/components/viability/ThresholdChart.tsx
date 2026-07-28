@@ -2,16 +2,18 @@ import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "rec
 import { Radar } from "lucide-react";
 import { Card } from "../common/Card";
 import type { ThresholdChartPoint } from "../../lib/viability/types";
+import { useLocale } from "../../i18n/useLocale";
 
 interface ThresholdChartProps {
   series: ThresholdChartPoint[];
 }
 
 export default function ThresholdChart({ series }: ThresholdChartProps) {
+  const { t } = useLocale();
   return (
     <Card
-      title="Threshold Curve"
-      subtitle="Base case versus threshold path"
+      title={t("thresholdChartTitle")}
+      subtitle={t("thresholdChartSubtitle")}
       icon={Radar}
       className="h-full"
     >
@@ -27,8 +29,7 @@ export default function ThresholdChart({ series }: ThresholdChartProps) {
         </ResponsiveContainer>
       </div>
       <p className="mt-3 text-xs leading-relaxed text-slate-500">
-        Threshold solving is not active yet. This chart reserves analytical space for views such as
-        minimum viable tuition, minimum viable enrollment, or maximum viable CAPEX against the base case.
+        {t("thresholdChartFooterNote")}
       </p>
     </Card>
   );

@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { BookOpen, CheckCircle2, GitBranch, Layers3 } from "lucide-react";
 import { cn } from "../../lib/utils";
+import { useLocale } from "../../i18n/useLocale";
 import {
   buildExecutiveOrgDesignTree,
   EXECUTIVE_ORG_SCENARIOS,
@@ -167,74 +168,66 @@ function HcTableRow({ row }: { row: OrgDesignHcTableRow }) {
 }
 
 function BalancedExplanationPanel() {
+  const { t } = useLocale();
   return (
     <section
-      aria-label="Balanced Experience: recommended operating model"
+      aria-label={t("orgDesignBalancedAriaLabel")}
       className="rounded-md border border-emerald-200 bg-emerald-50 p-4 shadow-sm"
     >
       <div className="mb-3 flex items-start gap-2">
         <BookOpen className="mt-0.5 h-4 w-4 shrink-0 text-emerald-700" />
         <div>
           <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-600">
-            Balanced Experience: recommended operating model
+            {t("orgDesignBalancedEyebrow")}
           </p>
           <p className="mt-1 text-sm font-semibold leading-5 text-emerald-950">
-            Balanced Experience is the recommended Rio structure because it protects the Concept learner
-            experience while keeping leadership growth tied to enrollment. The model combines scenario-driven
-            classroom staffing, lean division leadership, and a Learning Experience Design Hub responsible for
-            learning design, language acquisition, performance support, and personalized learning. Role-level HC
-            is model-backed and changes according to the selected opening scenario and year.
+            {t("orgDesignBalancedIntro")}
           </p>
         </div>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         <div className="rounded-md border border-emerald-200 bg-white p-3">
-          <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-emerald-700">Why Balanced</p>
+          <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-emerald-700">{t("orgDesignWhyBalancedTitle")}</p>
           <p className="text-[11px] font-semibold leading-5 text-slate-700">
-            Balanced sits between Minimum and Premium. It avoids the fragility of an underbuilt model while
-            avoiding the payroll risk of hiring too many specialized roles before enrollment maturity.
+            {t("orgDesignWhyBalancedBody")}
           </p>
         </div>
 
         <div className="rounded-md border border-emerald-200 bg-white p-3">
-          <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-emerald-700">Dynamic HC</p>
+          <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-emerald-700">{t("orgDesignDynamicHcTitle")}</p>
           <p className="text-[11px] font-semibold leading-5 text-slate-700">
-            Headcount is not a static org chart. It is generated from the selected opening scenario, year, and
-            org design version using the same staffing/FOPAG logic that supports the DRE and payroll export.
+            {t("orgDesignDynamicHcBody")}
           </p>
         </div>
 
         <div className="rounded-md border border-emerald-200 bg-white p-3">
           <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-emerald-700">
-            Learning Experience Design Hub
+            {t("orgDesignLedHubTitle")}
           </p>
           <ul className="space-y-0.5 text-[11px] font-semibold text-slate-700">
-            <li className="font-bold text-emerald-900">Learning Experience Design Hub</li>
-            <li className="pl-3 before:mr-1 before:content-['–']">Learning Experience Designer</li>
-            <li className="pl-3 before:mr-1 before:content-['–']">Language Acquisition and Performance Coach</li>
-            <li className="pl-3 before:mr-1 before:content-['–']">Personalized Learning Associate Educator</li>
+            <li className="font-bold text-emerald-900">{t("orgDesignLedHubItem0")}</li>
+            <li className="pl-3 before:mr-1 before:content-['–']">{t("orgDesignLedHubItem1")}</li>
+            <li className="pl-3 before:mr-1 before:content-['–']">{t("orgDesignLedHubItem2")}</li>
+            <li className="pl-3 before:mr-1 before:content-['–']">{t("orgDesignLedHubItem3")}</li>
           </ul>
         </div>
 
         <div className="rounded-md border border-emerald-200 bg-white p-3">
           <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-emerald-700">
-            Division Staffing Logic
+            {t("orgDesignDivisionStaffingLogicTitle")}
           </p>
           <p className="text-[11px] font-semibold leading-5 text-slate-700">
-            Early Years uses Reference Educator + Assistant + Monitor. Lower School uses Reference Educator +
-            Assistant. Middle School and High School staffing progress with the opening scenario, educator load,
-            mentorship, and program absorption model.
+            {t("orgDesignDivisionStaffingLogicBody")}
           </p>
         </div>
 
         <div className="rounded-md border border-slate-200 bg-white p-3 sm:col-span-2 lg:col-span-2">
           <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-slate-500">
-            Governance Caveat
+            {t("orgDesignGovernanceCaveatTitle")}
           </p>
           <p className="text-[11px] font-semibold leading-5 text-slate-600">
-            Read this as a dynamic operating model, not a fixed static chart. Role-level HC should be reviewed
-            by opening scenario and year.
+            {t("orgDesignGovernanceCaveatBody")}
           </p>
         </div>
       </div>
@@ -243,6 +236,7 @@ function BalancedExplanationPanel() {
 }
 
 const ExecutiveOrgDesignTab = () => {
+  const { t } = useLocale();
   const [scenario, setScenario] = useState<ExecutiveOrgScenario>("balanced");
   const [year, setYear] = useState<ExecutiveOrgYear>(2028);
   const [openingPackageId, setOpeningPackageId] = useState<OpeningPackageId>("t1_g4");
@@ -307,14 +301,14 @@ const ExecutiveOrgDesignTab = () => {
         <div>
           <div className="flex items-center gap-2">
             <GitBranch className="h-5 w-5 text-slate-500" />
-            <h3 className="text-2xl font-bold tracking-tight text-slate-950">Executive Org Design</h3>
+            <h3 className="text-2xl font-bold tracking-tight text-slate-950">{t("orgDesignHeaderTitle")}</h3>
           </div>
-          <p className="mt-1 text-sm font-semibold text-slate-500">Full Rio organization tree by scenario and year.</p>
+          <p className="mt-1 text-sm font-semibold text-slate-500">{t("orgDesignHeaderSubtitle")}</p>
         </div>
 
         <div className="flex flex-col gap-2 sm:flex-row">
           <label className="flex flex-col gap-1">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Opening Scenario</span>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{t("orgDesignOpeningScenarioLabel")}</span>
             <select
               value={openingPackageId}
               onChange={(event) => setOpeningPackageId(event.target.value as OpeningPackageId)}
@@ -329,7 +323,7 @@ const ExecutiveOrgDesignTab = () => {
           </label>
 
           <label className="flex flex-col gap-1">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Org Design Version</span>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{t("orgDesignVersionLabel")}</span>
             <select
               value={scenario}
               onChange={(event) => setScenario(event.target.value as ExecutiveOrgScenario)}
@@ -344,7 +338,7 @@ const ExecutiveOrgDesignTab = () => {
           </label>
 
           <div className="flex flex-col gap-1">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Year</span>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{t("orgDesignYearLabel")}</span>
             <div className="flex gap-2">
               <select
                 value={year}
@@ -365,7 +359,7 @@ const ExecutiveOrgDesignTab = () => {
                 onClick={handleProgressionToggle}
                 className="h-10 rounded-md border border-slate-300 bg-white px-3 text-xs font-bold text-slate-700 shadow-sm transition-colors hover:bg-slate-100"
               >
-                {isProgressionPlaying ? "Pause" : "Play 2028-2037"}
+                {isProgressionPlaying ? t("orgDesignPauseButton") : t("orgDesignPlayButton")}
               </button>
               {isProgressionPlaying && (
                 <button
@@ -373,13 +367,13 @@ const ExecutiveOrgDesignTab = () => {
                   onClick={() => setIsProgressionPlaying(false)}
                   className="h-10 rounded-md border border-slate-200 bg-slate-50 px-3 text-xs font-bold text-slate-500 transition-colors hover:bg-slate-100"
                 >
-                  Stop
+                  {t("orgDesignStopButton")}
                 </button>
               )}
             </div>
             <p className="max-w-xs text-[11px] font-semibold leading-4 text-slate-500">
-              Showing active organization for {year}.
-              {isProgressionPlaying && " Progression view: active roles appear as their source-backed HC activates."}
+              {t("orgDesignShowingActiveOrg").replace("{year}", String(year))}
+              {isProgressionPlaying && t("orgDesignProgressionNote")}
             </p>
           </div>
         </div>
@@ -416,9 +410,9 @@ const ExecutiveOrgDesignTab = () => {
           <div className="rounded-md border border-emerald-200 bg-emerald-50 p-3">
             <div className="flex items-center gap-2">
               <CheckCircle2 className="h-4 w-4 text-emerald-700" />
-              <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-700">Recommended posture</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-700">{t("orgDesignRecommendedPostureLabel")}</p>
             </div>
-            <p className="mt-1 text-sm font-bold text-emerald-950">Balanced</p>
+            <p className="mt-1 text-sm font-bold text-emerald-950">{t("orgDesignRecommendedPostureValue")}</p>
           </div>
 
           {viewModel.railItems.map((item) => (
@@ -440,42 +434,37 @@ const ExecutiveOrgDesignTab = () => {
       <section className="space-y-3">
         <div className="flex items-center justify-between">
           <div>
-            <h4 className="text-base font-bold text-slate-900">Role-Level Headcount</h4>
+            <h4 className="text-base font-bold text-slate-900">{t("orgDesignRoleLevelHeadcountTitle")}</h4>
             <p className="mt-0.5 text-[11px] font-semibold text-slate-500">
               {OPENING_SCENARIO_OPTIONS.find((o) => o.id === openingPackageId)?.label} ·{" "}
               {EXECUTIVE_ORG_SCENARIOS.find((o) => o.id === scenario)?.label} · {year} ·{" "}
-              {hcTableResult.calculationReady ? "Calculation ready" : "Blocking diagnostics present"}
+              {hcTableResult.calculationReady ? t("orgDesignCalculationReadyLabel") : t("orgDesignBlockingDiagnosticsLabel")}
             </p>
           </div>
           {!hcTableResult.calculationReady && (
             <span className="rounded border border-amber-200 bg-amber-50 px-2 py-1 text-[10px] font-bold text-amber-700">
-              Engine: {hcTableResult.engineStatus}
+              {t("orgDesignEngineStatusLabel")} {hcTableResult.engineStatus}
             </span>
           )}
         </div>
 
         <div className="rounded-md border border-slate-200 bg-slate-50 p-3 text-[11px] font-semibold leading-5 text-slate-600">
-          <span className="font-bold text-slate-800">Methodology: </span>
-          Headcount is model-backed via{" "}
-          <code className="rounded bg-slate-200 px-1 text-[10px]">calculateFopag()</code> / payrollAdapter. EY and LS
-          grade staffing is section-driven: sections = min(ceil(enrollment / studentsPerClass), 2), sourced from{" "}
-          <code className="rounded bg-slate-200 px-1 text-[10px]">sectionCountEngine</code> under occupancy scenario{" "}
-          <span className="font-bold">base</span>. Org Design Extension roles carry HC 1 from activation year
-          2028 per org design source contract. MS and HS educator pools are readiness-layer planning envelopes
-          (instructional-capacity only; not payroll authorization). Opening scenario:{" "}
-          <span className="font-bold">{openingGradeLabel}</span>. Do not modify headcount directly — change the model
-          inputs.
+          <span className="font-bold text-slate-800">{t("orgDesignMethodologyLabel")} </span>
+          {t("orgDesignMethodologyBody1")}{" "}
+          <code className="rounded bg-slate-200 px-1 text-[10px]">sectionCountEngine</code>{" "}
+          <span className="font-bold">base</span>. {t("orgDesignMethodologyBody2")}{" "}
+          <span className="font-bold">{openingGradeLabel}</span>{t("orgDesignMethodologyBody3")}
         </div>
 
         <div className="overflow-x-auto rounded-md border border-slate-200 shadow-sm">
           <table className="w-full border-collapse bg-white text-left">
             <thead>
               <tr className="border-b border-slate-200 bg-slate-100">
-                <th className="px-3 py-2.5 text-[10px] font-bold uppercase tracking-wider text-slate-500">Division / Area</th>
-                <th className="px-3 py-2.5 text-[10px] font-bold uppercase tracking-wider text-slate-500">Role Group or Hub</th>
-                <th className="px-3 py-2.5 text-[10px] font-bold uppercase tracking-wider text-slate-500">Role</th>
-                <th className="px-3 py-2.5 text-center text-[10px] font-bold uppercase tracking-wider text-slate-500">HC / FTE</th>
-                <th className="px-3 py-2.5 text-[10px] font-bold uppercase tracking-wider text-slate-500">Source Type / Logic</th>
+                <th className="px-3 py-2.5 text-[10px] font-bold uppercase tracking-wider text-slate-500">{t("orgDesignColDivisionArea")}</th>
+                <th className="px-3 py-2.5 text-[10px] font-bold uppercase tracking-wider text-slate-500">{t("orgDesignColRoleGroupOrHub")}</th>
+                <th className="px-3 py-2.5 text-[10px] font-bold uppercase tracking-wider text-slate-500">{t("orgDesignColRole")}</th>
+                <th className="px-3 py-2.5 text-center text-[10px] font-bold uppercase tracking-wider text-slate-500">{t("orgDesignColHcFte")}</th>
+                <th className="px-3 py-2.5 text-[10px] font-bold uppercase tracking-wider text-slate-500">{t("orgDesignColSourceTypeLogic")}</th>
               </tr>
             </thead>
             <tbody>
@@ -485,7 +474,7 @@ const ExecutiveOrgDesignTab = () => {
               {hcTableResult.rows.length === 0 && (
                 <tr>
                   <td colSpan={5} className="px-3 py-6 text-center text-[11px] font-semibold text-slate-400">
-                    No active roles for selected scenario and year.
+                    {t("orgDesignNoActiveRoles")}
                   </td>
                 </tr>
               )}
@@ -494,9 +483,9 @@ const ExecutiveOrgDesignTab = () => {
         </div>
 
         <p className="text-[10px] font-semibold text-slate-400">
-          Year: {year} · Opening Scenario: {openingPackageId} · Org Design Version:{" "}
-          {ORG_DESIGN_OPTION_MAP[scenario]} · Occupancy: {OCCUPANCY_SCENARIO_ID} ·{" "}
-          {hcTableResult.rows.length} active role rows
+          {t("orgDesignFooterYear")} {year} · {t("orgDesignFooterOpeningScenario")} {openingPackageId} · {t("orgDesignFooterVersion")}{" "}
+          {ORG_DESIGN_OPTION_MAP[scenario]} · {t("orgDesignFooterOccupancy")} {OCCUPANCY_SCENARIO_ID} ·{" "}
+          {hcTableResult.rows.length} {t("orgDesignFooterActiveRoleRows")}
         </p>
       </section>
     </div>

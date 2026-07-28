@@ -13,6 +13,7 @@ import type {
 } from "../../hooks/useDreScenarioSimulator";
 import type { DreEngineOutput } from "../../features/rio-scenario-resilience/model/dreEngineContract";
 import type { FopagEngineOutput } from "../../features/rio-scenario-resilience/model/fopagEngineContract";
+import { useLocale } from "../../i18n/useLocale";
 
 interface DreExportButtonProps {
   selections: DreScenarioSimulatorSelections;
@@ -39,15 +40,12 @@ export default function DreExportButton({
   orgDesignSensitivity,
   compact = false,
 }: DreExportButtonProps) {
+  const { t } = useLocale();
   const [error, setError] = useState<string | null>(null);
 
   const handleExport = () => {
     if (!payrollReconciliation.isReconciled) {
-      setError(
-        `Export blocked: FOPAG/DRE payroll reconciliation failed with ` +
-          `${payrollReconciliation.mismatches.length} mismatch(es). Resolve the ` +
-          `reconciliation before exporting.`,
-      );
+      setError(t("dreExportBlockedError").replace("{n}", String(payrollReconciliation.mismatches.length)));
       return;
     }
     setError(null);
@@ -73,7 +71,7 @@ export default function DreExportButton({
       <button
         type="button"
         onClick={handleExport}
-        title="Export audit workbook (XLSX)"
+        title={t("dreExportButtonTitle")}
         className={
           compact
             ? "inline-flex items-center gap-1.5 rounded-xl border border-cockpit-teal-muted bg-cockpit-teal-fill px-3 py-1.5 text-xs font-bold text-cockpit-teal transition hover:bg-cockpit-positive-fill"
@@ -81,7 +79,7 @@ export default function DreExportButton({
         }
       >
         <Download className={compact ? "h-3.5 w-3.5" : "h-4 w-4"} />
-        Export XLSX
+        {t("dreExportButtonLabel")}
       </button>
       {error ? (
         <div className="flex items-center gap-2 rounded-xl border border-cockpit-risk-border bg-cockpit-risk-fill px-3 py-2 text-xs font-semibold text-cockpit-risk">

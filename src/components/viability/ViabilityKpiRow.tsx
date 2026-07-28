@@ -3,6 +3,8 @@ import { Card } from "../common/Card";
 import type { ViabilityKpi } from "../../lib/viability/types";
 import { formatKpiValue } from "../../lib/viability/formatters";
 import { cn } from "../../lib/utils";
+import { useLocale } from "../../i18n/useLocale";
+import type { TranslationKey } from "../../i18n/localeContract";
 
 const TONE_MAP = {
   default: "border-slate-200",
@@ -20,31 +22,32 @@ const BADGE_MAP = {
   info: "info",
 } as const;
 
-const STATUS_LABELS = {
-  default: "Review",
-  success: "On Track",
-  warning: "Watch",
-  danger: "At Risk",
-  info: "Context",
-} as const;
+const STATUS_LABEL_KEYS: Record<string, TranslationKey> = {
+  default: "viabilityKpiStatusReview",
+  success: "viabilityKpiStatusOnTrack",
+  warning: "viabilityKpiStatusWatch",
+  danger: "viabilityKpiStatusAtRisk",
+  info: "viabilityKpiStatusContext",
+};
 
 interface ViabilityKpiRowProps {
   kpis: ViabilityKpi[];
 }
 
 export default function ViabilityKpiRow({ kpis }: ViabilityKpiRowProps) {
+  const { t } = useLocale();
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">
-            Decision Summary
+            {t("viabilityKpiRowLabel")}
           </div>
           <h4 className="text-lg font-bold text-slate-900">
-            Headline metrics for the active board case
+            {t("viabilityKpiRowTitle")}
           </h4>
           <p className="mt-1 text-sm text-slate-500">
-            These metrics summarize the current case before moving into sensitivity review or threshold questions.
+            {t("viabilityKpiRowIntro")}
           </p>
         </div>
       </div>
@@ -56,7 +59,7 @@ export default function ViabilityKpiRow({ kpis }: ViabilityKpiRowProps) {
                 <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">
                   {kpi.label}
                 </div>
-                <Badge variant={BADGE_MAP[kpi.tone]}>{STATUS_LABELS[kpi.tone]}</Badge>
+                <Badge variant={BADGE_MAP[kpi.tone]}>{t(STATUS_LABEL_KEYS[kpi.tone])}</Badge>
               </div>
               <div className="text-2xl font-bold leading-tight text-slate-900 break-words md:text-3xl">
                 {formatKpiValue(kpi)}
