@@ -9,7 +9,9 @@
 
 import React, { useState, useMemo } from "react";
 import { Calculator, DollarSign, Download, GraduationCap, TrendingUp } from "lucide-react";
-import { cn, formatBRL } from "../../lib/utils";
+import { cn } from "../../lib/utils";
+import { useLocale } from "../../i18n/useLocale";
+import { formatCurrencyBRL } from "../../i18n/formatters";
 import {
   annualSalaryBurden,
   buildExportPayload,
@@ -79,6 +81,7 @@ const PAYROLL_DIV_BG: Record<string, string> = {
   MS: "bg-blue-50 border-blue-200", HS: "bg-purple-50 border-purple-200",
 };
 const PayrollProjectionTab = () => {
+  const { t, locale } = useLocale();
   const [scenario, setScenario] = useState<PayrollScenario>("otimista");
   const [tuitionScenario, setTuitionScenario] = useState<TuitionScenario>("cen1");
   const [marginMode, setMarginMode] = useState<MarginMode>("FULLY_LOADED");
@@ -229,8 +232,8 @@ const PayrollProjectionTab = () => {
    }).filter(Boolean) as GradeDetailRow[];
   }, [turmasMatrix, selectedYear, scenario, tuitionScenario, withBenefits, gradeTiers]);
 
-  const scenarioLabels: Record<PayrollScenario, string> = {
-    otimista: "Otimista", base: "Intermediário", pessimista: "Pessimista",
+  const scenarioLabels: Record<PayrollScenario, "scenarioOtimista" | "scenarioBase" | "scenarioPessimista"> = {
+    otimista: "scenarioOtimista", base: "scenarioBase", pessimista: "scenarioPessimista",
   };
   const scenarioColors: Record<PayrollScenario, string> = {
     otimista: "bg-emerald-600 text-white", base: "bg-blue-600 text-white", pessimista: "bg-amber-600 text-white",
@@ -266,21 +269,21 @@ const PayrollProjectionTab = () => {
               <DollarSign className="h-5 w-5 text-white" />
             </div>
             <div>
-              <div className="text-xs font-black uppercase tracking-widest text-indigo-300 mb-1">How to use this page</div>
-              <div className="text-lg font-bold text-white leading-snug">Scenario → Classes → Educators → Cost → Payroll Coverage</div>
+              <div className="text-xs font-black uppercase tracking-widest text-indigo-300 mb-1">{t("payrollHowToUseLabel")}</div>
+              <div className="text-lg font-bold text-white leading-snug">{t("payrollHowToUseHeadline")}</div>
             </div>
           </div>
           <p className="text-sm text-slate-200 leading-relaxed">
-            Pick an <strong className="text-white">enrollment scenario</strong> and a <strong className="text-white">tuition table</strong>. The model looks up the number of <strong className="text-white">turmas per grade per year</strong>, assigns an educator tier, and builds the full annual cost stack. Revenue = students × annual tuition growing at <strong className="text-indigo-300">8%/year</strong> from the 2028 base. Payroll coverage = revenue minus the modeled people-cost stack.
+            {t("payrollHowToUseIntro")}
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="rounded-xl bg-indigo-600/30 border border-indigo-400/40 px-4 py-3">
-              <div className="text-xs font-black text-indigo-200 uppercase tracking-wider mb-1.5">FOPAG Direto includes</div>
-              <div className="text-sm text-white leading-relaxed">Lead educators · Assistants · Monitors · MS/HS FTE · Music · LED · HS Pool · Clerk · IT · Maintenance · Marketing · HR · Secretary</div>
+              <div className="text-xs font-black text-indigo-200 uppercase tracking-wider mb-1.5">{t("payrollFopagIncludesLabel")}</div>
+              <div className="text-sm text-white leading-relaxed">{t("payrollFopagIncludesList")}</div>
             </div>
             <div className="rounded-xl bg-amber-600/20 border border-amber-400/40 px-4 py-3">
-              <div className="text-xs font-black text-amber-200 uppercase tracking-wider mb-1.5">Folha Direta includes</div>
-              <div className="text-sm text-white leading-relaxed">HoS · EY Coordinator · Counselors · Ed Tech · Family Engagement · Inspirationeer · Nurse · Finance · Arts · Body & Movement · After School</div>
+              <div className="text-xs font-black text-amber-200 uppercase tracking-wider mb-1.5">{t("payrollFolhaIncludesLabel")}</div>
+              <div className="text-sm text-white leading-relaxed">{t("payrollFolhaIncludesList")}</div>
             </div>
           </div>
           <div className="flex items-start gap-3 pt-1 border-t border-white/10">
@@ -288,42 +291,42 @@ const PayrollProjectionTab = () => {
               <span className="text-xs font-black text-white">↓</span>
             </div>
             <span className="text-sm text-slate-300">
-              The <strong className="text-white">grade-level breakdown</strong> — turmas, educators, cost, and grade-level coverage — is at the bottom of this page. Click any row in the projection table to update it.
+              {t("payrollGradeBreakdownNote")}
             </span>
           </div>
         </div>
 
         {/* Calculation logic */}
         <div className="rounded-2xl border border-slate-200 bg-white p-5 flex flex-col gap-4">
-          <div className="text-xs font-black uppercase tracking-widest text-slate-500">Calculation logic</div>
+          <div className="text-xs font-black uppercase tracking-widest text-slate-500">{t("payrollCalcLogicLabel")}</div>
           {[
             {
-              label: "FOPAG Direto",
+              label: t("payrollLabelFopagDireto"),
               dotColor: "bg-indigo-500",
               textColor: "text-indigo-700",
-              formula: "(Gross + Labor Charges) × 13",
-              note: "13th salary annualization. FOPAG_DIRETO: lead educators, assistants, monitors, MS/HS FTE, Music, LED, HS Pool, Clerk, IT, Maintenance, Marketing, HR, Secretary. FOLHA_DIRETA: Arts, Body & Movement, After School, EY Coord, Counselors, Ed Tech, Family, Inspirationeer, Nurse, Finance.",
+              formula: t("payrollFormulaFopag"),
+              note: t("payrollNoteFopag"),
             },
             {
-              label: "Benefícios",
+              label: t("payrollLabelBeneficios"),
               dotColor: "bg-blue-500",
               textColor: "text-blue-700",
-              formula: "Benefits Monthly × 12",
-              note: "VA/VR, Alimentação, VT, life insurance. Toggle off with Without Benefits.",
+              formula: t("payrollFormulaBeneficios"),
+              note: t("payrollNoteBeneficios"),
             },
             {
-              label: "Folha Direta",
+              label: t("payrollLabelFolhaDireta"),
               dotColor: "bg-amber-500",
               textColor: "text-amber-700",
-              formula: "Salary × 13 · per role × headcount",
-              note: "FOLHA_DIRETA roles: HoS, EY Coordinator, Counselors (1→4), Ed Tech, Family Engagement, Inspirationeer, Nurse, Financial Analyst · Arts, Body & Movement, After School Educators.",
+              formula: t("payrollFormulaFolha"),
+              note: t("payrollNoteFolha"),
             },
             {
-              label: "Receita",
+              label: t("payrollLabelReceita"),
               dotColor: "bg-emerald-500",
               textColor: "text-emerald-700",
-              formula: "Students × Tuition₂₀₂₈ × 1.08^(yr−2028)",
-              note: "8% annual tuition growth compounded from the 2028 base rate.",
+              formula: t("payrollFormulaReceita"),
+              note: t("payrollNoteReceita"),
             },
           ].map(item => (
             <div key={item.label} className="flex gap-3 items-start">
@@ -339,51 +342,51 @@ const PayrollProjectionTab = () => {
       </div>
 
       {/* Controls */}
-      <Card title="Payroll Projection Controls" icon={Calculator} subtitle="Scenario-driven class count → educator headcount → FOPAG / Folha Direta cost">
+      <Card title={t("payrollControlsTitle")} icon={Calculator} subtitle={t("payrollControlsSubtitle")}>
         <div className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-indigo-100 bg-indigo-50 px-3 py-2">
           <span className="text-[10px] font-bold uppercase tracking-widest text-indigo-700">
-            Export current {PROJECTION_YEAR_RANGE_LABEL} projection
+            {t("payrollExportCurrentLabel").replace("{range}", PROJECTION_YEAR_RANGE_LABEL)}
           </span>
           <button
             onClick={handleDownloadProjectionTable}
             className="inline-flex items-center gap-1.5 rounded-lg border border-indigo-200 bg-white px-2.5 py-1.5 text-[10px] font-bold text-indigo-700 transition-colors hover:bg-indigo-100"
           >
             <Download className="h-3.5 w-3.5" />
-            Download .xlsx
+            {t("payrollDownloadXlsxLabel")}
           </button>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* View toggle */}
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">View Mode</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">{t("payrollViewModeLabel")}</p>
             <div className="flex gap-2">
               <button onClick={() => setView("single")}
                 className={cn("px-3 py-1.5 rounded-xl text-[11px] font-bold transition-all border",
                   view === "single" ? "bg-slate-900 text-white border-slate-900" : "bg-white border-slate-200 text-slate-600 hover:border-slate-400")}>
-                Single Scenario
+                {t("payrollViewSingleLabel")}
               </button>
               <button onClick={() => setView("compare")}
                 className={cn("px-3 py-1.5 rounded-xl text-[11px] font-bold transition-all border",
                   view === "compare" ? "bg-slate-900 text-white border-slate-900" : "bg-white border-slate-200 text-slate-600 hover:border-slate-400")}>
-                Compare All 3
+                {t("payrollViewCompareLabel")}
               </button>
               <button onClick={() => setView("matrix")}
                 className={cn("px-3 py-1.5 rounded-xl text-[11px] font-bold transition-all border",
                   view === "matrix" ? "bg-indigo-700 text-white border-indigo-700" : "bg-white border-slate-200 text-slate-600 hover:border-slate-400")}>
-                9 Cenários
+                {t("payrollView9ScenariosLabel")}
               </button>
             </div>
           </div>
           {/* Scenario selector */}
           {view === "single" && (
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">Enrollment Scenario</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">{t("payrollEnrollmentScenarioLabel")}</p>
               <div className="flex gap-2 flex-wrap">
                 {(["otimista","base","pessimista"] as PayrollScenario[]).map(s => (
                   <button key={s} onClick={() => setScenario(s)}
                     className={cn("px-3 py-1.5 rounded-xl text-[11px] font-bold transition-all border",
                       scenario === s ? scenarioColors[s] + " border-transparent shadow-md" : "bg-white border-slate-200 text-slate-600 hover:border-slate-400")}>
-                    {scenarioLabels[s]}
+                    {t(scenarioLabels[s])}
                   </button>
                 ))}
               </div>
@@ -392,39 +395,39 @@ const PayrollProjectionTab = () => {
           {/* Tuition scenario selector — hidden in matrix view (all 3 shown simultaneously) */}
           {view !== "matrix" && (
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">Tuition Table</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">{t("payrollTuitionTableLabel")}</p>
             <div className="flex gap-2 flex-wrap">
-              {(["cen1","cen2","cen3"] as TuitionScenario[]).map(t => (
-                <button key={t} onClick={() => setTuitionScenario(t)}
+              {(["cen1","cen2","cen3"] as TuitionScenario[]).map(tc => (
+                <button key={tc} onClick={() => setTuitionScenario(tc)}
                   className={cn("px-3 py-1.5 rounded-xl text-[11px] font-bold transition-all border",
-                    tuitionScenario === t ? "bg-slate-900 text-white border-slate-900 shadow-md" : "bg-white border-slate-200 text-slate-600 hover:border-slate-400")}>
-                  RJ {t.toUpperCase()}
+                    tuitionScenario === tc ? "bg-slate-900 text-white border-slate-900 shadow-md" : "bg-white border-slate-200 text-slate-600 hover:border-slate-400")}>
+                  RJ {tc.toUpperCase()}
                 </button>
               ))}
             </div>
             <p className="text-[9px] text-slate-400 mt-1">
-              {tuitionScenario === "cen1" ? "Cen 1 — higher LS/MS, highest HS" : 
-               tuitionScenario === "cen2" ? "Cen 2 — moderate across divisions" : 
-               "Cen 3 — flat R$105,406 for EY–MS, lower HS"}
+              {tuitionScenario === "cen1" ? t("payrollTuitionCen1Desc") :
+               tuitionScenario === "cen2" ? t("payrollTuitionCen2Desc") :
+               t("payrollTuitionCen3Desc")}
             </p>
           </div>
           )}
           {/* Benefits toggle */}
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">Cost Mode</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">{t("payrollCostModeLabel")}</p>
             <div className="flex items-center gap-3">
-              <span className={cn("text-[10px] font-bold", marginMode === "FULLY_LOADED" ? "text-indigo-600" : "text-slate-400")}>With Benefits</span>
+              <span className={cn("text-[10px] font-bold", marginMode === "FULLY_LOADED" ? "text-indigo-600" : "text-slate-400")}>{t("payrollWithBenefitsLabel")}</span>
               <button onClick={() => setMarginMode(p => p === "FULLY_LOADED" ? "WITHOUT_BENEFITS" : "FULLY_LOADED")}
                 className={cn("relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors", marginMode === "WITHOUT_BENEFITS" ? "bg-indigo-600" : "bg-slate-200")}>
                 <span className={cn("pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow transition", marginMode === "WITHOUT_BENEFITS" ? "translate-x-4" : "translate-x-0")} />
               </button>
-              <span className={cn("text-[10px] font-bold", marginMode === "WITHOUT_BENEFITS" ? "text-indigo-600" : "text-slate-400")}>Without Benefits</span>
+              <span className={cn("text-[10px] font-bold", marginMode === "WITHOUT_BENEFITS" ? "text-indigo-600" : "text-slate-400")}>{t("payrollWithoutBenefitsLabel")}</span>
             </div>
           </div>
           {/* Year selector */}
           {view === "single" && (
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">Detail Year</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">{t("payrollDetailYearLabel")}</p>
               <div className="flex gap-1.5 flex-wrap">
                 {PAYROLL_YEARS.map(y => (
                   <button key={y} onClick={() => setSelectedYear(y)}
@@ -440,7 +443,7 @@ const PayrollProjectionTab = () => {
         {/* Educator tier selectors — per grade, independent from Staffing Model tab */}
         <div className="mt-4 pt-4 border-t border-slate-100">
           <div className="flex items-center justify-between mb-3">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Educator Tier by Grade</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">{t("payrollEducatorTierByGradeLabel")}</p>
             <div className="flex gap-2">
               {/* Global presets — apply only to grades active in the selected year */}
               {EDUCATOR_LEVELS.filter(l => l.id !== "associate").map(level => (
@@ -453,12 +456,12 @@ const PayrollProjectionTab = () => {
                   });
                   setGradeTiers(next);
                 }} className="px-2.5 py-1 rounded-lg text-[9px] font-bold border border-slate-200 bg-white text-slate-500 hover:border-slate-400 transition-all">
-                  All → {level.name.split(" ")[0]}
+                  {t("payrollAllToLabel").replace("{tier}", level.name.split(" ")[0])}
                 </button>
               ))}
               <button onClick={() => setGradeTiers(defaultPayrollTiers)}
                 className="px-2.5 py-1 rounded-lg text-[9px] font-bold border border-slate-200 bg-white text-slate-500 hover:border-slate-400 transition-all">
-                Reset Defaults
+                {t("payrollResetDefaultsLabel")}
               </button>
             </div>
           </div>
@@ -466,7 +469,7 @@ const PayrollProjectionTab = () => {
           {(["EY","LS","MS","HS"] as const).map(div => {
             const divColors: Record<string, string> = { EY:"text-rose-600", LS:"text-emerald-600", MS:"text-blue-600", HS:"text-purple-600" };
             const divBg: Record<string, string> = { EY:"border-rose-100", LS:"border-emerald-100", MS:"border-blue-100", HS:"border-purple-100" };
-            const divLabels: Record<string, string> = { EY:"Early Years", LS:"Lower School", MS:"Middle School", HS:"High School" };
+            const divLabels: Record<string, string> = { EY: t("payrollDivEarlyYears"), LS: t("payrollDivLowerSchool"), MS: t("payrollDivMiddleSchool"), HS: t("payrollDivHighSchool") };
             const yi = PAYROLL_YEARS.indexOf(selectedYear);
             // Only show grades that are open (have ≥1 turma) in the selected year+scenario
             const divGrades = PAYROLL_GRADE_CONFIG.filter(g =>
@@ -502,7 +505,7 @@ const PayrollProjectionTab = () => {
                         <div className="flex items-center justify-between mb-1.5">
                           <span className="text-[10px] font-bold text-slate-800 break-words">{grade.name}</span>
                           {grade.shift === "M" && (
-                            <span className="text-[8px] font-bold px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 ml-1 shrink-0">Manhã</span>
+                            <span className="text-[8px] font-bold px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 ml-1 shrink-0">{t("payrollShiftManha")}</span>
                           )}
                         </div>
                         <select
@@ -520,7 +523,7 @@ const PayrollProjectionTab = () => {
               </div>
             );
           })}
-          <p className="text-[10px] text-slate-400 mt-2 italic">These selectors are independent of the staffing calculations. Use division preset buttons to set all grades at once, then override individually.</p>
+          <p className="text-[10px] text-slate-400 mt-2 italic">{t("payrollTierSelectorsNote")}</p>
         </div>
       </Card>
 
@@ -531,49 +534,49 @@ const PayrollProjectionTab = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-6 gap-3">
               {[
                 {
-                  label: "Alunos Estimados",
+                  label: t("payrollKpiAlunosLabel"),
                   value: String(selectedYearData.totalStudents),
-                  sub: `${selectedYearData.totalTurmas} turmas ativas`,
+                  sub: t("payrollKpiTurmasAtivasSub").replace("{n}", String(selectedYearData.totalTurmas)),
                   tone: "bg-white border-slate-200",
                   valueTone: "text-slate-900",
                   subTone: "text-slate-500",
                 },
                 {
-                  label: "Receita Anual",
-                  value: formatBRL(selectedYearData.totalRevenueAnnual),
-                  sub: `RJ ${tuitionScenario.toUpperCase()} · 8% a.a.`,
+                  label: t("payrollKpiReceitaAnualLabel"),
+                  value: formatCurrencyBRL(selectedYearData.totalRevenueAnnual, locale),
+                  sub: t("payrollKpiReceitaSub").replace("{tuition}", tuitionScenario.toUpperCase()),
                   tone: "bg-emerald-50 border-emerald-200",
                   valueTone: "text-emerald-800",
                   subTone: "text-emerald-600",
                 },
                 {
-                  label: "FOPAG Direto",
-                  value: formatBRL(selectedYearData.fopagDiretoAnnual),
-                  sub: "(gross + encargos) × 13",
+                  label: t("payrollLabelFopagDireto"),
+                  value: formatCurrencyBRL(selectedYearData.fopagDiretoAnnual, locale),
+                  sub: t("payrollKpiFopagSub"),
                   tone: "bg-indigo-50 border-indigo-200",
                   valueTone: "text-indigo-800",
                   subTone: "text-indigo-600",
                 },
                 {
-                  label: "Benefícios",
-                  value: formatBRL(selectedYearData.beneficiosAnnual),
-                  sub: withBenefits ? "benefits × 12" : "excluído",
+                  label: t("payrollLabelBeneficios"),
+                  value: formatCurrencyBRL(selectedYearData.beneficiosAnnual, locale),
+                  sub: withBenefits ? t("payrollKpiBeneficiosSubOn") : t("payrollExcluidoLabel"),
                   tone: "bg-blue-50 border-blue-200",
                   valueTone: withBenefits ? "text-blue-800" : "text-slate-400",
                   subTone: "text-blue-600",
                 },
                 {
-                  label: "Folha Direta",
-                  value: formatBRL(selectedYearData.folhaDiretaAnnual),
-                  sub: "liderança + backoffice + especialistas",
+                  label: t("payrollLabelFolhaDireta"),
+                  value: formatCurrencyBRL(selectedYearData.folhaDiretaAnnual, locale),
+                  sub: t("payrollKpiFolhaSub"),
                   tone: "bg-amber-50 border-amber-200",
                   valueTone: "text-amber-800",
                   subTone: "text-amber-600",
                 },
                 {
-                  label: "Cobertura Consolidada",
-                  value: formatBRL(selectedYearData.marginAnnual),
-                  sub: `${Math.round(selectedYearData.coverageRatio * 100)}% cobertura de folha`,
+                  label: t("payrollCoberturaConsolidadaLabel"),
+                  value: formatCurrencyBRL(selectedYearData.marginAnnual, locale),
+                  sub: t("payrollCoberturaSub").replace("{n}", String(Math.round(selectedYearData.coverageRatio * 100))),
                   tone:
                     selectedYearData.marginAnnual >= 0
                       ? "bg-teal-50 border-teal-200"
@@ -615,10 +618,10 @@ const PayrollProjectionTab = () => {
           <div className="grid grid-cols-1 2xl:grid-cols-[minmax(1180px,1fr)_320px] gap-6 items-start">
             {/* LEFT: projection overview table */}
             <Card
-              title={`${PROJECTION_YEAR_RANGE_LABEL} Payroll + Revenue Projection`}
+              title={t("payrollProjectionTableTitle").replace("{range}", PROJECTION_YEAR_RANGE_LABEL)}
               icon={TrendingUp}
-              subtitle={`${scenarioLabels[scenario]} · RJ ${tuitionScenario.toUpperCase()} · ${
-                marginMode === "FULLY_LOADED" ? "Fully Loaded" : "Without Benefits"
+              subtitle={`${t(scenarioLabels[scenario])} · RJ ${tuitionScenario.toUpperCase()} · ${
+                marginMode === "FULLY_LOADED" ? t("payrollFullyLoadedLabel") : t("payrollWithoutBenefitsLabel")
               }`}
               className="xl:overflow-visible"
             >
@@ -628,16 +631,16 @@ const PayrollProjectionTab = () => {
                   <thead>
                     <tr className="bg-slate-50">
                       <th className="w-[7%] px-2 py-2.5 text-[8px] font-bold uppercase tracking-[0.16em] text-slate-500 border-b border-slate-200 whitespace-nowrap xl:px-2.5">
-                        Year
+                        {t("payrollYearHeader")}
                       </th>
                       <th className="w-[7%] px-2 py-2.5 text-[8px] font-bold uppercase tracking-[0.16em] text-slate-500 border-b border-slate-200 text-center xl:px-2.5">
-                        Alunos
+                        {t("payrollAlunosHeader")}
                       </th>
                       <th className="w-[16%] px-2 py-2.5 text-[8px] font-bold uppercase tracking-[0.16em] text-indigo-600 border-b border-slate-200 text-right bg-indigo-50 xl:px-2.5">
-                        FOPAG Direto
+                        {t("payrollLabelFopagDireto")}
                       </th>
                       <th className="w-[14%] px-2 py-2.5 text-[8px] font-bold uppercase tracking-[0.16em] text-blue-600 border-b border-slate-200 text-right bg-blue-50 xl:px-2.5">
-                        Benefícios
+                        {t("payrollLabelBeneficios")}
                       </th>
 
                       {expandFolha ? (
@@ -646,17 +649,17 @@ const PayrollProjectionTab = () => {
                             <button
                               onClick={() => setExpandFolha(false)}
                               className="ml-auto inline-flex items-center gap-1 hover:opacity-70 transition-opacity"
-                              title="Collapse"
+                              title={t("payrollCollapseLabel")}
                             >
-                              <span>Liderança</span>
+                              <span>{t("payrollLiderancaHeader")}</span>
                               <span className="text-[8px]">▲</span>
                             </button>
                           </th>
                           <th className="w-[12%] px-2 py-2.5 text-[8px] font-bold uppercase tracking-[0.16em] text-emerald-600 border-b border-slate-200 text-right bg-emerald-50 xl:px-2.5">
-                            BackOffice
+                            {t("payrollBackofficeHeader")}
                           </th>
                           <th className="w-[12%] px-2 py-2.5 text-[8px] font-bold uppercase tracking-[0.16em] text-violet-600 border-b border-slate-200 text-right bg-violet-50 xl:px-2.5">
-                            Especialistas
+                            {t("payrollEspecialistasHeader")}
                           </th>
                         </>
                       ) : (
@@ -664,22 +667,22 @@ const PayrollProjectionTab = () => {
                           <button
                             onClick={() => setExpandFolha(true)}
                             className="ml-auto inline-flex items-center gap-1 hover:opacity-70 transition-opacity"
-                            title="Expandir Folha"
+                            title={t("payrollExpandirFolhaLabel")}
                           >
-                            <span>Folha Direta</span>
+                            <span>{t("payrollLabelFolhaDireta")}</span>
                             <span className="text-[8px]">▼</span>
                           </button>
                         </th>
                       )}
 
                       <th className="w-[14%] px-2 py-2.5 text-[8px] font-bold uppercase tracking-[0.16em] text-slate-800 border-b border-slate-200 text-right bg-slate-100 xl:px-2.5">
-                        Total
+                        {t("payrollTotalHeader")}
                       </th>
                       <th className="w-[14%] px-2 py-2.5 text-[8px] font-bold uppercase tracking-[0.16em] text-emerald-700 border-b border-slate-200 text-right bg-emerald-50 xl:px-2.5">
-                        Receita
+                        {t("payrollReceitaHeader")}
                       </th>
                       <th className="w-[12%] px-2 py-2.5 text-[8px] font-bold uppercase tracking-[0.16em] text-slate-500 border-b border-slate-200 text-right xl:px-2.5">
-                        Coverage
+                        {t("payrollCoverageHeader")}
                       </th>
                     </tr>
                   </thead>
@@ -717,7 +720,7 @@ const PayrollProjectionTab = () => {
 
                         <td className="px-2 py-2.5 text-right bg-indigo-50 xl:px-2.5">
                           <span className="text-[11px] font-bold text-indigo-800 tabular-nums">
-                            {formatBRL(yd.fopagDiretoAnnual)}
+                            {formatCurrencyBRL(yd.fopagDiretoAnnual, locale)}
                           </span>
                         </td>
 
@@ -730,7 +733,7 @@ const PayrollProjectionTab = () => {
                                 : "text-slate-400 line-through"
                             )}
                           >
-                            {formatBRL(yd.beneficiosAnnual)}
+                            {formatCurrencyBRL(yd.beneficiosAnnual, locale)}
                           </span>
                         </td>
 
@@ -738,40 +741,40 @@ const PayrollProjectionTab = () => {
                           <>
                             <td className="px-2 py-2.5 text-right bg-amber-50 xl:px-2.5">
                               <span className="text-[11px] font-bold text-amber-800 tabular-nums">
-                                {formatBRL(yd.leadershipAnnual)}
+                                {formatCurrencyBRL(yd.leadershipAnnual, locale)}
                               </span>
                             </td>
                             <td className="px-2 py-2.5 text-right bg-emerald-50 xl:px-2.5">
                               <span className="text-[11px] font-bold text-emerald-800 tabular-nums">
-                                {formatBRL(yd.backofficeAnnual)}
+                                {formatCurrencyBRL(yd.backofficeAnnual, locale)}
                               </span>
                             </td>
                             <td className="px-2 py-2.5 text-right bg-violet-50 xl:px-2.5">
                               <span className="text-[11px] font-bold text-violet-800 tabular-nums">
-                                {formatBRL(yd.specialistsAnnual)}
+                                {formatCurrencyBRL(yd.specialistsAnnual, locale)}
                               </span>
                             </td>
                           </>
                         ) : (
                           <td className="px-2 py-2.5 text-right bg-amber-50 xl:px-2.5">
                             <span className="text-[11px] font-bold text-amber-800 tabular-nums">
-                              {formatBRL(yd.folhaDiretaAnnual)}
+                              {formatCurrencyBRL(yd.folhaDiretaAnnual, locale)}
                             </span>
                             <div className="mt-0.5 text-[8px] text-amber-500">
-                              Lider · BO · Esp
+                              {t("payrollLiderBoEspAbbrev")}
                             </div>
                           </td>
                         )}
 
                         <td className="px-2 py-2.5 text-right bg-slate-100 xl:px-2.5">
                           <span className="text-[11px] font-black text-slate-900 tabular-nums">
-                            {formatBRL(yd.grandTotal)}
+                            {formatCurrencyBRL(yd.grandTotal, locale)}
                           </span>
                         </td>
 
                         <td className="px-2 py-2.5 text-right bg-emerald-50 xl:px-2.5">
                           <span className="text-[11px] font-bold text-emerald-800 tabular-nums">
-                            {formatBRL(yd.totalRevenueAnnual)}
+                            {formatCurrencyBRL(yd.totalRevenueAnnual, locale)}
                           </span>
                         </td>
 
@@ -782,7 +785,7 @@ const PayrollProjectionTab = () => {
                               yd.marginAnnual >= 0 ? "text-teal-700" : "text-red-600"
                             )}
                           >
-                            {formatBRL(yd.marginAnnual)}
+                            {formatCurrencyBRL(yd.marginAnnual, locale)}
                           </div>
                           <span
                             className={cn(
@@ -810,38 +813,38 @@ const PayrollProjectionTab = () => {
             {/* RIGHT: selected-year inspector */}
             {selectedYearData && (
               <div className="space-y-4">
-                <Card title={`Selected Year · ${selectedYear}`}>
+                <Card title={t("payrollSelectedYearTitle").replace("{year}", String(selectedYear))}>
                   <div className="space-y-3">
                     <div className="rounded-2xl bg-slate-900 px-4 py-4 text-white">
                       <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                        Total Annual Stack
+                        {t("payrollTotalAnnualStackLabel")}
                       </div>
                       <div className="mt-2 text-2xl font-black break-words">
-                        {formatBRL(selectedYearData.grandTotal)}
+                        {formatCurrencyBRL(selectedYearData.grandTotal, locale)}
                       </div>
                       <div className="mt-2 text-[11px] text-slate-300">
-                        FOPAG + Benefícios + Folha Direta
+                        {t("payrollStackBreakdownLabel")}
                       </div>
                     </div>
 
                     {[
                       {
-                        label: "FOPAG Direto",
+                        label: t("payrollLabelFopagDireto"),
                         value: selectedYearData.fopagDiretoAnnual,
                         tone: "bg-indigo-50 border-indigo-200 text-indigo-800",
                       },
                       {
-                        label: "Benefícios",
+                        label: t("payrollLabelBeneficios"),
                         value: selectedYearData.beneficiosAnnual,
                         tone: "bg-blue-50 border-blue-200 text-blue-800",
                       },
                       {
-                        label: "Folha Direta",
+                        label: t("payrollLabelFolhaDireta"),
                         value: selectedYearData.folhaDiretaAnnual,
                         tone: "bg-amber-50 border-amber-200 text-amber-800",
                       },
                       {
-                        label: "Receita Anual",
+                        label: t("payrollKpiReceitaAnualLabel"),
                         value: selectedYearData.totalRevenueAnnual,
                         tone: "bg-emerald-50 border-emerald-200 text-emerald-800",
                       },
@@ -854,7 +857,7 @@ const PayrollProjectionTab = () => {
                           {item.label}
                         </div>
                         <div className="mt-1 text-base font-black break-words">
-                          {formatBRL(item.value)}
+                          {formatCurrencyBRL(item.value, locale)}
                         </div>
                       </div>
                     ))}
@@ -875,7 +878,7 @@ const PayrollProjectionTab = () => {
                             : "text-red-500"
                         )}
                       >
-                        Cobertura Consolidada
+                        {t("payrollCoberturaConsolidadaLabel")}
                       </div>
                       <div
                         className={cn(
@@ -885,16 +888,16 @@ const PayrollProjectionTab = () => {
                             : "text-red-700"
                         )}
                       >
-                        {formatBRL(selectedYearData.marginAnnual)}
+                        {formatCurrencyBRL(selectedYearData.marginAnnual, locale)}
                       </div>
                       <div className="mt-1 text-[11px] text-slate-500">
-                        {Math.round(selectedYearData.coverageRatio * 100)}% cobertura de folha
+                        {t("payrollCoberturaSub").replace("{n}", String(Math.round(selectedYearData.coverageRatio * 100)))}
                       </div>
                     </div>
                   </div>
                 </Card>
 
-                <Card title="Division Snapshot">
+                <Card title={t("payrollDivisionSnapshotTitle")}>
                   <div className="space-y-3">
                     {(["EY", "LS", "MS", "HS"] as const).map((div) => {
                       const students = selectedYearData.studentsByDiv[div] ?? 0;
@@ -903,12 +906,12 @@ const PayrollProjectionTab = () => {
 
                       const divLabel =
                         div === "EY"
-                          ? "Early Years"
+                          ? t("payrollDivEarlyYears")
                           : div === "LS"
-                            ? "Lower School"
+                            ? t("payrollDivLowerSchool")
                             : div === "MS"
-                              ? "Middle School"
-                              : "High School";
+                              ? t("payrollDivMiddleSchool")
+                              : t("payrollDivHighSchool");
 
                       return (
                         <div
@@ -928,13 +931,13 @@ const PayrollProjectionTab = () => {
                               <div className="text-lg font-black text-slate-900">
                                 {students}
                               </div>
-                              <div className="text-[10px] text-slate-500">learners</div>
+                              <div className="text-[10px] text-slate-500">{t("payrollLearnersLabel")}</div>
                             </div>
                             <div className="text-right">
                               <div className="text-sm font-black text-slate-900">
                                 {turmas}
                               </div>
-                              <div className="text-[10px] text-slate-500">turmas</div>
+                              <div className="text-[10px] text-slate-500">{t("payrollTurmasLabel")}</div>
                             </div>
                           </div>
                         </div>
@@ -948,37 +951,37 @@ const PayrollProjectionTab = () => {
 
           {/* GRADE BREAKDOWN */}
           <Card
-            title={`Grade Breakdown · ${selectedYear}`}
+            title={t("payrollGradeBreakdownTitle").replace("{year}", String(selectedYear))}
             icon={GraduationCap}
-            subtitle={`${scenarioLabels[scenario]} · RJ ${tuitionScenario.toUpperCase()} · detailed teaching layer`}
+            subtitle={`${t(scenarioLabels[scenario])} · RJ ${tuitionScenario.toUpperCase()} · ${t("payrollDetailedTeachingLayerLabel")}`}
           >
             <div className="overflow-x-auto rounded-2xl border border-slate-100">
               <table className="w-full min-w-[1120px] border-collapse text-left">
                 <thead>
                   <tr className="bg-slate-50">
                     <th className="px-3 py-3 text-[9px] font-bold uppercase tracking-widest text-slate-500 border-b border-slate-200">
-                      Grade
+                      {t("payrollGradeHeader")}
                     </th>
                     <th className="px-3 py-3 text-[9px] font-bold uppercase tracking-widest text-slate-500 border-b border-slate-200 text-center">
-                      Turmas
+                      {t("payrollTurmasHeader")}
                     </th>
                     <th className="px-3 py-3 text-[9px] font-bold uppercase tracking-widest text-slate-500 border-b border-slate-200 text-center">
-                      Lead FTE
+                      {t("payrollLeadFteHeader")}
                     </th>
                     <th className="px-3 py-3 text-[9px] font-bold uppercase tracking-widest text-slate-500 border-b border-slate-200 text-center">
-                      Support
+                      {t("payrollSupportHeader")}
                     </th>
                     <th className="px-3 py-3 text-[9px] font-bold uppercase tracking-widest text-slate-500 border-b border-slate-200">
-                      Tier
+                      {t("payrollTierHeader")}
                     </th>
                     <th className="px-3 py-3 text-[9px] font-bold uppercase tracking-widest text-indigo-600 border-b border-slate-200 text-right">
-                      Payroll
+                      {t("payrollPayrollHeader")}
                     </th>
                     <th className="px-3 py-3 text-[9px] font-bold uppercase tracking-widest text-emerald-600 border-b border-slate-200 text-right">
-                      Receita
+                      {t("payrollReceitaHeader")}
                     </th>
                     <th className="px-3 py-3 text-[9px] font-bold uppercase tracking-widest text-teal-600 border-b border-slate-200 text-right">
-                      Coverage
+                      {t("payrollCoverageHeader")}
                     </th>
                   </tr>
                 </thead>
@@ -1011,10 +1014,10 @@ const PayrollProjectionTab = () => {
                         </span>
                       </td>
                       <td className="px-3 py-3 text-right text-xs font-bold text-slate-800 tabular-nums">
-                        {formatBRL(row.annualTotal)}
+                        {formatCurrencyBRL(row.annualTotal, locale)}
                       </td>
                       <td className="px-3 py-3 text-right text-xs font-bold text-emerald-700 tabular-nums">
-                        {formatBRL(row.revenueAnnual)}
+                        {formatCurrencyBRL(row.revenueAnnual, locale)}
                       </td>
                       <td
                         className={cn(
@@ -1022,7 +1025,7 @@ const PayrollProjectionTab = () => {
                           row.marginAnnual >= 0 ? "text-teal-700" : "text-red-600"
                         )}
                       >
-                        {formatBRL(row.marginAnnual)}
+                        {formatCurrencyBRL(row.marginAnnual, locale)}
                       </td>
                     </tr>
                   ))}
@@ -1033,39 +1036,31 @@ const PayrollProjectionTab = () => {
 
           {/* METHODOLOGY */}
           <Card
-            title="Methodology"
+            title={t("payrollMethodologyTitle")}
             icon={Calculator}
-            subtitle="How this projection is being calculated"
+            subtitle={t("payrollMethodologySubtitle")}
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-[11px] leading-relaxed text-slate-600">
               <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                <strong className="text-slate-800">Teaching layer:</strong> scenario-sensitive.
-                Turmas vary by scenario and year. Teaching costs scale with active classes using
-                spreadsheet-verified per-turma costs.
+                <strong className="text-slate-800">{t("payrollTeachingLayerLabel")}</strong> {t("payrollTeachingLayerText")}
               </div>
 
               <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                <strong className="text-slate-800">Non-teaching layer:</strong> fixed progression.
-                Leadership, backoffice, and specialists follow the headcount evolution encoded in
-                <span className="font-mono"> leadership.ts</span>.
+                <strong className="text-slate-800">{t("payrollNonTeachingLayerLabel")}</strong> {t("payrollNonTeachingLayerTextPre")}
+                <span className="font-mono"> leadership.ts</span>{t("payrollNonTeachingLayerTextPost")}
               </div>
 
               <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                <strong className="text-slate-800">Annualization:</strong> CLT logic =
-                (salary + encargos) × 13 + benefits × 12.
+                <strong className="text-slate-800">{t("payrollAnnualizationLabel")}</strong> {t("payrollAnnualizationText")}
               </div>
 
               <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                <strong className="text-slate-800">Revenue:</strong> students from
-                <span className="font-mono"> STUDENTS_SCHEDULE</span> × annual tuition,
-                with 8% annual growth from the 2028 base.
+                <strong className="text-slate-800">{t("payrollRevenueLabel")}</strong> {t("payrollRevenueTextPre")}
+                <span className="font-mono"> STUDENTS_SCHEDULE</span> {t("payrollRevenueTextPost")}
               </div>
 
               <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 md:col-span-2">
-                <strong className="text-slate-800">Coverage interpretation:</strong> this is
-                a people-cost coverage view. “Coverage” means revenue divided by total payroll
-                stack. It does not include rent, utilities, technology, marketing, or other
-                operating costs.
+                <strong className="text-slate-800">{t("payrollCoverageInterpretationLabel")}</strong> {t("payrollCoverageInterpretationText")}
               </div>
             </div>
           </Card>
@@ -1077,24 +1072,24 @@ const PayrollProjectionTab = () => {
         <>
           {/* Key insight callout */}
           <div className="rounded-2xl border border-indigo-200 bg-indigo-50 p-4">
-            <p className="text-xs font-black text-indigo-800 mb-1">Scenarios affect both turmas count and student fill — payroll differs meaningfully</p>
+            <p className="text-xs font-black text-indigo-800 mb-1">{t("payrollCompareCalloutTitle")}</p>
             <p className="text-[11px] text-indigo-700 leading-relaxed">
-              In Otimista, Grade 3 opens with 2 turmas in 2028; in Intermediário and Pessimista it starts with 1. Grade 4 opens at 2 turmas in Otimista in 2029 but only 1 in the other scenarios, reaching 2 only in 2032. This means <strong>teaching payroll differs across scenarios</strong> — not because of occupancy, but because lower demand means fewer classes need to be staffed. The Pessimista scenario defers opening second turmas, reducing the educator headcount needed in the early years.
+              {t("payrollCompareCalloutText")}
             </p>
           </div>
 
-          <Card title="All Scenarios — FOPAG + Revenue Coverage" icon={TrendingUp}
-            subtitle={`RJ ${tuitionScenario.toUpperCase()} · ${marginMode === "FULLY_LOADED" ? "Fully Loaded" : "Without Benefits"} · Revenue = estimated students × annual tuition`}>
+          <Card title={t("payrollAllScenariosTitle")} icon={TrendingUp}
+            subtitle={`RJ ${tuitionScenario.toUpperCase()} · ${marginMode === "FULLY_LOADED" ? t("payrollFullyLoadedLabel") : t("payrollWithoutBenefitsLabel")} · ${t("payrollRevenueFormulaLabel")}`}>
             <div className="overflow-x-auto rounded-2xl border border-slate-100">
               <table className="w-full text-left border-collapse min-w-[1200px]">
                 <thead>
                   <tr className="bg-slate-50">
-                    <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-slate-500 border-b border-slate-200">Year</th>
+                    <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-slate-500 border-b border-slate-200">{t("payrollYearHeader")}</th>
                     {(["otimista","base","pessimista"] as PayrollScenario[]).map(sc => (
                       <th key={sc} colSpan={4}
                         className={cn("px-4 py-2 text-[10px] font-bold uppercase tracking-widest border-b border-slate-200 text-center",
                           sc === "otimista" ? "text-emerald-700 bg-emerald-50" : sc === "base" ? "text-blue-700 bg-blue-50" : "text-amber-700 bg-amber-50")}>
-                        {scenarioLabels[sc]}
+                        {t(scenarioLabels[sc])}
                       </th>
                     ))}
                   </tr>
@@ -1102,10 +1097,10 @@ const PayrollProjectionTab = () => {
                     <th className="border-b border-slate-200"></th>
                     {(["otimista","base","pessimista"] as PayrollScenario[]).map(sc => (
                       <React.Fragment key={sc}>
-                        <th className="px-3 py-2 text-[9px] font-bold uppercase tracking-widest text-slate-400 border-b border-slate-200 text-center">Turmas</th>
-                        <th className="px-3 py-2 text-[9px] font-bold uppercase tracking-widest text-slate-400 border-b border-slate-200 text-right">FOPAG</th>
-                        <th className="px-3 py-2 text-[9px] font-bold uppercase tracking-widest text-emerald-600 border-b border-slate-200 text-right">Receita</th>
-                        <th className="px-3 py-2 text-[9px] font-bold uppercase tracking-widest text-teal-600 border-b border-slate-200 text-right">Coverage</th>
+                        <th className="px-3 py-2 text-[9px] font-bold uppercase tracking-widest text-slate-400 border-b border-slate-200 text-center">{t("payrollTurmasHeader")}</th>
+                        <th className="px-3 py-2 text-[9px] font-bold uppercase tracking-widest text-slate-400 border-b border-slate-200 text-right">{t("payrollFopagShortHeader")}</th>
+                        <th className="px-3 py-2 text-[9px] font-bold uppercase tracking-widest text-emerald-600 border-b border-slate-200 text-right">{t("payrollReceitaHeader")}</th>
+                        <th className="px-3 py-2 text-[9px] font-bold uppercase tracking-widest text-teal-600 border-b border-slate-200 text-right">{t("payrollCoverageHeader")}</th>
                       </React.Fragment>
                     ))}
                   </tr>
@@ -1122,10 +1117,10 @@ const PayrollProjectionTab = () => {
                           return (
                             <React.Fragment key={sc}>
                               <td className="px-3 py-3 text-center text-xs font-bold text-slate-700">{row.totalTurmas}</td>
-                              <td className="px-3 py-3 text-right text-xs font-bold text-slate-800">{formatBRL(row.fopagAnnual)}</td>
-                              <td className="px-3 py-3 text-right text-xs font-bold text-emerald-700">{formatBRL((row as any).totalRevenueAnnual ?? 0)}</td>
+                              <td className="px-3 py-3 text-right text-xs font-bold text-slate-800">{formatCurrencyBRL(row.fopagAnnual, locale)}</td>
+                              <td className="px-3 py-3 text-right text-xs font-bold text-emerald-700">{formatCurrencyBRL((row as any).totalRevenueAnnual ?? 0, locale)}</td>
                               <td className={cn("px-3 py-3 text-right text-xs font-black", margin >= 0 ? "text-teal-700" : "text-red-600")}>
-                                {formatBRL(margin)}
+                                {formatCurrencyBRL(margin, locale)}
                               </td>
                             </React.Fragment>
                           );
@@ -1136,7 +1131,7 @@ const PayrollProjectionTab = () => {
                 </tbody>
               </table>
             </div>
-            <p className="text-[10px] text-slate-400 mt-3 italic">Revenue estimated as students × annual tuition (RJ {tuitionScenario.toUpperCase()}). Coverage = Revenue – modeled FOPAG. This is a payroll coverage comparison, not a full operating margin.</p>
+            <p className="text-[10px] text-slate-400 mt-3 italic">{t("payrollCompareFooterNote").replace("{tuition}", tuitionScenario.toUpperCase())}</p>
           </Card>
         </>
       )}
@@ -1146,7 +1141,7 @@ const PayrollProjectionTab = () => {
         <div className="space-y-4">
           {/* Year selector for matrix */}
           <div className="flex items-center gap-3 flex-wrap">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Year</span>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">{t("payrollYearHeader")}</span>
             {PAYROLL_YEARS.map(y => (
               <button key={y} onClick={() => setSelectedYear(y)}
                 className={cn("px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all border",
@@ -1157,33 +1152,33 @@ const PayrollProjectionTab = () => {
           </div>
 
           <Card
-            title="9-Scenario FOPAG Coverage Matrix"
+            title={t("payrollMatrixTitle")}
             icon={TrendingUp}
-            subtitle={`${selectedYear} · each cell compares modeled FOPAG and tuition revenue for one enrollment/tuition combination`}
+            subtitle={t("payrollMatrixSubtitle").replace("{year}", String(selectedYear))}
           >
             {/* Explanation */}
             <div className="rounded-2xl border border-indigo-200 bg-indigo-50 px-4 py-3">
               <p className="text-[11px] text-indigo-800 leading-relaxed">
-                <strong>9 cenários</strong> = 3 enrollment paths × 3 tuition tables. Each cell shows revenue less modeled FOPAG for {selectedYear} at that combination. Tuition compounds at <strong>8%/year</strong> from the 2028 base. Green = positive payroll coverage. Red = modeled FOPAG exceeds tuition revenue. This is not a full operating margin.
+                {t("payrollMatrixExplanation").replace(/\{year\}/g, String(selectedYear))}
               </p>
             </div>
 
             {/* 3×3 matrix */}
             {(() => {
-              const enrollLabels = ["Otimista", "Intermediário", "Pessimista"];
+              const enrollLabels = [t("scenarioOtimista"), t("scenarioBase"), t("scenarioPessimista")];
               const enrollColors = ["text-emerald-700", "text-blue-700", "text-amber-700"];
               const enrollBg = ["bg-emerald-50 border-emerald-200", "bg-blue-50 border-blue-200", "bg-amber-50 border-amber-200"];
               const tuitLabels = ["RJ Cen 1", "RJ Cen 2", "RJ Cen 3"];
-              const tuitSub = ["Higher LS/MS, highest HS", "Moderate across divisions", "Flat R$105k · lower HS"];
+              const tuitSub = [t("payrollTuitSub1"), t("payrollTuitSub2"), t("payrollTuitSub3")];
               const yi = PAYROLL_YEARS.indexOf(selectedYear);
 
               return (
                 <div className="space-y-2">
                   <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 mb-2">
                     <div className="hidden sm:block" />
-                    {tuitLabels.map((t, ti) => (
+                    {tuitLabels.map((tuitLabel, ti) => (
                       <div key={ti} className="rounded-2xl bg-slate-900 text-white px-4 py-3 text-center">
-                        <div className="text-xs font-black">{t}</div>
+                        <div className="text-xs font-black">{tuitLabel}</div>
                         <div className="text-[9px] text-slate-400 mt-0.5">{tuitSub[ti]}</div>
                       </div>
                     ))}
@@ -1194,7 +1189,7 @@ const PayrollProjectionTab = () => {
                       <div className={cn("rounded-2xl border px-4 py-4", enrollBg[ei])}>
                         <div className={cn("text-xs font-black uppercase tracking-widest", enrollColors[ei])}>{label}</div>
                         <div className="text-[10px] text-slate-500 mt-1 leading-snug">
-                          Enrollment path drives turma opening cadence and student counts.
+                          {t("payrollEnrollmentPathNote")}
                         </div>
                       </div>
 
@@ -1212,24 +1207,26 @@ const PayrollProjectionTab = () => {
                             <div className="flex items-start justify-between gap-3">
                               <div>
                                 <div className="text-[10px] font-black uppercase tracking-widest text-slate-500">{tuitLabels[ti]}</div>
-                                <div className="text-[10px] text-slate-500 mt-1 leading-snug">{cell.totalStudents} students · {cell.totalTurmas} turmas</div>
+                                <div className="text-[10px] text-slate-500 mt-1 leading-snug">
+                                  {t("payrollCellStudentsTurmas").replace("{students}", String(cell.totalStudents)).replace("{turmas}", String(cell.totalTurmas))}
+                                </div>
                               </div>
                               <div className={cn("text-sm font-black tabular-nums shrink-0", positive ? "text-emerald-700" : "text-red-600")}>
-                                {formatBRL(cell.marginAnnual)}
+                                {formatCurrencyBRL(cell.marginAnnual, locale)}
                               </div>
                             </div>
 
                             <div className="mt-3 space-y-1.5">
                               <div className="flex items-center justify-between text-[10px]">
-                                <span className="text-slate-500">FOPAG</span>
-                                <span className="font-bold tabular-nums text-slate-800">{formatBRL(cell.fopagAnnual)}</span>
+                                <span className="text-slate-500">{t("payrollFopagShortHeader")}</span>
+                                <span className="font-bold tabular-nums text-slate-800">{formatCurrencyBRL(cell.fopagAnnual, locale)}</span>
                               </div>
                               <div className="flex items-center justify-between text-[10px]">
-                                <span className="text-slate-500">Receita</span>
-                                <span className="font-bold tabular-nums text-emerald-700">{formatBRL(cell.totalRevenueAnnual)}</span>
+                                <span className="text-slate-500">{t("payrollReceitaHeader")}</span>
+                                <span className="font-bold tabular-nums text-emerald-700">{formatCurrencyBRL(cell.totalRevenueAnnual, locale)}</span>
                               </div>
                               <div className="flex items-center justify-between text-[10px]">
-                                <span className="text-slate-500">Coverage</span>
+                                <span className="text-slate-500">{t("payrollCoverageHeader")}</span>
                                 <span className={cn("font-bold tabular-nums", positive ? "text-emerald-700" : "text-red-600")}>
                                   {Math.round(cell.coverageRatio * 100)}%
                                 </span>
@@ -1242,13 +1239,15 @@ const PayrollProjectionTab = () => {
                   ))}
                   <div className="rounded-2xl bg-slate-900 px-4 py-4 flex items-center justify-between mt-2">
                     <div>
-                      <div className="text-xs font-black text-white">Total Anual Consolidado</div>
-                      <div className="text-[9px] text-slate-400 mt-0.5">FOPAG + Benefícios + Folha Direta</div>
+                      <div className="text-xs font-black text-white">{t("payrollTotalAnualConsolidadoLabel")}</div>
+                      <div className="text-[9px] text-slate-400 mt-0.5">{t("payrollStackBreakdownLabel")}</div>
                     </div>
                     <div className="text-right">
-                      <div className="text-xl font-black text-white">{formatBRL(selectedYearData.grandTotal)}</div>
+                      <div className="text-xl font-black text-white">{formatCurrencyBRL(selectedYearData.grandTotal, locale)}</div>
                       <div className={cn("text-xs font-bold mt-0.5", selectedYearData.marginAnnual >= 0 ? "text-emerald-400" : "text-red-400")}>
-                        Revenue less modeled FOPAG: {formatBRL(selectedYearData.marginAnnual)} ({Math.round(selectedYearData.coverageRatio * 100)}% coverage)
+                        {t("payrollRevenueLessModeledFopag")
+                          .replace("{value}", formatCurrencyBRL(selectedYearData.marginAnnual, locale))
+                          .replace("{pct}", String(Math.round(selectedYearData.coverageRatio * 100)))}
                       </div>
                     </div>
                   </div>
@@ -1258,9 +1257,9 @@ const PayrollProjectionTab = () => {
           </Card>
 
           <Card
-            title="Long-range Payroll + Revenue Projection, 2028–2047"
+            title={t("payrollLongRangeTitle")}
             icon={TrendingUp}
-            subtitle={`${scenarioLabels[scenario]} · RJ ${tuitionScenario.toUpperCase()} · ${marginMode === "FULLY_LOADED" ? "Fully Loaded" : "Without Benefits"} · Teaching costs scale with turmas · Non-teaching fixed progression`}
+            subtitle={`${t(scenarioLabels[scenario])} · RJ ${tuitionScenario.toUpperCase()} · ${marginMode === "FULLY_LOADED" ? t("payrollFullyLoadedLabel") : t("payrollWithoutBenefitsLabel")} · ${t("payrollTeachingScaleNote")}`}
             className="xl:overflow-visible"
           >
             <div className="overflow-x-auto xl:overflow-visible">
@@ -1268,30 +1267,30 @@ const PayrollProjectionTab = () => {
                 <table className="w-full table-fixed border-collapse text-left xl:min-w-0">
                 <thead>
                   <tr className="bg-slate-50">
-                    <th className="w-[7%] px-2 py-2.5 text-[8px] font-bold uppercase tracking-[0.16em] text-slate-500 border-b border-slate-200 whitespace-nowrap xl:px-2.5">Year</th>
-                    <th className="w-[7%] px-2 py-2.5 text-[8px] font-bold uppercase tracking-[0.16em] text-slate-500 border-b border-slate-200 text-center xl:px-2.5">Alunos</th>
-                    <th className="w-[16%] px-2 py-2.5 text-[8px] font-bold uppercase tracking-[0.16em] text-indigo-600 border-b border-slate-200 text-right bg-indigo-50 xl:px-2.5">FOPAG Direto</th>
-                    <th className="w-[14%] px-2 py-2.5 text-[8px] font-bold uppercase tracking-[0.16em] text-blue-600 border-b border-slate-200 text-right bg-blue-50 xl:px-2.5">Benefícios</th>
+                    <th className="w-[7%] px-2 py-2.5 text-[8px] font-bold uppercase tracking-[0.16em] text-slate-500 border-b border-slate-200 whitespace-nowrap xl:px-2.5">{t("payrollYearHeader")}</th>
+                    <th className="w-[7%] px-2 py-2.5 text-[8px] font-bold uppercase tracking-[0.16em] text-slate-500 border-b border-slate-200 text-center xl:px-2.5">{t("payrollAlunosHeader")}</th>
+                    <th className="w-[16%] px-2 py-2.5 text-[8px] font-bold uppercase tracking-[0.16em] text-indigo-600 border-b border-slate-200 text-right bg-indigo-50 xl:px-2.5">{t("payrollLabelFopagDireto")}</th>
+                    <th className="w-[14%] px-2 py-2.5 text-[8px] font-bold uppercase tracking-[0.16em] text-blue-600 border-b border-slate-200 text-right bg-blue-50 xl:px-2.5">{t("payrollLabelBeneficios")}</th>
                     {expandFolha ? (
                       <>
                         <th className="w-[12%] px-2 py-2.5 text-[8px] font-bold uppercase tracking-[0.16em] text-amber-600 border-b border-slate-200 text-right bg-amber-50 xl:px-2.5">
-                          <button onClick={() => setExpandFolha(false)} className="flex items-center gap-1 ml-auto hover:opacity-70 transition-opacity" title="Collapse">
-                            <span>Liderança</span><span className="text-[8px]">▲</span>
+                          <button onClick={() => setExpandFolha(false)} className="flex items-center gap-1 ml-auto hover:opacity-70 transition-opacity" title={t("payrollCollapseLabel")}>
+                            <span>{t("payrollLiderancaHeader")}</span><span className="text-[8px]">▲</span>
                           </button>
                         </th>
-                        <th className="w-[12%] px-2 py-2.5 text-[8px] font-bold uppercase tracking-[0.16em] text-emerald-600 border-b border-slate-200 text-right bg-emerald-50 xl:px-2.5">BackOffice</th>
-                        <th className="w-[12%] px-2 py-2.5 text-[8px] font-bold uppercase tracking-[0.16em] text-violet-600 border-b border-slate-200 text-right bg-violet-50 xl:px-2.5">Especialistas</th>
+                        <th className="w-[12%] px-2 py-2.5 text-[8px] font-bold uppercase tracking-[0.16em] text-emerald-600 border-b border-slate-200 text-right bg-emerald-50 xl:px-2.5">{t("payrollBackofficeHeader")}</th>
+                        <th className="w-[12%] px-2 py-2.5 text-[8px] font-bold uppercase tracking-[0.16em] text-violet-600 border-b border-slate-200 text-right bg-violet-50 xl:px-2.5">{t("payrollEspecialistasHeader")}</th>
                       </>
                     ) : (
                       <th className="w-[16%] px-2 py-2.5 text-[8px] font-bold uppercase tracking-[0.16em] text-amber-700 border-b border-slate-200 text-right bg-amber-50 xl:px-2.5">
-                        <button onClick={() => setExpandFolha(true)} className="flex items-center gap-1 ml-auto hover:opacity-70 transition-opacity" title="Click to expand Liderança · BackOffice · Especialistas">
-                          <span>Folha de Pagamento</span><span className="text-[8px]">▼</span>
+                        <button onClick={() => setExpandFolha(true)} className="flex items-center gap-1 ml-auto hover:opacity-70 transition-opacity" title={t("payrollExpandFolhaTitleLong")}>
+                          <span>{t("payrollFolhaDePagamentoLabel")}</span><span className="text-[8px]">▼</span>
                         </button>
                       </th>
                     )}
-                    <th className="w-[14%] px-2 py-2.5 text-[8px] font-bold uppercase tracking-[0.16em] text-slate-800 border-b border-slate-200 text-right bg-slate-100 xl:px-2.5">Total Anual</th>
-                    <th className="w-[14%] px-2 py-2.5 text-[8px] font-bold uppercase tracking-[0.16em] text-teal-600 border-b border-slate-200 text-right bg-teal-50 xl:px-2.5">Receita</th>
-                    <th className="w-[12%] px-2 py-2.5 text-[8px] font-bold uppercase tracking-[0.16em] text-slate-500 border-b border-slate-200 text-right xl:px-2.5">Coverage</th>
+                    <th className="w-[14%] px-2 py-2.5 text-[8px] font-bold uppercase tracking-[0.16em] text-slate-800 border-b border-slate-200 text-right bg-slate-100 xl:px-2.5">{t("payrollTotalAnualHeader")}</th>
+                    <th className="w-[14%] px-2 py-2.5 text-[8px] font-bold uppercase tracking-[0.16em] text-teal-600 border-b border-slate-200 text-right bg-teal-50 xl:px-2.5">{t("payrollReceitaHeader")}</th>
+                    <th className="w-[12%] px-2 py-2.5 text-[8px] font-bold uppercase tracking-[0.16em] text-slate-500 border-b border-slate-200 text-right xl:px-2.5">{t("payrollCoverageHeader")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1319,53 +1318,53 @@ const PayrollProjectionTab = () => {
                         </td>
                         <td className="px-2 py-2.5 text-right bg-indigo-50 xl:px-2.5">
                           <span className="text-[11px] font-bold tabular-nums text-indigo-800">
-                            {formatBRL(yd.fopagDiretoAnnual)}
+                            {formatCurrencyBRL(yd.fopagDiretoAnnual, locale)}
                           </span>
                         </td>
                         <td className="px-2 py-2.5 text-right bg-blue-50 xl:px-2.5">
                           <span className={cn("text-[11px] tabular-nums", withBenefits ? "font-bold text-blue-800" : "text-slate-400 line-through")}>
-                            {formatBRL(yd.beneficiosAnnual)}
+                            {formatCurrencyBRL(yd.beneficiosAnnual, locale)}
                           </span>
                         </td>
                         {expandFolha ? (
                           <>
                             <td className="px-2 py-2.5 text-right bg-amber-50 xl:px-2.5">
                               <span className="text-[11px] font-bold tabular-nums text-amber-800">
-                                {formatBRL(yd.leadershipAnnual)}
+                                {formatCurrencyBRL(yd.leadershipAnnual, locale)}
                               </span>
                             </td>
                             <td className="px-2 py-2.5 text-right bg-emerald-50 xl:px-2.5">
                               <span className="text-[11px] font-bold tabular-nums text-emerald-800">
-                                {formatBRL(yd.backofficeAnnual)}
+                                {formatCurrencyBRL(yd.backofficeAnnual, locale)}
                               </span>
                             </td>
                             <td className="px-2 py-2.5 text-right bg-violet-50 xl:px-2.5">
                               <span className="text-[11px] font-bold tabular-nums text-violet-800">
-                                {formatBRL(yd.specialistsAnnual)}
+                                {formatCurrencyBRL(yd.specialistsAnnual, locale)}
                               </span>
                             </td>
                           </>
                         ) : (
                           <td className="px-2 py-2.5 text-right bg-amber-50 xl:px-2.5">
                             <span className="text-[11px] font-bold tabular-nums text-amber-800">
-                              {formatBRL(yd.folhaDiretaAnnual)}
+                              {formatCurrencyBRL(yd.folhaDiretaAnnual, locale)}
                             </span>
-                            <div className="text-[8px] text-amber-500 mt-0.5">Lider · BO · Esp</div>
+                            <div className="text-[8px] text-amber-500 mt-0.5">{t("payrollLiderBoEspAbbrev")}</div>
                           </td>
                         )}
                         <td className="px-2 py-2.5 text-right bg-slate-100 xl:px-2.5">
                           <span className="text-[11px] font-black tabular-nums text-slate-900">
-                            {formatBRL(yd.grandTotal)}
+                            {formatCurrencyBRL(yd.grandTotal, locale)}
                           </span>
                         </td>
                         <td className="px-2 py-2.5 text-right bg-teal-50 xl:px-2.5">
                           <span className="text-[11px] font-bold tabular-nums text-teal-800">
-                            {formatBRL(yd.totalRevenueAnnual)}
+                            {formatCurrencyBRL(yd.totalRevenueAnnual, locale)}
                           </span>
                         </td>
                         <td className="px-2 py-2.5 text-right xl:px-2.5">
                           <div className={cn("text-[11px] font-black tabular-nums", yd.marginAnnual >= 0 ? "text-teal-700" : "text-red-600")}>
-                            {formatBRL(yd.marginAnnual)}
+                            {formatCurrencyBRL(yd.marginAnnual, locale)}
                           </div>
                           <span
                             className={cn(
@@ -1395,27 +1394,27 @@ const PayrollProjectionTab = () => {
                 className="inline-flex items-center gap-1.5 rounded-lg border border-indigo-200 bg-indigo-50 px-2.5 py-1.5 text-[10px] font-bold text-indigo-700 transition-colors hover:bg-indigo-100"
               >
                 <Download className="h-3.5 w-3.5" />
-                Download .xlsx
+                {t("payrollDownloadXlsxLabel")}
               </button>
             </div>
           </Card>
 
           <Card
-            title={`Grade Breakdown — ${selectedYear}`}
+            title={t("payrollGradeBreakdownTitle").replace("{year}", String(selectedYear))}
             icon={GraduationCap}
-            subtitle={`${scenarioLabels[scenario]} · RJ ${tuitionScenario.toUpperCase()} · detailed teaching cost and revenue by grade`}
+            subtitle={`${t(scenarioLabels[scenario])} · RJ ${tuitionScenario.toUpperCase()} · ${t("payrollDetailedTeachingCostRevenueLabel")}`}
           >
             <div className="overflow-x-auto rounded-2xl border border-slate-100">
               <table className="w-full text-left border-collapse min-w-[1100px]">
                 <thead>
                   <tr className="bg-slate-50">
-                    <th className="px-3 py-3 text-[9px] font-bold uppercase tracking-widest text-slate-500 border-b border-slate-200">Grade</th>
-                    <th className="px-3 py-3 text-[9px] font-bold uppercase tracking-widest text-slate-500 border-b border-slate-200 text-center">Turmas</th>
-                    <th className="px-3 py-3 text-[9px] font-bold uppercase tracking-widest text-slate-500 border-b border-slate-200 text-center">Lead FTE</th>
-                    <th className="px-3 py-3 text-[9px] font-bold uppercase tracking-widest text-slate-500 border-b border-slate-200 text-center">Support</th>
-                    <th className="px-3 py-3 text-[9px] font-bold uppercase tracking-widest text-indigo-600 border-b border-slate-200 text-right">Payroll</th>
-                    <th className="px-3 py-3 text-[9px] font-bold uppercase tracking-widest text-emerald-600 border-b border-slate-200 text-right">Receita</th>
-                    <th className="px-3 py-3 text-[9px] font-bold uppercase tracking-widest text-teal-600 border-b border-slate-200 text-right">Coverage</th>
+                    <th className="px-3 py-3 text-[9px] font-bold uppercase tracking-widest text-slate-500 border-b border-slate-200">{t("payrollGradeHeader")}</th>
+                    <th className="px-3 py-3 text-[9px] font-bold uppercase tracking-widest text-slate-500 border-b border-slate-200 text-center">{t("payrollTurmasHeader")}</th>
+                    <th className="px-3 py-3 text-[9px] font-bold uppercase tracking-widest text-slate-500 border-b border-slate-200 text-center">{t("payrollLeadFteHeader")}</th>
+                    <th className="px-3 py-3 text-[9px] font-bold uppercase tracking-widest text-slate-500 border-b border-slate-200 text-center">{t("payrollSupportHeader")}</th>
+                    <th className="px-3 py-3 text-[9px] font-bold uppercase tracking-widest text-indigo-600 border-b border-slate-200 text-right">{t("payrollPayrollHeader")}</th>
+                    <th className="px-3 py-3 text-[9px] font-bold uppercase tracking-widest text-emerald-600 border-b border-slate-200 text-right">{t("payrollReceitaHeader")}</th>
+                    <th className="px-3 py-3 text-[9px] font-bold uppercase tracking-widest text-teal-600 border-b border-slate-200 text-right">{t("payrollCoverageHeader")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1428,10 +1427,10 @@ const PayrollProjectionTab = () => {
                       <td className="px-3 py-3 text-center text-xs font-bold text-slate-700">{row.turmas}</td>
                       <td className="px-3 py-3 text-center text-xs font-bold text-slate-700">{row.leadsCount}</td>
                       <td className="px-3 py-3 text-center text-xs font-bold text-slate-700">{row.supportCount}</td>
-                      <td className="px-3 py-3 text-right text-xs font-bold text-slate-800">{formatBRL(row.annualTotal)}</td>
-                      <td className="px-3 py-3 text-right text-xs font-bold text-emerald-700">{formatBRL(row.revenueAnnual)}</td>
+                      <td className="px-3 py-3 text-right text-xs font-bold text-slate-800">{formatCurrencyBRL(row.annualTotal, locale)}</td>
+                      <td className="px-3 py-3 text-right text-xs font-bold text-emerald-700">{formatCurrencyBRL(row.revenueAnnual, locale)}</td>
                       <td className={cn("px-3 py-3 text-right text-xs font-black", row.marginAnnual >= 0 ? "text-teal-700" : "text-red-600")}>
-                        {formatBRL(row.marginAnnual)}
+                        {formatCurrencyBRL(row.marginAnnual, locale)}
                       </td>
                     </tr>
                   ))}
