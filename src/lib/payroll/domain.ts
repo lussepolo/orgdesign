@@ -16,7 +16,7 @@ import {
   type RoleYearProjection,
 } from "./core";
 
-export type PayrollScenario = "otimista" | "intermediario" | "pessimista";
+export type PayrollScenario = "otimista" | "base" | "pessimista";
 export type TuitionScenario = "cen1" | "cen2" | "cen3";
 export type MarginMode = "FULLY_LOADED" | "WITHOUT_BENEFITS";
 
@@ -69,25 +69,25 @@ export const TUITION_ANNUAL: Record<string, Record<TuitionScenario, number>> = {
 };
 
 export const PAYROLL_GRADE_CONFIG = [
-  { id:"t1i", name:"Toddlers 1 – Integral", cap:14, sections:1, openYear:2028, div:"EY", shift:"I", occ:{otimista:0.714, intermediario:0.643, pessimista:0.500} },
-  { id:"t1m", name:"Toddlers 1 – Manhã",    cap:14, sections:1, openYear:2028, div:"EY", shift:"M", occ:{otimista:0.714, intermediario:0.643, pessimista:0.500} },
-  { id:"t2i", name:"Toddlers 2 – Integral", cap:14, sections:1, openYear:2028, div:"EY", shift:"I", occ:{otimista:0.714, intermediario:0.571, pessimista:0.500} },
-  { id:"t2m", name:"Toddlers 2 – Manhã",    cap:14, sections:1, openYear:2028, div:"EY", shift:"M", occ:{otimista:0.714, intermediario:0.571, pessimista:0.500} },
-  { id:"pk3", name:"Pre-K3",       cap:18, sections:2, openYear:2028, div:"EY", shift:"I", occ:{otimista:1.000, intermediario:0.611, pessimista:0.333} },
-  { id:"pk4", name:"Pre-K4",       cap:18, sections:2, openYear:2028, div:"EY", shift:"I", occ:{otimista:0.722, intermediario:0.667, pessimista:0.500} },
-  { id:"k",   name:"Kindergarten", cap:20, sections:2, openYear:2028, div:"EY", shift:"I", occ:{otimista:0.700, intermediario:0.650, pessimista:0.500} },
-  { id:"g1",  name:"Grade 1",  cap:22, sections:2, openYear:2028, div:"LS", shift:"I", occ:{otimista:0.705, intermediario:0.659, pessimista:0.455} },
-  { id:"g2",  name:"Grade 2",  cap:22, sections:2, openYear:2028, div:"LS", shift:"I", occ:{otimista:0.341, intermediario:0.341, pessimista:0.250} },
-  { id:"g3",  name:"Grade 3",  cap:22, sections:2, openYear:2028, div:"LS", shift:"I", occ:{otimista:0.614, intermediario:0.341, pessimista:0.250} },
-  { id:"g4",  name:"Grade 4",  cap:24, sections:2, openYear:2029, div:"LS", shift:"I", occ:{otimista:0.646, intermediario:0.625, pessimista:0.583} },
-  { id:"g5",  name:"Grade 5",  cap:24, sections:2, openYear:2030, div:"LS", shift:"I", occ:{otimista:0.646, intermediario:0.625, pessimista:0.583} },
-  { id:"g6",  name:"Grade 6",  cap:25, sections:2, openYear:2031, div:"MS", shift:"I", occ:{otimista:0.680, intermediario:0.680, pessimista:0.680} },
-  { id:"g7",  name:"Grade 7",  cap:25, sections:2, openYear:2032, div:"MS", shift:"I", occ:{otimista:0.680, intermediario:0.680, pessimista:0.680} },
-  { id:"g8",  name:"Grade 8",  cap:25, sections:2, openYear:2033, div:"MS", shift:"I", occ:{otimista:0.680, intermediario:0.680, pessimista:0.680} },
-  { id:"g9",  name:"Grade 9",  cap:25, sections:2, openYear:2034, div:"HS", shift:"I", occ:{otimista:0.680, intermediario:0.680, pessimista:0.680} },
-  { id:"g10", name:"Grade 10", cap:25, sections:2, openYear:2035, div:"HS", shift:"I", occ:{otimista:0.680, intermediario:0.680, pessimista:0.680} },
-  { id:"g11", name:"Grade 11", cap:25, sections:2, openYear:2036, div:"HS", shift:"I", occ:{otimista:0.680, intermediario:0.680, pessimista:0.680} },
-  { id:"g12", name:"Grade 12", cap:25, sections:2, openYear:2037, div:"HS", shift:"I", occ:{otimista:0.680, intermediario:0.680, pessimista:0.680} },
+  { id:"t1i", name:"Toddlers 1 – Integral", cap:14, sections:1, openYear:2028, div:"EY", shift:"I", occ:{otimista:0.714, base:0.643, pessimista:0.500} },
+  { id:"t1m", name:"Toddlers 1 – Manhã",    cap:14, sections:1, openYear:2028, div:"EY", shift:"M", occ:{otimista:0.714, base:0.643, pessimista:0.500} },
+  { id:"t2i", name:"Toddlers 2 – Integral", cap:14, sections:1, openYear:2028, div:"EY", shift:"I", occ:{otimista:0.714, base:0.571, pessimista:0.500} },
+  { id:"t2m", name:"Toddlers 2 – Manhã",    cap:14, sections:1, openYear:2028, div:"EY", shift:"M", occ:{otimista:0.714, base:0.571, pessimista:0.500} },
+  { id:"pk3", name:"Pre-K3",       cap:18, sections:2, openYear:2028, div:"EY", shift:"I", occ:{otimista:1.000, base:0.611, pessimista:0.333} },
+  { id:"pk4", name:"Pre-K4",       cap:18, sections:2, openYear:2028, div:"EY", shift:"I", occ:{otimista:0.722, base:0.667, pessimista:0.500} },
+  { id:"k",   name:"Kindergarten", cap:20, sections:2, openYear:2028, div:"EY", shift:"I", occ:{otimista:0.700, base:0.650, pessimista:0.500} },
+  { id:"g1",  name:"Grade 1",  cap:22, sections:2, openYear:2028, div:"LS", shift:"I", occ:{otimista:0.705, base:0.659, pessimista:0.455} },
+  { id:"g2",  name:"Grade 2",  cap:22, sections:2, openYear:2028, div:"LS", shift:"I", occ:{otimista:0.341, base:0.341, pessimista:0.250} },
+  { id:"g3",  name:"Grade 3",  cap:22, sections:2, openYear:2028, div:"LS", shift:"I", occ:{otimista:0.614, base:0.341, pessimista:0.250} },
+  { id:"g4",  name:"Grade 4",  cap:24, sections:2, openYear:2029, div:"LS", shift:"I", occ:{otimista:0.646, base:0.625, pessimista:0.583} },
+  { id:"g5",  name:"Grade 5",  cap:24, sections:2, openYear:2030, div:"LS", shift:"I", occ:{otimista:0.646, base:0.625, pessimista:0.583} },
+  { id:"g6",  name:"Grade 6",  cap:25, sections:2, openYear:2031, div:"MS", shift:"I", occ:{otimista:0.680, base:0.680, pessimista:0.680} },
+  { id:"g7",  name:"Grade 7",  cap:25, sections:2, openYear:2032, div:"MS", shift:"I", occ:{otimista:0.680, base:0.680, pessimista:0.680} },
+  { id:"g8",  name:"Grade 8",  cap:25, sections:2, openYear:2033, div:"MS", shift:"I", occ:{otimista:0.680, base:0.680, pessimista:0.680} },
+  { id:"g9",  name:"Grade 9",  cap:25, sections:2, openYear:2034, div:"HS", shift:"I", occ:{otimista:0.680, base:0.680, pessimista:0.680} },
+  { id:"g10", name:"Grade 10", cap:25, sections:2, openYear:2035, div:"HS", shift:"I", occ:{otimista:0.680, base:0.680, pessimista:0.680} },
+  { id:"g11", name:"Grade 11", cap:25, sections:2, openYear:2036, div:"HS", shift:"I", occ:{otimista:0.680, base:0.680, pessimista:0.680} },
+  { id:"g12", name:"Grade 12", cap:25, sections:2, openYear:2037, div:"HS", shift:"I", occ:{otimista:0.680, base:0.680, pessimista:0.680} },
 ] as const;
 
 export type PayrollGrade = typeof PAYROLL_GRADE_CONFIG[number];
@@ -100,7 +100,7 @@ export const TURMAS_SCHEDULE: Record<PayrollScenario, Record<string, number[]>> 
     g6: extendSchedule([0,0,0,2,2,2,2,2,2,2]), g7: extendSchedule([0,0,0,0,2,2,2,2,2,2]), g8: extendSchedule([0,0,0,0,0,2,2,2,2,2]), g9: extendSchedule([0,0,0,0,0,0,2,2,2,2]),
     g10: extendSchedule([0,0,0,0,0,0,0,2,2,2]), g11: extendSchedule([0,0,0,0,0,0,0,0,2,2]), g12: extendSchedule([0,0,0,0,0,0,0,0,0,2]),
   },
-  intermediario: {
+  base: {
     t1i: extendSchedule([1,1,1,1,1,1,1,1,1,1]), t1m: extendSchedule([1,1,1,1,1,1,1,1,1,1]), t2i: extendSchedule([1,1,1,1,1,1,1,1,1,1]), t2m: extendSchedule([1,1,1,1,1,1,1,1,1,1]),
     pk3: extendSchedule([2,2,2,2,2,2,2,2,2,2]), pk4: extendSchedule([2,2,2,2,2,2,2,2,2,2]), k: extendSchedule([2,2,2,2,2,2,2,2,2,2]), g1: extendSchedule([2,2,2,2,2,2,2,2,2,2]),
     g2: extendSchedule([1,1,2,2,2,2,2,2,2,2]), g3: extendSchedule([1,1,1,2,2,2,2,2,2,2]), g4: extendSchedule([0,1,1,1,2,2,2,2,2,2]), g5: extendSchedule([0,0,1,1,1,2,2,2,2,2]),
@@ -124,7 +124,7 @@ export const STUDENTS_SCHEDULE: Record<PayrollScenario, Record<string, number[]>
     g6: extendSchedule([0,0,0,34,38,41,34,38,38,39]), g7: extendSchedule([0,0,0,0,36,38,40,42,43,43]), g8: extendSchedule([0,0,0,0,0,38,40,42,43,43]), g9: extendSchedule([0,0,0,0,0,0,40,44,44,45]),
     g10: extendSchedule([0,0,0,0,0,0,0,44,44,44]), g11: extendSchedule([0,0,0,0,0,0,0,0,44,44]), g12: extendSchedule([0,0,0,0,0,0,0,0,0,44]),
   },
-  intermediario: {
+  base: {
     t1i: extendSchedule([9,10,11,12,13,14,14,14,14,14]), t1m: extendSchedule([9,10,11,12,13,14,14,14,14,14]), t2i: extendSchedule([8,9,9,10,10,11,12,12,12,12]), t2m: extendSchedule([8,9,9,10,10,11,12,12,12,12]),
     pk3: extendSchedule([22,25,25,27,30,33,35,36,36,36]), pk4: extendSchedule([24,26,29,31,34,36,36,36,36,36]), k: extendSchedule([26,29,32,35,38,40,40,40,40,40]), g1: extendSchedule([29,32,35,38,41,44,44,44,44,44]),
     g2: extendSchedule([15,17,30,32,34,36,37,39,39,39]), g3: extendSchedule([15,17,18,30,32,34,36,37,37,37]), g4: extendSchedule([0,18,20,22,33,35,37,38,38,38]), g5: extendSchedule([0,0,20,22,24,33,35,36,36,36]),
@@ -573,7 +573,7 @@ export function buildScenarioComparison(params: {
   marginMode: MarginMode;
   gradeTiers?: Record<string, string>;
 }): ScenarioComparisonResult[] {
-  const scenarios: PayrollScenario[] = ["otimista", "intermediario", "pessimista"];
+  const scenarios: PayrollScenario[] = ["otimista", "base", "pessimista"];
 
   return scenarios.map((scenario) => {
     const projection = buildPayrollProjection({
@@ -608,7 +608,7 @@ export function buildScenarioMatrix(params: {
   marginMode: MarginMode;
   gradeTiers?: Record<string, string>;
 }): ScenarioMatrixCellYear[][][] {
-  const enrollmentScenarios: PayrollScenario[] = ["otimista", "intermediario", "pessimista"];
+  const enrollmentScenarios: PayrollScenario[] = ["otimista", "base", "pessimista"];
   const tuitionScenarios: TuitionScenario[] = ["cen1", "cen2", "cen3"];
 
   return enrollmentScenarios.map((scenario) =>

@@ -125,7 +125,7 @@ export default function ViabilityInputsRail({
             className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700 outline-none transition focus:border-slate-400"
           >
             <option value="pessimista">Pessimista</option>
-            <option value="intermediario">Intermediário</option>
+            <option value="base">Intermediário</option>
             <option value="otimista">Otimista</option>
             <option value="full-seat">Full Seat</option>
           </select>

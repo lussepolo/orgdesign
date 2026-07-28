@@ -2,7 +2,7 @@ export type ViabilityScreen = "baseline" | "sensitivity" | "thresholds";
 
 export type ViabilityEnrollmentScenario =
   | "otimista"
-  | "intermediario"
+  | "base"
   | "pessimista"
   | "full-seat";
 

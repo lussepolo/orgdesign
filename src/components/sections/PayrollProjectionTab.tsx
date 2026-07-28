@@ -230,10 +230,10 @@ const PayrollProjectionTab = () => {
   }, [turmasMatrix, selectedYear, scenario, tuitionScenario, withBenefits, gradeTiers]);
 
   const scenarioLabels: Record<PayrollScenario, string> = {
-    otimista: "Otimista", intermediario: "Intermediário", pessimista: "Pessimista",
+    otimista: "Otimista", base: "Intermediário", pessimista: "Pessimista",
   };
   const scenarioColors: Record<PayrollScenario, string> = {
-    otimista: "bg-emerald-600 text-white", intermediario: "bg-blue-600 text-white", pessimista: "bg-amber-600 text-white",
+    otimista: "bg-emerald-600 text-white", base: "bg-blue-600 text-white", pessimista: "bg-amber-600 text-white",
   };
 
   const selectedYearData = yearlyData[PAYROLL_YEARS.indexOf(selectedYear)];
@@ -379,7 +379,7 @@ const PayrollProjectionTab = () => {
             <div>
               <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">Enrollment Scenario</p>
               <div className="flex gap-2 flex-wrap">
-                {(["otimista","intermediario","pessimista"] as PayrollScenario[]).map(s => (
+                {(["otimista","base","pessimista"] as PayrollScenario[]).map(s => (
                   <button key={s} onClick={() => setScenario(s)}
                     className={cn("px-3 py-1.5 rounded-xl text-[11px] font-bold transition-all border",
                       scenario === s ? scenarioColors[s] + " border-transparent shadow-md" : "bg-white border-slate-200 text-slate-600 hover:border-slate-400")}>
@@ -1090,17 +1090,17 @@ const PayrollProjectionTab = () => {
                 <thead>
                   <tr className="bg-slate-50">
                     <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-slate-500 border-b border-slate-200">Year</th>
-                    {(["otimista","intermediario","pessimista"] as PayrollScenario[]).map(sc => (
+                    {(["otimista","base","pessimista"] as PayrollScenario[]).map(sc => (
                       <th key={sc} colSpan={4}
                         className={cn("px-4 py-2 text-[10px] font-bold uppercase tracking-widest border-b border-slate-200 text-center",
-                          sc === "otimista" ? "text-emerald-700 bg-emerald-50" : sc === "intermediario" ? "text-blue-700 bg-blue-50" : "text-amber-700 bg-amber-50")}>
+                          sc === "otimista" ? "text-emerald-700 bg-emerald-50" : sc === "base" ? "text-blue-700 bg-blue-50" : "text-amber-700 bg-amber-50")}>
                         {scenarioLabels[sc]}
                       </th>
                     ))}
                   </tr>
                   <tr className="bg-slate-50">
                     <th className="border-b border-slate-200"></th>
-                    {(["otimista","intermediario","pessimista"] as PayrollScenario[]).map(sc => (
+                    {(["otimista","base","pessimista"] as PayrollScenario[]).map(sc => (
                       <React.Fragment key={sc}>
                         <th className="px-3 py-2 text-[9px] font-bold uppercase tracking-widest text-slate-400 border-b border-slate-200 text-center">Turmas</th>
                         <th className="px-3 py-2 text-[9px] font-bold uppercase tracking-widest text-slate-400 border-b border-slate-200 text-right">FOPAG</th>
@@ -1117,7 +1117,7 @@ const PayrollProjectionTab = () => {
                       <tr key={year} className={cn("border-b border-slate-100 hover:bg-indigo-50 transition-colors", yi % 2 === 0 ? "bg-white" : "bg-slate-50/40")}>
                         <td className="px-4 py-3 text-sm font-black text-slate-900">{year}</td>
                         {rows.map((row, si) => {
-                          const sc = (["otimista","intermediario","pessimista"] as PayrollScenario[])[si];
+                          const sc = (["otimista","base","pessimista"] as PayrollScenario[])[si];
                           const margin = (row as any).marginAnnual ?? 0;
                           return (
                             <React.Fragment key={sc}>

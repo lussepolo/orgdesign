@@ -12,7 +12,7 @@ import type {
 const VARIABLE_OPTIONS: Record<SensitivityVariable, SensitivityVariableOption[]> = {
   enrollmentScenario: [
     { value: "pessimista", label: "Pessimista", description: "Lower students/turmas carry through the operating model." },
-    { value: "intermediario", label: "Intermediário", description: "Current central planning path." },
+    { value: "base", label: "Base", description: "Current central planning path." },
     { value: "otimista", label: "Otimista", description: "Higher enrollment operating path." },
     { value: "full-seat", label: "Full Seat", description: "Capacity-reaching enrollment envelope." },
   ],

@@ -45,7 +45,7 @@ function clampProjectionHorizon(years: number): number {
 
 function resolvePayrollScenario(
   enrollmentScenario: ViabilityEnrollmentScenario,
-): "otimista" | "intermediario" | "pessimista" {
+): "otimista" | "base" | "pessimista" {
   if (enrollmentScenario === "full-seat") return "otimista";
   return enrollmentScenario;
 }

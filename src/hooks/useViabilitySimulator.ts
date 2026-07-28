@@ -30,7 +30,7 @@ const DEFAULT_CAPEX_CATEGORIES = [
 
 const DEFAULT_STATE: ViabilitySimulatorState = {
   activeScreen: "baseline",
-  enrollmentScenario: "intermediario",
+  enrollmentScenario: "base",
   tuitionScenario: "cen2",
   costScenario: "base",
   projectionHorizonYears: 20,

@@ -118,7 +118,7 @@ export default function ViabilitySimulatorTab() {
       value:
         state.enrollmentScenario === "full-seat"
           ? "Full Seat"
-          : state.enrollmentScenario === "intermediario"
+          : state.enrollmentScenario === "base"
             ? "Intermediário"
             : state.enrollmentScenario === "pessimista"
               ? "Pessimista"
