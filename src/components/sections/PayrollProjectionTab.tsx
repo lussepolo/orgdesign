@@ -380,7 +380,7 @@ const PayrollProjectionTab = ({ openingPackageId, occupancyScenarioId, tuitionSc
               { label: t("payrollLabelBeneficios"), value: formatCurrencyBRL(selectedYearData.beneficiosAnnual, locale), tone: "bg-blue-50 border-blue-200", valueTone: withBenefits ? "text-blue-800" : "text-slate-400" },
               { label: t("payrollLabelFolhaDireta"), value: formatCurrencyBRL(selectedYearData.folhaDiretaAnnual, locale), tone: "bg-amber-50 border-amber-200", valueTone: "text-amber-800" },
               {
-                label: t("payrollCoberturaConsolidadaLabel"),
+                label: t("payrollMargemFolhaDiretaLabel"),
                 value: formatCurrencyBRL(selectedYearData.marginAnnual, locale),
                 tone: selectedYearData.marginAnnual >= 0 ? "bg-teal-50 border-teal-200" : "bg-red-50 border-red-200",
                 valueTone: selectedYearData.marginAnnual >= 0 ? "text-teal-800" : "text-red-700",

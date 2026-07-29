@@ -561,7 +561,7 @@ export const PT_BR = {
   payrollKpiBeneficiosSubOn: "benefícios × 12",
   payrollExcluidoLabel: "excluído",
   payrollKpiFolhaSub: "liderança + backoffice + especialistas",
-  payrollCoberturaConsolidadaLabel: "Cobertura Consolidada",
+  payrollMargemFolhaDiretaLabel: "Margem sobre Folha Direta",
   payrollCoberturaSub: "{n}% cobertura de folha",
   payrollProjectionTableTitle: "Projeção de Folha + Receita {range}",
   payrollFullyLoadedLabel: "Totalmente Carregado",

@@ -561,7 +561,7 @@ export const EN_US: Record<TranslationKey, string> = {
   payrollKpiBeneficiosSubOn: "benefits × 12",
   payrollExcluidoLabel: "excluded",
   payrollKpiFolhaSub: "leadership + backoffice + specialists",
-  payrollCoberturaConsolidadaLabel: "Consolidated Coverage",
+  payrollMargemFolhaDiretaLabel: "Margin over Direct Payroll",
   payrollCoberturaSub: "{n}% payroll coverage",
   payrollProjectionTableTitle: "{range} Payroll + Revenue Projection",
   payrollFullyLoadedLabel: "Fully Loaded",
