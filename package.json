@@ -48,6 +48,7 @@
     "validate:v10-x2t": "tsx scripts/validate-v10-x2t-workspace-architecture-i18n.ts",
     "validate:phase15u2": "tsx scripts/validate-phase15u2.ts",
     "validate:v10-rc2-gate2": "tsx scripts/validate-v10-rc2-gate2-governance.ts",
+    "validate:v10-rc2-gate8": "tsx scripts/validate-v10-rc2-gate8-coverage-matrix.ts",
     "qa:v10-e1": "tsx tests/v10e1/v10-e1.run.ts"
   },
   "dependencies": {
