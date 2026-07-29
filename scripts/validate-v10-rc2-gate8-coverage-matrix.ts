@@ -59,6 +59,22 @@ interface CoverageCell {
   staffingStatus: string;
   payrollAvailable: boolean;
   payrollTotalPayroll: number | null;
+  // V10-RC2.2 Gate 7: Payroll now consumes the shared engines (Gate 2 refactor)
+  // and matches Org Design headcount exactly at role granularity (Gate 3,
+  // 10272 role-rows). payrollHeadcountAvailable/payrollMonetaryAvailable
+  // are distinct from staffingAvailable/payrollAvailable above (which predate
+  // the refactor and describe the FOPAG engine's own readiness) -- these two
+  // new fields specifically assert that Payroll's headcount and monetary
+  // outputs are available to the Payroll tab for this cell, post-refactor.
+  payrollHeadcountAvailable: boolean;
+  payrollMonetaryAvailable: boolean;
+  payrollMonetaryCertified: false;
+  // Corporate allocation and consolidated people cost: genuinely unavailable
+  // for every cell -- no adapter exists (CORPORATE-ALLOCATION, V10-RC2.2 Gate 1
+  // blocker register). Never zero-substituted: these are false (unavailable),
+  // not 0 (a computed zero-cost claim).
+  corporateAllocationAvailable: false;
+  consolidatedCostAvailable: false;
   tuitionStatus: "computed_uncertified";
   revenueAvailable: boolean;
   revenueValue: number | null;
@@ -156,6 +172,9 @@ for (const openingPackageId of PACKAGES) {
             "enrollment/sections: openingPackageOccupancySourceData.ts + sectionCountEngine.ts",
             "staffing/payroll: fopagEngine.ts (V10-P1 salary/benefits/encargos escalation)",
             "revenue/DRE: dreEngine.ts (D-R1-D-R4/D-R7/D-R8 approved_by_project_owner)",
+            "Payroll headcount/monetary: PayrollProjectionTab.tsx now consumes calculateFopag/calculateDre/" +
+              "buildOrgDesignHcTable directly (V10-RC2.2 Gate 2 refactor), verified role-level-identical to " +
+              "Org Design across all 900 cells (V10-RC2.2 Gate 3, 10272 role-rows)",
           ];
           const limitationParts = [GOVERNANCE_LIMITATION_BASE];
           limitationParts.push(
@@ -171,6 +190,12 @@ for (const openingPackageId of PACKAGES) {
               "independently of the live UI's visible scenario selection (RC1B " +
               "finding, unchanged by this phase) — export is not wired to this " +
               "cell's exact combination.",
+          );
+          limitationParts.push(
+            "Corporate allocation and consolidated people cost genuinely unavailable for every cell — " +
+              "no adapter exists in this codebase (CORPORATE-ALLOCATION, V10-RC2.2 Gate 1 blocker register). " +
+              "Direct campus payroll (fopagDireto+folhaDireta+benefits) is never suppressed or zero-substituted " +
+              "because of this (V10-RC2.2 Gate 4).",
           );
 
           cells.push({
@@ -189,6 +214,11 @@ for (const openingPackageId of PACKAGES) {
             staffingStatus: fopagResult.engineStatus,
             payrollAvailable: fopagResult.calculationReady && yearFopagTotals !== null,
             payrollTotalPayroll: yearFopagTotals?.totalPayroll ?? null,
+            payrollHeadcountAvailable: fopagResult.calculationReady && yearFopagTotals !== null,
+            payrollMonetaryAvailable: fopagResult.calculationReady && yearFopagTotals !== null,
+            payrollMonetaryCertified: false,
+            corporateAllocationAvailable: false,
+            consolidatedCostAvailable: false,
             tuitionStatus: "computed_uncertified",
             revenueAvailable: dreYear !== null && Number.isFinite(dreYear.receita_operacional_liquida),
             revenueValue: dreYear?.receita_operacional_liquida ?? null,
@@ -207,7 +237,7 @@ for (const openingPackageId of PACKAGES) {
             // occur anywhere in this governed 2-package/3-captacao/3-org-design
             // subset (confirmed by the assertions at the bottom of this script).
             supportLevel: "partially_supported",
-            blockedByDecisionIds: ["D-R5", "D-R6", "F03", "F06"],
+            blockedByDecisionIds: ["D-R5", "D-R6", "F03", "F06", "CORPORATE-ALLOCATION"],
             msHsStaffingAuthorityReconciled: false,
             evidenceSource: evidenceParts.join("; "),
             limitation: limitationParts.join(" "),
@@ -242,6 +272,34 @@ const summary = {
     dreHandoffAvailable: cells.filter((c) => c.dreHandoffAvailable).length,
     exportAvailable: cells.filter((c) => c.exportAvailable).length,
   },
+  // V10-RC2.2 Gate 7 — Payroll shared-engine refactor coverage fields. Named
+  // individually per the phase directive rather than folded into
+  // availabilityCounts above, since they answer a distinct question (does
+  // Payroll's post-refactor headcount/monetary/corporate-allocation output
+  // exist for this cell) from the pre-existing engine-readiness fields.
+  payrollAndCorporateAllocationCounts: {
+    payrollHeadcountAvailable: cells.filter((c) => c.payrollHeadcountAvailable).length,
+    payrollHeadcountUnavailable: cells.filter((c) => !c.payrollHeadcountAvailable).length,
+    payrollMonetaryAvailable: cells.filter((c) => c.payrollMonetaryAvailable).length,
+    payrollMonetaryUnavailable: cells.filter((c) => !c.payrollMonetaryAvailable).length,
+    payrollMonetaryCertified: cells.filter((c) => c.payrollMonetaryCertified).length,
+    payrollMonetaryUncertified: cells.filter((c) => !c.payrollMonetaryCertified).length,
+    corporateAllocationAvailable: cells.filter((c) => c.corporateAllocationAvailable).length,
+    corporateAllocationUnavailable: cells.filter((c) => !c.corporateAllocationAvailable).length,
+    consolidatedCostAvailable: cells.filter((c) => c.consolidatedCostAvailable).length,
+    consolidatedCostUnavailable: cells.filter((c) => !c.consolidatedCostAvailable).length,
+    // Cross-tabs: proves direct payroll is never suppressed by the corporate-
+    // allocation/consolidated-cost gap (V10-RC2.2 Gate 4's "do not suppress
+    // direct payroll" requirement, verified at the coverage-matrix level).
+    payrollHeadcountAvailable_and_corporateAllocationUnavailable: cells.filter(
+      (c) => c.payrollHeadcountAvailable && !c.corporateAllocationAvailable,
+    ).length,
+    payrollMonetaryAvailable_and_consolidatedCostUnavailable: cells.filter(
+      (c) => c.payrollMonetaryAvailable && !c.consolidatedCostAvailable,
+    ).length,
+    blockedByCorporateAllocationDecisionId: cells.filter((c) => c.blockedByDecisionIds.includes("CORPORATE-ALLOCATION"))
+      .length,
+  },
   governanceGaps: {
     "D-R5_desconto_metodo": "genuinely_unresolved — all cells, precision risk only (~2.8% of gross)",
     "D-R6_F03_base_tuition_source": "genuinely_unresolved — all cells, tuitionStatus=computed_uncertified",
@@ -267,6 +325,7 @@ const summary = {
     F03: cells.filter((c) => c.blockedByDecisionIds.includes("F03")).length,
     F05: cells.filter((c) => c.blockedByDecisionIds.includes("F05")).length,
     F06: cells.filter((c) => c.blockedByDecisionIds.includes("F06")).length,
+    "CORPORATE-ALLOCATION": cells.filter((c) => c.blockedByDecisionIds.includes("CORPORATE-ALLOCATION")).length,
   },
   // Cross-tabs Gate 2 explicitly asked for. Each answers "how many cells have X
   // available but Y not" -- distinct from the plain per-column counts above.
@@ -323,6 +382,24 @@ assertAll("staffingAvailable is true for every governed cell", (c) => c.staffing
 assertAll("payrollAvailable is true for every governed cell", (c) => c.payrollAvailable);
 assertAll("revenueAvailable is true for every governed cell", (c) => c.revenueAvailable);
 assertAll("dreHandoffAvailable is true for every governed cell", (c) => c.dreHandoffAvailable);
+assertAll("payrollHeadcountAvailable is true for every governed cell (V10-RC2.2 Gate 7)", (c) => c.payrollHeadcountAvailable);
+assertAll("payrollMonetaryAvailable is true for every governed cell (V10-RC2.2 Gate 7)", (c) => c.payrollMonetaryAvailable);
+assertAll(
+  "payrollMonetaryCertified is false for every cell (available but never Finance-certified)",
+  (c) => c.payrollMonetaryCertified === false,
+);
+assertAll(
+  "corporateAllocationAvailable is false for every cell (no adapter exists — CORPORATE-ALLOCATION blocker)",
+  (c) => c.corporateAllocationAvailable === false,
+);
+assertAll(
+  "consolidatedCostAvailable is false for every cell (depends on corporate allocation)",
+  (c) => c.consolidatedCostAvailable === false,
+);
+assertAll(
+  "direct payroll headcount is never suppressed by the corporate-allocation gap (both available and unavailable coexist correctly)",
+  (c) => c.payrollHeadcountAvailable && !c.corporateAllocationAvailable,
+);
 assertAll(
   "exportAvailable is false for every cell (no cell's tuition/MS-HS-staffing figures are certified — V10-RC2.1 Gate 7's Fagundes Export Index does not change this)",
   (c) => !c.exportAvailable,
