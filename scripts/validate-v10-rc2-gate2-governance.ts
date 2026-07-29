@@ -120,8 +120,10 @@ for (const item of [...financeRegister.openItems, ...financeRegister.resolvedIte
     tuitionGrowthSrc.includes("0.059"),
   );
   check(
-    "D-R2: receitaEngine.ts no longer applies the retired 8% convention",
-    !src("src/features/rio-scenario-resilience/model/receitaEngine.ts").includes("0.08"),
+    "D-R2: receitaEngine.ts sources tuition escalation from tuitionGrowth.ts (not an inline retired-rate literal)",
+    src("src/features/rio-scenario-resilience/model/receitaEngine.ts").includes(
+      "resolveTuitionGrowthFactor",
+    ),
   );
 
   // dreRevenueDriverSourceData.ts derives percentual_desconto_medio from
@@ -147,8 +149,10 @@ for (const item of [...financeRegister.openItems, ...financeRegister.resolvedIte
 
   const occupancySrc = src("src/features/rio-scenario-resilience/model/openingPackageOccupancySourceData.ts");
   check(
-    "D-R8: openingPackageOccupancySourceData.ts encodes the approved 258/PK3=28 G4 Base 2028 figure",
-    occupancySrc.includes("258") && occupancySrc.includes("28"),
+    "D-R8: openingPackageOccupancySourceData.ts encodes the approved t1_g4/base/2028 total enrollment of 258",
+    /packageId:\s*"t1_g4",\s*scenarioId:\s*"base",\s*year:\s*2028,\s*totalEnrollment:\s*258/.test(
+      occupancySrc,
+    ),
   );
 
   const payrollAdapterSrc = src("src/features/rio-scenario-resilience/model/payrollAdapter.ts");
