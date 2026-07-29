@@ -1,0 +1,106 @@
+{
+  "generatedBy": "scripts/validate-v10-rc2-2-gate1-blocker-register.ts",
+  "categoryTaxonomy": [
+    "active_governance_blocker",
+    "retired_decision",
+    "engineering_integration_gap",
+    "unsupported_product_boundary",
+    "unavailable_financial_output",
+    "resolved_decision"
+  ],
+  "entries": [
+    {
+      "id": "D-R5",
+      "category": "active_governance_blocker",
+      "concept": "desconto_metodo_reverification",
+      "relatedTo": [],
+      "evidence": "docs/audits/rio-resilience/phase-v10-f1a-revenue-governance-decision-register.json decisionId D-R5; selectedOption=null. dreRevenueDriverSourceData.ts driverId 'desconto_metodo' is back-derived (Z13=-Y230/Y225), not a direct annual extraction; absent from all v9/v10 audit documents.",
+      "blockedOutputs": ["receita_de_ensino_liquida precision (~2.8243% of gross deduction, unquantified pending re-verification)"],
+      "notBlocked": ["enrollment", "sections", "instructional and non-instructional headcount", "direct campus payroll", "org-design tier comparison"],
+      "activeCoverageCellsBlocked": 900,
+      "resolutionRequired": "Finance re-verification of the Descontos Método row against the D-R1 governing workbook.",
+      "invented": false
+    },
+    {
+      "id": "D-R6",
+      "category": "active_governance_blocker",
+      "concept": "base_tuition_source_authority",
+      "relatedTo": ["F03"],
+      "relationNote": "D-R6 and F03 concern the same underlying subject (tuition base-rate source provenance) but are NOT merged: they are separate records in separate registers (phase-v10-f1a-revenue-governance-decision-register.json vs dre-finance-confirmation-register.json), each with its own status fields, and neither declares a supersededBy pointer to the other. D-R6 cites F03 as sourceEvidence, which is a reference, not an equivalence declaration.",
+      "evidence": "docs/audits/rio-resilience/phase-v10-f1a-revenue-governance-decision-register.json decisionId D-R6; selectedOption=null, approvalStatus=pending. tuitionSourceData.ts sourceEvidenceOrigin=screenshot_transcription_based, needsFinanceReview=true on all bp_scenario_1-3 records.",
+      "blockedOutputs": ["base tuition rate certification (BP1 2028: EY R$91,390 / LS R$111,670 / MS R$122,419 / HS R$141,469 — computed, not Finance-signed)"],
+      "notBlocked": ["enrollment", "sections", "instructional and non-instructional headcount", "direct campus payroll", "revenue/DRE computation itself (computed_uncertified, not suppressed)"],
+      "activeCoverageCellsBlocked": 900,
+      "resolutionRequired": "Finance approves current transcription as-is, or provides a signed XLSX replacement (docs/audits/rio-resilience/phase-v10-f1a-revenue-governance-decision-register.json D-R6 alternatives).",
+      "invented": false
+    },
+    {
+      "id": "F03",
+      "category": "active_governance_blocker",
+      "concept": "tuition_source_provenance",
+      "relatedTo": ["D-R6"],
+      "evidence": "docs/finance/dre-finance-confirmation-register.json id=F03; status=provisional_source, decisionStatus=open, approvedValue=null. blocksEngineCalculation=false, blocksBoardRatification=true, calculationContinues=true.",
+      "blockedOutputs": ["board ratification of tuition source (does not block engine calculation)"],
+      "notBlocked": ["enrollment", "sections", "headcount", "direct campus payroll", "DRE computation (calculationContinues=true)"],
+      "activeCoverageCellsBlocked": 900,
+      "resolutionRequired": "Finance confirms transcribed values match Finance-approved values, or provides a signed xlsx (financeAsk field).",
+      "invented": false
+    },
+    {
+      "id": "F05",
+      "category": "retired_decision",
+      "concept": "enrollment_baseline_parity",
+      "relatedTo": [],
+      "evidence": "docs/finance/dre-finance-confirmation-register.json id=F05 concerns t1_g3/intermediario — both retired: t1_g3 removed from ACTIVE_OPENING_PACKAGE_IDS and rejected at the engine level by assertSupportedDreEnrollmentCapacityLeverInput (throws 'Unsupported openingPackageId/occupancyScenarioId combination: t1_g3/base') since commit 3f4da5c (V10-E1 governed package migration, 2026-07-24); 'intermediario' renamed to 'base' the same commit.",
+      "blockedOutputs": [],
+      "notBlocked": ["all 900 cells of the current governed coverage matrix (t1_g4/t1_g6 x conservador/base/otimista x 3 org-design x 10 years x 5 tuition)"],
+      "activeCoverageCellsBlocked": 0,
+      "resolutionRequired": "None for active coverage. The underlying finance-register record (F05) itself remains formally 'open' for historical/audit purposes — that is a distinct question (whether Finance still needs to formally close the record) from whether it blocks any currently active, supported combination, which it does not.",
+      "invented": false
+    },
+    {
+      "id": "F06",
+      "category": "unsupported_product_boundary",
+      "concept": "instructional_capacity_payroll_sync",
+      "relatedTo": [],
+      "evidence": "docs/finance/dre-finance-confirmation-register.json id=F06; three non-identical, unreconciled MS/HS staffing sources exist: (1) Phase 15H.2 instructional-capacity planning model (secondaryEducatorCapacityModel.ts: MS 9 educators, HS 11 educators, combined pool 20), (2) the FOPAG payroll adapter's own fixed-FTE table (payrollAdapter.ts ms_teaching_lead/hs_teaching_lead roleSourceTypes), (3) a recovered-but-never-committed Phase 8B count.",
+      "blockedOutputs": ["MS/HS grade-level (per-grade) instructional headcount — genuinely unavailable, not extrapolated from EY/LS"],
+      "notBlocked": ["MS/HS aggregate headcount (engine estimate, shown labeled 'unreconciled' in PayrollProjectionTab.tsx, not misrepresented as governed grade-level staffing)", "EY/LS grade-level instructional headcount (fully governed, unaffected)"],
+      "activeCoverageCellsBlocked": 0,
+      "extrapolationToMsHs": false,
+      "aggregateInfoPreserved": true,
+      "resolutionRequired": "Finance and Academic jointly reconcile the three sources in a dedicated future phase (per F06's own financeAsk field).",
+      "invented": false
+    },
+    {
+      "id": "CORPORATE-ALLOCATION",
+      "category": "engineering_integration_gap",
+      "concept": "corporate_allocation_adapter",
+      "relatedTo": [],
+      "evidence": "No adapter exists anywhere in this codebase that allocates corporate/shared people-cost overhead onto direct campus payroll to form a 'consolidated people cost' metric (confirmed V10-RC2 Gate 5, reconfirmed V10-RC2.1 Gate 5, reconfirmed this phase). Two DISTINCT DRE-level fixed cost lines exist tagged costLineCategory='corporate_allocation' — dreLineId 'corporativo_bu' and 'rateio_corporativo' (dreLineItemMap.ts, populated with real Finance annual values in dreAnnualAssumptionSourceData.ts, feeding calculateDre()'s EBITDA) — but these are Finance-provided fixed P&L expense lines, directScenarioDriver=false, scenarioSensitivity=independent_of_board_decision_levers: NOT headcount-driven, NOT a function of payroll, and NOT a payroll-to-corporate-cost consolidation adapter. They must not be conflated with the payroll-side 'corporate allocation' this gate concerns.",
+      "blockedOutputs": ["payroll-side corporate allocation (unavailable)", "consolidated people cost = direct campus payroll + corporate allocation (unavailable, since it causally depends on corporate allocation)"],
+      "notBlocked": ["direct campus payroll (fopagDireto + folhaDireta + benefits — fully governed and available, never suppressed because corporate allocation is unavailable)"],
+      "activeCoverageCellsBlocked": 0,
+      "substitutedZero": false,
+      "directPayrollSuppressed": false,
+      "resolutionRequired": "A governed corporate-allocation source, formula, or adapter must be identified and approved before this output can exist. None is invented here.",
+      "invented": false
+    },
+    {
+      "id": "PAYROLL-TAB-CONSTRAINT",
+      "category": "resolved_decision",
+      "concept": "payroll_projection_tab_calculation_core_lock",
+      "relatedTo": [],
+      "evidence": "V10-RC2.1 Gate 4 established the constraint was advisory (added at initial commit aa5e198, 2026-05-22; already edited through twice under governance discipline; q19 pinned only two narrow byte ranges, not the whole file), not a filesystem or active-process lock. V10-RC2.2 explicitly authorized refactoring the calculation core and export handler; the refactor was completed and committed (commit a015a0a): shared scenario props, calculateFopag/calculateDre/buildOrgDesignHcTable consumption, retirement of the disconnected local axis, governed export builder.",
+      "blockedOutputs": [],
+      "notBlocked": ["Payroll now receives the shared scenario and governed staffing/role outputs, matching Org Design at the same granularity"],
+      "activeCoverageCellsBlocked": 0,
+      "protectedRangesModified": [
+        "PayrollProjectionTab.tsx lines ~85-234 (prior calculation core: local scenario/tuition/tier state, turmasMatrix, projection, allScenariosData, matrixData, gradeDetail) — replaced with shared-prop-driven calculateFopag/calculateDre/buildOrgDesignHcTable calls",
+        "PayrollProjectionTab.tsx lines ~242-257 (prior export handler: handleDownloadProjectionTable calling the standalone lib/payroll/exportXlsx.ts pathway) — replaced with buildDreScenarioWorkbook()"
+      ],
+      "resolutionRequired": "None — resolved this phase.",
+      "invented": false
+    }
+  ]
+}
