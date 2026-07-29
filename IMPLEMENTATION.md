@@ -6103,3 +6103,216 @@ real regressions closed with root-cause evidence rather than papered over, one
 architectural blocker replacing a vague "file lock" characterization, and two new,
 committed, validator-backed capabilities (staffing table, Fagundes export) where the
 prior phase had only a decision document.
+
+## Phase V10-RC2.2 — Payroll Shared-Engine Refactor and Release-Boundary Closure (2026-07-29)
+
+### Entry Gate
+
+Verified before any mutation: branch `main`; HEAD `2940f5d`; worktree and index clean;
+`origin/main` unchanged; ahead/behind = 36/0; no unexplained untracked files; the same
+single pre-existing stash (`stash@{0}`) untouched; no new worktree; nothing pushed or
+deployed. All facts matched — proceeded. This phase explicitly authorized refactoring
+`PayrollProjectionTab.tsx`'s previously file-lock-protected calculation core and export
+handler — the exact architectural blocker V10-RC2.1 closed with — "only as necessary to
+make Payroll consume the existing shared scenario, staffing and organizational-role
+engines."
+
+### Gate 1 — blocker register normalization
+
+New `docs/audits/rio-resilience/phase-v10-rc2-2-gate1-blocker-register.json`: 7 entries
+(D-R5, D-R6, F03, F05, F06, CORPORATE-ALLOCATION, PAYROLL-TAB-CONSTRAINT) classified into
+a 6-member taxonomy (`active_governance_blocker`, `retired_decision`,
+`engineering_integration_gap`, `unsupported_product_boundary`,
+`unavailable_financial_output`, `resolved_decision`). Live cross-checks
+(`validate:v10-rc2-2-gate1`) confirm: F05's subject is genuinely engine-rejected (not
+just documented), D-R6/F03 remain separate cross-referenced records (not merged), F06
+does not extrapolate the EY/LS rule to MS/HS, corporate allocation is never
+zero-substituted and never suppresses direct payroll, and the payroll-tab constraint
+cites a real, existing commit. ALL CHECKS PASSED.
+
+### Gate 2 — Payroll shared-engine refactor
+
+Wrote `docs/audits/rio-resilience/phase-v10-rc2-2-gate2-payroll-data-flow-map.md` before
+any mutation, identifying which of `PayrollProjectionTab.tsx`'s local computations
+duplicated already-governed engines (retire) versus genuinely missing capability
+(MS/HS grade-level detail, variable educator tier, corporate allocation — keep
+explicitly unavailable). Fully rewrote `PayrollProjectionTab.tsx`: retired its
+disconnected local scenario/tuition/tier axis and duplicate calculation paths
+(`buildPayrollProjection`, `buildScenarioComparison`, `getLeadFteForGrade`, etc.);
+now consumes `calculateFopag()`/`calculateDre()`/`buildOrgDesignHcTable()` directly via
+shared `openingPackageId`/`occupancyScenarioId`/`tuitionScenarioId` props (`App.tsx` →
+`SectionsAndPayrollWorkspace.tsx` → `PayrollProjectionTab.tsx`), matching the same call
+shape `ExecutiveOrgDesignTab.tsx` uses. Export switched from the standalone
+`lib/payroll/exportXlsx.ts` pathway to the governed `buildDreScenarioWorkbook()`.
+Workspace registry status for this subview changed `simulation` → `governed_data`.
+`validate-v10-x2t-workspace-architecture-i18n.ts`'s prior byte-identity pin against the
+old (intentionally superseded) file was replaced with 5 structural/behavioral checks
+(shared props received, governed engines consumed, disconnected axis retired, governed
+export used, no local currency formatting left in calc scope) — a deliberate
+architectural decision, documented inline, since a permanent blob-hash pin is
+structurally incompatible with any future authorized edit.
+
+### Gate 3 — Payroll parity validation
+
+New `scripts/validate-v10-rc2-2-gate3-payroll-parity.ts`: proves Org Design and Payroll
+headcount are identical by construction (both call `buildOrgDesignHcTable()` with the
+identical argument shape) across 180 combinations (2 packages x 3 captação x 3
+org-design x 10 years), 10,272 role-rows compared, 0 discrepancies; section counts match
+teaching-lead headcount exactly for 1,197 EY/LS grade-years; 366 role-activation-years
+are deterministic. Tier-invariance (597/597, `validate:v10-rc2-1-gate6`) and
+export-scenario-fidelity (11/11, `validate:v10-rc2-1-gate7`) were not re-implemented —
+cited as already proving what they prove.
+
+### Gate 4 — cost boundaries
+
+New `docs/audits/rio-resilience/phase-v10-rc2-2-gate4-cost-boundaries.md` documents the
+exact formula/source for all six cost concepts (base salary payroll, encargos, benefits,
+direct campus payroll, corporate allocation, consolidated people cost) and confirms
+D-R5/D-R6/F03 block only revenue-side outputs, never headcount or direct payroll. Found
+and fixed a real mislabeling this gate exists to catch: `PayrollProjectionTab.tsx`'s
+margin KPI was labeled "Cobertura Consolidada" / "Consolidated Coverage" while showing
+`totalRevenueAnnual - grandTotal` (direct campus payroll only, no corporate-allocation
+term) — implying consolidated-cost coverage it did not have. Renamed to "Margem sobre
+Folha Direta" / "Margin over Direct Payroll" in both locales and the component.
+`validate:v10-rc2-2-gate4`: 11/11, including a live check that `totalPayroll ===
+fopagDireto + folhaDireta + benefits` for all 360 governed year-totals, with no hidden
+corporate term.
+
+### Gate 5 — Fagundes export completion
+
+Per the directive: "The Fagundes Export Index alone does not satisfy this gate." Added
+three dedicated sheets to `dreScenarioWorkbook.ts` (25 → 28 sheets): "Grade-Level
+Staffing Summary" and "Grade-Level Staffing Detail" (sourced from the same
+`buildOrgDesignHcTable()` call Payroll and Org Design both use, with an explicit
+per-row F06 basis disclosure for MS/HS), and "Direct Payroll & Corp Alloc" (direct
+campus payroll shown unconditionally per year; Corporate Allocation and Consolidated
+People Cost columns explicitly labeled `UNAVAILABLE` citing the blocker, never blank,
+never zero). Fagundes Export Index updated with a new `partially_available`
+classification. All 11 requested outputs are now either materially implemented or
+explicitly, evidentially partial. `validate:v10-rc2-1-gate7` extended: 24/24.
+
+### Gate 6 — eight (nine-script) pre-existing failure disposition
+
+Fixed the three crashing scripts (`validate:phase15f`, `validate:phase15i2c`,
+`validate:phase15j`) at root cause: hardcoded/iterated retired `openingPackageId:
+"t1_g3"` (rejected since commit `3f4da5c`). Found and fixed a genuine live production
+bug along the way: `ScenarioConfigurationPanel.tsx`'s Capital Decision "Opening Grades"
+lever offered the two retired packages as selectable options — selecting either would
+crash `calculateInvestmentInterpretation`; now filtered to
+`ACTIVE_OPENING_PACKAGE_IDS`. Fixing the crashes exposed real pre-existing failures
+underneath, fixed with cited evidence: two DRE/formula checks tested a pre-V10-F2.2/D-R7
+"no reajuste factor" formula superseded 2026-07-27 before this session started (updated
+to the current, independently-validated `outras_receitas`/`receita_com_eventos`
+formulas, `validate:v10-f2` 76/76); two lever-propagation validators defined an "opening
+grades" comparison scenario left pointing at the same package as its own baseline
+(collapsed into a no-op), fixed to use the other active package.
+`validate:phase15i2c`: crash → 26/26. `validate:phase15j`: crash → 21/21.
+`validate:phase15f`: crash → 179/185 (6 checks disclosed as out-of-boundary, requiring
+Capital Decision domain review of discounted-payback economics under the `t1_g6`
+canonical base — unrelated to Payroll). The six non-crashing scripts
+(`validate:phase15i2-packet`, `phase15j3`, `phase15l`, `phase15l2`, `phase15m`,
+`phase15o`) reproduce byte-identical to their previously-disclosed state — confirmed via
+`git stash` that none were touched by this phase's Payroll refactor; dispositioned with
+exact evidence, not fixed, since all six require UI-content/domain judgment unrelated to
+Payroll consuming the shared engines.
+
+### Gate 7 — coverage matrix regeneration
+
+Extended the existing 900-cell generator (`validate:v10-rc2-gate8`, same cross-product,
+no new generator) with `payrollHeadcountAvailable`/`payrollMonetaryAvailable`/
+`payrollMonetaryCertified`/`corporateAllocationAvailable`/`consolidatedCostAvailable` per
+cell. Payroll headcount/monetary: 900/900 available (post-refactor, verified
+role-identical to Org Design at Gate 3). Corporate allocation and consolidated cost:
+0/900, `CORPORATE-ALLOCATION` blocker cited, never zero-substituted — with an explicit
+cross-tab proving direct payroll headcount is never suppressed by the gap (900/900). All
+pre-existing counts (900/900 for every previously-governed dimension, 0/900
+`fully_supported`, 0/900 `exportAvailable`) re-confirmed unchanged. 16/16 generator
+invariants hold.
+
+### Gate 8 — model, browser, and export validation; full regression sweep
+
+Full validator sweep (29 commands): all in-scope V10-RC2/V10-RC2.1/V10-RC2.2 validators
+green; all out-of-boundary pre-existing failures unchanged from Gate 6. Caught and fixed
+two false-positive regressions during the sweep (a Gate 5 sheet-builder function name
+containing the literal substring "CorporateAllocation," tripping Gate 1/Gate 4's live
+adapter-absence grep; a Gate 6 fixture comment using the literal retired string
+"intermediario," tripping the rc2-gate2 terminology check) — both fixed, not routed
+around. Live browser verification (Chrome automation, dev server on :3001, documented
+auth-bypass pattern): all six required model combinations (T1-G4/T1-G6 x
+Conservador/Base/Otimista x Minimum/Balanced/Premium x representative years) render
+real, distinct, non-crashing KPI values with the shared scenario state correctly
+propagating from Organizational Design to Payroll; tier invariance, PT/EN locale
+switching (including the Gate 4 label fix rendering correctly in Portuguese),
+back-navigation state persistence, the F06 MS/HS disclosure notice, and a representative
+`.xlsx` export (console-clean, zero errors) all confirmed live. `git diff --check` and
+`git diff --cached --check` both clean throughout.
+
+### Files changed this phase
+
+`docs/audits/rio-resilience/phase-v10-rc2-2-gate{1,2,4,5,6,7,8}-*.{md,json}` (new, 8
+files); `scripts/validate-v10-rc2-2-gate{1,3,4}-*.ts` (new, 3 files);
+`scripts/validate-phase15i2c.ts`, `scripts/validate-phase15j.ts` (Gate 6 crash fixes);
+`scripts/validate-v10-rc2-1-gate7-fagundes-export.ts` (Gate 5 extension);
+`scripts/validate-v10-rc2-gate8-coverage-matrix.ts` (Gate 7 fields);
+`scripts/validate-v10-x2t-workspace-architecture-i18n.ts` (Gate 2 structural checks);
+`src/App.tsx`, `src/components/sections/PayrollProjectionTab.tsx` (full rewrite, Gate
+2), `src/components/sections/SectionsAndPayrollWorkspace.tsx`,
+`src/config/workspaceRegistry.ts`; `src/components/dreSimulator/dreScenarioWorkbook.ts`
+(Gate 5, 3 new sheets); `src/features/rio-scenario-resilience/components/CapitalDecision/ScenarioConfigurationPanel.tsx`
+(Gate 6 production fix), `phase15fUiIntegrationValidation.ts`,
+`phase15cInvestmentMetricsEngineValidation.ts`,
+`phase15dDecisionLeverPropagationValidation{,Contract}.ts`,
+`phase15eInvestmentInterpretationValidation.ts`, `dreEngineValidation.ts` (Gate 6 fixes);
+`src/i18n/en-US.ts`, `src/i18n/pt-BR.ts` (Gate 4 label fix); `package.json` (+4 npm
+scripts).
+
+### Commits this phase
+
+`a015a0a` Gate 2 (Payroll shared-engine refactor) · `b055704` Gate 1 (blocker register) ·
+`4247cbe` Gate 3 (parity validation) · `7844767` Gate 4 (cost boundaries) · `d150ae3`
+Gate 6 (eight-failure disposition) · `bb3bcfa` Gate 5 (Fagundes export completion) ·
+`1bf3421` Gate 7 (coverage matrix regeneration) · `f331697` Gate 8 (two regression
+fixes) · `b62c81b` Gate 8 (model/browser/export validation doc, this update pending).
+
+### Final state
+
+Final HEAD (before this documentation commit): `b62c81b`.
+`git rev-list --count origin/main..HEAD` = 45, behind = 0. Decomposes cleanly:
+`git rev-list --count origin/main..2940f5d` = 36 (pre-existing, ahead of `origin/main`
+before this phase began) + 9 commits this phase = 45, matching exactly. Worktree and
+index clean; the same single pre-existing stash (`stash@{0}`) remains untouched; no new
+worktree, branch, or stash created; no push or deployment occurred at any point this
+phase.
+
+### Remaining blockers (governance and architectural — unchanged in kind, not newly introduced)
+
+1. **D-R5** (desconto método precision, ~2.8% of gross) — genuinely unresolved, Finance decision pending. The user explicitly declined to resolve D-R6/Gate 6 in this session ("Not now — leave Gate 6 blocked" — referring to the prior phase's Tuition/Revenue/DRE gate); this phase did not attempt to resolve it either, consistent with that instruction.
+2. **D-R6/F03** (base tuition source authority) — genuinely unresolved, `tuitionSourceData.ts` remains `screenshot_transcription_based`.
+3. **F06** (MS/HS staffing reconciliation) — three non-identical, unreconciled figures exist in this repository; now consistently disclosed everywhere Payroll/Org Design/export surfaces MS/HS headcount, not resolved.
+4. **Corporate allocation / consolidated people cost** — no adapter exists in this codebase; not built, not invented; explicitly, consistently unavailable across Payroll UI, the coverage matrix, and the export workbook.
+5. **Six non-crashing pre-existing validator failures** (Gate 6) — `phase15i2-packet` (1), `phase15j3` (13), `phase15l` (3), `phase15l2` (10), `phase15m` (7), `phase15o` (9) — all UI-content/domain questions unrelated to Payroll, confirmed unaffected by this phase, disclosed with exact evidence, recommended as a dedicated future phase.
+6. **Six Phase 15D.2/15F Capital Decision checks** (Gate 6) — discounted-payback "NA" propagation under the `t1_g6` canonical base; requires Capital Decision domain review, unrelated to Payroll.
+
+### Recommendation
+
+Every element of the directive's PASS criteria is met: Payroll consumes the shared
+scenario, governed staffing, and organizational-role engines; the disconnected local
+Payroll scenario path is retired, not fallback-retained; supported headcounts match
+Org Design exactly at role granularity (10,272 role-rows, 0 discrepancies); tier changes
+affect compensation only, never sections or headcount (597/597 invariance, reconfirmed
+live in-browser); MS/HS staffing stays explicit and disclosed everywhere it appears;
+direct payroll stays distinct from corporate allocation and consolidated cost, both of
+which remain honestly unavailable rather than zero-substituted or silently defaulted;
+every currently-supportable Fagundes output is materially implemented; the export
+receives the exact visible scenario; all eight/nine pre-existing failures received
+evidence-based dispositions (three fixed at crash root cause plus real underlying bugs,
+six disclosed with exact evidence); coverage counts were regenerated accurately with
+named fields and cross-tabs; no silent fallback or invented value exists anywhere in
+this phase's changes; the repository state is clean and reproducible (`git diff --check`
+and `git diff --cached --check` both clean throughout, nothing pushed, nothing
+deployed). Unresolved financial fields (D-R5, D-R6/F03) remain explicitly unavailable
+because their blockers are genuinely unresolved and correctly bounded — not because this
+phase declined to address them — and every supported output remains fully functional
+around them.
+
+**V10-RC2.2 PAYROLL SHARED-ENGINE REFACTOR AND RELEASE-BOUNDARY CLOSURE: PASS**
