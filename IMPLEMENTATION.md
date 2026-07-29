@@ -5545,3 +5545,135 @@ or require unwiring the `PayrollProjectionTab.tsx`-locked pathway, which is Gate
 blocker. Building the sheets themselves — even the unblocked DRE-sourced subset — was
 judged out of scope for this phase's remaining time budget and is reported as
 architecture-decided-but-not-implemented, not attempted.
+
+### Gate 6 — tuition/revenue/DRE wiring: BLOCKED, not attempted
+
+D-R6/F03 (base tuition source authority) is genuinely unresolved (Gate 1) —
+`tuitionSourceData.ts` remains `screenshot_transcription_based`, `needsFinanceReview:
+true`. The recovered stash conventions
+(`phase-v10-rc2-recovered-finance-convention-decisions.md`) govern *how* tuition is
+used (basis, discount timing, Receita v1 scope) but do not supply signed base rates —
+they cannot substitute for D-R6. Implementing new tuition-configuration wiring on top
+of uncertified base rates would present computed-but-unsigned figures as if they were
+governed, which Gate 6's own instruction forbids ("implement only calculations
+supported by recorded governance evidence"). The Gate 8 coverage matrix already
+reflects this correctly: `tuitionStatus: "computed_uncertified"` for all 900 cells,
+not a new wiring gap — the mechanism (tuition selection reaching Revenue/DRE) already
+works today via `calculateDre()`, which every one of those 900 cells exercises. What
+is missing is a Finance-signed value, not application code.
+
+### Gate 11 — regression results
+
+Full suite rerun against final `HEAD` (`22e2c00`):
+
+| Check | Result |
+|---|---|
+| `npm run lint` (tsc --noEmit) | clean |
+| `npm run build` (vite) | clean |
+| `validate:v10-e1` | 100/100 |
+| `validate:v10-e2` | 309/309 |
+| `validate:v10-f1b` | 109/109 |
+| `validate:v10-p1` | 58/58 |
+| `validate:v10-f2` | 76/76 |
+| `validate:v10-x1` | 39/39 |
+| `validate:phase15j2-simulator` | 31/31 |
+| `validate:phase15u2` | 81/81 |
+| `validate:v10-x2t` | 103/104 (q5 i18n gap, disclosed, unchanged scope — Gate 10) |
+| `validate:v10-rc2-gate2` (new) | ALL CHECKS PASSED |
+| `validate:v10-rc2-gate8` (new) | ALL CHECKS PASSED, 900/900 |
+| `validate-v10-x2t-3a-r1-division-page-reachability.ts` | 48/48 (Gate 10) |
+| `qa:x2t-state-invariance` | 12/12 |
+| `qa:x2t-accessibility` | 13/13 |
+| `qa:x2t-crawl-and-screenshots` | clean (0 mixed-language, 0 overflow, 0 console errors, 0 broken controls, 20/20 screenshots) |
+| `git diff --check` | clean |
+| `git diff --cached --check` | clean |
+
+**Two pre-existing, out-of-scope failures found during this regression pass (not
+introduced by V10-RC2, confirmed via A/B against unmodified `HEAD` using a scoped
+temporary stash of only this phase's changes):**
+
+- `validate:phase15i1` — 23/24. `canonical_fixture_2028_enrollment_228` expects 228,
+  gets 258, for the `t1_g3`/`base`/`bp1_division_differentiated`/`balanced_experience`
+  fixture. Plausibly the same D-R8/F05 conflation the Gate 1 matrix already names (258
+  is D-R8's `t1_g4` figure; this fixture is `t1_g3`) — not investigated further, as it
+  is outside Gate 10's named scope (only 103/104 and 43/45 were named) and not
+  reproduced or worsened by this phase's commits.
+- `qa:v10-e1` (Playwright, distinct from `validate:v10-e1` above, which passes) —
+  times out waiting for a button named "DRE Scenario Simulator". That string does not
+  exist in either locale's translation catalog (`wsDreShortLabel` is "DRE Operacional"
+  / "Operating P&L" — confirmed via direct grep of `pt-BR.ts`/`en-US.ts`); the test
+  file has not been touched in 22 commits. Stale test expectation, not a regression.
+
+**Export generation:** covered by `validate:v10-x1` (39/39, Payroll export matrix,
+unchanged). A live in-browser export-button click was not performed this phase (the
+export controls were not located within the browser QA time budget); this is recorded
+as a gap, not a pass.
+
+### Files changed this phase (10 commits, `6d95dde..22e2c00`)
+
+`c2d9772`, `ea6a699`, `00012f1`, `6532bc4`, `3062346`, `77bd201`, `2be39a2`, `25bf307`,
+`e2b6f5f`, `22e2c00`. Touched: `IMPLEMENTATION.md`; `package.json`;
+`docs/finance/dre-finance-confirmation-register.json`;
+`docs/audits/rio-resilience/phase-v10-rc2-gate1-decision-assimilation-matrix.md` (new);
+`docs/audits/rio-resilience/phase-v10-rc2-recovered-finance-convention-decisions.md`
+(new); `docs/audits/rio-resilience/phase-v10-rc2-gate8-coverage-matrix.json` (new);
+`scripts/validate-v10-rc2-gate2-governance.ts` (new);
+`scripts/validate-v10-rc2-gate8-coverage-matrix.ts` (new);
+`scripts/validate-v10-x2t-3a-r1-division-page-reachability.ts`; `src/App.tsx`;
+`src/components/sections/ExecutiveOrgDesignTab.tsx`.
+
+### Process note: concurrent background research agent
+
+Mid-phase, a background research agent dispatched for Gate 1 evidence recovery
+continued running after its intended task and, because it shared this same working
+tree, committed in-progress edits (including this session's own Gate 3 code, mid-edit)
+under its own narration (`6532bc4`, `3062346`). It was stopped
+(`TaskStop`) once discovered. Both commits were independently reviewed
+(`git show <sha>`) and confirmed to contain exactly the intended changes with no
+foreign content — `6532bc4`'s diff matches this session's own `App.tsx`/
+`ExecutiveOrgDesignTab.tsx` edits verbatim, and `3062346` correctly removed a
+duplicate `## Phase V10-RC2` section the same concurrent-write situation had produced
+in `IMPLEMENTATION.md`. No content was lost; the stash was not touched by this
+process. Recorded here because the commit authorship/narration does not reflect
+this session's own review timeline, even though the content is correct.
+
+### Final state
+
+Branch `main`, `HEAD` `22e2c00`, `origin/main` `1cab331`, ahead 27 / behind 0.
+Working tree clean, no untracked files, no new stash (`stash@{0}` is the same
+pre-existing entry present at phase start), no new worktree. No push, no deployment.
+
+### Remaining release blockers
+
+1. **D-R5** — `desconto_metodo` re-verification against the governing workbook
+   (genuinely unresolved, ~2.8% of gross tuition, precision risk only).
+2. **D-R6 / F03** — base tuition rate source authority (genuinely unresolved,
+   `screenshot_transcription_based`, blocks Gate 6 in full).
+3. **F05** — 2028 `t1_g3` enrollment scenario-mapping (engine 228 vs. workbook ~246;
+   genuinely unresolved; distinct from the resolved `t1_g4` D-R8 question).
+4. **F06** — MS/HS instructional-capacity vs. FOPAG staffing reconciliation
+   (genuinely unresolved; three non-identical figures now on record).
+5. **`PayrollProjectionTab.tsx` lock** — blocks the remainder of Gate 3 (Payroll's own
+   scenario state, including the retired `"pessimista"` value still present in its
+   local `PayrollScenario` type) and all of Gate 5's UI wiring and Gate 7's
+   Payroll-sourced export sheets. Requires an explicit project-owner unlock decision;
+   none was sought or assumed.
+6. **`q5_zero_unresolved_visible_strings_app_wide`** — 2768 reachable untranslated
+   strings, a disclosed, pre-existing, whole-application localization gap, unchanged
+   in scope by this phase (slightly improved, not worsened: 2772 → 2768).
+7. Two pre-existing, unrelated failures surfaced by this phase's regression pass
+   (`validate:phase15i1` 23/24, `qa:v10-e1` stale locator) — reported, not
+   investigated further, as outside this phase's named scope.
+
+### Recommendation
+
+Gates 1, 2, 3 (partial — the DRE↔Org Design connection, the concrete piece of RC1B's
+finding), 8, 9, 10 are complete and durable. Gates 4 and 5 are documented as already
+governed rather than newly implemented — no new calculation was needed. Gate 6 and the
+remainder of Gates 3/5/7 are correctly blocked on named, specific, external
+dependencies (two Finance decisions, one enrollment scenario-mapping decision, one
+staffing reconciliation, and one file-unlock decision) — not on missing engineering
+capacity. **Not ready for project-owner review as a "complete" phase** in the sense of
+closing all eleven gates, but the repository is in a materially more consistent,
+better-documented, and more behaviorally-correct state than at phase entry, with every
+remaining gap named precisely enough to act on without another reconciliation pass.
