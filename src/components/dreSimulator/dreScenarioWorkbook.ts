@@ -42,6 +42,10 @@ import type {
   OrgDesignSensitivityRow,
   PayrollReconciliationResult,
 } from "../../hooks/useDreScenarioSimulator";
+import {
+  buildPayrollAssumptionRows,
+  buildRoleScenarioActivationRows,
+} from "../../features/rio-scenario-resilience/model/payrollGovernanceWorkbookAdapter";
 
 export interface OrgDesignPayrollVariant {
   dreOutput: DreEngineOutput;
@@ -489,6 +493,8 @@ function buildReadmeSheet(vm: DreScenarioWorkbookViewModel): XLSX.WorkSheet {
     ["20. FOPAG Headcount Plan"],
     ["21. FOPAG Role Audit"],
     ["22. FOPAG Payroll Projection"],
+    ["23. Payroll Assumptions"],
+    ["24. Role Scenario Activation Matrix"],
     [],
     ["Three-version payroll export (Phase 15R.1):"],
     ["The main DRE sheets (1–13) reflect the selected scenario."],
@@ -528,6 +534,20 @@ function buildReadmeSheet(vm: DreScenarioWorkbookViewModel): XLSX.WorkSheet {
       "Scenario B / T1_G4 now uses the Finance workbook source for 2028 Base: 258 learners, 348 available capacity, and 74.1% occupancy. " +
         "The per-grade allocation is source-backed: T1 16, T2 16, PK3 28, PK4 32, Kindergarten 36, G1 40, G2 36, G3 32, G4 22. " +
         "Grade 4 remains a two-section Lower School opening package based on 48 available seats.",
+    ],
+    [],
+    ["Phase 15U.2 — Payroll Governance Sheets (tabs 23–24):"],
+    [
+      "Tab 23 (Payroll Assumptions) — one row per unique role ID. Shows per-person compensation basis " +
+        "(grossMonthly, laborChargesMonthly, benefitsMonthly), the 2028 annualized cost totals, " +
+        "the division/area, role group/hub, compensation archetype, and DRE reconciliation target. " +
+        "Values are read from model-backed fopagOutput records; nothing is manually typed.",
+    ],
+    [
+      "Tab 24 (Role Scenario Activation Matrix) — long format: one row per role × year × org design scenario. " +
+        "Covers all three org design versions (Minimum, Balanced, Premium) and all projection years. " +
+        "Shows HC/FTE, first active year, activation year source, allocation, and source type. " +
+        "Encargos is the single labor-charge component; no FGTS or INSS columns are created.",
     ],
   ];
   return XLSX.utils.aoa_to_sheet(rows);
@@ -1679,6 +1699,32 @@ function buildFopagPayrollProjectionSheet(tv: ThreeVersionPayroll): XLSX.WorkShe
   return XLSX.utils.aoa_to_sheet(rows);
 }
 
+// ── Sheet 23: Payroll Assumptions ────────────────────────────────────────────
+function buildPayrollAssumptionsSheet(vm: DreScenarioWorkbookViewModel): XLSX.WorkSheet {
+  const tv = vm.threeVersionPayroll;
+  const rows = buildPayrollAssumptionRows({
+    openingPackageId: vm.selections.openingPackageId,
+    occupancyScenarioId: vm.selections.occupancyScenarioId,
+    minimum: tv.minimum,
+    balanced: tv.balanced,
+    premium: tv.premium,
+  });
+  return XLSX.utils.aoa_to_sheet(rows);
+}
+
+// ── Sheet 24: Role Scenario Activation Matrix ─────────────────────────────────
+function buildRoleScenarioActivationMatrixSheet(vm: DreScenarioWorkbookViewModel): XLSX.WorkSheet {
+  const tv = vm.threeVersionPayroll;
+  const rows = buildRoleScenarioActivationRows({
+    openingPackageId: vm.selections.openingPackageId,
+    occupancyScenarioId: vm.selections.occupancyScenarioId,
+    minimum: tv.minimum,
+    balanced: tv.balanced,
+    premium: tv.premium,
+  });
+  return XLSX.utils.aoa_to_sheet(rows);
+}
+
 // ── Main entry point ──────────────────────────────────────────────────────────
 export function buildDreScenarioWorkbook(vm: DreScenarioWorkbookViewModel): XLSX.WorkBook {
   const wb = XLSX.utils.book_new();
@@ -1727,6 +1773,10 @@ export function buildDreScenarioWorkbook(vm: DreScenarioWorkbookViewModel): XLSX
   XLSX.utils.book_append_sheet(wb, buildFopagHeadcountPlanSheet(tv), "FOPAG Headcount Plan");
   XLSX.utils.book_append_sheet(wb, buildFopagRoleAuditSheet(tv), "FOPAG Role Audit");
   XLSX.utils.book_append_sheet(wb, buildFopagPayrollProjectionSheet(tv), "FOPAG Payroll Projection");
+
+  // Phase 15U.2: payroll governance sheets
+  XLSX.utils.book_append_sheet(wb, buildPayrollAssumptionsSheet(vm), "Payroll Assumptions");
+  XLSX.utils.book_append_sheet(wb, buildRoleScenarioActivationMatrixSheet(vm), "Role Scenario Activation Matrix");
 
   return wb;
 }
