@@ -5390,3 +5390,135 @@ asserts its calculation-core and export-handler substrings are byte-identical to
 V10-X2T entry state. Wiring Payroll into the shared contract requires an explicit
 unlock decision from the project owner that this phase does not have; it is reported
 as a named blocker, not attempted.
+
+### Gate 4 — grade-level staffing, EY/LS rows (canonical scenario: t1_g6/base/balanced/2028)
+
+Computed live via `calculateFopag()` + `calculateSectionCountsForScenario()` — not
+hand-entered. Educator/assistant/monitor headcount equals section count exactly, per
+the approved rule (`payrollAdapter.ts:344-349`, "Phase 8H.1, project owner Luciana
+Polonen, 2026-06-03"): EY = 1 lead + 1 assistant + 1 monitor per section; LS = 1 lead +
+1 assistant per section (no monitor). Annual base payroll = salary + encargos
+(`grossLaborAnnualAfterGrowth`, V10-P1 5.9%/yr escalation); annual loaded cost adds
+benefits (`totalAnnualPayrollAfterGrowth`, V10-P1 10%/yr escalation). Tier is Master
+Educator for every EY/LS grade (Phase 8C v1 default, `payrollStaffingRuleSourceTrace.md`
+§17.1, recovered this phase — see Gate 1) and affects these BRL figures only, not the
+headcount columns.
+
+| Grade | Learners | Sections | Educators | Educator tier | Assistants | Assistant tier | Monitors | Total HC | Annual base payroll (BRL) | Annual loaded cost (BRL) |
+|---|---:|---:|---:|---|---:|---|---:|---:|---:|---:|
+| EY T1 | 16 | 2 | 2 | Master | 2 | Master | 2 | 6 | 978,312 | 1,058,497 |
+| EY T2 | 16 | 2 | 2 | Master | 2 | Master | 2 | 6 | 978,312 | 1,058,497 |
+| EY PK3 | 24 | 2 | 2 | Master | 2 | Master | 2 | 6 | 978,312 | 1,058,497 |
+| EY PK4 | 28 | 2 | 2 | Master | 2 | Master | 2 | 6 | 978,312 | 1,058,497 |
+| EY Kindergarten | 30 | 2 | 2 | Master | 2 | Master | 2 | 6 | 978,312 | 1,058,497 |
+| LS G1 | 34 | 2 | 2 | Master | 2 | Master | 0 | 4 | 812,124 | 866,999 |
+| LS G2 | 28 | 2 | 2 | Master | 2 | Master | 0 | 4 | 812,124 | 866,999 |
+| LS G3 | 26 | 2 | 2 | Master | 2 | Master | 0 | 4 | 812,124 | 866,999 |
+| LS G4 | 22 | 2 | 2 | Master | 2 | Master | 0 | 4 | 812,124 | 866,999 |
+| LS G5 | 18 | 2 | 2 | Master | 2 | Master | 0 | 4 | 812,124 | 866,999 |
+
+**MS/HS rows deliberately omitted from this table** — F06 (Gate 1) records three
+non-identical, unreconciled MS/HS staffing figures in this repository (Phase 15H.2
+instructional-capacity model, the FOPAG adapter's own fixed-FTE table, and a
+recovered-but-never-committed Phase 8B count). Presenting one as settled would
+contradict Gate 1's own finding. The full cross-product for all divisions, packages,
+captação/org-design/year/tuition combinations — with MS/HS rows carrying this
+limitation explicitly per cell — is in the Gate 8 coverage matrix below, not
+duplicated here as a second table.
+
+### Gate 5 — Org Design / Payroll(FOPAG) integration
+
+Org Design and the FOPAG engine already share one calculation output:
+`orgDesignHcTableAdapter.ts`'s `buildOrgDesignHcTable()` calls `calculateFopag()`
+directly and derives its headcount table from `output.records` — it does not rebuild
+headcount from a separate grade table. Direct campus payroll (`FOPAG_DIRETO` +
+`FOLHA_DIRETA`), benefits, and encargos are tracked as separate components on every
+`FopagCalculatedRecord`/`FopagYearTotals` (`fopagDireto`, `folhaDireta`, `benefits`,
+`totalPayroll = fopagDireto + folhaDireta + benefits`) — proven per-year by
+`validate:v10-p1` (58/58). Consolidated people cost (direct + corporate allocation) is
+out of scope for this phase: FOPAG's `FOLHA_DIRETA`/`FOPAG_DIRETO` split is a
+direct-campus-only breakdown; no corporate-allocation adapter exists in this codebase
+to sum against it, and none is invented here.
+
+Comparison across Minimum/Balanced/Premium preserves opening package, captação, year,
+and tuition configuration by construction — `calculateFopag()`/`calculateDre()` take
+`orgDesignOptionId` as the only varying input across a comparison; the Gate 8 matrix's
+900-cell run exercises exactly this for every other-dimension combination.
+
+**Blocked:** implementing any *new* salary/benefit/dissídio/encargos rule is out of
+scope — none was needed, since V10-P1/V10-P1.1 already governs all of it (Gate 1).
+Wiring `PayrollProjectionTab.tsx` itself into this shared output is blocked by its
+file-level lock (Gate 3, above) — Payroll's UI and Org Design's UI both call into the
+same governed engine today, but through two different, unshared scenario-selection
+surfaces.
+
+### Gate 8/9 — coverage matrix and model-level cross-product
+
+See `docs/audits/rio-resilience/phase-v10-rc2-gate8-coverage-matrix.json`
+(`npm run validate:v10-rc2-gate8`, generated and self-asserting). Full governed
+cross-product: 2 active opening packages x 3 captação x 3 org-design x 10 years
+(2028-2037) x 5 governed tuition scenarios = 900 cells, computed by the live engines,
+not derived from documentation. Result: enrollment, per-grade enrollment, sections,
+staffing, payroll, revenue, and DRE handoff are available for 900/900 cells (Gate 1's
+`encoded_consistently` decisions are, in fact, consistently computable everywhere in
+the matrix). Export is unavailable for 900/900 cells (Gate 7, below). Tuition is
+`computed_uncertified` for all cells (D-R6/F03). MS/HS-staffing limitation (F06) is
+named per cell, not silently resolved. No fallback to Base, no substituted
+package/year/org-design, no default tuition selection, no extrapolated per-grade
+enrollment, no capacity substituted for enrollment anywhere in the generator.
+
+### Gate 7 — export parity architecture decision (documented, not built)
+
+**Decision: extend the existing 24-sheet `dreScenarioWorkbook.ts` with a governed
+Fagundes *view* — a curated subset/reordering of already-computed sheet data — rather
+than building a second, parallel 11-sheet export engine.** Reasons:
+
+1. **Correction after direct verification:** `dreScenarioWorkbook.ts` (the 24-sheet
+   builder) is *not* one of the six files `q11_governed_export_files_unchanged_runtime`
+   pins to their V10-X1 committed blob — it was checked and confirmed absent from
+   `GOVERNED_EXPORT_FILES` in `validate-v10-x2t-workspace-architecture-i18n.ts:432-439`
+   (that list is `payrollExportMatrixContract.ts`, `payrollExportWorkbookBuilder.ts`,
+   `payrollExportSummaryWorkbookBuilder.ts`, `payrollExportManifest.ts`,
+   `payrollExportZip.ts`, `payrollExportScenarioAdapter.ts` — a *separate* export
+   pathway, called only from the Payroll workspace, distinct from
+   `dreScenarioWorkbook.ts`'s `buildDreScenarioWorkbook()`, which is called only from
+   `DreExportButton.tsx`). `dreScenarioWorkbook.ts` does appear in a second,
+   *non-immutable* check (`no_drift__src/components/dreSimulator/dreScenarioWorkbook.ts`)
+   that re-baselines against current `HEAD` every run rather than a fixed historical
+   commit — Phase 15U.2 (`9c90cb6`) already extended it with two new sheets without
+   tripping that check. Extending `dreScenarioWorkbook.ts` further is not blocked by
+   either validator. `validate:v10-x1` (39/39) gates the *other* (Payroll) export
+   pathway against the same immutable V10-X1 blob as `q11` — a parallel engine there
+   would duplicate formula logic that validator already certifies.
+2. Nearly every requested Fagundes sheet already has a direct or near-direct
+   existing counterpart: Scenario Control -> `Scenario Inputs`; Grade-Level Staffing
+   Summary/Detail -> `Org Design Roles` / `FOPAG Role Audit` / `Payroll Detail -
+   {Minimum,Balanced,Premium}`; Non-Teaching Headcount -> `Org Design Roles`;
+   Staffing and Tier Assumptions -> `Payroll Assumptions`; Payroll Detail ->
+   `Payroll Detail - *`; Direct Payroll and Corporate Allocation -> `DRE Payroll
+   Bridge` (direct-only — no corporate-allocation adapter exists in this codebase,
+   per Gate 5's finding above; a Fagundes view cannot show a figure the engine
+   does not produce); Tuition and Revenue Assumptions -> `Tuition Revenue`; Scenario
+   Comparison -> `Scenario Sensitivity Matrix` / `Org Design Sensitivity`; FOPAG_DIRETO
+   Payroll Bridge -> `DRE Payroll Bridge`; Source and Formula Lineage -> `Formula
+   Audit` / `Raw Engine Output`.
+3. Building a duplicate engine is the specific failure mode the phase directive
+   warns against ("prefer reuse of the existing calculation and formula-preserving
+   export architecture").
+
+**Partially blocked, not attempted this phase (architecture decided, sheets not built):**
+the DRE-sourced Fagundes sheets (Scenario Control, Tuition/Revenue Assumptions,
+Payroll Detail via `calculateFopag`, Scenario Comparison, Source/Formula Lineage) could
+in principle be extended into `dreScenarioWorkbook.ts` without touching any locked
+file, since `buildDreScenarioWorkbook()` already consumes the same shared
+`dreSelections` state Gate 3 wired end-to-end. The Direct Payroll and Corporate
+Allocation sheet cannot be built at all yet — no corporate-allocation adapter exists
+(Gate 5). And `payrollExportScenarioAdapter.ts` (one of the six `q11`-pinned files)
+still reads governed FOPAG records independently of `PayrollProjectionTab`'s live UI
+state (RC1B's finding, still true) — a Fagundes view that needs *that* pathway's data
+would either inherit the same disconnect the phase directive forbids ("must receive
+the exact visible shared scenario state... must not independently select defaults")
+or require unwiring the `PayrollProjectionTab.tsx`-locked pathway, which is Gate 5's
+blocker. Building the sheets themselves — even the unblocked DRE-sourced subset — was
+judged out of scope for this phase's remaining time budget and is reported as
+architecture-decided-but-not-implemented, not attempted.
