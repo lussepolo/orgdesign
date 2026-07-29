@@ -1,0 +1,1056 @@
+[
+ {
+  "index": 14,
+  "path": "pedagogicalOfferScenarios[0]<Scenario A>.title",
+  "keyName": "offerScenarioATitle",
+  "pt": "Cenário A",
+  "en": "Scenario A",
+  "disposition": "semantic-id-display-separation",
+  "notes": "Scenario A/B/C/D is the literal stable ID used elsewhere for React state (selectedScenarioTitle), .find() comparisons, and map keys — keep the ID string unchanged in source; only the rendered label is localized."
+ },
+ {
+  "index": 41,
+  "path": "pedagogicalOfferScenarios[1]<Scenario B>.title",
+  "keyName": "offerScenarioBTitle",
+  "pt": "Cenário B",
+  "en": "Scenario B",
+  "disposition": "semantic-id-display-separation",
+  "notes": "Scenario A/B/C/D is the literal stable ID used elsewhere for React state (selectedScenarioTitle), .find() comparisons, and map keys — keep the ID string unchanged in source; only the rendered label is localized."
+ },
+ {
+  "index": 69,
+  "path": "pedagogicalOfferScenarios[2]<Scenario C>.title",
+  "keyName": "offerScenarioCTitle",
+  "pt": "Cenário C",
+  "en": "Scenario C",
+  "disposition": "semantic-id-display-separation",
+  "notes": "Scenario A/B/C/D is the literal stable ID used elsewhere for React state (selectedScenarioTitle), .find() comparisons, and map keys — keep the ID string unchanged in source; only the rendered label is localized."
+ },
+ {
+  "index": 98,
+  "path": "pedagogicalOfferScenarios[3]<Scenario D>.title",
+  "keyName": "offerScenarioDTitle",
+  "pt": "Cenário D",
+  "en": "Scenario D",
+  "disposition": "semantic-id-display-separation",
+  "notes": "Scenario A/B/C/D is the literal stable ID used elsewhere for React state (selectedScenarioTitle), .find() comparisons, and map keys — keep the ID string unchanged in source; only the rendered label is localized."
+ },
+ {
+  "index": 190,
+  "path": "specialistPillarGradeSequence[0]",
+  "keyName": "offerSpecialistPillarGradeSequence1",
+  "pt": "Toddlers 1",
+  "en": "Toddlers 1",
+  "disposition": "semantic-id-display-separation",
+  "notes": "array value used positionally (indexOf) / as SpecialistFinalGrade type state - keep the literal English string unchanged in source; translation pair below is for the DISPLAY label only, per the app's governed grade glossary. Toddlers 1/2 unchanged both locales per rule 7."
+ },
+ {
+  "index": 191,
+  "path": "specialistPillarGradeSequence[1]",
+  "keyName": "offerSpecialistPillarGradeSequence2",
+  "pt": "Toddlers 2",
+  "en": "Toddlers 2",
+  "disposition": "semantic-id-display-separation",
+  "notes": "array value used positionally (indexOf) - keep literal English string unchanged in source; display label per rule 7 glossary. Toddlers 1/2 unchanged both locales."
+ },
+ {
+  "index": 192,
+  "path": "specialistPillarGradeSequence[2]",
+  "keyName": "offerSpecialistPillarGradeSequence3",
+  "pt": "Pré-K3",
+  "en": "Pre-K3",
+  "disposition": "semantic-id-display-separation",
+  "notes": "array value used positionally (indexOf) - keep literal English string unchanged in source; display label per rule 7 glossary, matches earlyYearsGradePreK3 in pt-BR.ts/en-US.ts."
+ },
+ {
+  "index": 193,
+  "path": "specialistPillarGradeSequence[3]",
+  "keyName": "offerSpecialistPillarGradeSequence4",
+  "pt": "Pré-K4",
+  "en": "Pre-K4",
+  "disposition": "semantic-id-display-separation",
+  "notes": "array value used positionally (indexOf) - keep literal English string unchanged in source; display label per rule 7 glossary, matches earlyYearsGradePreK4 in pt-BR.ts/en-US.ts."
+ },
+ {
+  "index": 194,
+  "path": "specialistPillarGradeSequence[4]",
+  "keyName": "offerSpecialistPillarGradeSequence5",
+  "pt": "Jardim",
+  "en": "Kinder",
+  "disposition": "semantic-id-display-separation",
+  "notes": "array value used positionally (indexOf) - keep literal English string \"Kindergarten\" unchanged in source; display label corrected per rule 7 to match app's already-governed canonical terms (earlyYearsGradeKinder: en \"Kinder\", pt \"Jardim\"), not a literal 'Kindergarten'/'Jardim de Infância' translation."
+ },
+ {
+  "index": 195,
+  "path": "specialistPillarGradeSequence[5]",
+  "keyName": "offerSpecialistPillarGradeSequence6",
+  "pt": "Série 1",
+  "en": "Grade 1",
+  "disposition": "semantic-id-display-separation",
+  "notes": "array value used positionally (indexOf) - keep literal English string unchanged in source; display label per rule 7 governed grade glossary."
+ },
+ {
+  "index": 196,
+  "path": "specialistPillarGradeSequence[6]",
+  "keyName": "offerSpecialistPillarGradeSequence7",
+  "pt": "Série 2",
+  "en": "Grade 2",
+  "disposition": "semantic-id-display-separation",
+  "notes": "array value used positionally (indexOf) - keep literal English string unchanged in source; display label per rule 7 governed grade glossary."
+ },
+ {
+  "index": 197,
+  "path": "specialistPillarGradeSequence[7]",
+  "keyName": "offerSpecialistPillarGradeSequence8",
+  "pt": "Série 3",
+  "en": "Grade 3",
+  "disposition": "semantic-id-display-separation",
+  "notes": "array value used positionally (indexOf) - keep literal English string unchanged in source; display label per rule 7 governed grade glossary."
+ },
+ {
+  "index": 198,
+  "path": "specialistPillarGradeSequence[8]",
+  "keyName": "offerSpecialistPillarGradeSequence9",
+  "pt": "Série 4",
+  "en": "Grade 4",
+  "disposition": "semantic-id-display-separation",
+  "notes": "array value used positionally (indexOf) - keep literal English string unchanged in source; display label per rule 7 governed grade glossary."
+ },
+ {
+  "index": 199,
+  "path": "specialistPillarGradeSequence[9]",
+  "keyName": "offerSpecialistPillarGradeSequence10",
+  "pt": "Série 5",
+  "en": "Grade 5",
+  "disposition": "semantic-id-display-separation",
+  "notes": "array value used positionally (indexOf) - keep literal English string unchanged in source; display label per rule 7 governed grade glossary."
+ },
+ {
+  "index": 200,
+  "path": "specialistPillarGradeSequence[10]",
+  "keyName": "offerSpecialistPillarGradeSequence11",
+  "pt": "Série 6",
+  "en": "Grade 6",
+  "disposition": "semantic-id-display-separation",
+  "notes": "array value used positionally (indexOf) - keep literal English string unchanged in source; display label per rule 7 governed grade glossary."
+ },
+ {
+  "index": 201,
+  "path": "specialistFinalGradeOptions[0]",
+  "keyName": "offerSpecialistFinalGradeOption1",
+  "pt": "Série 3",
+  "en": "Grade 3",
+  "disposition": "semantic-id-display-separation",
+  "notes": "value used as SpecialistFinalGrade type/state (dropdown option) - keep literal English string unchanged in source; display label per rule 7 governed grade glossary."
+ },
+ {
+  "index": 202,
+  "path": "specialistFinalGradeOptions[1]",
+  "keyName": "offerSpecialistFinalGradeOption2",
+  "pt": "Série 4",
+  "en": "Grade 4",
+  "disposition": "semantic-id-display-separation",
+  "notes": "value used as SpecialistFinalGrade type/state (dropdown option) - keep literal English string unchanged in source; display label per rule 7 governed grade glossary."
+ },
+ {
+  "index": 203,
+  "path": "specialistFinalGradeOptions[2]",
+  "keyName": "offerSpecialistFinalGradeOption3",
+  "pt": "Série 5",
+  "en": "Grade 5",
+  "disposition": "semantic-id-display-separation",
+  "notes": "value used as SpecialistFinalGrade type/state (dropdown option) - keep literal English string unchanged in source; display label per rule 7 governed grade glossary."
+ },
+ {
+  "index": 204,
+  "path": "specialistFinalGradeOptions[3]",
+  "keyName": "offerSpecialistFinalGradeOption4",
+  "pt": "Série 6",
+  "en": "Grade 6",
+  "disposition": "semantic-id-display-separation",
+  "notes": "value used as SpecialistFinalGrade type/state (dropdown option) - keep literal English string unchanged in source; display label per rule 7 governed grade glossary."
+ },
+ {
+  "index": 328,
+  "path": "scenarioMatrix[0][0]",
+  "keyName": "offerScenarioMatrixRowATitle",
+  "pt": "Cenário A",
+  "en": "Scenario A",
+  "disposition": "semantic-id-display-separation",
+  "notes": "Row-key literal used the same way as pedagogicalOfferScenarios[0].title (see index 14) — 'Scenario A' is compared/used as an ID elsewhere in the component; keep ID unchanged, localize only the display label."
+ },
+ {
+  "index": 336,
+  "path": "scenarioMatrix[1][0]",
+  "keyName": "offerScenarioMatrixRowBTitle",
+  "pt": "Cenário B",
+  "en": "Scenario B",
+  "disposition": "semantic-id-display-separation",
+  "notes": "Row-key literal used the same way as pedagogicalOfferScenarios[1].title (see index 41) — 'Scenario B' is compared/used as an ID elsewhere in the component; keep ID unchanged, localize only the display label."
+ },
+ {
+  "index": 344,
+  "path": "scenarioMatrix[2][0]",
+  "keyName": "offerScenarioMatrixRowCTitle",
+  "pt": "Cenário C",
+  "en": "Scenario C",
+  "disposition": "semantic-id-display-separation",
+  "notes": "Row-key literal used the same way as pedagogicalOfferScenarios[2].title (see index 69) — 'Scenario C' is compared/used as an ID elsewhere in the component; keep ID unchanged, localize only the display label."
+ },
+ {
+  "index": 352,
+  "path": "scenarioMatrix[3][0]",
+  "keyName": "offerScenarioMatrixRowDTitle",
+  "pt": "Cenário D",
+  "en": "Scenario D",
+  "disposition": "semantic-id-display-separation",
+  "notes": "Row-key literal used the same way as pedagogicalOfferScenarios[3].title (see index 98) — 'Scenario D' is compared/used as an ID elsewhere in the component; keep ID unchanged, localize only the display label."
+ },
+ {
+  "index": 404,
+  "path": "baselineDivisionArchitecture[0]<Early Years>.division",
+  "keyName": "offerDivisionEarlyYearsLabel",
+  "pt": "Educação Infantil",
+  "en": "Early Years",
+  "disposition": "semantic-id-display-separation",
+  "notes": "division name is used as a comparison/lookup value and React key elsewhere (division.division) — keep the literal division-name string unchanged in source, only the rendered label is localized."
+ },
+ {
+  "index": 422,
+  "path": "baselineDivisionArchitecture[1]<Lower School>.division",
+  "keyName": "offerDivisionLowerSchoolLabel",
+  "pt": "Ensino Fundamental: Anos Iniciais",
+  "en": "Lower School",
+  "disposition": "semantic-id-display-separation",
+  "notes": "division name is used as a comparison/lookup value and React key elsewhere (division.division) — keep the literal division-name string unchanged in source, only the rendered label is localized."
+ },
+ {
+  "index": 444,
+  "path": "baselineDivisionArchitecture[2]<Middle School>.division",
+  "keyName": "offerDivisionMiddleSchoolLabel",
+  "pt": "Ensino Fundamental: Anos Finais",
+  "en": "Middle School",
+  "disposition": "semantic-id-display-separation",
+  "notes": "division name is used as a comparison/lookup value and React key elsewhere (division.division) — keep the literal division-name string unchanged in source, only the rendered label is localized."
+ },
+ {
+  "index": 468,
+  "path": "baselineDivisionArchitecture[3]<High School, future stage>.division",
+  "keyName": "offerDivisionHighSchoolLabel",
+  "pt": "Ensino Médio, etapa futura",
+  "en": "High School, future stage",
+  "disposition": "semantic-id-display-separation",
+  "notes": "division name is used as a comparison/lookup value and React key elsewhere (division.division) — keep the literal division-name string unchanged in source, only the rendered label is localized."
+ },
+ {
+  "index": 544,
+  "path": "decisionPanelItems[0]<Scenario A>.scenario",
+  "keyName": "offerDecisionPanelScenarioALabel",
+  "pt": "Cenário A",
+  "en": "Scenario A",
+  "disposition": "semantic-id-display-separation",
+  "notes": "Scenario A-D stable ID, only display label localized."
+ },
+ {
+  "index": 549,
+  "path": "decisionPanelItems[1]<Scenario B>.scenario",
+  "keyName": "offerDecisionPanelScenarioBLabel",
+  "pt": "Cenário B",
+  "en": "Scenario B",
+  "disposition": "semantic-id-display-separation",
+  "notes": "Scenario A-D stable ID, only display label localized."
+ },
+ {
+  "index": 554,
+  "path": "decisionPanelItems[2]<Scenario C>.scenario",
+  "keyName": "offerDecisionPanelScenarioCLabel",
+  "pt": "Cenário C",
+  "en": "Scenario C",
+  "disposition": "semantic-id-display-separation",
+  "notes": "Scenario A-D stable ID, only display label localized."
+ },
+ {
+  "index": 559,
+  "path": "decisionPanelItems[3]<Scenario D>.scenario",
+  "keyName": "offerDecisionPanelScenarioDLabel",
+  "pt": "Cenário D",
+  "en": "Scenario D",
+  "disposition": "semantic-id-display-separation",
+  "notes": "Scenario A-D stable ID, only display label localized."
+ },
+ {
+  "index": 567,
+  "path": "minimumAcademicOperationGroups[0]<Linha de base vivida pelo estudante>.systems[0]",
+  "keyName": "offerMinAcademicOpsSystemClassroomOwnership",
+  "pt": "Titularidade da sala de aula",
+  "en": "Classroom ownership",
+  "disposition": "semantic-id-display-separation",
+  "notes": "this string is a lookup key matching minimumAcademicOperations[].system elsewhere in the file via .find(item => item.system === system) — keep the literal system-name string unchanged in source; reuses the exact translation pair from index 519"
+ },
+ {
+  "index": 568,
+  "path": "minimumAcademicOperationGroups[0]<Linha de base vivida pelo estudante>.systems[1]",
+  "keyName": "offerMinAcademicOpsSystemClassroomPackage",
+  "pt": "Pacote de sala de aula",
+  "en": "Classroom package",
+  "disposition": "semantic-id-display-separation",
+  "notes": "this string is a lookup key matching minimumAcademicOperations[].system elsewhere in the file via .find(item => item.system === system) — keep the literal system-name string unchanged in source; reuses the exact translation pair from index 522"
+ },
+ {
+  "index": 569,
+  "path": "minimumAcademicOperationGroups[0]<Linha de base vivida pelo estudante>.systems[2]",
+  "keyName": "offerMinAcademicOpsSystemSpecialistAccess",
+  "pt": "Acesso a especialistas",
+  "en": "Specialist access",
+  "disposition": "semantic-id-display-separation",
+  "notes": "this string is a lookup key matching minimumAcademicOperations[].system elsewhere in the file via .find(item => item.system === system) — keep the literal system-name string unchanged in source; reuses the exact translation pair from index 525"
+ },
+ {
+  "index": 574,
+  "path": "minimumAcademicOperationGroups[1]<Camada de inteligência acadêmica>.systems[0]",
+  "keyName": "offerMinAcademicOpsSystemAcademicPerformanceLanguageAcquisition",
+  "pt": "Desempenho acadêmico e aquisição de língua",
+  "en": "Academic performance and language acquisition",
+  "disposition": "semantic-id-display-separation",
+  "notes": "this string is a lookup key matching minimumAcademicOperations[].system elsewhere in the file via .find(item => item.system === system) — keep the literal system-name string unchanged in source; reuses the exact translation pair from index 528"
+ },
+ {
+  "index": 575,
+  "path": "minimumAcademicOperationGroups[1]<Camada de inteligência acadêmica>.systems[1]",
+  "keyName": "offerMinAcademicOpsSystemCurriculumAssessmentCoherence",
+  "pt": "Coerência de currículo e avaliação",
+  "en": "Curriculum and assessment coherence",
+  "disposition": "semantic-id-display-separation",
+  "notes": "this string is a lookup key matching minimumAcademicOperations[].system elsewhere in the file via .find(item => item.system === system) — keep the literal system-name string unchanged in source; reuses the exact translation pair from index 532"
+ },
+ {
+  "index": 576,
+  "path": "minimumAcademicOperationGroups[1]<Camada de inteligência acadêmica>.systems[2]",
+  "keyName": "offerMinAcademicOpsSystemDocumentationPortfolio",
+  "pt": "Documentação e portfólio",
+  "en": "Documentation and portfolio",
+  "disposition": "semantic-id-display-separation",
+  "notes": "this string is a lookup key matching minimumAcademicOperations[].system elsewhere in the file via .find(item => item.system === system) — keep the literal system-name string unchanged in source; reuses the exact translation pair from index 535"
+ },
+ {
+  "index": 581,
+  "path": "minimumAcademicOperationGroups[2]<Camada de controle de qualidade>.systems[0]",
+  "keyName": "offerMinAcademicOpsSystemSignatureProgramRoutines",
+  "pt": "Rotinas dos programas de assinatura",
+  "en": "Signature program routines",
+  "disposition": "semantic-id-display-separation",
+  "notes": "this string is a lookup key matching minimumAcademicOperations[].system elsewhere in the file via .find(item => item.system === system) — keep the literal system-name string unchanged in source; reuses the exact translation pair from index 538"
+ },
+ {
+  "index": 582,
+  "path": "minimumAcademicOperationGroups[2]<Camada de controle de qualidade>.systems[1]",
+  "keyName": "offerMinAcademicOpsSystemDivisionalLeadershipCoaching",
+  "pt": "Liderança e coaching divisional",
+  "en": "Divisional leadership and coaching",
+  "disposition": "semantic-id-display-separation",
+  "notes": "this string is a lookup key matching minimumAcademicOperations[].system elsewhere in the file via .find(item => item.system === system) — keep the literal system-name string unchanged in source; reuses the exact translation pair from index 541"
+ },
+ {
+  "index": 626,
+  "path": "sharedBudgetRows[0]<Classroom package>.status",
+  "keyName": "offerBudgetSharedRowClassroomPackageStatus",
+  "pt": "Controle de linha de base",
+  "en": "Baseline control",
+  "disposition": "semantic-id-display-separation",
+  "notes": "status string is a BudgetRowStatus value used as a Record key in budgetStatusClassName for className lookup — keep the ID string unchanged in source (the BudgetRowStatus type/values), only the rendered display label is localized."
+ },
+ {
+  "index": 632,
+  "path": "sharedBudgetRows[1]<Leadership>.status",
+  "keyName": "offerBudgetSharedRowLeadershipStatus",
+  "pt": "Controle de linha de base",
+  "en": "Baseline control",
+  "disposition": "semantic-id-display-separation",
+  "notes": "status string is a BudgetRowStatus value used as a Record key in budgetStatusClassName for className lookup — keep the ID string unchanged in source (the BudgetRowStatus type/values), only the rendered display label is localized."
+ },
+ {
+  "index": 638,
+  "path": "sharedBudgetRows[2]<Learning Experience Design>.status",
+  "keyName": "offerBudgetSharedRowLearningExperienceDesignStatus",
+  "pt": "Controle de linha de base",
+  "en": "Baseline control",
+  "disposition": "semantic-id-display-separation",
+  "notes": "status string is a BudgetRowStatus value used as a Record key in budgetStatusClassName for className lookup — keep the ID string unchanged in source (the BudgetRowStatus type/values), only the rendered display label is localized."
+ },
+ {
+  "index": 644,
+  "path": "sharedBudgetRows[3]<After School role mapping>.status",
+  "keyName": "offerBudgetSharedRowAfterSchoolRoleMappingStatus",
+  "pt": "Validação de mapeamento",
+  "en": "Mapping validation",
+  "disposition": "semantic-id-display-separation",
+  "notes": "status string is a BudgetRowStatus value used as a Record key in budgetStatusClassName for className lookup — keep the ID string unchanged in source (the BudgetRowStatus type/values), only the rendered display label is localized."
+ },
+ {
+  "index": 650,
+  "path": "sharedBudgetRows[4]<Specialist baseline>.status",
+  "keyName": "offerBudgetSharedRowSpecialistBaselineStatus",
+  "pt": "Controle de linha de base",
+  "en": "Baseline control",
+  "disposition": "semantic-id-display-separation",
+  "notes": "status string is a BudgetRowStatus value used as a Record key in budgetStatusClassName for className lookup — keep the ID string unchanged in source (the BudgetRowStatus type/values), only the rendered display label is localized."
+ },
+ {
+  "index": 655,
+  "path": "scenarioBudgetComparisons[0]<Scenario A>.scenario",
+  "keyName": "offerBudgetScenarioAScenario",
+  "pt": "Cenário A",
+  "en": "Scenario A",
+  "disposition": "semantic-id-display-separation",
+  "notes": "Scenario A/B/C/D is the stable ID used elsewhere for comparisons/keys — keep unchanged in source, only the display label is localized."
+ },
+ {
+  "index": 659,
+  "path": "scenarioBudgetComparisons[0]<Scenario A>.rows[0]<Specialist expansion beyond baseline>.status",
+  "keyName": "offerBudgetScenarioARowSpecialistExpansionStatus",
+  "pt": "Não ativo",
+  "en": "Not active",
+  "disposition": "semantic-id-display-separation",
+  "notes": "status string is a BudgetRowStatus value used as a Record key in budgetStatusClassName for className lookup — keep the ID string unchanged in source (the BudgetRowStatus type/values), only the rendered display label is localized."
+ },
+ {
+  "index": 665,
+  "path": "scenarioBudgetComparisons[0]<Scenario A>.rows[1]<Language Acquisition Coach / academic-language support>.status",
+  "keyName": "offerBudgetScenarioARowLapCoachStatus",
+  "pt": "Incremento potencial",
+  "en": "Potential increment",
+  "disposition": "semantic-id-display-separation",
+  "notes": "status string is a BudgetRowStatus value used as a Record key in budgetStatusClassName for className lookup — keep the ID string unchanged in source (the BudgetRowStatus type/values), only the rendered display label is localized."
+ },
+ {
+  "index": 671,
+  "path": "scenarioBudgetComparisons[0]<Scenario A>.rows[2]<Scenario-specific programs>.status",
+  "keyName": "offerBudgetScenarioARowScenarioSpecificProgramsStatus",
+  "pt": "Não ativo",
+  "en": "Not active",
+  "disposition": "semantic-id-display-separation",
+  "notes": "status string is a BudgetRowStatus value used as a Record key in budgetStatusClassName for className lookup — keep the ID string unchanged in source (the BudgetRowStatus type/values), only the rendered display label is localized."
+ },
+ {
+  "index": 676,
+  "path": "scenarioBudgetComparisons[1]<Scenario B>.scenario",
+  "keyName": "offerBudgetScenarioBScenario",
+  "pt": "Cenário B",
+  "en": "Scenario B",
+  "disposition": "semantic-id-display-separation",
+  "notes": "Scenario A/B/C/D is the stable ID used elsewhere for comparisons/keys — keep unchanged in source, only the display label is localized."
+ },
+ {
+  "index": 680,
+  "path": "scenarioBudgetComparisons[1]<Scenario B>.rows[0]<Specialist load pressure>.status",
+  "keyName": "offerBudgetScenarioBRowSpecialistLoadPressureStatus",
+  "pt": "Incremento potencial",
+  "en": "Potential increment",
+  "disposition": "semantic-id-display-separation",
+  "notes": "status string is a BudgetRowStatus value used as a Record key in budgetStatusClassName for className lookup — keep the ID string unchanged in source (the BudgetRowStatus type/values), only the rendered display label is localized."
+ },
+ {
+  "index": 686,
+  "path": "scenarioBudgetComparisons[1]<Scenario B>.rows[1]<Language Acquisition Coach / academic-language support>.status",
+  "keyName": "offerBudgetScenarioBRowLapCoachStatus",
+  "pt": "Incremento potencial",
+  "en": "Potential increment",
+  "disposition": "semantic-id-display-separation",
+  "notes": "status string is a BudgetRowStatus value used as a Record key in budgetStatusClassName for className lookup — keep the ID string unchanged in source (the BudgetRowStatus type/values), only the rendered display label is localized."
+ },
+ {
+  "index": 692,
+  "path": "scenarioBudgetComparisons[1]<Scenario B>.rows[2]<Researchers progression>.status",
+  "keyName": "offerBudgetScenarioBRowResearchersProgressionStatus",
+  "pt": "Direcionador de cenário",
+  "en": "Scenario driver",
+  "disposition": "semantic-id-display-separation",
+  "notes": "status string is a BudgetRowStatus value used as a Record key in budgetStatusClassName for className lookup — keep the ID string unchanged in source (the BudgetRowStatus type/values), only the rendered display label is localized."
+ },
+ {
+  "index": 697,
+  "path": "scenarioBudgetComparisons[2]<Scenario C>.scenario",
+  "keyName": "offerBudgetScenarioCScenario",
+  "pt": "Cenário C",
+  "en": "Scenario C",
+  "disposition": "semantic-id-display-separation",
+  "notes": "Scenario A/B/C/D is the stable ID used elsewhere for comparisons/keys — keep unchanged in source, only the display label is localized."
+ },
+ {
+  "index": 701,
+  "path": "scenarioBudgetComparisons[2]<Scenario C>.rows[0]<Specialist / Design Technologies load>.status",
+  "keyName": "offerBudgetScenarioCRowSpecialistDesignTechLoadStatus",
+  "pt": "Incremento potencial",
+  "en": "Potential increment",
+  "disposition": "semantic-id-display-separation",
+  "notes": "status string is a BudgetRowStatus value used as a Record key in budgetStatusClassName for className lookup — keep the ID string unchanged in source (the BudgetRowStatus type/values), only the rendered display label is localized."
+ },
+ {
+  "index": 707,
+  "path": "scenarioBudgetComparisons[2]<Scenario C>.rows[1]<Language Acquisition Coach / academic-language support>.status",
+  "keyName": "offerBudgetScenarioCRowLapCoachStatus",
+  "pt": "Incremento potencial",
+  "en": "Potential increment",
+  "disposition": "semantic-id-display-separation",
+  "notes": "status string is a BudgetRowStatus value used as a Record key in budgetStatusClassName for className lookup — keep the ID string unchanged in source (the BudgetRowStatus type/values), only the rendered display label is localized."
+ },
+ {
+  "index": 713,
+  "path": "scenarioBudgetComparisons[2]<Scenario C>.rows[2]<Grade 5 Pathways and transition protocols>.status",
+  "keyName": "offerBudgetScenarioCRowGrade5PathwaysTransitionStatus",
+  "pt": "Direcionador de cenário",
+  "en": "Scenario driver",
+  "disposition": "semantic-id-display-separation",
+  "notes": "status string is a BudgetRowStatus value used as a Record key in budgetStatusClassName for className lookup — keep the ID string unchanged in source (the BudgetRowStatus type/values), only the rendered display label is localized."
+ },
+ {
+  "index": 719,
+  "path": "scenarioBudgetComparisons[2]<Scenario C>.rows[3]<Full-class PDJ>.status",
+  "keyName": "offerBudgetScenarioCRowFullClassPdjStatus",
+  "pt": "Direcionador de cenário",
+  "en": "Scenario driver",
+  "disposition": "semantic-id-display-separation",
+  "notes": "status string is a BudgetRowStatus value used as a Record key in budgetStatusClassName for className lookup — keep the ID string unchanged in source (the BudgetRowStatus type/values), only the rendered display label is localized."
+ },
+ {
+  "index": 725,
+  "path": "scenarioBudgetComparisons[2]<Scenario C>.rows[4]<Passion Projects>.status",
+  "keyName": "offerBudgetScenarioCRowPassionProjectsStatus",
+  "pt": "Não ativo",
+  "en": "Not active",
+  "disposition": "semantic-id-display-separation",
+  "notes": "status string is a BudgetRowStatus value used as a Record key in budgetStatusClassName for className lookup — keep the ID string unchanged in source (the BudgetRowStatus type/values), only the rendered display label is localized."
+ },
+ {
+  "index": 730,
+  "path": "scenarioBudgetComparisons[3]<Scenario D>.scenario",
+  "keyName": "offerBudgetScenarioDScenario",
+  "pt": "Cenário D",
+  "en": "Scenario D",
+  "disposition": "semantic-id-display-separation",
+  "notes": "Scenario A/B/C/D is the stable ID used elsewhere for comparisons/keys — keep unchanged in source, only the display label is localized."
+ },
+ {
+  "index": 734,
+  "path": "scenarioBudgetComparisons[3]<Scenario D>.rows[0]<Creative Hub / Design Technologies / shared Middle School capacity>.status",
+  "keyName": "offerBudgetScenarioDRowCreativeHubDesignTechCapacityStatus",
+  "pt": "Incremento potencial",
+  "en": "Potential increment",
+  "disposition": "semantic-id-display-separation",
+  "notes": "status string is a BudgetRowStatus value used as a Record key in budgetStatusClassName for className lookup — keep the ID string unchanged in source (the BudgetRowStatus type/values), only the rendered display label is localized."
+ },
+ {
+  "index": 740,
+  "path": "scenarioBudgetComparisons[3]<Scenario D>.rows[1]<Language Acquisition Coach / academic-language support>.status",
+  "keyName": "offerBudgetScenarioDRowLapCoachStatus",
+  "pt": "Incremento potencial",
+  "en": "Potential increment",
+  "disposition": "semantic-id-display-separation",
+  "notes": "status string is a BudgetRowStatus value used as a Record key in budgetStatusClassName for className lookup — keep the ID string unchanged in source (the BudgetRowStatus type/values), only the rendered display label is localized."
+ },
+ {
+  "index": 746,
+  "path": "scenarioBudgetComparisons[3]<Scenario D>.rows[2]<Project Mentorship / Passion Projects>.status",
+  "keyName": "offerBudgetScenarioDRowProjectMentorshipPassionProjectsStatus",
+  "pt": "Direcionador de cenário",
+  "en": "Scenario driver",
+  "disposition": "semantic-id-display-separation",
+  "notes": "status string is a BudgetRowStatus value used as a Record key in budgetStatusClassName for className lookup — keep the ID string unchanged in source (the BudgetRowStatus type/values), only the rendered display label is localized."
+ },
+ {
+  "index": 752,
+  "path": "scenarioBudgetComparisons[3]<Scenario D>.rows[3]<Cluster educator capacity validation>.status",
+  "keyName": "offerBudgetScenarioDRowClusterEducatorCapacityValidationStatus",
+  "pt": "Validação de mapeamento",
+  "en": "Mapping validation",
+  "disposition": "semantic-id-display-separation",
+  "notes": "status string is a BudgetRowStatus value used as a Record key in budgetStatusClassName for className lookup — keep the ID string unchanged in source (the BudgetRowStatus type/values), only the rendered display label is localized."
+ },
+ {
+  "index": 758,
+  "path": "scenarioBudgetComparisons[3]<Scenario D>.rows[4]<Dedicated Project Mentor>.status",
+  "keyName": "offerBudgetScenarioDRowDedicatedProjectMentorStatus",
+  "pt": "Incremento condicional",
+  "en": "Conditional increment",
+  "disposition": "semantic-id-display-separation",
+  "notes": "status string is a BudgetRowStatus value used as a Record key in budgetStatusClassName for className lookup — keep the ID string unchanged in source (the BudgetRowStatus type/values), only the rendered display label is localized."
+ },
+ {
+  "index": 825,
+  "path": "ecosystemScenarioLadder[0]<A>.title",
+  "keyName": "offerEcosystemLadderScenarioATitle",
+  "pt": "Cenário A",
+  "en": "Scenario A",
+  "disposition": "semantic-id-display-separation",
+  "notes": "Scenario A/B/C/D stable ID used elsewhere for comparisons/keys — keep the literal ID string unchanged in source, only the rendered display label is localized. Confirmed two independent couplings: (1) selectedScenarioTitle state (line 1399) is compared against ecosystemScenarioLadder[].title via pedagogicalOfferScenarios.find(s => s.title === selectedScenarioTitle); (2) row.scenario values are rendered directly as labels in the decision-layer table. Do not simply replace this string."
+ },
+ {
+  "index": 830,
+  "path": "ecosystemScenarioLadder[1]<B>.title",
+  "keyName": "offerEcosystemLadderScenarioBTitle",
+  "pt": "Cenário B",
+  "en": "Scenario B",
+  "disposition": "semantic-id-display-separation",
+  "notes": "Scenario A/B/C/D stable ID used elsewhere for comparisons/keys — keep the literal ID string unchanged in source, only the rendered display label is localized. Confirmed two independent couplings: (1) selectedScenarioTitle state (line 1399) is compared against ecosystemScenarioLadder[].title via pedagogicalOfferScenarios.find(s => s.title === selectedScenarioTitle); (2) row.scenario values are rendered directly as labels in the decision-layer table. Do not simply replace this string."
+ },
+ {
+  "index": 835,
+  "path": "ecosystemScenarioLadder[2]<C>.title",
+  "keyName": "offerEcosystemLadderScenarioCTitle",
+  "pt": "Cenário C",
+  "en": "Scenario C",
+  "disposition": "semantic-id-display-separation",
+  "notes": "Scenario A/B/C/D stable ID used elsewhere for comparisons/keys — keep the literal ID string unchanged in source, only the rendered display label is localized. Confirmed two independent couplings: (1) selectedScenarioTitle state (line 1399) is compared against ecosystemScenarioLadder[].title via pedagogicalOfferScenarios.find(s => s.title === selectedScenarioTitle); (2) row.scenario values are rendered directly as labels in the decision-layer table. Do not simply replace this string."
+ },
+ {
+  "index": 840,
+  "path": "ecosystemScenarioLadder[3]<D>.title",
+  "keyName": "offerEcosystemLadderScenarioDTitle",
+  "pt": "Cenário D",
+  "en": "Scenario D",
+  "disposition": "semantic-id-display-separation",
+  "notes": "Scenario A/B/C/D stable ID used elsewhere for comparisons/keys — keep the literal ID string unchanged in source, only the rendered display label is localized. Confirmed two independent couplings: (1) selectedScenarioTitle state (line 1399) is compared against ecosystemScenarioLadder[].title via pedagogicalOfferScenarios.find(s => s.title === selectedScenarioTitle); (2) row.scenario values are rendered directly as labels in the decision-layer table. Do not simply replace this string."
+ },
+ {
+  "index": 865,
+  "path": "ecosystemDecisionLayers.classroom<Sala de aula>.rows[0]<Scenario A>.scenario",
+  "keyName": "offerEcosystemClassroomRowScenarioAScenario",
+  "pt": "Cenário A",
+  "en": "Scenario A",
+  "disposition": "semantic-id-display-separation",
+  "notes": "Scenario A/B/C/D stable ID used elsewhere for comparisons/keys — keep the literal ID string unchanged in source, only the rendered display label is localized. Confirmed two independent couplings: (1) selectedScenarioTitle state (line 1399) is compared against ecosystemScenarioLadder[].title via pedagogicalOfferScenarios.find(s => s.title === selectedScenarioTitle); (2) row.scenario values are rendered directly as labels in the decision-layer table. Do not simply replace this string."
+ },
+ {
+  "index": 866,
+  "path": "ecosystemDecisionLayers.classroom<Sala de aula>.rows[0]<Scenario A>.status",
+  "keyName": "offerEcosystemClassroomRowScenarioAStatus",
+  "pt": "Estrutura básica",
+  "en": "Basic structure",
+  "disposition": "semantic-id-display-separation",
+  "notes": "status string is used as a lookup key into a component-local `ecosystemStatusClasses` className map (line ~1457) keyed by these exact Portuguese status strings — translating this value in place would break that lookup silently. Needs a stable status-id plus a separate localized display label; do not simply replace this string. Verified in source: map has 18 keys but they do not exactly match the 18 distinct status strings actually used by data — \"Progressão acadêmica\" (signature row B) is USED by data but ABSENT from the map (silently falls back to the default class \"border-slate-200 bg-white text-slate-600\"), while \"Preparação\" and \"Formação de identidade\" exist as map keys but are not used by any current row (dead entries). Flag this pre-existing styling gap for the parent."
+ },
+ {
+  "index": 870,
+  "path": "ecosystemDecisionLayers.classroom<Sala de aula>.rows[1]<Scenario B>.scenario",
+  "keyName": "offerEcosystemClassroomRowScenarioBScenario",
+  "pt": "Cenário B",
+  "en": "Scenario B",
+  "disposition": "semantic-id-display-separation",
+  "notes": "Scenario A/B/C/D stable ID used elsewhere for comparisons/keys — keep the literal ID string unchanged in source, only the rendered display label is localized. Confirmed two independent couplings: (1) selectedScenarioTitle state (line 1399) is compared against ecosystemScenarioLadder[].title via pedagogicalOfferScenarios.find(s => s.title === selectedScenarioTitle); (2) row.scenario values are rendered directly as labels in the decision-layer table. Do not simply replace this string."
+ },
+ {
+  "index": 871,
+  "path": "ecosystemDecisionLayers.classroom<Sala de aula>.rows[1]<Scenario B>.status",
+  "keyName": "offerEcosystemClassroomRowScenarioBStatus",
+  "pt": "Estrutura básica fortalecida",
+  "en": "Strengthened basic structure",
+  "disposition": "semantic-id-display-separation",
+  "notes": "status string is used as a lookup key into a component-local `ecosystemStatusClasses` className map (line ~1457) keyed by these exact Portuguese status strings — translating this value in place would break that lookup silently. Needs a stable status-id plus a separate localized display label; do not simply replace this string. Verified in source: map has 18 keys but they do not exactly match the 18 distinct status strings actually used by data — \"Progressão acadêmica\" (signature row B) is USED by data but ABSENT from the map (silently falls back to the default class \"border-slate-200 bg-white text-slate-600\"), while \"Preparação\" and \"Formação de identidade\" exist as map keys but are not used by any current row (dead entries). Flag this pre-existing styling gap for the parent."
+ },
+ {
+  "index": 875,
+  "path": "ecosystemDecisionLayers.classroom<Sala de aula>.rows[2]<Scenario C>.scenario",
+  "keyName": "offerEcosystemClassroomRowScenarioCScenario",
+  "pt": "Cenário C",
+  "en": "Scenario C",
+  "disposition": "semantic-id-display-separation",
+  "notes": "Scenario A/B/C/D stable ID used elsewhere for comparisons/keys — keep the literal ID string unchanged in source, only the rendered display label is localized. Confirmed two independent couplings: (1) selectedScenarioTitle state (line 1399) is compared against ecosystemScenarioLadder[].title via pedagogicalOfferScenarios.find(s => s.title === selectedScenarioTitle); (2) row.scenario values are rendered directly as labels in the decision-layer table. Do not simply replace this string."
+ },
+ {
+  "index": 876,
+  "path": "ecosystemDecisionLayers.classroom<Sala de aula>.rows[2]<Scenario C>.status",
+  "keyName": "offerEcosystemClassroomRowScenarioCStatus",
+  "pt": "Preparação ativa",
+  "en": "Active preparation",
+  "disposition": "semantic-id-display-separation",
+  "notes": "status string is used as a lookup key into a component-local `ecosystemStatusClasses` className map (line ~1457) keyed by these exact Portuguese status strings — translating this value in place would break that lookup silently. Needs a stable status-id plus a separate localized display label; do not simply replace this string. Verified in source: map has 18 keys but they do not exactly match the 18 distinct status strings actually used by data — \"Progressão acadêmica\" (signature row B) is USED by data but ABSENT from the map (silently falls back to the default class \"border-slate-200 bg-white text-slate-600\"), while \"Preparação\" and \"Formação de identidade\" exist as map keys but are not used by any current row (dead entries). Flag this pre-existing styling gap for the parent."
+ },
+ {
+  "index": 880,
+  "path": "ecosystemDecisionLayers.classroom<Sala de aula>.rows[3]<Scenario D>.scenario",
+  "keyName": "offerEcosystemClassroomRowScenarioDScenario",
+  "pt": "Cenário D",
+  "en": "Scenario D",
+  "disposition": "semantic-id-display-separation",
+  "notes": "Scenario A/B/C/D stable ID used elsewhere for comparisons/keys — keep the literal ID string unchanged in source, only the rendered display label is localized. Confirmed two independent couplings: (1) selectedScenarioTitle state (line 1399) is compared against ecosystemScenarioLadder[].title via pedagogicalOfferScenarios.find(s => s.title === selectedScenarioTitle); (2) row.scenario values are rendered directly as labels in the decision-layer table. Do not simply replace this string."
+ },
+ {
+  "index": 881,
+  "path": "ecosystemDecisionLayers.classroom<Sala de aula>.rows[3]<Scenario D>.status",
+  "keyName": "offerEcosystemClassroomRowScenarioDStatus",
+  "pt": "Mudança de modelo",
+  "en": "Model change",
+  "disposition": "semantic-id-display-separation",
+  "notes": "status string is used as a lookup key into a component-local `ecosystemStatusClasses` className map (line ~1457) keyed by these exact Portuguese status strings — translating this value in place would break that lookup silently. Needs a stable status-id plus a separate localized display label; do not simply replace this string. Verified in source: map has 18 keys but they do not exactly match the 18 distinct status strings actually used by data — \"Progressão acadêmica\" (signature row B) is USED by data but ABSENT from the map (silently falls back to the default class \"border-slate-200 bg-white text-slate-600\"), while \"Preparação\" and \"Formação de identidade\" exist as map keys but are not used by any current row (dead entries). Flag this pre-existing styling gap for the parent."
+ },
+ {
+  "index": 887,
+  "path": "ecosystemDecisionLayers.academic-language<Performance acadêmica & aquisição de língua>.rows[0]<Scenario A>.scenario",
+  "keyName": "offerEcosystemAcademicLanguageRowScenarioAScenario",
+  "pt": "Cenário A",
+  "en": "Scenario A",
+  "disposition": "semantic-id-display-separation",
+  "notes": "Scenario A/B/C/D stable ID used elsewhere for comparisons/keys — keep the literal ID string unchanged in source, only the rendered display label is localized. Confirmed two independent couplings: (1) selectedScenarioTitle state (line 1399) is compared against ecosystemScenarioLadder[].title via pedagogicalOfferScenarios.find(s => s.title === selectedScenarioTitle); (2) row.scenario values are rendered directly as labels in the decision-layer table. Do not simply replace this string."
+ },
+ {
+  "index": 888,
+  "path": "ecosystemDecisionLayers.academic-language<Performance acadêmica & aquisição de língua>.rows[0]<Scenario A>.status",
+  "keyName": "offerEcosystemAcademicLanguageRowScenarioAStatus",
+  "pt": "Investimento recomendado",
+  "en": "Recommended investment",
+  "disposition": "semantic-id-display-separation",
+  "notes": "status string is used as a lookup key into a component-local `ecosystemStatusClasses` className map (line ~1457) keyed by these exact Portuguese status strings — translating this value in place would break that lookup silently. Needs a stable status-id plus a separate localized display label; do not simply replace this string. Verified in source: map has 18 keys but they do not exactly match the 18 distinct status strings actually used by data — \"Progressão acadêmica\" (signature row B) is USED by data but ABSENT from the map (silently falls back to the default class \"border-slate-200 bg-white text-slate-600\"), while \"Preparação\" and \"Formação de identidade\" exist as map keys but are not used by any current row (dead entries). Flag this pre-existing styling gap for the parent."
+ },
+ {
+  "index": 892,
+  "path": "ecosystemDecisionLayers.academic-language<Performance acadêmica & aquisição de língua>.rows[1]<Scenario B>.scenario",
+  "keyName": "offerEcosystemAcademicLanguageRowScenarioBScenario",
+  "pt": "Cenário B",
+  "en": "Scenario B",
+  "disposition": "semantic-id-display-separation",
+  "notes": "Scenario A/B/C/D stable ID used elsewhere for comparisons/keys — keep the literal ID string unchanged in source, only the rendered display label is localized. Confirmed two independent couplings: (1) selectedScenarioTitle state (line 1399) is compared against ecosystemScenarioLadder[].title via pedagogicalOfferScenarios.find(s => s.title === selectedScenarioTitle); (2) row.scenario values are rendered directly as labels in the decision-layer table. Do not simply replace this string."
+ },
+ {
+  "index": 893,
+  "path": "ecosystemDecisionLayers.academic-language<Performance acadêmica & aquisição de língua>.rows[1]<Scenario B>.status",
+  "keyName": "offerEcosystemAcademicLanguageRowScenarioBStatus",
+  "pt": "Investimento recomendado",
+  "en": "Recommended investment",
+  "disposition": "semantic-id-display-separation",
+  "notes": "status string is used as a lookup key into a component-local `ecosystemStatusClasses` className map (line ~1457) keyed by these exact Portuguese status strings — translating this value in place would break that lookup silently. Needs a stable status-id plus a separate localized display label; do not simply replace this string. Verified in source: map has 18 keys but they do not exactly match the 18 distinct status strings actually used by data — \"Progressão acadêmica\" (signature row B) is USED by data but ABSENT from the map (silently falls back to the default class \"border-slate-200 bg-white text-slate-600\"), while \"Preparação\" and \"Formação de identidade\" exist as map keys but are not used by any current row (dead entries). Flag this pre-existing styling gap for the parent."
+ },
+ {
+  "index": 897,
+  "path": "ecosystemDecisionLayers.academic-language<Performance acadêmica & aquisição de língua>.rows[2]<Scenario C>.scenario",
+  "keyName": "offerEcosystemAcademicLanguageRowScenarioCScenario",
+  "pt": "Cenário C",
+  "en": "Scenario C",
+  "disposition": "semantic-id-display-separation",
+  "notes": "Scenario A/B/C/D stable ID used elsewhere for comparisons/keys — keep the literal ID string unchanged in source, only the rendered display label is localized. Confirmed two independent couplings: (1) selectedScenarioTitle state (line 1399) is compared against ecosystemScenarioLadder[].title via pedagogicalOfferScenarios.find(s => s.title === selectedScenarioTitle); (2) row.scenario values are rendered directly as labels in the decision-layer table. Do not simply replace this string."
+ },
+ {
+  "index": 898,
+  "path": "ecosystemDecisionLayers.academic-language<Performance acadêmica & aquisição de língua>.rows[2]<Scenario C>.status",
+  "keyName": "offerEcosystemAcademicLanguageRowScenarioCStatus",
+  "pt": "Necessário para transição",
+  "en": "Necessary for transition",
+  "disposition": "semantic-id-display-separation",
+  "notes": "status string is used as a lookup key into a component-local `ecosystemStatusClasses` className map (line ~1457) keyed by these exact Portuguese status strings — translating this value in place would break that lookup silently. Needs a stable status-id plus a separate localized display label; do not simply replace this string. Verified in source: map has 18 keys but they do not exactly match the 18 distinct status strings actually used by data — \"Progressão acadêmica\" (signature row B) is USED by data but ABSENT from the map (silently falls back to the default class \"border-slate-200 bg-white text-slate-600\"), while \"Preparação\" and \"Formação de identidade\" exist as map keys but are not used by any current row (dead entries). Flag this pre-existing styling gap for the parent."
+ },
+ {
+  "index": 902,
+  "path": "ecosystemDecisionLayers.academic-language<Performance acadêmica & aquisição de língua>.rows[3]<Scenario D>.scenario",
+  "keyName": "offerEcosystemAcademicLanguageRowScenarioDScenario",
+  "pt": "Cenário D",
+  "en": "Scenario D",
+  "disposition": "semantic-id-display-separation",
+  "notes": "Scenario A/B/C/D stable ID used elsewhere for comparisons/keys — keep the literal ID string unchanged in source, only the rendered display label is localized. Confirmed two independent couplings: (1) selectedScenarioTitle state (line 1399) is compared against ecosystemScenarioLadder[].title via pedagogicalOfferScenarios.find(s => s.title === selectedScenarioTitle); (2) row.scenario values are rendered directly as labels in the decision-layer table. Do not simply replace this string."
+ },
+ {
+  "index": 903,
+  "path": "ecosystemDecisionLayers.academic-language<Performance acadêmica & aquisição de língua>.rows[3]<Scenario D>.status",
+  "keyName": "offerEcosystemAcademicLanguageRowScenarioDStatus",
+  "pt": "Necessário",
+  "en": "Necessary",
+  "disposition": "semantic-id-display-separation",
+  "notes": "status string is used as a lookup key into a component-local `ecosystemStatusClasses` className map (line ~1457) keyed by these exact Portuguese status strings — translating this value in place would break that lookup silently. Needs a stable status-id plus a separate localized display label; do not simply replace this string. Verified in source: map has 18 keys but they do not exactly match the 18 distinct status strings actually used by data — \"Progressão acadêmica\" (signature row B) is USED by data but ABSENT from the map (silently falls back to the default class \"border-slate-200 bg-white text-slate-600\"), while \"Preparação\" and \"Formação de identidade\" exist as map keys but are not used by any current row (dead entries). Flag this pre-existing styling gap for the parent."
+ },
+ {
+  "index": 908,
+  "path": "ecosystemDecisionLayers.specialists<Especialistas>.rows[0]<Scenario A>.scenario",
+  "keyName": "offerEcosystemSpecialistsRowScenarioAScenario",
+  "pt": "Cenário A",
+  "en": "Scenario A",
+  "disposition": "semantic-id-display-separation",
+  "notes": "Scenario A/B/C/D stable ID used elsewhere for comparisons/keys — keep the literal ID string unchanged in source, only the rendered display label is localized. Confirmed two independent couplings: (1) selectedScenarioTitle state (line 1399) is compared against ecosystemScenarioLadder[].title via pedagogicalOfferScenarios.find(s => s.title === selectedScenarioTitle); (2) row.scenario values are rendered directly as labels in the decision-layer table. Do not simply replace this string."
+ },
+ {
+  "index": 909,
+  "path": "ecosystemDecisionLayers.specialists<Especialistas>.rows[0]<Scenario A>.status",
+  "keyName": "offerEcosystemSpecialistsRowScenarioAStatus",
+  "pt": "Capacidade compartilhada",
+  "en": "Shared capacity",
+  "disposition": "semantic-id-display-separation",
+  "notes": "status string is used as a lookup key into a component-local `ecosystemStatusClasses` className map (line ~1457) keyed by these exact Portuguese status strings — translating this value in place would break that lookup silently. Needs a stable status-id plus a separate localized display label; do not simply replace this string. Verified in source: map has 18 keys but they do not exactly match the 18 distinct status strings actually used by data — \"Progressão acadêmica\" (signature row B) is USED by data but ABSENT from the map (silently falls back to the default class \"border-slate-200 bg-white text-slate-600\"), while \"Preparação\" and \"Formação de identidade\" exist as map keys but are not used by any current row (dead entries). Flag this pre-existing styling gap for the parent."
+ },
+ {
+  "index": 913,
+  "path": "ecosystemDecisionLayers.specialists<Especialistas>.rows[1]<Scenario B>.scenario",
+  "keyName": "offerEcosystemSpecialistsRowScenarioBScenario",
+  "pt": "Cenário B",
+  "en": "Scenario B",
+  "disposition": "semantic-id-display-separation",
+  "notes": "Scenario A/B/C/D stable ID used elsewhere for comparisons/keys — keep the literal ID string unchanged in source, only the rendered display label is localized. Confirmed two independent couplings: (1) selectedScenarioTitle state (line 1399) is compared against ecosystemScenarioLadder[].title via pedagogicalOfferScenarios.find(s => s.title === selectedScenarioTitle); (2) row.scenario values are rendered directly as labels in the decision-layer table. Do not simply replace this string."
+ },
+ {
+  "index": 914,
+  "path": "ecosystemDecisionLayers.specialists<Especialistas>.rows[1]<Scenario B>.status",
+  "keyName": "offerEcosystemSpecialistsRowScenarioBStatus",
+  "pt": "Capacidade compartilhada fortalecida",
+  "en": "Strengthened shared capacity",
+  "disposition": "semantic-id-display-separation",
+  "notes": "status string is used as a lookup key into a component-local `ecosystemStatusClasses` className map (line ~1457) keyed by these exact Portuguese status strings — translating this value in place would break that lookup silently. Needs a stable status-id plus a separate localized display label; do not simply replace this string. Verified in source: map has 18 keys but they do not exactly match the 18 distinct status strings actually used by data — \"Progressão acadêmica\" (signature row B) is USED by data but ABSENT from the map (silently falls back to the default class \"border-slate-200 bg-white text-slate-600\"), while \"Preparação\" and \"Formação de identidade\" exist as map keys but are not used by any current row (dead entries). Flag this pre-existing styling gap for the parent."
+ },
+ {
+  "index": 918,
+  "path": "ecosystemDecisionLayers.specialists<Especialistas>.rows[2]<Scenario C>.scenario",
+  "keyName": "offerEcosystemSpecialistsRowScenarioCScenario",
+  "pt": "Cenário C",
+  "en": "Scenario C",
+  "disposition": "semantic-id-display-separation",
+  "notes": "Scenario A/B/C/D stable ID used elsewhere for comparisons/keys — keep the literal ID string unchanged in source, only the rendered display label is localized. Confirmed two independent couplings: (1) selectedScenarioTitle state (line 1399) is compared against ecosystemScenarioLadder[].title via pedagogicalOfferScenarios.find(s => s.title === selectedScenarioTitle); (2) row.scenario values are rendered directly as labels in the decision-layer table. Do not simply replace this string."
+ },
+ {
+  "index": 919,
+  "path": "ecosystemDecisionLayers.specialists<Especialistas>.rows[2]<Scenario C>.status",
+  "keyName": "offerEcosystemSpecialistsRowScenarioCStatus",
+  "pt": "Continuidade LS completa",
+  "en": "Full LS continuity",
+  "disposition": "semantic-id-display-separation",
+  "notes": "status string is used as a lookup key into a component-local `ecosystemStatusClasses` className map (line ~1457) keyed by these exact Portuguese status strings — translating this value in place would break that lookup silently. Needs a stable status-id plus a separate localized display label; do not simply replace this string. Verified in source: map has 18 keys but they do not exactly match the 18 distinct status strings actually used by data — \"Progressão acadêmica\" (signature row B) is USED by data but ABSENT from the map (silently falls back to the default class \"border-slate-200 bg-white text-slate-600\"), while \"Preparação\" and \"Formação de identidade\" exist as map keys but are not used by any current row (dead entries). Flag this pre-existing styling gap for the parent."
+ },
+ {
+  "index": 923,
+  "path": "ecosystemDecisionLayers.specialists<Especialistas>.rows[3]<Scenario D>.scenario",
+  "keyName": "offerEcosystemSpecialistsRowScenarioDScenario",
+  "pt": "Cenário D",
+  "en": "Scenario D",
+  "disposition": "semantic-id-display-separation",
+  "notes": "Scenario A/B/C/D stable ID used elsewhere for comparisons/keys — keep the literal ID string unchanged in source, only the rendered display label is localized. Confirmed two independent couplings: (1) selectedScenarioTitle state (line 1399) is compared against ecosystemScenarioLadder[].title via pedagogicalOfferScenarios.find(s => s.title === selectedScenarioTitle); (2) row.scenario values are rendered directly as labels in the decision-layer table. Do not simply replace this string."
+ },
+ {
+  "index": 924,
+  "path": "ecosystemDecisionLayers.specialists<Especialistas>.rows[3]<Scenario D>.status",
+  "keyName": "offerEcosystemSpecialistsRowScenarioDStatus",
+  "pt": "Capacidade compartilhada EY/LS/MS",
+  "en": "Shared capacity EY/LS/MS",
+  "disposition": "semantic-id-display-separation",
+  "notes": "status string is used as a lookup key into a component-local `ecosystemStatusClasses` className map (line ~1457) keyed by these exact Portuguese status strings — translating this value in place would break that lookup silently. Needs a stable status-id plus a separate localized display label; do not simply replace this string. Verified in source: map has 18 keys but they do not exactly match the 18 distinct status strings actually used by data — \"Progressão acadêmica\" (signature row B) is USED by data but ABSENT from the map (silently falls back to the default class \"border-slate-200 bg-white text-slate-600\"), while \"Preparação\" and \"Formação de identidade\" exist as map keys but are not used by any current row (dead entries). Flag this pre-existing styling gap for the parent."
+ },
+ {
+  "index": 930,
+  "path": "ecosystemDecisionLayers.signature<Programas autorais>.rows[0]<Scenario A>.scenario",
+  "keyName": "offerEcosystemSignatureRowScenarioAScenario",
+  "pt": "Cenário A",
+  "en": "Scenario A",
+  "disposition": "semantic-id-display-separation",
+  "notes": "Scenario A/B/C/D stable ID used elsewhere for comparisons/keys — keep the literal ID string unchanged in source, only the rendered display label is localized. Confirmed two independent couplings: (1) selectedScenarioTitle state (line 1399) is compared against ecosystemScenarioLadder[].title via pedagogicalOfferScenarios.find(s => s.title === selectedScenarioTitle); (2) row.scenario values are rendered directly as labels in the decision-layer table. Do not simply replace this string."
+ },
+ {
+  "index": 931,
+  "path": "ecosystemDecisionLayers.signature<Programas autorais>.rows[0]<Scenario A>.status",
+  "keyName": "offerEcosystemSignatureRowScenarioAStatus",
+  "pt": "Estrutura básica",
+  "en": "Basic structure",
+  "disposition": "semantic-id-display-separation",
+  "notes": "status string is used as a lookup key into a component-local `ecosystemStatusClasses` className map (line ~1457) keyed by these exact Portuguese status strings — translating this value in place would break that lookup silently. Needs a stable status-id plus a separate localized display label; do not simply replace this string. Verified in source: map has 18 keys but they do not exactly match the 18 distinct status strings actually used by data — \"Progressão acadêmica\" (signature row B) is USED by data but ABSENT from the map (silently falls back to the default class \"border-slate-200 bg-white text-slate-600\"), while \"Preparação\" and \"Formação de identidade\" exist as map keys but are not used by any current row (dead entries). Flag this pre-existing styling gap for the parent."
+ },
+ {
+  "index": 935,
+  "path": "ecosystemDecisionLayers.signature<Programas autorais>.rows[1]<Scenario B>.scenario",
+  "keyName": "offerEcosystemSignatureRowScenarioBScenario",
+  "pt": "Cenário B",
+  "en": "Scenario B",
+  "disposition": "semantic-id-display-separation",
+  "notes": "Scenario A/B/C/D stable ID used elsewhere for comparisons/keys — keep the literal ID string unchanged in source, only the rendered display label is localized. Confirmed two independent couplings: (1) selectedScenarioTitle state (line 1399) is compared against ecosystemScenarioLadder[].title via pedagogicalOfferScenarios.find(s => s.title === selectedScenarioTitle); (2) row.scenario values are rendered directly as labels in the decision-layer table. Do not simply replace this string."
+ },
+ {
+  "index": 936,
+  "path": "ecosystemDecisionLayers.signature<Programas autorais>.rows[1]<Scenario B>.status",
+  "keyName": "offerEcosystemSignatureRowScenarioBStatus",
+  "pt": "Progressão acadêmica",
+  "en": "Academic progression",
+  "disposition": "semantic-id-display-separation",
+  "notes": "status string is used as a lookup key into a component-local `ecosystemStatusClasses` className map (line ~1457) keyed by these exact Portuguese status strings — translating this value in place would break that lookup silently. Needs a stable status-id plus a separate localized display label; do not simply replace this string. Verified in source: map has 18 keys but they do not exactly match the 18 distinct status strings actually used by data — \"Progressão acadêmica\" (signature row B) is USED by data but ABSENT from the map (silently falls back to the default class \"border-slate-200 bg-white text-slate-600\"), while \"Preparação\" and \"Formação de identidade\" exist as map keys but are not used by any current row (dead entries). Flag this pre-existing styling gap for the parent."
+ },
+ {
+  "index": 940,
+  "path": "ecosystemDecisionLayers.signature<Programas autorais>.rows[2]<Scenario C>.scenario",
+  "keyName": "offerEcosystemSignatureRowScenarioCScenario",
+  "pt": "Cenário C",
+  "en": "Scenario C",
+  "disposition": "semantic-id-display-separation",
+  "notes": "Scenario A/B/C/D stable ID used elsewhere for comparisons/keys — keep the literal ID string unchanged in source, only the rendered display label is localized. Confirmed two independent couplings: (1) selectedScenarioTitle state (line 1399) is compared against ecosystemScenarioLadder[].title via pedagogicalOfferScenarios.find(s => s.title === selectedScenarioTitle); (2) row.scenario values are rendered directly as labels in the decision-layer table. Do not simply replace this string."
+ },
+ {
+  "index": 941,
+  "path": "ecosystemDecisionLayers.signature<Programas autorais>.rows[2]<Scenario C>.status",
+  "keyName": "offerEcosystemSignatureRowScenarioCStatus",
+  "pt": "Ativo",
+  "en": "Active",
+  "disposition": "semantic-id-display-separation",
+  "notes": "status string is used as a lookup key into a component-local `ecosystemStatusClasses` className map (line ~1457) keyed by these exact Portuguese status strings — translating this value in place would break that lookup silently. Needs a stable status-id plus a separate localized display label; do not simply replace this string. Verified in source: map has 18 keys but they do not exactly match the 18 distinct status strings actually used by data — \"Progressão acadêmica\" (signature row B) is USED by data but ABSENT from the map (silently falls back to the default class \"border-slate-200 bg-white text-slate-600\"), while \"Preparação\" and \"Formação de identidade\" exist as map keys but are not used by any current row (dead entries). Flag this pre-existing styling gap for the parent."
+ },
+ {
+  "index": 945,
+  "path": "ecosystemDecisionLayers.signature<Programas autorais>.rows[3]<Scenario D>.scenario",
+  "keyName": "offerEcosystemSignatureRowScenarioDScenario",
+  "pt": "Cenário D",
+  "en": "Scenario D",
+  "disposition": "semantic-id-display-separation",
+  "notes": "Scenario A/B/C/D stable ID used elsewhere for comparisons/keys — keep the literal ID string unchanged in source, only the rendered display label is localized. Confirmed two independent couplings: (1) selectedScenarioTitle state (line 1399) is compared against ecosystemScenarioLadder[].title via pedagogicalOfferScenarios.find(s => s.title === selectedScenarioTitle); (2) row.scenario values are rendered directly as labels in the decision-layer table. Do not simply replace this string."
+ },
+ {
+  "index": 946,
+  "path": "ecosystemDecisionLayers.signature<Programas autorais>.rows[3]<Scenario D>.status",
+  "keyName": "offerEcosystemSignatureRowScenarioDStatus",
+  "pt": "Ativo + add-on potencial",
+  "en": "Active + potential add-on",
+  "disposition": "semantic-id-display-separation",
+  "notes": "status string is used as a lookup key into a component-local `ecosystemStatusClasses` className map (line ~1457) keyed by these exact Portuguese status strings — translating this value in place would break that lookup silently. Needs a stable status-id plus a separate localized display label; do not simply replace this string. Verified in source: map has 18 keys but they do not exactly match the 18 distinct status strings actually used by data — \"Progressão acadêmica\" (signature row B) is USED by data but ABSENT from the map (silently falls back to the default class \"border-slate-200 bg-white text-slate-600\"), while \"Preparação\" and \"Formação de identidade\" exist as map keys but are not used by any current row (dead entries). Flag this pre-existing styling gap for the parent."
+ },
+ {
+  "index": 951,
+  "path": "ecosystemDecisionLayers.ms-hs<MS/HS readiness>.rows[0]<Scenario A>.scenario",
+  "keyName": "offerEcosystemMsHsRowScenarioAScenario",
+  "pt": "Cenário A",
+  "en": "Scenario A",
+  "disposition": "semantic-id-display-separation",
+  "notes": "Scenario A/B/C/D stable ID used elsewhere for comparisons/keys — keep the literal ID string unchanged in source, only the rendered display label is localized. Confirmed two independent couplings: (1) selectedScenarioTitle state (line 1399) is compared against ecosystemScenarioLadder[].title via pedagogicalOfferScenarios.find(s => s.title === selectedScenarioTitle); (2) row.scenario values are rendered directly as labels in the decision-layer table. Do not simply replace this string."
+ },
+ {
+  "index": 952,
+  "path": "ecosystemDecisionLayers.ms-hs<MS/HS readiness>.rows[0]<Scenario A>.status",
+  "keyName": "offerEcosystemMsHsRowScenarioAStatus",
+  "pt": "Não ativo",
+  "en": "Not active",
+  "disposition": "semantic-id-display-separation",
+  "notes": "status string is used as a lookup key into a component-local `ecosystemStatusClasses` className map (line ~1457) keyed by these exact Portuguese status strings — translating this value in place would break that lookup silently. Needs a stable status-id plus a separate localized display label; do not simply replace this string. Verified in source: map has 18 keys but they do not exactly match the 18 distinct status strings actually used by data — \"Progressão acadêmica\" (signature row B) is USED by data but ABSENT from the map (silently falls back to the default class \"border-slate-200 bg-white text-slate-600\"), while \"Preparação\" and \"Formação de identidade\" exist as map keys but are not used by any current row (dead entries). Flag this pre-existing styling gap for the parent."
+ },
+ {
+  "index": 956,
+  "path": "ecosystemDecisionLayers.ms-hs<MS/HS readiness>.rows[1]<Scenario B>.scenario",
+  "keyName": "offerEcosystemMsHsRowScenarioBScenario",
+  "pt": "Cenário B",
+  "en": "Scenario B",
+  "disposition": "semantic-id-display-separation",
+  "notes": "Scenario A/B/C/D stable ID used elsewhere for comparisons/keys — keep the literal ID string unchanged in source, only the rendered display label is localized. Confirmed two independent couplings: (1) selectedScenarioTitle state (line 1399) is compared against ecosystemScenarioLadder[].title via pedagogicalOfferScenarios.find(s => s.title === selectedScenarioTitle); (2) row.scenario values are rendered directly as labels in the decision-layer table. Do not simply replace this string."
+ },
+ {
+  "index": 957,
+  "path": "ecosystemDecisionLayers.ms-hs<MS/HS readiness>.rows[1]<Scenario B>.status",
+  "keyName": "offerEcosystemMsHsRowScenarioBStatus",
+  "pt": "Preparação cultural",
+  "en": "Cultural preparation",
+  "disposition": "semantic-id-display-separation",
+  "notes": "status string is used as a lookup key into a component-local `ecosystemStatusClasses` className map (line ~1457) keyed by these exact Portuguese status strings — translating this value in place would break that lookup silently. Needs a stable status-id plus a separate localized display label; do not simply replace this string. Verified in source: map has 18 keys but they do not exactly match the 18 distinct status strings actually used by data — \"Progressão acadêmica\" (signature row B) is USED by data but ABSENT from the map (silently falls back to the default class \"border-slate-200 bg-white text-slate-600\"), while \"Preparação\" and \"Formação de identidade\" exist as map keys but are not used by any current row (dead entries). Flag this pre-existing styling gap for the parent."
+ },
+ {
+  "index": 961,
+  "path": "ecosystemDecisionLayers.ms-hs<MS/HS readiness>.rows[2]<Scenario C>.scenario",
+  "keyName": "offerEcosystemMsHsRowScenarioCScenario",
+  "pt": "Cenário C",
+  "en": "Scenario C",
+  "disposition": "semantic-id-display-separation",
+  "notes": "Scenario A/B/C/D stable ID used elsewhere for comparisons/keys — keep the literal ID string unchanged in source, only the rendered display label is localized. Confirmed two independent couplings: (1) selectedScenarioTitle state (line 1399) is compared against ecosystemScenarioLadder[].title via pedagogicalOfferScenarios.find(s => s.title === selectedScenarioTitle); (2) row.scenario values are rendered directly as labels in the decision-layer table. Do not simply replace this string."
+ },
+ {
+  "index": 962,
+  "path": "ecosystemDecisionLayers.ms-hs<MS/HS readiness>.rows[2]<Scenario C>.status",
+  "keyName": "offerEcosystemMsHsRowScenarioCStatus",
+  "pt": "Ponte formal",
+  "en": "Formal bridge",
+  "disposition": "semantic-id-display-separation",
+  "notes": "status string is used as a lookup key into a component-local `ecosystemStatusClasses` className map (line ~1457) keyed by these exact Portuguese status strings — translating this value in place would break that lookup silently. Needs a stable status-id plus a separate localized display label; do not simply replace this string. Verified in source: map has 18 keys but they do not exactly match the 18 distinct status strings actually used by data — \"Progressão acadêmica\" (signature row B) is USED by data but ABSENT from the map (silently falls back to the default class \"border-slate-200 bg-white text-slate-600\"), while \"Preparação\" and \"Formação de identidade\" exist as map keys but are not used by any current row (dead entries). Flag this pre-existing styling gap for the parent."
+ },
+ {
+  "index": 966,
+  "path": "ecosystemDecisionLayers.ms-hs<MS/HS readiness>.rows[3]<Scenario D>.scenario",
+  "keyName": "offerEcosystemMsHsRowScenarioDScenario",
+  "pt": "Cenário D",
+  "en": "Scenario D",
+  "disposition": "semantic-id-display-separation",
+  "notes": "Scenario A/B/C/D stable ID used elsewhere for comparisons/keys — keep the literal ID string unchanged in source, only the rendered display label is localized. Confirmed two independent couplings: (1) selectedScenarioTitle state (line 1399) is compared against ecosystemScenarioLadder[].title via pedagogicalOfferScenarios.find(s => s.title === selectedScenarioTitle); (2) row.scenario values are rendered directly as labels in the decision-layer table. Do not simply replace this string."
+ },
+ {
+  "index": 967,
+  "path": "ecosystemDecisionLayers.ms-hs<MS/HS readiness>.rows[3]<Scenario D>.status",
+  "keyName": "offerEcosystemMsHsRowScenarioDStatus",
+  "pt": "Ativo",
+  "en": "Active",
+  "disposition": "semantic-id-display-separation",
+  "notes": "status string is used as a lookup key into a component-local `ecosystemStatusClasses` className map (line ~1457) keyed by these exact Portuguese status strings — translating this value in place would break that lookup silently. Needs a stable status-id plus a separate localized display label; do not simply replace this string. Verified in source: map has 18 keys but they do not exactly match the 18 distinct status strings actually used by data — \"Progressão acadêmica\" (signature row B) is USED by data but ABSENT from the map (silently falls back to the default class \"border-slate-200 bg-white text-slate-600\"), while \"Preparação\" and \"Formação de identidade\" exist as map keys but are not used by any current row (dead entries). Flag this pre-existing styling gap for the parent."
+ },
+ {
+  "index": 973,
+  "path": "ecosystemDecisionLayers.budget<Add-ons orçamentários>.rows[0]<Scenario A>.scenario",
+  "keyName": "offerEcosystemBudgetRowScenarioAScenario",
+  "pt": "Cenário A",
+  "en": "Scenario A",
+  "disposition": "semantic-id-display-separation",
+  "notes": "Scenario A/B/C/D stable ID used elsewhere for comparisons/keys — keep the literal ID string unchanged in source, only the rendered display label is localized. Confirmed two independent couplings: (1) selectedScenarioTitle state (line 1399) is compared against ecosystemScenarioLadder[].title via pedagogicalOfferScenarios.find(s => s.title === selectedScenarioTitle); (2) row.scenario values are rendered directly as labels in the decision-layer table. Do not simply replace this string."
+ },
+ {
+  "index": 974,
+  "path": "ecosystemDecisionLayers.budget<Add-ons orçamentários>.rows[0]<Scenario A>.status",
+  "keyName": "offerEcosystemBudgetRowScenarioAStatus",
+  "pt": "Add-on potencial",
+  "en": "Potential add-on",
+  "disposition": "semantic-id-display-separation",
+  "notes": "status string is used as a lookup key into a component-local `ecosystemStatusClasses` className map (line ~1457) keyed by these exact Portuguese status strings — translating this value in place would break that lookup silently. Needs a stable status-id plus a separate localized display label; do not simply replace this string. Verified in source: map has 18 keys but they do not exactly match the 18 distinct status strings actually used by data — \"Progressão acadêmica\" (signature row B) is USED by data but ABSENT from the map (silently falls back to the default class \"border-slate-200 bg-white text-slate-600\"), while \"Preparação\" and \"Formação de identidade\" exist as map keys but are not used by any current row (dead entries). Flag this pre-existing styling gap for the parent."
+ },
+ {
+  "index": 978,
+  "path": "ecosystemDecisionLayers.budget<Add-ons orçamentários>.rows[1]<Scenario B>.scenario",
+  "keyName": "offerEcosystemBudgetRowScenarioBScenario",
+  "pt": "Cenário B",
+  "en": "Scenario B",
+  "disposition": "semantic-id-display-separation",
+  "notes": "Scenario A/B/C/D stable ID used elsewhere for comparisons/keys — keep the literal ID string unchanged in source, only the rendered display label is localized. Confirmed two independent couplings: (1) selectedScenarioTitle state (line 1399) is compared against ecosystemScenarioLadder[].title via pedagogicalOfferScenarios.find(s => s.title === selectedScenarioTitle); (2) row.scenario values are rendered directly as labels in the decision-layer table. Do not simply replace this string."
+ },
+ {
+  "index": 979,
+  "path": "ecosystemDecisionLayers.budget<Add-ons orçamentários>.rows[1]<Scenario B>.status",
+  "keyName": "offerEcosystemBudgetRowScenarioBStatus",
+  "pt": "Add-on potencial",
+  "en": "Potential add-on",
+  "disposition": "semantic-id-display-separation",
+  "notes": "status string is used as a lookup key into a component-local `ecosystemStatusClasses` className map (line ~1457) keyed by these exact Portuguese status strings — translating this value in place would break that lookup silently. Needs a stable status-id plus a separate localized display label; do not simply replace this string. Verified in source: map has 18 keys but they do not exactly match the 18 distinct status strings actually used by data — \"Progressão acadêmica\" (signature row B) is USED by data but ABSENT from the map (silently falls back to the default class \"border-slate-200 bg-white text-slate-600\"), while \"Preparação\" and \"Formação de identidade\" exist as map keys but are not used by any current row (dead entries). Flag this pre-existing styling gap for the parent."
+ },
+ {
+  "index": 983,
+  "path": "ecosystemDecisionLayers.budget<Add-ons orçamentários>.rows[2]<Scenario C>.scenario",
+  "keyName": "offerEcosystemBudgetRowScenarioCScenario",
+  "pt": "Cenário C",
+  "en": "Scenario C",
+  "disposition": "semantic-id-display-separation",
+  "notes": "Scenario A/B/C/D stable ID used elsewhere for comparisons/keys — keep the literal ID string unchanged in source, only the rendered display label is localized. Confirmed two independent couplings: (1) selectedScenarioTitle state (line 1399) is compared against ecosystemScenarioLadder[].title via pedagogicalOfferScenarios.find(s => s.title === selectedScenarioTitle); (2) row.scenario values are rendered directly as labels in the decision-layer table. Do not simply replace this string."
+ },
+ {
+  "index": 984,
+  "path": "ecosystemDecisionLayers.budget<Add-ons orçamentários>.rows[2]<Scenario C>.status",
+  "keyName": "offerEcosystemBudgetRowScenarioCStatus",
+  "pt": "Add-on potencial",
+  "en": "Potential add-on",
+  "disposition": "semantic-id-display-separation",
+  "notes": "status string is used as a lookup key into a component-local `ecosystemStatusClasses` className map (line ~1457) keyed by these exact Portuguese status strings — translating this value in place would break that lookup silently. Needs a stable status-id plus a separate localized display label; do not simply replace this string. Verified in source: map has 18 keys but they do not exactly match the 18 distinct status strings actually used by data — \"Progressão acadêmica\" (signature row B) is USED by data but ABSENT from the map (silently falls back to the default class \"border-slate-200 bg-white text-slate-600\"), while \"Preparação\" and \"Formação de identidade\" exist as map keys but are not used by any current row (dead entries). Flag this pre-existing styling gap for the parent."
+ },
+ {
+  "index": 988,
+  "path": "ecosystemDecisionLayers.budget<Add-ons orçamentários>.rows[3]<Scenario D>.scenario",
+  "keyName": "offerEcosystemBudgetRowScenarioDScenario",
+  "pt": "Cenário D",
+  "en": "Scenario D",
+  "disposition": "semantic-id-display-separation",
+  "notes": "Scenario A/B/C/D stable ID used elsewhere for comparisons/keys — keep the literal ID string unchanged in source, only the rendered display label is localized. Confirmed two independent couplings: (1) selectedScenarioTitle state (line 1399) is compared against ecosystemScenarioLadder[].title via pedagogicalOfferScenarios.find(s => s.title === selectedScenarioTitle); (2) row.scenario values are rendered directly as labels in the decision-layer table. Do not simply replace this string."
+ },
+ {
+  "index": 989,
+  "path": "ecosystemDecisionLayers.budget<Add-ons orçamentários>.rows[3]<Scenario D>.status",
+  "keyName": "offerEcosystemBudgetRowScenarioDStatus",
+  "pt": "Add-on potencial",
+  "en": "Potential add-on",
+  "disposition": "semantic-id-display-separation",
+  "notes": "status string is used as a lookup key into a component-local `ecosystemStatusClasses` className map (line ~1457) keyed by these exact Portuguese status strings — translating this value in place would break that lookup silently. Needs a stable status-id plus a separate localized display label; do not simply replace this string. Verified in source: map has 18 keys but they do not exactly match the 18 distinct status strings actually used by data — \"Progressão acadêmica\" (signature row B) is USED by data but ABSENT from the map (silently falls back to the default class \"border-slate-200 bg-white text-slate-600\"), while \"Preparação\" and \"Formação de identidade\" exist as map keys but are not used by any current row (dead entries). Flag this pre-existing styling gap for the parent."
+ },
+ {
+  "index": 1193,
+  "path": "JSX:L4137",
+  "line": 4137,
+  "keyName": "offerBlockDurationMinutesSuffix",
+  "pt": "min",
+  "en": "min",
+  "disposition": "semantic-id-display-separation",
+  "notes": "unit abbreviation for minutes rendered via template literal `${option} min`; 'min' is a standard abbreviation in both pt-BR and en-US, kept identical; source finding text carried leading whitespace from the template-literal join, not meaningful Matches real catalog key 'offerBlockDurationMinutesSuffix' exactly (no leading space; the source finding's leading whitespace was a template-literal join artifact, not meaningful). SEMANTIC-ID FLAG STANDS regardless: consumer expression at L4137 `typeof option === \"number\" && control.label === \"Block duration\" ? `${option} min` : option` compares against the CONTROL'S LABEL STRING 'Block duration' (not itself a JSX finding). If that label is localized without updating this comparison, the branch silently stops matching and the ' min' suffix disappears from the pt-BR dropdown. Needs a stable non-localized `id` field on the control objects instead of comparing against the display label."
+ }
+]
