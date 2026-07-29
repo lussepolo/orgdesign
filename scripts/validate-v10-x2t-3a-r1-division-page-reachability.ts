@@ -121,6 +121,7 @@ const POST_BASELINE_ALLOWED_COMMITS = new Set([
   "9c90cb62304c029bfc62fb01f2b829e4566a9b8c", // Phase 15U.2 payroll governance sheets — validate:phase15u2 81/81
   "e29f56a11e1515663879d331b087253240e166d9", // intermediario->base terminology sweep — comments/fixtures only, zero numeric impact
   "06111e8319f45901549d948bed69819ba00a3d15", // RC1B.1 merge of this validator's own branch into main
+  "6532bc4d23d602b08dd8c98756a6f831f1b44559", // V10-RC2 Gate 3: App.tsx/ExecutiveOrgDesignTab.tsx only — no protected calculation/staffing/adapter path touched, reviewed diff matches commit message exactly
 ]);
 
 function commitsTouching(paths: string[]): string[] {
