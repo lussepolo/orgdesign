@@ -495,6 +495,7 @@ function buildReadmeSheet(vm: DreScenarioWorkbookViewModel): XLSX.WorkSheet {
     ["22. FOPAG Payroll Projection"],
     ["23. Payroll Assumptions"],
     ["24. Role Scenario Activation Matrix"],
+    ["25. Fagundes Export Index"],
     [],
     ["Three-version payroll export (Phase 15R.1):"],
     ["The main DRE sheets (1–13) reflect the selected scenario."],
@@ -1725,6 +1726,126 @@ function buildRoleScenarioActivationMatrixSheet(vm: DreScenarioWorkbookViewModel
   return XLSX.utils.aoa_to_sheet(rows);
 }
 
+// ── Sheet 25: Fagundes Export Index (V10-RC2.1 Gate 7) ────────────────────────
+// A curated view/index over already-computed sheet data, not a second export
+// engine. Every "Maps to" cell names an existing sheet built from the same
+// vm (dreOutput/fopagOutput/threeVersionPayroll) as everything else in this
+// workbook — no independent calculation, no default/module-level scenario.
+// Unsupported requested content is marked "unavailable" in-sheet with the
+// governance reason, never left blank and never shown as 0.
+interface FagundesIndexRow {
+  fagundesSheet: string;
+  availability: "available" | "unavailable";
+  mapsTo: string;
+  sourceAndLimitationLineage: string;
+}
+
+function buildFagundesIndexRows(vm: DreScenarioWorkbookViewModel): FagundesIndexRow[] {
+  return [
+    {
+      fagundesSheet: "Scenario Control",
+      availability: "available",
+      mapsTo: "Scenario Inputs",
+      sourceAndLimitationLineage:
+        "vm.selections (shared dreSelections state, Gate 3) — exact visible scenario, not a default.",
+    },
+    {
+      fagundesSheet: "Grade-Level Staffing Summary",
+      availability: "available",
+      mapsTo: "FOPAG Headcount Plan; EY/LS grade detail also in Payroll Role Audit",
+      sourceAndLimitationLineage:
+        "calculateFopag().records, EY/LS section-based rule (payrollAdapter.ts, Phase 8H.1, Luciana " +
+        "2026-06-03). MS/HS grade-level rows are not included here — F06 (V10-RC2 Gate 1) records three " +
+        "non-identical, unreconciled MS/HS staffing figures in this repository; the EY/LS rule is not " +
+        "extrapolated to MS/HS grades.",
+    },
+    {
+      fagundesSheet: "Grade-Level Staffing Detail",
+      availability: "available",
+      mapsTo: "FOPAG Role Audit",
+      sourceAndLimitationLineage: "calculateFopag().records, one row per roleId x year. Same MS/HS limitation as above.",
+    },
+    {
+      fagundesSheet: "Non-Teaching Headcount",
+      availability: "available",
+      mapsTo: "Org Design Roles",
+      sourceAndLimitationLineage: "orgDesignHcTableAdapter.ts buildOrgDesignHcTable(), derived from calculateFopag().records.",
+    },
+    {
+      fagundesSheet: "Staffing and Tier Assumptions",
+      availability: "available",
+      mapsTo: "Payroll Assumptions",
+      sourceAndLimitationLineage:
+        "payrollGovernanceWorkbookAdapter.ts buildPayrollAssumptionRows() — per-person compensation basis " +
+        "by role, Finance-validated (Phase 8A extraction).",
+    },
+    {
+      fagundesSheet: "Payroll Detail",
+      availability: "available",
+      mapsTo: "Payroll Detail - Minimum / Balanced / Premium",
+      sourceAndLimitationLineage: "calculateFopag() per org-design tier (threeVersionPayroll), computed not typed.",
+    },
+    {
+      fagundesSheet: "Direct Payroll and Corporate Allocation",
+      availability: "unavailable",
+      mapsTo: "DRE Payroll Bridge (direct-campus payroll only)",
+      sourceAndLimitationLineage:
+        "No corporate-allocation adapter exists in this codebase (V10-RC2 Gate 5 finding, reconfirmed " +
+        "V10-RC2.1). FopagYearTotals splits fopagDireto/folhaDireta/benefits (direct-campus only); nothing " +
+        "sums a corporate allocation against it, and none is invented here. This cell intentionally shows " +
+        "no monetary figure rather than a blank or a zero.",
+    },
+    {
+      fagundesSheet: "Tuition and Revenue Assumptions",
+      availability: "available",
+      mapsTo: "Tuition Revenue",
+      sourceAndLimitationLineage:
+        "dreOutput.byYear via calculateDre(). Tuition status is computed_uncertified: D-R6/F03 base " +
+        "tuition source authority remains unresolved (tuitionSourceData.ts: screenshot_transcription_based, " +
+        "needsFinanceReview=true) — figures are engine-computed from the currently governed inputs, not " +
+        "Finance-certified.",
+    },
+    {
+      fagundesSheet: "Scenario Comparison",
+      availability: "available",
+      mapsTo: "Scenario Sensitivity Matrix; Org Design Sensitivity",
+      sourceAndLimitationLineage: "calculateDre() varied across governed lever combinations, same engine as the selected scenario.",
+    },
+    {
+      fagundesSheet: "FOPAG_DIRETO Payroll Bridge",
+      availability: "available",
+      mapsTo: "DRE Payroll Bridge",
+      sourceAndLimitationLineage: "threeVersionPayroll reconciliation between DRE cost lines and FOPAG_DIRETO/FOLHA_DIRETA totals.",
+    },
+    {
+      fagundesSheet: "Source and Formula Lineage",
+      availability: "available",
+      mapsTo: "Formula Audit; Raw Engine Output",
+      sourceAndLimitationLineage: "Per-DRE-line formula pattern and source citation, cross-referenced to dreLineItemMap.ts.",
+    },
+  ];
+}
+
+function buildFagundesExportIndexSheet(vm: DreScenarioWorkbookViewModel): XLSX.WorkSheet {
+  const rows: (string | number)[][] = [
+    ["Rio Strategic Org Design — Fagundes Export Index (V10-RC2.1 Gate 7)"],
+    ["Selected scenario", scenarioKey(vm.selections)],
+    ["Export timestamp", vm.exportedAt.toISOString()],
+    [],
+    [
+      "This sheet is a curated index over the 24 sheets already in this workbook, mapped to the " +
+        "Fagundes-requested sheet set. It performs no independent calculation and adds no new export " +
+        "engine — every 'Maps to' sheet is built from the same scenario result (dreOutput / fopagOutput / " +
+        "threeVersionPayroll) as this sheet. Unsupported content is marked 'unavailable' with its " +
+        "governance reason; it is never left blank and never shown as a zero.",
+    ],
+    [],
+    ["Fagundes sheet", "Availability", "Maps to", "Source and limitation lineage"],
+    ...buildFagundesIndexRows(vm).map((r) => [r.fagundesSheet, r.availability, r.mapsTo, r.sourceAndLimitationLineage]),
+  ];
+  return XLSX.utils.aoa_to_sheet(rows);
+}
+
 // ── Main entry point ──────────────────────────────────────────────────────────
 export function buildDreScenarioWorkbook(vm: DreScenarioWorkbookViewModel): XLSX.WorkBook {
   const wb = XLSX.utils.book_new();
@@ -1777,6 +1898,10 @@ export function buildDreScenarioWorkbook(vm: DreScenarioWorkbookViewModel): XLSX
   // Phase 15U.2: payroll governance sheets
   XLSX.utils.book_append_sheet(wb, buildPayrollAssumptionsSheet(vm), "Payroll Assumptions");
   XLSX.utils.book_append_sheet(wb, buildRoleScenarioActivationMatrixSheet(vm), "Role Scenario Activation Matrix");
+
+  // V10-RC2.1 Gate 7: curated index over the sheets above, mapped to the
+  // Fagundes-requested sheet set. No independent calculation.
+  XLSX.utils.book_append_sheet(wb, buildFagundesExportIndexSheet(vm), "Fagundes Export Index");
 
   return wb;
 }
