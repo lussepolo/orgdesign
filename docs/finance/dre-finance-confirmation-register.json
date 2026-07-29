@@ -13,12 +13,13 @@
     "FINANCE_SOURCE_CLOSURE_COMPLETE": false,
     "BOARD_RATIFICATION_READY": false,
     "openItemCount": 5,
-    "resolvedItemCount": 1
+    "resolvedItemCount": 1,
+    "v10RC2Gate2CorrectionNote": "2026-07-29: F01 and F04 currentEngineBehavior/sourceProvenance corrected to reflect D-R7 and D-R3 (phase-v10-f1a-revenue-governance-decision-register.json), which superseded the stale runtime descriptions this document previously carried. decisionStatus remains 'open' on both — only the Finance-signed provenance sign-off is outstanding, not the formula/value, which is now a recorded project-owner implementation decision. See docs/audits/rio-resilience/phase-v10-rc2-gate1-decision-assimilation-matrix.md."
   },
   "enrollmentDocumentation": {
     "engineCanonicalFixture2028": 228,
     "pnlWorkbookBaseline2028": 246,
-    "declarationNote": "Neither value is declared authoritative. Engine: t1_g3/intermediario scenario (openingPackageOccupancySourceData.ts). PnL workbook: Phase 13B baseline (PNL_FORMULA_PARITY_SOURCE_DATA, ~246 learners; scenario not mapped to engine). Finance and Board must confirm the authoritative baseline and equivalent-scenario mapping.",
+    "declarationNote": "Neither value is declared authoritative. Engine: t1_g3/base scenario (openingPackageOccupancySourceData.ts) — corrected 2026-07-29 (V10-RC2 Gate 2): the OccupancyScenarioId enum has no 'intermediario' member; 'intermediario' is a retired legacy alias that normalizeOccupancyScenarioId() deterministically maps to 'base' (openingPackageOccupancySourceDataContract.ts:110-111). This document's prior wording predates that normalization being named here and did not itself invoke live 'intermediario' code (none exists in tracked src/). PnL workbook: Phase 13B baseline (PNL_FORMULA_PARITY_SOURCE_DATA, ~246 learners; scenario not mapped to engine). Finance and Board must confirm the authoritative baseline and equivalent-scenario mapping. Distinct question from D-R8 (t1_g4, 258 vs 259) — see F05 and the Gate 1 decision matrix.",
     "authoritative2028Enrollment": null
   },
   "openItems": [
@@ -28,18 +29,19 @@
       "label": "Outras Receitas — annual adjustment (reajuste_despesas) index name and signed source",
       "status": "provisional_source",
       "decisionStatus": "open",
-      "currentEngineBehavior": "outras_receitas = outrasReceitasRatio × numero_de_alunos — reajuste term omitted; engine discloses via outrasReceitasReajusteNote. Formula mechanics confirmed from PnL workbook (C233 = ($Y233/$Y$221)*(1+C$9)*C$221); direct row-9 annual values not yet extracted as a committed source record.",
-      "sourceProvenance": "Formula structure: PnL workbook row 233 (confirmed Phase 12I/12K). Direct row-9 (reajuste_despesas) extraction: not available in any committed source file. Branch B determination: Phase 15I.2C.",
+      "supersededBy": "D-R7 (formula/value question only — provenance question below remains open)",
+      "currentEngineBehavior": "SUPERSEDED as of Phase V10-F2.2 (2026-07-27) / D-R7 (phase-v10-f1a-revenue-governance-decision-register.json): outras_receitas (and all 21 other PnL row-11-dependent lines) is now formula_derived and live in dreEngine.ts/dreLineItemMap.ts via reajusteDespesasGrowth.ts — the 'reajuste term omitted' gap this item originally described is closed. Runtime formula: explicitBase2028 = 2,571.87 x 1.05 (one-time PnL!E11 conversion), then x 1.049^(year-2028) from 2029, x numero_de_alunos(year). Validated by scripts/validate-v10-f2.ts (76/76).",
+      "sourceProvenance": "Formula structure: PnL workbook row 233/row 235 (confirmed Phase 12I/12K, corrected V10-F2). Annual index values (5.0% 2028 / 4.9% 2029+): PnL!E11/F11:N11, workbook v10, direct OOXML read, project-owner precedence decision (D-R1, D-R7). Remaining open item is provenance sign-off only, not the value or formula.",
       "requiredOwner": "Finance",
       "blocksEngineCalculation": false,
       "blocksBoardRatification": true,
       "calculationContinues": true,
-      "financeAsk": "Confirm the index name for reajuste_despesas (C$9, PnL row 9) and provide a signed source reference. The formula structure (C233 = (Y233/Y221)*(1+C9)*C221) is already confirmed — only the economic index name and signed reference are needed.",
-      "approvedFormula": null,
+      "financeAsk": "Formula and value are now implemented per the project-owner's v10 precedence decision (D-R7, fully implemented). Finance's remaining ask is narrower than originally scoped: provide a signed reference confirming the row-11 'Reajuste Despesas' index name/source, for Board-ratification purposes only — this no longer blocks or changes engine calculation.",
+      "approvedFormula": "outras_receitas(year) = (2571.87 x 1.05) x 1.049^(year-2028) x numero_de_alunos(year), for year >= 2029; 2571.87 x 1.05 x numero_de_alunos(2028) at 2028 — project-owner implementation decision (D-R7), not yet Finance-signed",
       "approvedValue": null,
-      "approvedSourceReference": null,
-      "decisionDate": null,
-      "owner": null
+      "approvedSourceReference": "PnL!E11/F11:N11, workbook v10 (SHA 2e3230ad233c7cd450c1da1fca46da1cb80899e66cdf5ba3d4e9358357a05da0), per D-R1/D-R7",
+      "decisionDate": "2026-07-27",
+      "owner": "project owner (Luciana Polonen) — implementation decision; Finance sign-off on provenance still requested"
     },
     {
       "id": "F03",
@@ -66,18 +68,19 @@
       "label": "Discount schedule — formal sign-off",
       "status": "provisional_source",
       "decisionStatus": "open",
-      "currentEngineBehavior": "20% (2028-2030), 17% (2031), 15% (2032-2033), 12.5% terminal (2034+) — discountScheduleSourceData.ts",
-      "sourceProvenance": "Verbal/documented source: Head of Finance; not a Finance-signed workbook",
+      "supersededBy": "D-R3 (schedule/value question only — provenance sign-off below remains open)",
+      "currentEngineBehavior": "SUPERSEDED as of Phase V10-F1B (2026-07-27) / D-R3 (phase-v10-f1a-revenue-governance-decision-register.json): the 20/17/15/12.5 schedule this item described (itself already a stale intermediate — the 'historical Finance-packet' snapshot from Phase 15I.2C) is retired. Live schedule is workbook_v10_row224: 25/20/20/18/15/15/15/12.5/12.5/12.5 (2028-2037), independently cross-confirmed identical in workbook v9 row 222 and v10 row 224.",
+      "sourceProvenance": "PnL!E224:N224, workbook v10 (SHA 2e3230ad233c7cd450c1da1fca46da1cb80899e66cdf5ba3d4e9358357a05da0), direct OOXML read; independently corroborated by PnL!C222:V222, workbook v9. Project-owner implementation decision (D-R1/D-R3), not yet a Finance-signed document.",
       "requiredOwner": "Finance",
       "blocksEngineCalculation": false,
       "blocksBoardRatification": true,
       "calculationContinues": true,
-      "financeAsk": "Provide signed document confirming the existing discount schedule. No formula change required — provenance sign-off only.",
+      "financeAsk": "The schedule itself is now implemented and cross-corroborated by two independent workbook reads (v9 and v10). Finance's remaining ask is unchanged in kind, narrower in scope: provide a signed document confirming this specific schedule (25/20/20/18/15/15/15/12.5/12.5/12.5), for Board-ratification purposes only — no formula or value change required.",
       "approvedFormula": null,
-      "approvedValue": null,
-      "approvedSourceReference": null,
-      "decisionDate": null,
-      "owner": null
+      "approvedValue": "25/20/20/18/15/15/15/12.5/12.5/12.5 (2028-2037) — project-owner implementation decision (D-R3), not yet Finance-signed",
+      "approvedSourceReference": "PnL!E224:N224, workbook v10, and PnL!C222:V222, workbook v9 (independent corroboration), per D-R1/D-R3",
+      "decisionDate": "2026-07-27",
+      "owner": "project owner (Luciana Polonen) — implementation decision; Finance sign-off on provenance still requested"
     },
     {
       "id": "F05",
