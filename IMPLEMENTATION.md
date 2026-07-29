@@ -6057,19 +6057,24 @@ precision correction), `docs/audits/rio-resilience/phase-v10-rc2-gate8-coverage-
 `0218537` Gate 2 (coverage-matrix classification) · `669f6a6` Gate 3 (phase15i1 +
 qa:v10-e1 regressions) · `176981e` Gate 6 (staffing table) · `ea243ae` Gate 7 (Fagundes
 export) · `86fd80e` Gate 8 (export test) · `aa0bfbb` (stale-language correction in the
-Gate 8 matrix).
+Gate 8 matrix) · `25ebd2e` (this IMPLEMENTATION.md update).
+
+### Full regression sweep note
+
+The sweep above was run at `aa0bfbb`, the last commit that touches any source or
+validator file this phase; `25ebd2e` (documentation only) changes no validator input, so
+every result in that table still holds at final HEAD.
 
 ### Final state
 
-Final HEAD: `aa0bfbb`. `git rev-list --count origin/main..HEAD` = 34, `origin/main..HEAD`
-right-side count (behind) = 0. Decomposes cleanly and reconciles exactly:
-`git rev-list --count origin/main..6d95dde` = 17 (commits already ahead of `origin/main`
-before V10-RC2 began — pre-existing, unrelated to this multi-phase effort) +
-`git rev-list --count 6d95dde..1fb5e8c` = 11 (V10-RC2) +
-`git rev-list --count 1fb5e8c..HEAD` = 6 (V10-RC2.1: `0218537`, `669f6a6`, `176981e`,
-`ea243ae`, `86fd80e`, `aa0bfbb`) = 17 + 11 + 6 = **34**, matching exactly. Worktree and
-index clean; the same single pre-existing stash (`stash@{0}`) remains untouched; no push
-or deployment occurred at any point this phase.
+Final HEAD: `25ebd2e`. `git rev-list --count origin/main..HEAD` = 35, behind = 0.
+Decomposes cleanly and reconciles exactly: `git rev-list --count origin/main..6d95dde` =
+17 (commits already ahead of `origin/main` before V10-RC2 began — pre-existing, unrelated
+to this multi-phase effort) + `git rev-list --count 6d95dde..1fb5e8c` = 11 (V10-RC2) +
+`git rev-list --count 1fb5e8c..HEAD` = 7 (V10-RC2.1: `0218537`, `669f6a6`, `176981e`,
+`ea243ae`, `86fd80e`, `aa0bfbb`, `25ebd2e`) = 17 + 11 + 7 = **35**, matching exactly.
+Worktree and index clean; the same single pre-existing stash (`stash@{0}`) remains
+untouched; no push or deployment occurred at any point this phase.
 
 ### Remaining blockers
 
