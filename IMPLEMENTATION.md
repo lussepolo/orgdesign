@@ -5342,3 +5342,51 @@ Gates 3–5 below is added through `t()` with keys present in both `pt-BR.ts` an
 `en-US.ts` (`q2`/`q3` already enforce key-parity and fail-closed lookup at runtime),
 and the reachable-string count is re-measured after those changes to confirm it has
 not increased beyond 2772 from this phase's own additions.
+
+### Gate 3 — shared scenario contract, first cross-tab connection closed
+
+`ExecutiveOrgDesignTab.tsx` hardcoded captação to `"base"` (`OCCUPANCY_SCENARIO_ID`
+module constant, no selector) and held its own tab-local `openingPackageId` state,
+seeded from a locally-declared `OPENING_SCENARIO_OPTIONS` array that included the two
+retired packages `t1_g3`/`t1_g5` alongside the active ones — the exact "hardcoded
+`base`" and "duplicated defaults" items this phase's directive named. Commit `6532bc4`
+closed this by lifting `openingPackageId`/`occupancyScenarioId` to props sourced from
+the same `dreSelections` state `App.tsx` already lifts above `AnimatePresence` for
+`DreScenarioSimulatorTab` (Phase 15G.2) — reusing the existing shared state rather than
+introducing a second, parallel contract. Org Design's opening-package selector is now
+restricted to `ActiveOpeningPackageId` (`t1_g4`/`t1_g6`, via `ACTIVE_OPENING_PACKAGE_IDS`),
+matching what `DreLeverPanel` already offers; a defensive `isActiveOpeningPackageId`
+narrow handles `DreScenarioSimulatorSelections.openingPackageId`'s wider type without
+assuming DRE's state is always active-only. A captação selector (previously absent)
+was added, reusing the existing `scenarioConservador`/`scenarioBase`/`scenarioOtimista`
+and `dreLeverPanelCaptacaoLabel` translation keys already present in both locale files.
+
+Org-design tier (Minimum/Balanced/Premium) and year remain Org Design-local by design,
+not oversight: year is a single-year view selector here (DRE iterates all ten
+projection years at once in its own tab — forcing year into the shared contract would
+create the false dependency the phase directive explicitly forbids), and tier affects
+salary only (Gate 5's Payroll domain), not headcount or enrollment.
+
+**Browser-verified** (dev server, password-gated local app): set captação to
+"Otimista" on Executive Org Design (`t1_g6`/Balanced), navigated to DRE Operacional —
+DRE's own "Cenário de Captação" and "Pacote de Abertura" controls showed "Otimista"
+and "T1–G6 Opening Package (t1_g6)" without re-selecting anything, confirming the
+state is genuinely shared and survives tab navigation, not reset per RC1B's finding.
+
+Model-level regression after this change: lint clean, build clean, `validate:v10-e1`
+100/100, `validate:v10-e2` 309/309, `validate:v10-f1b` 109/109, `validate:v10-p1`
+58/58, `validate:v10-f2` 76/76, `validate:v10-x1` 39/39, `validate:phase15u2` 81/81,
+`validate:v10-rc2-gate2` clean, division-page reachability 48/48. `validate:v10-x2t`
+q5 reachable-candidate-string count went from 2772 to 2768 (decreased — removing the
+two retired-package option labels outweighed the new captação selector, which reuses
+existing translated keys only) — no new untranslated string was introduced.
+
+**Not yet done (remaining Gate 3/5 scope):** `PayrollProjectionTab.tsx` still owns its
+own `PayrollScenario`/`TuitionScenario` types (the latter still including the retired
+`"pessimista"` value) and has no `openingPackageId`/org-design state at all — this file
+is explicitly marked `LOCKED FILE — do not edit without explicit approval` at its own
+header, and `validate:v10-x2t` check `q19_payroll_tab_calc_core_parity_runtime`
+asserts its calculation-core and export-handler substrings are byte-identical to the
+V10-X2T entry state. Wiring Payroll into the shared contract requires an explicit
+unlock decision from the project owner that this phase does not have; it is reported
+as a named blocker, not attempted.
