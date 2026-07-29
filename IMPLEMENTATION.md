@@ -5677,3 +5677,424 @@ capacity. **Not ready for project-owner review as a "complete" phase** in the se
 closing all eleven gates, but the repository is in a materially more consistent,
 better-documented, and more behaviorally-correct state than at phase entry, with every
 remaining gap named precisely enough to act on without another reconciliation pass.
+
+## Phase V10-RC2.1 — Commit Integrity, Regression Closure and Supported Scenario Integration (2026-07-29)
+
+### Entry Gate
+
+Verified before any mutation: branch `main`; HEAD `1fb5e8c`; V10-RC2 commit range
+`6d95dde..1fb5e8c` (11 new commits); worktree and index clean; `origin/main` unchanged
+from V10-RC2's start; one pre-existing stash (`stash@{0}: On main: WIP rio-scenario-resilience
+supporting data`) untouched; no push or deployment had occurred. All facts matched — proceeded.
+
+### Gate 1 — commit integrity table (all 11 V10-RC2 commits)
+
+| Commit | Subject | Exact paths | Functional purpose | Relevant validator | Validation result | Foreign/unrelated content |
+|---|---|---|---|---|---|---|
+| `c2d9772` | Correct stale baseline-exception assertions in division-page reachability validator (Gate 10) | `scripts/validate-v10-x2t-3a-r1-division-page-reachability.ts` | Replace fixed-baseline-diff checks 7/8 with `commitsTouching()` + allowlist | `validate:v10-x2t-3a-r1` (self) | 48/48 | None |
+| `ea6a699` | Assimilate approved governance decisions, close dangling citation (Gate 1/2) | `IMPLEMENTATION.md`, 2 new audit docs, `dre-finance-confirmation-register.json`, `package.json`, new `validate-v10-rc2-gate2-governance.ts` | Governance-record corrections + new Gate 2 validator | `validate:v10-rc2-gate2` (new) | Created (had 2 weak checks, fixed next commit) | None |
+| `00012f1` | Tighten two substring-based checks in the Gate 2 governance validator | `scripts/validate-v10-rc2-gate2-governance.ts` | Fix D-R2 fragile substring check, D-R8 vacuous substring check, D-R3 wrong-file check, ESM `require()` crash | `validate:v10-rc2-gate2` | ALL CHECKS PASSED (reconfirmed this phase) | None |
+| `3062346` | Fix stale check-count claim in V10-RC2 Gate 10 disposition | `IMPLEMENTATION.md` | Remove a duplicate doc section produced by concurrent writes | N/A (doc-only) | N/A | **Background-agent commit — see disposition below. Reverified this phase via full diff: doc-cleanup only, zero code changes.** |
+| `6532bc4` | V10-RC2 Gate 3: wire Executive Org Design into the shared DRE scenario state | `src/App.tsx`, `src/components/sections/ExecutiveOrgDesignTab.tsx` | Replace hardcoded `occupancyScenarioId="base"` and tab-local `openingPackageId` state with shared `dreSelections` props | Gate 9 browser QA (3 transitions, V10-RC2) + `tsc --noEmit` | Passing; browser QA confirmed bidirectional persistence | **Background-agent commit — see disposition below. Reverified this phase via full diff: contains only the two stated files, matches the commit message exactly.** |
+| `77bd201` | Document Gate 3 (shared scenario contract) in IMPLEMENTATION.md | `IMPLEMENTATION.md` | Documentation | N/A (doc-only) | N/A | None |
+| `2be39a2` | Add V10-RC2 Gate 8 coverage matrix and Gate 9 model-level cross-product test | New `validate-v10-rc2-gate8-coverage-matrix.ts` + generated JSON, `package.json` | 900-cell coverage-matrix generator | `validate:v10-rc2-gate8` (self) | ALL CHECKS PASSED (refined this phase — Gate 2 below) | None |
+| `25bf307` | Add reviewed Gate 3 commit to the reachability validator's allowlist | `scripts/validate-v10-x2t-3a-r1-division-page-reachability.ts` (+1 line) | Register `6532bc4` in `POST_BASELINE_ALLOWED_COMMITS` after independent content verification | `validate:v10-x2t-3a-r1` (self) | 48/48 | None |
+| `e2b6f5f` | Document Gates 4, 5, 7 in IMPLEMENTATION.md | `IMPLEMENTATION.md` | Documentation | N/A (doc-only) | N/A | None |
+| `22e2c00` | Document Gate 9 browser QA results | `IMPLEMENTATION.md` | Documentation | N/A (doc-only) | N/A | None |
+| `1fb5e8c` | V10-RC2 Gate 6 disposition, Gate 11 regression results, and phase closure | `IMPLEMENTATION.md` | Documentation / phase closure | N/A (doc-only) | N/A | None |
+
+**Background-agent commit disposition (`6532bc4`, `3062346`):** a fork agent dispatched
+for Gate 1 research in V10-RC2 continued running past its intended scope after being
+resumed, and — sharing the same working directory as the main session — committed the
+main session's in-progress Gate 3 code edits under its own commit narration (`6532bc4`),
+plus a cleanup commit (`3062346`) removing a duplicate doc section the concurrent writes
+had produced. The agent was stopped via `TaskStop` immediately upon discovery (unexpected
+commits appearing in `git log`). Both commits were verified in V10-RC2 via full `git show`
+diff inspection to confirm they contained ONLY their stated content. **Reverified this
+phase**, independently: `git show 6532bc4` touches exactly `src/App.tsx` and
+`ExecutiveOrgDesignTab.tsx`, matching its message; `git show 3062346` touches only
+`IMPLEMENTATION.md`, removing 151 lines / adding 20, consistent with "fix stale
+check-count claim." No foreign or unrelated content in either commit.
+
+### Gate 2 — coverage-matrix interpretation with exact counts
+
+**What one "cell" represents:** one full DRE/FOPAG engine evaluation — `calculateDre()` +
+`calculateFopag()` + `calculateSectionCountsForScenario()` — for exactly one
+`(openingPackageId, occupancyScenarioId, orgDesignOptionId, year, tuitionScenarioId)`
+combination. An aggregate scenario-level computation, not a per-grade or per-role
+breakdown (that granularity is Gate 6's staffing table, a separate artifact).
+
+Added explicit `supportLevel`, `blockedByDecisionIds`, and `msHsStaffingAuthorityReconciled`
+fields to every cell, plus `supportLevelCounts`, `blockedByDecisionIdCounts`, `crossTabs`,
+and `cellDefinition` to the summary, and two new terminal assertions. Regenerated and
+reverified (10/10 generator assertions pass, deterministic rerun byte-identical before
+this phase's later comment-only correction — see below).
+
+**Exact counts (900 cells: 2 packages x 3 captação x 3 org-design x 10 years x 5 tuition
+scenarios):**
+
+| Metric | Count |
+|---|---|
+| `supportLevelCounts.fully_supported` | 0 / 900 |
+| `supportLevelCounts.partially_supported` | 900 / 900 |
+| `supportLevelCounts.unavailable` | 0 / 900 |
+| `blockedByDecisionIdCounts["D-R5"]` | 900 |
+| `blockedByDecisionIdCounts["D-R6"]` | 900 |
+| `blockedByDecisionIdCounts["F03"]` | 900 |
+| `blockedByDecisionIdCounts["F05"]` | 0 (t1_g3 retired, excluded from `PACKAGES`) |
+| `blockedByDecisionIdCounts["F06"]` | 900 |
+| `crossTabs.enrollmentAvailable_staffingNotAvailable` | 0 |
+| `crossTabs.staffingAvailable_payrollNotAvailable` | 0 |
+| `crossTabs.payrollAvailable_tuitionNotCertified` | 900 |
+| `crossTabs.anyOutputAvailable_exportNotAvailable` | 900 |
+
+Do not describe this as "a 900-cell passing integration suite" — 0/900 cells are
+`fully_supported`; every cell is `partially_supported` because tuition is
+`computed_uncertified` (D-R6/F03) and no cell's figures are export-certified in every
+case (see the Gate 7 precision correction below). Enrollment, sections, staffing,
+payroll, revenue, and DRE handoff ARE available for all 900/900 cells — that is a real,
+verified result, distinct from "fully supported."
+
+A later fix this phase (see "Cross-phase correction" below) corrected stale
+"export not wired" language in this generator's comments and assertion labels after
+Gate 7 landed — the `exportAvailable: false` value itself is unchanged and unaffected;
+only the explanatory text was imprecise.
+
+### Gate 3 — regression closure (the two disclosed failures)
+
+**`validate:phase15i1` (23/24 → 24/24):** Failing check `canonical_fixture_2028_enrollment_228`
+expected 228 for `WORKING_SCENARIO_DRE_OUTPUT.byYear[2028].numero_de_alunos`, actual 258.
+
+- **Root cause, with commit evidence:** `git log -p` on `dreWorkingScenario.ts` shows
+  commit `3f4da5c` ("Implement V10-E1 governed package migration", 2026-07-24) changed
+  `WORKING_SCENARIO_SELECTIONS.openingGrades.selectedOptionId` from the retired `t1_g3`
+  package to the active `t1_g6` package (and `occupancyEnrollment` from `intermediario`
+  to `base`), but never updated the downstream assertion in
+  `dreGovernanceReadinessValidation.ts` or its comment, both of which still said `t1_g3`
+  and `228`.
+- **Which side was defective:** the assertion, not the engine. Confirmed three ways: (1)
+  `t1_g3/base` is now explicitly rejected by
+  `assertSupportedDreEnrollmentCapacityLeverInput` (throws "Unsupported
+  openingPackageId/occupancyScenarioId combination: t1_g3/base") — 228 can no longer be
+  produced by any supported input. (2) `governedCaptacaoCapacitySourceData.ts`'s
+  SHA256-verified G6 captação workbook data (`G6_ENROLLMENT_BY_SCENARIO.base`, 2028
+  column, summed across the 11 active grades: 16+16+24+28+30+34+28+26+22+18+16) = 258
+  exactly. (3) The same methodology is independently cross-validated for `t1_g4` by
+  `validate:phase15s1`/`validate:phase15s2` (both passing, `t1_g4/base/2028 = 258`,
+  cross-checked against the DRE workbook export and the OfferScenariosTab UI).
+- **Correction:** renamed the check ID to `canonical_fixture_2028_enrollment_258`,
+  updated the expected value to 258, and rewrote the stale comment to name `t1_g6`,
+  cite commit `3f4da5c`, and cite the governed-data trace above.
+- **New regression coverage:** none needed — the existing check now asserts the correct
+  value; a rename was verified safe (grepped for the old check-ID string across
+  `src`/`scripts`/`docs`/`tests`; zero other references).
+
+**`qa:v10-e1` (timeout → 19/19):** Failing at `openDreTab()`, waiting for
+`getByRole("button", { name: /DRE Scenario Simulator/i })`.
+
+- **Root cause, with commit evidence:** `git log --all -S'DRE Scenario Simulator'` shows
+  that string existed only in the original locale-infrastructure commit (`a247d0e`) and
+  was replaced by the `wsDreShortLabel` translation key before this test was ever
+  exercised against current code — the app's default locale (pt-BR) renders "DRE
+  Operacional", not "DRE Scenario Simulator" or even "Operating P&L" (the en-US value).
+- **Which side was defective:** the test, not the app. `wsDreShortLabel` resolves
+  correctly in both locales; the test's locator simply never matched either.
+- **Correction, iterative (three more stale locators found behind the first, exactly as
+  expected once the pattern was identified):** fixed `getByRole("button", ...)` to match
+  `/DRE Operacional|Operating P&L/i`; fixed `getByLabel(/Captação Scenario/i)` (en-US
+  only) to `/Cenário de Captação|Captação Scenario/i`; fixed
+  `getByLabel(/Opening Package/i)` to `/Pacote de Abertura|Opening Package/i`; fixed the
+  T1-G4 governed-message regex to match both locale strings. All four were the same root
+  cause: locators written against en-US-only text against an app whose default locale is
+  pt-BR.
+- **New regression coverage:** none needed — the fixed locators now exercise the same 19
+  checks the test always intended, including package/scenario switching, capacity
+  figures, and the pessimista-absence check.
+
+**Additional pre-existing, out-of-scope failures surfaced by this investigation (NOT
+among the two disclosed regressions, NOT caused by V10-RC2/V10-RC2.1, left
+unresolved per this phase's bounded scope):**
+
+| Script | Status | Traced cause |
+|---|---|---|
+| `validate:phase15f` | Crashes (uncaught exception) | Hardcodes `t1_g3/base`, rejected since commit `3f4da5c` (2026-07-24) |
+| `validate:phase15i2c` | Crashes (uncaught exception) | Same — hardcodes `t1_g3/base` |
+| `validate:phase15j` | Crashes (uncaught exception) | Same — hardcodes `t1_g3/base` |
+| `validate:phase15i2-packet` | 24/25 | `all_items_no_approval_recorded` fails — F01-F06 approval-field state, unrelated to either fixture |
+| `validate:phase15j3` | 7/20 | Not investigated — outside scope |
+| `validate:phase15l` | 15/18 | Not investigated — outside scope |
+| `validate:phase15l2` | 17/27 | Not investigated — outside scope |
+| `validate:phase15m` | 13/20 | Not investigated — outside scope |
+| `validate:phase15o` | 14/23 | Not investigated — outside scope |
+
+Per the directive's instruction not to dismiss failures as unrelated merely because they
+predate this phase, these are reported rather than silently omitted from the regression
+sweep — but fixing eight additional legacy validators without their original phase
+context (three of which share one root cause, five of which are unexamined) is outside
+this bounded correction phase's named scope (close the two disclosed regressions).
+Recommended as a follow-up phase.
+
+### Gate 4 — `PayrollProjectionTab.tsx` file-lock disposition
+
+Investigated whether the header comment ("LOCKED FILE — do not edit without explicit
+approval") reflects an active process lock, a filesystem lock, or an advisory
+convention.
+
+- **Filesystem:** `ls -la` shows normal permissions (`-rw-r--r--`); `git ls-files -v`
+  shows `H` (tracked, normal — no `skip-worktree`/`assume-unchanged` bit, which would
+  show as a lowercase letter). No filesystem-level lock exists.
+- **Process:** the only background agent from this multi-phase session was already
+  stopped (`TaskStop`, confirmed in V10-RC2's Gate 11). No other agent is running. No
+  active process owns this file.
+- **Provenance:** `git log -S"LOCKED FILE"` shows the comment was added at the initial
+  commit (`aa5e198`, 2026-05-22) — a static, generic header, not tied to any specific
+  phase-closure event. It has already been edited through twice under governance
+  discipline since: `42c4acd` ("rename PayrollScenario 'intermediario' to 'base'") and
+  `d09e08e` ("localization residual"), both 2026-07-28 — establishing real precedent for
+  editing this file with review discipline, not that it is frozen.
+- **What the enforcement mechanism actually pins:** `q19_payroll_tab_calc_core_parity_runtime`
+  (`validate-v10-x2t-workspace-architecture-i18n.ts:791-796`) only requires two narrower
+  sub-checks to pass: `payroll_tab_calculation_core_byte_identical` (the substring
+  between `const [scenario, setScenario] = useState<PayrollScenario>("otimista");` and
+  `const scenarioLabels: Record<PayrollScenario` — roughly lines 85-234 of the current
+  file) and `payroll_tab_export_handler_byte_identical` (between
+  `const selectedYearData = yearlyData[...]` and the JSX `return (` — roughly lines
+  242-257). Imports, the component's own signature/props (line 83), and the entire JSX
+  render body (from `return (` onward) are outside both pinned ranges and have already
+  been edited twice (the two commits above) without tripping q19.
+
+**Disposition: advisory convention, not an active engineering or process lock.** "Do not
+treat an engineering lock as missing financial governance" — confirmed this is not
+financial-governance-driven; the pinned ranges protect the calculation core and export
+handler specifically, not the whole file, and the file has a real history of governed
+edits outside those ranges. No code change was needed for this gate — the finding is the
+deliverable, and it directly informs Gate 5 below.
+
+### Gate 5 — shared-contract state completion: architecturally blocked (confirmed, more precisely evidenced than V10-RC2's finding)
+
+V10-RC2's Gate 5 already reported wiring `PayrollProjectionTab.tsx` into the shared
+scenario contract as blocked by "its file-level lock." This phase's Gate 4 investigation
+shows the lock itself is not the real obstacle (see above) — the real obstacle is
+architectural, and is confirmed by direct source inspection:
+
+- `PayrollProjectionTab.tsx` imports its own `PayrollScenario` ("otimista"/"base"/
+  "pessimista") and `TuitionScenario` ("cen1"/"cen2"/"cen3") types from
+  `src/lib/payroll/domain.ts` — entirely distinct axes from the shared contract's
+  `OccupancyScenarioId` ("conservador"/"base"/"otimista") and `TuitionScenarioId`
+  ("bp1_division_differentiated", etc.).
+- `grep -rln "PayrollScenario" src` (excluding `lib/payroll` and this file) returns only
+  `src/lib/viability/baseline.ts` — `PayrollScenario` is not referenced by, and does not
+  flow into or out of, any shared-contract file.
+- `grep -rln "rio-scenario-resilience" src/lib/payroll/ src/components/sections/PayrollProjectionTab.tsx`
+  returns nothing. `lib/payroll` has zero imports from the shared engine module
+  (`rio-scenario-resilience`) anywhere. It computes its own hardcoded
+  `STUDENTS_SCHEDULE`/`TURMAS_SCHEDULE` tables per `PayrollScenario`, entirely
+  independent of `openingPackageId`/`occupancyScenarioId`/the governed captação
+  workbooks.
+- The `PayrollScenario` type retaining a `"pessimista"` value is not the retired-
+  terminology violation it superficially resembles: `RetiredOccupancyScenarioId` in the
+  shared contract is a different, unrelated type (`openingPackageOccupancySourceDataContract.ts:84`).
+  Same string, different namespace, no governance violation — `PayrollScenario` is
+  Payroll's own, intentionally separate 3-scenario domain model.
+
+**Genuinely wiring `openingPackageId`/`occupancyScenarioId` into `PayrollProjectionTab.tsx`
+so its numbers respond to the shared contract would require rewriting its pinned
+calculation core (Gate 4) to consume the shared engines instead of its own hardcoded
+schedules — which is both the file-lock-protected region and, independently, the
+parallel-calculation-engine duplication this phase's directive explicitly forbids
+("no parallel calculation engine"). This is a genuine architectural blocker, not a
+missing-governance or missing-engineering-time blocker.** No code change was made to
+this file this phase — a display-only banner or partial prop-plumbing was considered and
+rejected: it would touch a locked file for no governed capability, inviting exactly the
+question this finding is meant to close.
+
+**Already complete, reconfirmed rather than rebuilt (nothing in this session touched
+`App.tsx`, `ExecutiveOrgDesignTab.tsx`, or `DreLeverPanel.tsx` — verified via
+`git diff --stat 6d95dde..HEAD` showing changes to those files only from V10-RC2's
+Gate 3 commit `6532bc4`, already reviewed above):** Org Design already shares FOPAG
+output via `orgDesignHcTableAdapter.ts`'s `buildOrgDesignHcTable()`; tier
+(Minimum/Balanced/Premium) affects payroll BRL only, not headcount, per V10-RC2's Gate 9
+browser QA and this phase's Gate 6 empirical proof below; locale affects presentation
+only (V10-RC2 Gate 9's PT→EN transition test); nav/back-nav preserves scenario state
+bidirectionally (V10-RC2 Gate 9's two-direction transition test); export receives the
+exact visible scenario (`buildDreScenarioWorkbook()` reads `vm.selections`, sourced from
+`dreSelections` — proven concretely by this phase's Gate 7/8 export test, two distinct
+scenarios producing two distinct embedded scenario lines).
+
+### Gate 6 — full grade-level staffing table with availability/evidence
+
+Extends V10-RC2 Gate 4's single-scenario (t1_g6/base/balanced/2028) EY/LS table to every
+supported combination in the governed 10-year direct-workbook horizon: 2 packages x 3
+captação x 3 org-design tiers x 10 years = 180 combinations, computed live via
+`calculateFopag()` (which already embeds the EY/LS section-based staffing rule from
+`payrollAdapter.ts`, Phase 8H.1 — no logic reimplemented, no numbers hand-entered).
+
+`npm run validate:v10-rc2-1-gate6` → 1791 grade-level rows, 597 tier-invariance groups
+asserted, **all 597 pass**: for every fixed (package, captação, year, grade), total
+headcount is identical across Minimum/Balanced/Premium — proving tier does not affect
+EY/LS headcount, empirically, per cell. Payroll BRL is also identical across tiers for
+these grades specifically, since EY/LS teaching-lead compensation is fixed at Master
+Educator tier regardless of org-design option (tier affects Org Design's own extension
+roles, not EY/LS section staffing).
+
+Sample cross-check (t1_g6/base/2028/T1, all three tiers): 6 total headcount (2 educators
++ 2 assistants + 2 monitors), R$978,312 base payroll, R$1,058,497 loaded cost — identical
+across `minimum_experience`/`balanced_experience`/`premium_experience`, and matching
+V10-RC2's Gate 4 table exactly (cross-validating both sessions' independent computations).
+
+Every row carries `availability: "available"` and a non-empty `evidence` string citing
+the exact engine call and governance record. **MS/HS rows are excluded, not
+extrapolated:** F06 (V10-RC2 Gate 1) records three non-identical, unreconciled MS/HS
+staffing figures in this repository; applying the EY/LS per-section rule to MS/HS would
+silently resolve a finding this repository's own governance record says is still open.
+
+Full output: `docs/audits/rio-resilience/phase-v10-rc2-1-gate6-staffing-table.json`.
+
+### Gate 7 — Fagundes export implemented in the existing 24-sheet architecture
+
+V10-RC2's Gate 7 decided the architecture (extend `dreScenarioWorkbook.ts` with a
+curated view, not build a second export engine) but explicitly deferred building it
+("judged out of scope for this phase's remaining time budget"). This phase implements
+the DRE-sourced subset that decision found unblocked.
+
+Added a 25th sheet, **"Fagundes Export Index"**, to `dreScenarioWorkbook.ts`. It performs
+no independent calculation — every row's "Maps to" column names an existing sheet built
+from the same `vm` (`dreOutput`/`fopagOutput`/`threeVersionPayroll`) as the rest of the
+workbook, sourced from `vm.selections` (the shared `dreSelections` state, Gate 3), not a
+default.
+
+| Fagundes sheet | Availability | Maps to |
+|---|---|---|
+| Scenario Control | available | Scenario Inputs |
+| Grade-Level Staffing Summary | available | FOPAG Headcount Plan; Payroll Role Audit |
+| Grade-Level Staffing Detail | available | FOPAG Role Audit |
+| Non-Teaching Headcount | available | Org Design Roles |
+| Staffing and Tier Assumptions | available | Payroll Assumptions |
+| Payroll Detail | available | Payroll Detail - Minimum/Balanced/Premium |
+| **Direct Payroll and Corporate Allocation** | **unavailable** | DRE Payroll Bridge (direct-campus only) |
+| Tuition and Revenue Assumptions | available | Tuition Revenue |
+| Scenario Comparison | available | Scenario Sensitivity Matrix; Org Design Sensitivity |
+| FOPAG_DIRETO Payroll Bridge | available | DRE Payroll Bridge |
+| Source and Formula Lineage | available | Formula Audit; Raw Engine Output |
+
+The one unsupported field is shown as an **explicit `unavailable` row with its governance
+reason** (no corporate-allocation adapter exists in this codebase — V10-RC2 Gate 5,
+reconfirmed this phase) — never a blank cell, never a zero.
+
+**Verified non-regressing** against the three validators that gate the workbook and the
+parallel Payroll export pathway: `validate:v10-x1` (39/39, the six `q11`-pinned
+Payroll-export files, untouched), `validate:phase15u2` (81/81, the last sheets added to
+this same builder), `validate:v10-x2t` (103/104 unchanged post-commit — the file's
+no-drift check re-baselines against committed HEAD each run and only appeared to fail
+transiently pre-commit; the sole remaining failure is the pre-existing, disclosed q5
+whole-app localization gap).
+
+### Gate 8 — model-level and browser validation, separated by test type
+
+Per the directive: "a coverage record is not equivalent to a numerical parity
+assertion." Five distinct categories, not collapsed into one pass/fail number:
+
+| Test type | Artifact | Result |
+|---|---|---|
+| **Availability** (does a value exist for a cell) | `validate:v10-rc2-gate8` | 900/900 cells: enrollment/sections/staffing/payroll/revenue/DRE-handoff available; 0/900 export-certified; 0/900 fully_supported (by design — see Gate 2) |
+| **Numerical** (is the value correct, and tier-invariant) | `validate:v10-rc2-1-gate6` | 597/597 tier-invariance groups verified; `phase15i1`'s 258 fix cross-validated against `phase15s1`/`phase15s2`'s independently-certified t1_g4 figure |
+| **State-contract** (does UI state flow correctly between surfaces) | V10-RC2 Gate 9 browser QA, reconfirmed unchanged this phase (`git diff --stat 6d95dde..HEAD` shows no touches to `App.tsx`/`ExecutiveOrgDesignTab.tsx`/`DreLeverPanel.tsx` beyond the already-reviewed `6532bc4`) | Org Design→DRE persistence, DRE→Org Design persistence, tier tab-locality, locale presentation-only — all previously proven, still valid |
+| **Browser-transition** (does the actual rendered UI behave correctly) | `qa:v10-e1` | 19/19 (this phase's Gate 3 fix) |
+| **Export** (does the export mechanism receive and reflect the exact visible scenario) | `validate:v10-rc2-1-gate7` | 11/11 — real XLSX built for two distinct scenarios; sheet exists with 25 total sheets, 11 Fagundes rows, 1 explicit unavailable row, scenario line tracks `vm.selections` exactly and differs between the two scenarios |
+
+No single number stands in for all five. The 900-cell coverage record proves
+availability, not export certification; the 597-group tier-invariance proof is
+numerical, not a browser assertion; the 19/19 browser suite proves UI wiring, not export
+content; the 11/11 export test proves export content and scenario-fidelity, not
+per-cell availability.
+
+### Full regression sweep (this phase, final)
+
+| Validator | Result | Disposition |
+|---|---|---|
+| `validate:phase15f` | Crashes | Pre-existing, out of scope (t1_g3, see Gate 3) |
+| `validate:phase15g2` | 25/25 | Pass |
+| `validate:phase15h2` | 30/30 | Pass |
+| `validate:phase15i1` | 24/24 | **Fixed this phase (Gate 3)** |
+| `validate:phase15i2-packet` | 24/25 | Pre-existing, out of scope (unrelated failure) |
+| `validate:phase15i2c` | Crashes | Pre-existing, out of scope (t1_g3) |
+| `validate:phase15j` | Crashes | Pre-existing, out of scope (t1_g3) |
+| `validate:phase15j2-simulator` | 31/31 | Pass |
+| `validate:phase15j3` | 7/20 | Pre-existing, out of scope |
+| `validate:phase15l` | 15/18 | Pre-existing, out of scope |
+| `validate:phase15l2` | 17/27 | Pre-existing, out of scope |
+| `validate:phase15m` | 13/20 | Pre-existing, out of scope |
+| `validate:phase15n` | 11/11 | Pass |
+| `validate:phase15o` | 14/23 | Pre-existing, out of scope |
+| `validate:phase15u2` | 81/81 | Pass (unaffected by Gate 7's new sheet) |
+| `validate:v10-e1` | 100/100 | Pass |
+| `validate:v10-e2` | 309/309 | Pass |
+| `validate:v10-f1b` | 109/109 | Pass |
+| `validate:v10-f2` | 76/76 | Pass |
+| `validate:v10-p1` | 58/58 | Pass |
+| `validate:v10-rc2-gate2` | ALL CHECKS PASSED | Pass |
+| `validate:v10-rc2-gate8` | 10/10 generator assertions | Pass |
+| `validate:v10-x1` | 39/39 | Pass (unaffected by Gate 7) |
+| `validate:v10-x2t` | 103/104 | Pass except pre-existing, disclosed q5 (2768 untranslated strings, unchanged in scope) |
+| `validate:v10-rc2-1-gate6` (new) | ALL CHECKS PASSED, 597 tier-invariance groups | Pass |
+| `validate:v10-rc2-1-gate7` (new) | 11/11 | Pass |
+| `validate:v10-x2t-3a-r1-division-page-reachability` | 48/48 | Pass |
+| `qa:v10-e1` | 19/19 | **Fixed this phase (Gate 3)** |
+
+### Files changed this phase
+
+`scripts/validate-v10-rc2-gate8-coverage-matrix.ts` (Gate 2 support-level fields + Gate 7
+precision correction), `docs/audits/rio-resilience/phase-v10-rc2-gate8-coverage-matrix.json`
+(regenerated), `src/features/rio-scenario-resilience/model/dreGovernanceReadinessValidation.ts`
+(Gate 3 fix), `tests/v10e1/v10-e1.run.ts` (Gate 3 fix), `scripts/validate-v10-rc2-1-gate6-staffing-table.ts`
+(new, Gate 6), `docs/audits/rio-resilience/phase-v10-rc2-1-gate6-staffing-table.json` (new),
+`src/components/dreSimulator/dreScenarioWorkbook.ts` (Gate 7, +125 lines, 25th sheet),
+`scripts/validate-v10-rc2-1-gate7-fagundes-export.ts` (new, Gate 8 export test),
+`package.json` (+3 npm scripts: `validate:v10-rc2-1-gate6`, `validate:v10-rc2-1-gate7`).
+
+### Commits this phase
+
+`0218537` Gate 2 (coverage-matrix classification) · `669f6a6` Gate 3 (phase15i1 +
+qa:v10-e1 regressions) · `176981e` Gate 6 (staffing table) · `ea243ae` Gate 7 (Fagundes
+export) · `86fd80e` Gate 8 (export test) · `aa0bfbb` (stale-language correction in the
+Gate 8 matrix).
+
+### Final state
+
+Final HEAD: `aa0bfbb`. `git rev-list --count origin/main..HEAD` = 34, `origin/main..HEAD`
+right-side count (behind) = 0. Decomposes cleanly and reconciles exactly:
+`git rev-list --count origin/main..6d95dde` = 17 (commits already ahead of `origin/main`
+before V10-RC2 began — pre-existing, unrelated to this multi-phase effort) +
+`git rev-list --count 6d95dde..1fb5e8c` = 11 (V10-RC2) +
+`git rev-list --count 1fb5e8c..HEAD` = 6 (V10-RC2.1: `0218537`, `669f6a6`, `176981e`,
+`ea243ae`, `86fd80e`, `aa0bfbb`) = 17 + 11 + 6 = **34**, matching exactly. Worktree and
+index clean; the same single pre-existing stash (`stash@{0}`) remains untouched; no push
+or deployment occurred at any point this phase.
+
+### Remaining blockers
+
+1. **D-R5** (desconto método precision, ~2.8% of gross) — genuinely unresolved, Finance decision pending.
+2. **D-R6/F03** (base tuition source authority) — genuinely unresolved, `tuitionSourceData.ts` remains `screenshot_transcription_based`.
+3. **F06** (MS/HS staffing reconciliation) — three non-identical, unreconciled figures exist in this repository; not resolved by this or the prior phase.
+4. **`PayrollProjectionTab.tsx` architectural isolation** (Gate 5) — genuinely blocked; wiring it into the shared contract requires either rewriting its pinned calculation core (file-lock-protected) or building a parallel engine (explicitly forbidden). Not a governance blocker; an architectural one, now precisely evidenced (q19's exact pinned byte ranges; `lib/payroll`'s zero imports from the shared engine).
+5. **Direct Payroll and Corporate Allocation export sheet** (Gate 7) — no corporate-allocation adapter exists in this codebase; not built, not invented.
+6. **Eight pre-existing, out-of-scope validator failures** (Gate 3's investigation) — three share one root cause (retired `t1_g3`), five unexamined; recommended as a follow-up phase, not attempted here.
+7. **`q5_zero_unresolved_visible_strings_app_wide`** (2768 reachable untranslated strings) — disclosed, pre-existing, unchanged in scope by this phase.
+
+### Recommendation
+
+Gates 1, 2, 3, 4, 6, 7, 8, and the reconfirmed portions of Gate 5 are complete and
+durable — this phase delivered new capability (the Fagundes Export Index, the
+full-combination staffing table) rather than only re-verifying prior work. Gate 5's
+remaining piece (`PayrollProjectionTab.tsx` integration) is correctly blocked on a named,
+specific, architectural dependency — not on missing engineering capacity or an
+unresolved governance decision. **Not ready to report PASS**: Gate 5 does not clear, and
+the directive's own Gate 5 language ("complete every shared-scenario/export-contract
+change supported by existing governed evidence... while leaving genuinely
+governance-dependent outputs explicitly unavailable") is satisfied for every piece
+except this one, which is architecture-dependent rather than governance-dependent but
+still incomplete. The repository is materially further along than at phase entry: two
+real regressions closed with root-cause evidence rather than papered over, one
+architectural blocker replacing a vague "file lock" characterization, and two new,
+committed, validator-backed capabilities (staffing table, Fagundes export) where the
+prior phase had only a decision document.
