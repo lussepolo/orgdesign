@@ -65,6 +65,23 @@ interface CoverageCell {
   dreHandoffAvailable: boolean;
   ebitdaValue: number | null;
   exportAvailable: false;
+  // V10-RC2.1 Gate 2: a cell is "fully supported" only if every required output is
+  // both available AND certified (not just computable). Tuition/revenue precision
+  // (D-R5) and base tuition rates (D-R6/F03) are computed but never Finance-signed,
+  // and export is never wired (Gate 7) -- so no cell in this matrix is, honestly,
+  // "fully supported." "unavailable" is reserved for cells where the engine itself
+  // cannot produce a required output at all (none exist in this governed 2-package
+  // subset). Every cell is therefore "partially_supported" by construction; this
+  // field exists so the classification is asserted, not implied by an all-PASS run.
+  supportLevel: "fully_supported" | "partially_supported" | "unavailable";
+  // Decision IDs (see phase-v10-rc2-gate1-decision-assimilation-matrix.md) whose
+  // unresolved status limits (not blocks computation of) this cell's outputs.
+  blockedByDecisionIds: readonly string[];
+  // MS/HS aggregate payroll total in this cell is computed from ONE of three
+  // non-identical candidate staffing figures (F06) -- the FOPAG adapter's own
+  // fixed-FTE table -- not a governance-ratified choice among the three. EY/LS
+  // headcount does not carry this caveat (Gate 4's governed 1:1 section rule).
+  msHsStaffingAuthorityReconciled: false;
   evidenceSource: string;
   limitation: string;
 }
@@ -176,6 +193,15 @@ for (const openingPackageId of PACKAGES) {
             dreHandoffAvailable: dreYear !== null && Number.isFinite(dreYear.ebitda),
             ebitdaValue: dreYear?.ebitda ?? null,
             exportAvailable: false,
+            // No cell reaches "fully_supported" -- tuition is never certified
+            // (D-R6/F03), export is never wired (Gate 7), and MS/HS staffing
+            // authority is never reconciled (F06). "unavailable" would require a
+            // required output the engine cannot produce at all, which does not
+            // occur anywhere in this governed 2-package/3-captacao/3-org-design
+            // subset (confirmed by the assertions at the bottom of this script).
+            supportLevel: "partially_supported",
+            blockedByDecisionIds: ["D-R5", "D-R6", "F03", "F06"],
+            msHsStaffingAuthorityReconciled: false,
             evidenceSource: evidenceParts.join("; "),
             limitation: limitationParts.join(" "),
           });
@@ -213,9 +239,42 @@ const summary = {
     "D-R5_desconto_metodo": "genuinely_unresolved — all cells, precision risk only (~2.8% of gross)",
     "D-R6_F03_base_tuition_source": "genuinely_unresolved — all cells, tuitionStatus=computed_uncertified",
     F05_t1_g3_enrollment_mapping: "genuinely_unresolved — not applicable to this matrix (t1_g3 is retired, excluded from PACKAGES)",
-    F06_ms_hs_staffing_reconciliation: "genuinely_unresolved — MS/HS rows only, named per-cell in limitation",
+    F06_ms_hs_staffing_reconciliation: "genuinely_unresolved — aggregate payroll/staffing total in every cell includes MS/HS headcount from one of three unreconciled candidate sources",
     export_wiring: "not connected to visible shared scenario state — Gate 7, all cells",
   },
+  // V10-RC2.1 Gate 2 — explicit support-level classification. See CoverageCell
+  // comments for why no cell reaches fully_supported.
+  supportLevelCounts: {
+    fully_supported: cells.filter((c) => c.supportLevel === "fully_supported").length,
+    partially_supported: cells.filter((c) => c.supportLevel === "partially_supported").length,
+    unavailable: cells.filter((c) => c.supportLevel === "unavailable").length,
+  },
+  blockedByDecisionIdCounts: {
+    "D-R5": cells.filter((c) => c.blockedByDecisionIds.includes("D-R5")).length,
+    "D-R6": cells.filter((c) => c.blockedByDecisionIds.includes("D-R6")).length,
+    F03: cells.filter((c) => c.blockedByDecisionIds.includes("F03")).length,
+    F05: cells.filter((c) => c.blockedByDecisionIds.includes("F05")).length,
+    F06: cells.filter((c) => c.blockedByDecisionIds.includes("F06")).length,
+  },
+  // Cross-tabs Gate 2 explicitly asked for. Each answers "how many cells have X
+  // available but Y not" -- distinct from the plain per-column counts above.
+  crossTabs: {
+    enrollmentAvailable_staffingNotAvailable: cells.filter((c) => c.enrollmentAvailable && !c.staffingAvailable).length,
+    staffingAvailable_payrollNotAvailable: cells.filter((c) => c.staffingAvailable && !c.payrollAvailable).length,
+    payrollAvailable_tuitionNotCertified: cells.filter((c) => c.payrollAvailable && c.tuitionStatus === "computed_uncertified").length,
+    anyOutputAvailable_exportNotAvailable: cells.filter(
+      (c) => (c.enrollmentAvailable || c.staffingAvailable || c.payrollAvailable || c.revenueAvailable) && !c.exportAvailable,
+    ).length,
+  },
+  cellDefinition:
+    "One cell = one full DRE/FOPAG engine evaluation (calculateSectionCountsForScenario " +
+    "+ calculateFopag + calculateDre) for exactly one (openingPackageId, " +
+    "occupancyScenarioId, orgDesignOptionId, year, tuitionScenarioId) combination. " +
+    "A cell is an AGGREGATE scenario-level computation -- it reports one enrollment " +
+    "total, one payroll total, one revenue total for the whole school in that year " +
+    "under that scenario. It is NOT a per-grade or per-role breakdown; grade-level " +
+    "detail (Gate 4/6's staffing table) is a separate, smaller artifact for " +
+    "representative scenarios, not exhaustively cross-produced inside this JSON.",
 };
 
 const outPath = join(process.cwd(), "docs/audits/rio-resilience/phase-v10-rc2-gate8-coverage-matrix.json");
@@ -250,6 +309,20 @@ assertAll("payrollAvailable is true for every governed cell", (c) => c.payrollAv
 assertAll("revenueAvailable is true for every governed cell", (c) => c.revenueAvailable);
 assertAll("dreHandoffAvailable is true for every governed cell", (c) => c.dreHandoffAvailable);
 assertAll("exportAvailable is false for every cell (Gate 7 not yet wired)", (c) => !c.exportAvailable);
+assertAll(
+  "supportLevel is partially_supported for every cell (none fully_supported, none unavailable)",
+  (c) => c.supportLevel === "partially_supported",
+);
+assertAll("no cell claims fully_supported", (c) => c.supportLevel !== "fully_supported");
 
-console.log(failures === 0 ? "\nALL CHECKS PASSED" : `\n${failures} CHECK(S) FAILED`);
+// Deliberately not phrased "ALL CHECKS PASSED" — that would read as "everything is
+// available and supported," which is false (tuition is never certified, export is
+// never wired). What passed is narrower: these are the invariants this generator
+// asserts about ITS OWN output, not a claim that the underlying scenarios are
+// production-ready.
+console.log(
+  failures === 0
+    ? "\nGenerator invariants hold: computed-availability assertions pass; 0/900 cells are fully_supported (tuition uncertified, export unwired, MS/HS staffing unreconciled — by design, not by defect)."
+    : `\n${failures} GENERATOR INVARIANT(S) FAILED`,
+);
 process.exit(failures === 0 ? 0 : 1);
