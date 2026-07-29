@@ -13,24 +13,38 @@ import {
 } from "../../features/rio-scenario-resilience/model/executiveOrgDesignModel";
 import { openingGrades } from "../../features/rio-scenario-resilience/data/openingGrades";
 import { buildOrgDesignHcTable, type OrgDesignHcTableRow } from "../../features/rio-scenario-resilience/model/orgDesignHcTableAdapter";
+import {
+  ACTIVE_OPENING_PACKAGE_IDS,
+  OCCUPANCY_SCENARIO_IDS,
+  type ActiveOpeningPackageId,
+  type OccupancyScenarioId,
+} from "../../features/rio-scenario-resilience/model/openingPackageOccupancySourceDataContract";
+import type { TranslationKey } from "../../i18n/localeContract";
 
-// Opening scenario options: Scenario A–D mapped to opening package IDs
-const OPENING_SCENARIO_OPTIONS = [
-  { id: "t1_g3" as const, label: "Scenario A / T1→G3" },
-  { id: "t1_g4" as const, label: "Scenario B / T1→G4" },
-  { id: "t1_g5" as const, label: "Scenario C / T1→G5" },
-  { id: "t1_g6" as const, label: "Scenario D / T1→G6" },
-] as const;
+const OCCUPANCY_SCENARIO_LABEL_KEYS: Record<OccupancyScenarioId, TranslationKey> = {
+  conservador: "scenarioConservador",
+  base: "scenarioBase",
+  otimista: "scenarioOtimista",
+};
 
-type OpeningPackageId = (typeof OPENING_SCENARIO_OPTIONS)[number]["id"];
+// V10-RC2 Gate 3: shared scenario contract. Opening package is restricted to the two
+// active packages (ACTIVE_OPENING_PACKAGE_IDS) — t1_g3/t1_g5 are retired and must not
+// be offered here even though the wider OpeningPackageId union still includes them for
+// legacy/historical source records elsewhere in the codebase.
+const OPENING_SCENARIO_OPTION_LABELS: Record<ActiveOpeningPackageId, string> = {
+  t1_g4: "Scenario B / T1→G4",
+  t1_g6: "Scenario D / T1→G6",
+};
+const OPENING_SCENARIO_OPTIONS: readonly { id: ActiveOpeningPackageId; label: string }[] =
+  ACTIVE_OPENING_PACKAGE_IDS.map((id) => ({ id, label: OPENING_SCENARIO_OPTION_LABELS[id] }));
+
+type OpeningPackageId = ActiveOpeningPackageId;
 
 const ORG_DESIGN_OPTION_MAP: Record<ExecutiveOrgScenario, string> = {
   minimum: "minimum_experience",
   balanced: "balanced_experience",
   premium: "premium_experience",
 };
-
-const OCCUPANCY_SCENARIO_ID = "base" as const;
 
 const nodeVariantClasses: Record<OrgTreeNodeVariant, string> = {
   base: "border-slate-200 bg-white",
@@ -235,11 +249,29 @@ function BalancedExplanationPanel() {
   );
 }
 
-const ExecutiveOrgDesignTab = () => {
+// V10-RC2 Gate 3: openingPackageId and occupancyScenarioId are shared-contract
+// dimensions, lifted from App.tsx and controlled the same way DreScenarioSimulatorTab
+// receives its selections — not tab-local state that resets on navigation, and no
+// longer a hardcoded captação. org-design tier (scenario) and year remain Org
+// Design-local: year is a single-year view selector (DRE iterates all years — forcing
+// year into the shared contract would create a false dependency), and tier affects
+// only which organizational roles are active, not enrollment/sections.
+interface ExecutiveOrgDesignTabProps {
+  readonly openingPackageId: OpeningPackageId;
+  readonly onOpeningPackageIdChange: (id: OpeningPackageId) => void;
+  readonly occupancyScenarioId: OccupancyScenarioId;
+  readonly onOccupancyScenarioIdChange: (id: OccupancyScenarioId) => void;
+}
+
+const ExecutiveOrgDesignTab = ({
+  openingPackageId,
+  onOpeningPackageIdChange,
+  occupancyScenarioId,
+  onOccupancyScenarioIdChange,
+}: ExecutiveOrgDesignTabProps) => {
   const { t } = useLocale();
   const [scenario, setScenario] = useState<ExecutiveOrgScenario>("balanced");
   const [year, setYear] = useState<ExecutiveOrgYear>(2028);
-  const [openingPackageId, setOpeningPackageId] = useState<OpeningPackageId>("t1_g4");
   const [isProgressionPlaying, setIsProgressionPlaying] = useState(false);
 
   const viewModel = useMemo(() => buildExecutiveOrgDesignTree(scenario, year), [scenario, year]);
@@ -251,11 +283,11 @@ const ExecutiveOrgDesignTab = () => {
     () =>
       buildOrgDesignHcTable({
         openingPackageId,
-        occupancyScenarioId: OCCUPANCY_SCENARIO_ID,
+        occupancyScenarioId,
         orgDesignOptionId: ORG_DESIGN_OPTION_MAP[scenario],
         year,
       }),
-    [openingPackageId, scenario, year],
+    [openingPackageId, occupancyScenarioId, scenario, year],
   );
 
   useEffect(() => {
@@ -311,12 +343,27 @@ const ExecutiveOrgDesignTab = () => {
             <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{t("orgDesignOpeningScenarioLabel")}</span>
             <select
               value={openingPackageId}
-              onChange={(event) => setOpeningPackageId(event.target.value as OpeningPackageId)}
+              onChange={(event) => onOpeningPackageIdChange(event.target.value as OpeningPackageId)}
               className="h-10 rounded-md border border-slate-300 bg-white px-3 text-sm font-bold text-slate-800 shadow-sm"
             >
               {OPENING_SCENARIO_OPTIONS.map((option) => (
                 <option key={option.id} value={option.id}>
                   {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="flex flex-col gap-1">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{t("dreLeverPanelCaptacaoLabel")}</span>
+            <select
+              value={occupancyScenarioId}
+              onChange={(event) => onOccupancyScenarioIdChange(event.target.value as OccupancyScenarioId)}
+              className="h-10 rounded-md border border-slate-300 bg-white px-3 text-sm font-bold text-slate-800 shadow-sm"
+            >
+              {OCCUPANCY_SCENARIO_IDS.map((id) => (
+                <option key={id} value={id}>
+                  {t(OCCUPANCY_SCENARIO_LABEL_KEYS[id])}
                 </option>
               ))}
             </select>
@@ -484,7 +531,7 @@ const ExecutiveOrgDesignTab = () => {
 
         <p className="text-[10px] font-semibold text-slate-400">
           {t("orgDesignFooterYear")} {year} · {t("orgDesignFooterOpeningScenario")} {openingPackageId} · {t("orgDesignFooterVersion")}{" "}
-          {ORG_DESIGN_OPTION_MAP[scenario]} · {t("orgDesignFooterOccupancy")} {OCCUPANCY_SCENARIO_ID} ·{" "}
+          {ORG_DESIGN_OPTION_MAP[scenario]} · {t("orgDesignFooterOccupancy")} {occupancyScenarioId} ·{" "}
           {hcTableResult.rows.length} {t("orgDesignFooterActiveRoleRows")}
         </p>
       </section>

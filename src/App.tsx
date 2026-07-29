@@ -51,6 +51,11 @@ import { RioScenarioResiliencePreview } from "./features/rio-scenario-resilience
 import { useCapitalDecisionWorkspace } from "./features/rio-scenario-resilience/hooks/useCapitalDecisionWorkspace";
 import { DRE_DEFAULT_SELECTIONS } from "./hooks/useDreScenarioSimulator";
 import type { DreScenarioSimulatorSelections } from "./hooks/useDreScenarioSimulator";
+import {
+  isActiveOpeningPackageId,
+  type ActiveOpeningPackageId,
+  type OccupancyScenarioId,
+} from "./features/rio-scenario-resilience/model/openingPackageOccupancySourceDataContract";
 import { useLocale } from "./i18n/useLocale";
 import type { Locale } from "./i18n/localeContract";
 import {
@@ -251,6 +256,24 @@ function AppShell() {
   const [dreSelections, setDreSelections] = useState<DreScenarioSimulatorSelections>(DRE_DEFAULT_SELECTIONS);
   const capitalDecisionWorkspace = useCapitalDecisionWorkspace();
 
+  // V10-RC2 Gate 3: Executive Org Design consumes the same openingPackageId/
+  // occupancyScenarioId shared-contract dimensions as DRE, rather than a hardcoded
+  // captação constant and tab-local opening-package state — persists across
+  // navigation between the two tabs. DreLeverPanel already restricts its own
+  // opening-package selector to ACTIVE_OPENING_PACKAGE_IDS, so dreSelections is
+  // expected to already hold an active package; isActiveOpeningPackageId narrows
+  // defensively rather than assuming it, falling back to the shared default (also
+  // active) if it somehow does not.
+  const orgDesignOpeningPackageId: ActiveOpeningPackageId = isActiveOpeningPackageId(
+    dreSelections.openingPackageId,
+  )
+    ? dreSelections.openingPackageId
+    : (DRE_DEFAULT_SELECTIONS.openingPackageId as ActiveOpeningPackageId);
+  const handleOrgDesignOpeningPackageIdChange = (id: ActiveOpeningPackageId) =>
+    setDreSelections({ ...dreSelections, openingPackageId: id });
+  const handleOrgDesignOccupancyScenarioIdChange = (id: OccupancyScenarioId) =>
+    setDreSelections({ ...dreSelections, occupancyScenarioId: id });
+
   React.useEffect(() => {
     const hasSeenAbout = localStorage.getItem(APP_ABOUT_SEEN_STORAGE_KEY);
     if (!hasSeenAbout) {
@@ -387,7 +410,14 @@ function AppShell() {
             {activeTab === "lower-school" && <LowerSchoolTab />}
             {activeTab === "ms" && <MiddleSchoolTab sections={msSections} setSections={setMsSections} />}
             {activeTab === "offer-scenarios" && <OfferScenariosTab />}
-            {activeTab === "executive-org-design" && <ExecutiveOrgDesignTab />}
+            {activeTab === "executive-org-design" && (
+              <ExecutiveOrgDesignTab
+                openingPackageId={orgDesignOpeningPackageId}
+                onOpeningPackageIdChange={handleOrgDesignOpeningPackageIdChange}
+                occupancyScenarioId={dreSelections.occupancyScenarioId}
+                onOccupancyScenarioIdChange={handleOrgDesignOccupancyScenarioIdChange}
+              />
+            )}
             {activeTab === "hs" && <HighSchoolTab sections={hsSections} setSections={setHsSections} />}
             {activeTab === "payroll" && <SectionsAndPayrollWorkspace />}
             {activeTab === "viability" && <ViabilitySimulatorTab />}
