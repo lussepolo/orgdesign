@@ -8,7 +8,7 @@
 import { useState } from "react";
 import { Copy, Check, FileText } from "lucide-react";
 import { Card } from "../common/Card";
-import { formatBRL } from "../../lib/utils";
+import { useLocale } from "../../i18n/useLocale";
 import {
   OCCUPANCY_LABELS,
   TUITION_LABELS,
@@ -91,6 +91,7 @@ export default function DreBoardReadableExport({
   selections,
   dreOutput,
 }: DreBoardReadableExportProps) {
+  const { t } = useLocale();
   const [copied, setCopied] = useState(false);
   const text = buildBoardReadableExplanation(selections, dreOutput);
 
@@ -103,14 +104,12 @@ export default function DreBoardReadableExport({
 
   return (
     <Card
-      title="Board-readable scenario explanation"
-      subtitle="Provisional — not Finance-source confirmed, not board-ratified"
+      title={t("dreBoardExportTitle")}
+      subtitle={t("dreBoardExportSubtitle")}
       icon={FileText}
     >
       <p className="mb-3 text-sm leading-relaxed text-slate-600">
-        This text block describes the current scenario with its provisional-source status explicitly
-        stated. It is suitable for review, comparison, and trade-off discussion — not a
-        board-ratified recommendation.
+        {t("dreBoardExportIntro")}
       </p>
       <div className="relative">
         <pre className="overflow-x-auto rounded-xl border border-slate-200 bg-slate-50 p-4 text-[11px] leading-relaxed text-slate-700 whitespace-pre-wrap font-mono">
@@ -124,12 +123,12 @@ export default function DreBoardReadableExport({
           {copied ? (
             <>
               <Check className="h-3 w-3 text-emerald-600" />
-              Copied
+              {t("dreBoardExportCopiedLabel")}
             </>
           ) : (
             <>
               <Copy className="h-3 w-3" />
-              Copy
+              {t("dreBoardExportCopyLabel")}
             </>
           )}
         </button>

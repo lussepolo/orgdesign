@@ -2,6 +2,7 @@ import { Card } from "../common/Card";
 import type { ThresholdResultCard } from "../../lib/viability/types";
 import { formatBRL } from "../../lib/utils";
 import { formatPercent, formatYears } from "../../lib/viability/formatters";
+import { useLocale } from "../../i18n/useLocale";
 
 interface ThresholdResultCardsProps {
   cards: ThresholdResultCard[];
@@ -16,14 +17,15 @@ function formatValue(card: ThresholdResultCard): string {
 export default function ThresholdResultCards({
   cards,
 }: ThresholdResultCardsProps) {
+  const { t } = useLocale();
   return (
     <div className="space-y-4">
       <div>
         <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">
-          Threshold Outputs
+          {t("thresholdResultCardsLabel")}
         </div>
         <h4 className="text-lg font-bold text-slate-900">
-          Decision markers for the selected threshold question
+          {t("thresholdResultCardsTitle")}
         </h4>
       </div>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">

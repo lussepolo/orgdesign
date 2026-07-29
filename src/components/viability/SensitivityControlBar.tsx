@@ -4,16 +4,18 @@ import type {
   SensitivityVariable,
   ViabilityMetric,
 } from "../../lib/viability/types";
+import { useLocale } from "../../i18n/useLocale";
+import type { TranslationKey } from "../../i18n/localeContract";
 
-const VARIABLE_LABELS: Record<SensitivityVariable, string> = {
-  enrollmentScenario: "Enrollment Scenario",
-  tuitionScenario: "Tuition Scenario",
-  costScenario: "Cost Scenario",
-  discountRate: "Discount Rate",
-  payrollGrowthRate: "Payroll Growth",
-  benefitsGrowthRate: "Benefits Growth",
-  opexGrowthRate: "Opex Growth",
-  tuitionGrowthRate: "Tuition Growth",
+const VARIABLE_LABEL_KEYS: Record<SensitivityVariable, TranslationKey> = {
+  enrollmentScenario: "sensitivityControlVarEnrollment",
+  tuitionScenario: "sensitivityControlVarTuition",
+  costScenario: "sensitivityControlVarCost",
+  discountRate: "sensitivityControlVarDiscountRate",
+  payrollGrowthRate: "sensitivityControlVarPayrollGrowth",
+  benefitsGrowthRate: "sensitivityControlVarBenefitsGrowth",
+  opexGrowthRate: "sensitivityControlVarOpexGrowth",
+  tuitionGrowthRate: "sensitivityControlVarTuitionGrowth",
 };
 
 interface SensitivityControlBarProps {
@@ -33,38 +35,37 @@ export default function SensitivityControlBar({
   onRowVariableChange,
   onColumnVariableChange,
 }: SensitivityControlBarProps) {
-  const variableKeys = Object.keys(VARIABLE_LABELS) as SensitivityVariable[];
+  const { t } = useLocale();
+  const variableKeys = Object.keys(VARIABLE_LABEL_KEYS) as SensitivityVariable[];
 
   return (
     <Card
-      title="Sensitivity Controls"
-      subtitle="Select the two dimensions that vary across the matrix"
+      title={t("sensitivityControlTitle")}
+      subtitle={t("sensitivityControlSubtitle")}
       icon={Grid2x2}
     >
       <div className="mb-4 grid gap-3 rounded-2xl border border-blue-100 bg-blue-50 p-4 lg:grid-cols-[1.2fr_0.8fr]">
         <div>
           <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-blue-700">
-            Reading rule
+            {t("sensitivityControlReadingRuleLabel")}
           </div>
           <p className="mt-2 text-sm leading-relaxed text-slate-600">
-            Each cell represents one model run for one row-variable and one column-variable combination.
-            The grid is analytical, not interpolated.
+            {t("sensitivityControlReadingRuleBody")}
           </p>
         </div>
         <div className="rounded-2xl border border-amber-100 bg-white/70 p-3">
           <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-amber-700">
-            Current status
+            {t("sensitivityControlCurrentStatusLabel")}
           </div>
           <p className="mt-2 text-xs leading-relaxed text-slate-600">
-            Matrix semantics are locked. Cell values are still directional placeholders until the full
-            sensitivity engine is wired to baseline calculations.
+            {t("sensitivityControlCurrentStatusBody")}
           </p>
         </div>
       </div>
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <label className="block">
           <div className="mb-1 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">
-            Cell Metric
+            {t("sensitivityControlCellMetricLabel")}
           </div>
           <select
             value={metric}
@@ -78,7 +79,7 @@ export default function SensitivityControlBar({
         </label>
         <label className="block">
           <div className="mb-1 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">
-            Rows Vary
+            {t("sensitivityControlRowsVaryLabel")}
           </div>
           <select
             value={rowVariable}
@@ -87,14 +88,14 @@ export default function SensitivityControlBar({
           >
             {variableKeys.map((key) => (
               <option key={key} value={key}>
-                {VARIABLE_LABELS[key]}
+                {t(VARIABLE_LABEL_KEYS[key])}
               </option>
             ))}
           </select>
         </label>
         <label className="block">
           <div className="mb-1 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">
-            Columns Vary
+            {t("sensitivityControlColumnsVaryLabel")}
           </div>
           <select
             value={columnVariable}
@@ -103,15 +104,14 @@ export default function SensitivityControlBar({
           >
             {variableKeys.map((key) => (
               <option key={key} value={key}>
-                {VARIABLE_LABELS[key]}
+                {t(VARIABLE_LABEL_KEYS[key])}
               </option>
             ))}
           </select>
         </label>
       </div>
       <p className="mt-3 text-xs leading-relaxed text-slate-500">
-        What varies: the selected row variable and selected column variable. What stays fixed: every
-        other assumption in the current model context, including shared/global non-teaching staffing.
+        {t("sensitivityControlFooterNote")}
       </p>
     </Card>
   );

@@ -4882,3 +4882,212 @@ dependency + `validate:v10-x1` script).
   Receita/capital/viability/payroll-governance work, forensic audit docs) was inventoried
   and deliberately left untouched — none of it was staged, committed, or depended upon by
   this phase's bounded patch (confirmed empirically via the isolated worktree lint/build).
+
+## Phase V10-X2T.2B — Patch Decomposition and Clean-Base Reconstruction (2026-07-28)
+
+### Purpose and relationship to the two sections above
+
+A prior session staged a single 72-file, ~7,800-line patch on top of the primary tree
+mixing five distinct, independently-classifiable concerns: locale infrastructure, a
+payroll/viability terminology rename, completed-surface localization, a workspace/
+navigation architecture rewrite, and validators/QA/fixtures — plus two files that belong
+to a separate, quarantined adapter feature and a documentation file containing several
+unsupported claims. This phase decomposed that single patch into five ordered candidate
+commits on an isolated local branch (`v10-x2t-2b-reconstruction`, based on `HEAD`
+`1cab3312b50e52005ab5d22c109646e94650da4e`), each independently classified, verified, and
+committed, without ever staging, committing, or pushing anything from the primary tree.
+The full hunk-level classification is recorded in
+`docs/audits/rio-resilience/v10-x2t-2b-reconstruction-manifest.md`.
+
+### Candidate commits (this branch only; nothing pushed)
+
+1. **Locale infrastructure** — `src/i18n/` (LocaleProvider, pt-BR/en-US catalogs,
+   formatters, `useLocale`), `main.tsx` wraps the app in `LocaleProvider`. No consuming
+   surface wired yet.
+2. **Payroll/viability terminology migration** — `PayrollScenario` and
+   `ViabilityEnrollmentScenario`'s `"intermediario"` member renamed to `"base"` across
+   `lib/payroll/domain.ts`, the `lib/viability/*` files, `useViabilitySimulator.ts`, and
+   the corresponding one-to-seven-line identifier hunks in `PayrollProjectionTab.tsx`,
+   `ViabilitySimulatorTab.tsx`, and `ViabilityInputsRail.tsx`. **This rename is
+   independently ratified** — it is not derived from, and must not be conflated with, the
+   separate `OccupancyScenarioId` enum (`conservador`/`base`/`otimista`), whose own
+   `"intermediario"`-normalizes-to-`"base"` legacy-input handling at its governed
+   enrollment-parser boundary predates this phase and is untouched by it. The two enums
+   happen to both use the label "base"; neither was inferred from the other. (A draft of
+   this documentation previously described this rename as "pre-existing... out of this
+   gate's bounded scope to fix" — that description is incorrect for this branch, where the
+   rename is this candidate's own content, and is corrected here.)
+3. **Completed-surface localization** (two commits: the manifest's explicitly-listed
+   32-component set, plus a follow-up completing the residual localization in
+   `PayrollProjectionTab.tsx`, `ViabilitySimulatorTab.tsx`, and `ViabilityInputsRail.tsx`
+   that Candidate 2 deliberately left in place — the follow-up was needed because the
+   first commit only covered the manifest's explicit Category C list and omitted these
+   three "mixed at line level" files; caught by re-running the Candidate 5 validator, not
+   by construction). Hardcoded Portuguese strings across ~42 components converted to
+   `t()`/`useLocale()` lookups. No formula, numeric input, schedule, default, state,
+   serialization, or export changed in any of these files — verified by export-signature
+   diffing and a `useState`/`localStorage`/`JSON.stringify`/`JSON.parse` line-change sweep
+   against every touched file, not by inspection alone.
+4. **Workspace/navigation architecture** — `src/config/workspaceRegistry.ts` (new, single
+   source of truth for nav/heading/banner metadata), `appMetadata.ts`,
+   `WorkspaceContextBanner.tsx`, `SectionsAndPayrollWorkspace.tsx` (all new), plus
+   whole-file rewrites of `App.tsx` and `AboutModal.tsx` to consume the registry (not
+   line-splittable from localization, since their `t()` calls resolve keys sourced from
+   the registry itself), and an icon-export addition to `lucide-react-build-shim.ts`.
+5. **Validators, QA, fixtures, and inventory repair** — see below.
+
+### Visible-string inventory repair
+
+The prior inventory script (`scripts/validate-v10-x2t-visible-string-inventory.ts`)
+detected only JSX text nodes, a fixed 5-attribute list, and a directly-unwrapped string
+literal as a JSX expression child. It has been repaired to also detect: a widened
+accessibility/tooltip attribute set; module-scope array/object literals (data-driven
+rendered content, including plain string arrays); template literals with substitutions;
+string literals nested inside conditional/logical JSX-child expressions (loading, empty,
+error, and status text); exported top-level string constants (export-facing labels); and
+fixture/snapshot files under `tests/`, reported as a distinct third bucket. This is
+mechanically a stricter, more complete inventory than the one the prior draft's "1,131
+candidate strings" and "104/105" figures were computed from, so the reachable count
+computed by this repaired script (currently 3,890, see below) is **not comparable to, and
+is not a regression from**, that prior 1,131 figure — it reflects a materially larger set
+of detected categories over the same, still partly-untranslated application surface.
+
+Two concepts are kept deliberately separate, per this phase's governance requirement:
+**inventory completeness** (did the script walk every target and fixture file to
+completion and classify every finding — the script's own success condition, and it always
+exits 0 once the walk completes) is distinct from **whole-application localization
+closure** (whether the reachable count is actually zero — a much harder question that
+remains open, and is owned by `scripts/validate-v10-x2t-workspace-architecture-i18n.ts`'s
+own `q5` check, not by the inventory script). Thresholds and expected counts were not
+altered to force a green result on either.
+
+Corrected, independently inspectable baselines (`npx tsx
+scripts/validate-v10-x2t-visible-string-inventory.ts`, run against this branch's HEAD,
+none of these three files touched by any candidate above):
+
+| Surface | Reachable candidate strings |
+| --- | --- |
+| `OfferScenariosTab.tsx` | 1,234 |
+| `MiddleSchoolTab.tsx` (+ `middleSchoolLoadModel.ts`: 79) | 324 |
+| `HighSchoolTab.tsx` (+ `highSchoolScheduleModel.ts`: 1,196) | 612 |
+
+### Workspace/i18n validator — circularity correction
+
+`scripts/validate-v10-x2t-workspace-architecture-i18n.ts`'s Section N previously carried
+commentary that could be read as implying the payroll/viability `"base"` rename is "the
+same governed normalization" as the separate `OccupancyScenarioId` enum's unrelated
+legacy-input handling. That commentary has been corrected (see Candidate 2 above); the two
+migrations are independently ratified and neither was inferred from the other.
+
+### Validated result on this branch (Candidates 1–5, before this documentation commit)
+
+`npx tsx scripts/validate-v10-x2t-workspace-architecture-i18n.ts`: **102/104 pass, 2
+fail** — not "104/105." The two failures are both expected and open, not regressions:
+`q5_zero_unresolved_visible_strings_app_wide` (3,890 reachable candidate strings remain;
+`OfferScenariosTab.tsx`, `MiddleSchoolTab.tsx`, `HighSchoolTab.tsx`, the 9 untranslated DRE
+panels, and the Capital Decision panels are deliberately out of this reconstruction's
+scope) and `future_dashboard_documented_in_implementation_md` (this section closes that
+gap; see the final aggregate validation for the post-commit re-run).
+
+Also verified this session, all passing and none previously reproduced with actual
+command output in this branch: `qa:x2t-state-invariance` 12/12,
+`qa:x2t-accessibility` 13/13, `qa:x2t-crawl-and-screenshots` 30/30 routes with **0
+mixed-language findings** (see below), `qa:phase15g2` (dre-capital-handoff) 19/19,
+`validate:v10-x1/p1/f2/f1b/e1/e2` 39/39, 58/58, 76/76, 109/109, 100/100, 309/309
+(unchanged, no regression), `validate:phase15j2-simulator` 31/31, `tsc --noEmit` clean,
+production build clean, `git diff --check` clean.
+
+### Correction: the prior draft's "3 genuine mixed-language findings" claim
+
+A prior draft of this documentation claimed `CapitalDecisionView.tsx` hardcodes
+`title="Capital Decision"` (English) on one render branch and `title="Decisão de
+Capital"` (Portuguese) on two others, independent of locale. This session read the actual
+staged content of that file and found all three render branches use the same
+`t("wsCapitalTitle")` key, present with correct values in both catalogs — and this
+session's bilingual crawl (30/30 routes) independently found 0 mixed-language findings.
+This claim is not supported by the content as staged and is not carried forward.
+
+### Claims from a prior draft explicitly not carried forward
+
+The following statements appeared in an earlier draft of this documentation and are
+excluded here because this session found no git evidence supporting them:
+
+- **"104/105 pass"** and **"20 checks... 104/105 pass"** — this session's own runs of the
+  validator, on this branch, produced 102/104 (pre-doc-commit; see the final aggregate
+  validation for the post-commit figure). The discrepancy was not reconciled and is not
+  claimed to be explained by anything other than the two documents being different runs
+  against different (and, for the primary tree, uncommitted and since-partially-changed)
+  states.
+- **An "isolated worktree validation... reproduced 104/105"** section — this session's own
+  `git reflog`, `git branch --list`, and `git worktree list`, checked before any action
+  this session took, show no such worktree existed prior to this session creating
+  `v10-x2t-2b-reconstruction`. This session's own isolated-worktree work (this entire
+  branch) is the only isolated-worktree reproduction with evidence behind it, and its
+  actual results are reported above and in the final aggregate validation, not assumed to
+  match the unverified prior claim.
+- The description of `src/lib/payroll/domain.ts`'s `intermediario`→`base` rename as
+  "pre-existing... out of this gate's bounded scope to fix" — corrected under Candidate 2
+  above.
+
+### Adapter quarantine (not part of this branch)
+
+`src/features/rio-scenario-resilience/model/payrollGovernanceWorkbookAdapter.ts` and the
+matching ~50-line sheet-23/24 wiring in `src/components/dreSimulator/dreScenarioWorkbook.ts`
+are a separate, quarantined feature — verified this session to contain zero localization
+or workspace content — and are deliberately **not** committed to this branch. The staged
+two-file patch reproduces to the previously-reported hash
+`20369b2ceae4d780eef0d5474b385df720781d601ac01ee0ec25548fd1dc07fd`.
+
+An untracked validator, `scripts/validate-phase15u2.ts` (81 checks), exists only in the
+primary tree's working directory and is not committed anywhere. This session copied it
+read-only into the (otherwise clean) reconstruction branch together with the two adapter
+files and ran it directly: **81/81 pass**, including its cross-validation of the adapter's
+sheet output against `fopagEngine`'s computed values. This is a stronger and more precise
+finding than "the validator is merely untracked": the adapter feature typechecks, builds,
+and its own validator passes fully **without** requiring the primary tree's separate
+uncommitted, unrelated dirty state in `capitalDecisionEngine.ts`,
+`dreGovernanceReadiness*.ts`, or `dreWorkingScenarioContract.ts` — this validator does not
+import runtime code from those files at all. The sole reason 81/81 is not reproducible
+from a fresh clean checkout is that `scripts/validate-phase15u2.ts` itself has never been
+committed to any branch. An expanded three-file quarantine evidence bundle (the two staged
+files plus this untracked validator, `git diff --no-index` against `/dev/null` for the
+validator) was computed this session; its hash is
+`41846260267f625a2437c7a4711e2b5f931cd6ab62fcb0b70bcbc893a3e00756`, reported separately
+from, and not replacing, the original two-file hash above. Neither bundle nor the
+validator was committed to this branch — this section documents their evidence, not their
+inclusion.
+
+**Known adapter governance gap, not fixed this phase** (fixing it now would modify
+quarantined functionality outside this phase's bounded scope): the `CALC_TRACE` prose
+inside the adapter describes the pre-V10-P1 payroll-growth formula and is stale relative
+to the current model. This is recorded here as a required correction for a future,
+explicit adapter-governance phase.
+
+### Future Executive Dashboard — documented, not implemented (unchanged from the
+architecture-first draft, restated here because it is real and still governs the current
+registry)
+
+Planned insertion point: Capa → Painel Executivo/Executive Dashboard → Oferta e Ocupação →
+... → Decisão de Capital. No `TabId`/registry entry exists for it in any candidate above;
+`q20_no_prohibited_scope_expansion` confirms the registry contains no Dashboard,
+Senior Learning Assistant, or Staffing entry. Planned fields would be consumed from
+canonical adapters only, never calculated independently, if and when a future phase
+implements it.
+
+### Visual-approval status
+
+**Not visually approved.** This session did not present screenshots or the live app to
+Luciana. The 20 screenshots from the bilingual crawl in this session are written to
+`~/Downloads/Rio_V10_X2T_Visual_Review` (outside the repository, never staged) and remain
+pending her review, as do all prior sessions' screenshots referenced above.
+
+### Overall status: architecture-first + completed-surface localization implemented;
+whole-application localization closure remains open
+
+Candidates 1–5 are implemented and committed to `v10-x2t-2b-reconstruction` only —
+verified by the aggregate result above (see the final aggregate validation elsewhere in
+this session's record for the post-documentation-commit re-run). This is **not** a
+whole-application translation closure: `OfferScenariosTab.tsx`, `MiddleSchoolTab.tsx`,
+`HighSchoolTab.tsx`, the 9 remaining DRE panels, and the Capital Decision panels remain
+untranslated, by explicit, unchanged scope decision. Nothing from this branch has been
+merged to `main`, and nothing has been pushed.

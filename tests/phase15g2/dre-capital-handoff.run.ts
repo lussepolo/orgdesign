@@ -50,7 +50,7 @@ function stopServer(proc: ChildProcess) {
 
 async function land(page: Page) {
   await page.goto(BASE, { waitUntil: "domcontentloaded", timeout: 30_000 });
-  await page.waitForSelector("text=Strategic", { timeout: 20_000 });
+  await page.waitForSelector("header h1", { timeout: 20_000 });
   await page.waitForTimeout(600);
   // Dismiss the About modal that appears on first load. Click the X button
   // (the close button inside the modal) or the backdrop if present.
@@ -94,11 +94,11 @@ async function runQa(page: Page) {
 
   // ── 1. App loads and shows cover ──────────────────────────────────────────
   check("app_loads_cover", await safe("app_loads_cover",
-    () => page.locator("text=Strategic").first().isVisible(), false));
+    () => page.locator("header h1").first().isVisible(), false));
 
-  // ── 2. DRE Scenario Simulator tab is visible in nav ───────────────────────
+  // ── 2. DRE Operacional tab is visible in nav ───────────────────────
   check("dre_tab_in_nav", await safe("dre_tab_in_nav",
-    () => page.locator("button:has-text('DRE Scenario Simulator')").first().isVisible(), false));
+    () => page.locator("button:has-text('DRE Operacional')").first().isVisible(), false));
 
   // ── 3. Capital Decision tab is visible in nav ─────────────────────────────
   check("capital_decision_tab_in_nav", await safe("capital_decision_tab_in_nav",
@@ -106,17 +106,17 @@ async function runQa(page: Page) {
 
   // ── 4. Navigate to DRE tab ────────────────────────────────────────────────
   await safe("nav_to_dre", async () => {
-    await clickTab(page, "DRE Scenario Simulator");
-    await page.waitForSelector("text=Send to Capital Decision", { timeout: 10_000 });
+    await clickTab(page, "DRE Operacional");
+    await page.waitForSelector("text=Enviar para Decisão de Capital", { timeout: 10_000 });
   }, undefined);
   await ss("02_dre_tab");
 
   check("dre_tab_heading", await safe("dre_tab_heading",
-    () => page.locator("text=DRE Scenario Simulator").first().isVisible(), false));
+    () => page.locator("text=DRE Operacional").first().isVisible(), false));
 
   // ── 5. Send button is visible in DRE tab ─────────────────────────────────
   check("send_button_visible", await safe("send_button_visible",
-    () => page.locator("button:has-text('Send to Capital Decision')").first().isVisible(), false));
+    () => page.locator("button:has-text('Enviar para Decisão de Capital')").first().isVisible(), false));
 
   // ── 6. DRE lever selects are present (4 levers in DRE) ───────────────────
   check("dre_lever_selects_present", await safe("dre_lever_selects_present",
@@ -124,8 +124,8 @@ async function runQa(page: Page) {
 
   // ── 7. Click Send → navigates to Capital Decision ─────────────────────────
   await safe("send_navigates_to_capital_decision", async () => {
-    await page.locator("button:has-text('Send to Capital Decision')").first().click();
-    await page.waitForSelector("text=DRE-imported scenarios", { timeout: 8_000 });
+    await page.locator("button:has-text('Enviar para Decisão de Capital')").first().click();
+    await page.waitForSelector("text=Cenários importados da DRE", { timeout: 8_000 });
     check("capital_decision_integrated_view", true);
     await ss("03_capital_decision_after_send");
   }, undefined);
@@ -174,15 +174,15 @@ async function runQa(page: Page) {
 
   // ── 13. CAPEX variant button is present ──────────────────────────────────
   check("capex_variant_button_visible", await safe("capex_variant_button_visible",
-    () => page.locator("button:has-text('CAPEX variant')").first().isVisible(), false));
+    () => page.locator("button:has-text('Variante de CAPEX')").first().isVisible(), false));
 
   // ── 14. Go back to DRE, send same config → already_present navigates immediately
   await safe("second_send_already_present", async () => {
-    await clickTab(page, "DRE Scenario Simulator");
-    await page.waitForSelector("button:has-text('Send to Capital Decision')", { timeout: 8_000 });
-    await page.locator("button:has-text('Send to Capital Decision')").first().click();
+    await clickTab(page, "DRE Operacional");
+    await page.waitForSelector("button:has-text('Enviar para Decisão de Capital')", { timeout: 8_000 });
+    await page.locator("button:has-text('Enviar para Decisão de Capital')").first().click();
     // Should navigate back to Capital Decision immediately (already_present)
-    await page.waitForSelector("text=DRE-imported scenarios", { timeout: 8_000 });
+    await page.waitForSelector("text=Cenários importados da DRE", { timeout: 8_000 });
     check("already_present_navigates", true);
     await ss("05_already_present");
   }, undefined);
@@ -193,33 +193,33 @@ async function runQa(page: Page) {
   // ── 15. Go back to DRE, change occupancy, send → second scenario ──────────
   // DreLeverPanel selects have no id; locate by the enclosing label text.
   await safe("new_scenario_after_occupancy_change", async () => {
-    await clickTab(page, "DRE Scenario Simulator");
-    await page.waitForSelector("button:has-text('Send to Capital Decision')", { timeout: 12_000 });
+    await clickTab(page, "DRE Operacional");
+    await page.waitForSelector("button:has-text('Enviar para Decisão de Capital')", { timeout: 12_000 });
     await page.waitForTimeout(800);
     // Occupancy select is inside a label with text "Occupancy Scenario"
-    const occSel = page.locator("label:has-text('Occupancy Scenario') select").first();
+    const occSel = page.locator("label:has-text('Cenário de Captação') select").first();
     await occSel.waitFor({ timeout: 10_000 });
-    await occSel.selectOption("pessimista");
+    await occSel.selectOption("otimista");
     await page.waitForTimeout(500);
-    await page.locator("button:has-text('Send to Capital Decision')").first().click();
-    await page.waitForSelector("text=DRE-imported scenarios", { timeout: 10_000 });
+    await page.locator("button:has-text('Enviar para Decisão de Capital')").first().click();
+    await page.waitForSelector("text=Cenários importados da DRE", { timeout: 10_000 });
     check("second_scenario_created", await page.locator("text=Scenario 2").first().isVisible());
     await ss("06_two_scenarios");
   }, undefined);
 
   // ── 16. Scenario comparison panel is present when 2+ scenarios ────────────
   check("comparison_panel_visible", await safe("comparison_panel_visible",
-    () => page.locator("text=Scenario output comparison").first().isVisible(), false));
+    () => page.locator("text=Comparação de resultados de cenário").first().isVisible(), false));
 
   // ── 17. DRE selections persist when returning to DRE tab ─────────────────
   await safe("dre_selections_persist", async () => {
-    // We already changed occupancy to "pessimista" above.
-    await clickTab(page, "DRE Scenario Simulator");
+    // We already changed occupancy to "otimista" above.
+    await clickTab(page, "DRE Operacional");
     await page.waitForTimeout(800);
-    const occSel = page.locator("label:has-text('Occupancy Scenario') select").first();
+    const occSel = page.locator("label:has-text('Cenário de Captação') select").first();
     await occSel.waitFor({ timeout: 10_000 });
     const currentVal = await occSel.inputValue();
-    check("dre_occupancy_persists_as_pessimista", currentVal === "pessimista");
+    check("dre_occupancy_persists_as_otimista", currentVal === "otimista");
     await ss("07_dre_persists_occupancy");
   }, undefined);
 
@@ -227,10 +227,10 @@ async function runQa(page: Page) {
   await safe("go_to_dre_button_works", async () => {
     await clickTab(page, "Decisão de Capital");
     await page.waitForTimeout(400);
-    const dreBtn = page.locator("button:has-text('Go to DRE Simulator')").first();
+    const dreBtn = page.locator("button:has-text('Ir para o Simulador da DRE')").first();
     if (await dreBtn.isVisible()) {
       await dreBtn.click();
-      await page.waitForSelector("button:has-text('Send to Capital Decision')", { timeout: 8_000 });
+      await page.waitForSelector("button:has-text('Enviar para Decisão de Capital')", { timeout: 8_000 });
       check("go_to_dre_navigates", true);
     } else {
       check("go_to_dre_navigates", "button not visible — skipped");

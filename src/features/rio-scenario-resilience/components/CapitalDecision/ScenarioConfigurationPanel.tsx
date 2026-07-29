@@ -22,10 +22,13 @@ import {
   type IntegratedCapitalDecisionScenario,
   type DuplicateForCapexVariantResult,
 } from "./capitalDecisionUiTypes";
+import { useLocale } from "../../../../i18n/useLocale";
+import { formatNumber } from "../../../../i18n/formatters";
+import type { TranslationKey } from "../../../../i18n/localeContract";
 
 interface LeverFieldConfig {
   readonly id: CapitalDecisionLeverId;
-  readonly label: string;
+  readonly labelKey: TranslationKey;
   readonly inputKey: keyof CapitalDecisionEngineInput;
   readonly options: readonly CapitalDecisionLeverOption[];
 }
@@ -33,19 +36,19 @@ interface LeverFieldConfig {
 const LEVER_FIELDS: readonly LeverFieldConfig[] = [
   {
     id: "openingGrades",
-    label: "Opening Grades",
+    labelKey: "capitalConfigPanelLeverOpeningGrades",
     inputKey: "openingPackageId",
     options: openingGrades.map((option) => ({ id: option.id, label: option.label })),
   },
   {
     id: "occupancy",
-    label: "Occupancy",
+    labelKey: "capitalConfigPanelLeverOccupancy",
     inputKey: "occupancyScenarioId",
     options: occupancyOptions,
   },
   {
     id: "orgDesignStructure",
-    label: "Org Design Structure",
+    labelKey: "capitalConfigPanelLeverOrgDesignStructure",
     inputKey: "orgDesignOptionId",
     options: orgDesignStructure.map((option) => ({
       id: option.id,
@@ -55,13 +58,13 @@ const LEVER_FIELDS: readonly LeverFieldConfig[] = [
   },
   {
     id: "tuition",
-    label: "Tuition",
+    labelKey: "capitalConfigPanelLeverTuition",
     inputKey: "tuitionScenarioId",
     options: tuitionArchitecture.map((option) => ({ id: option.id, label: option.label })),
   },
   {
     id: "capex",
-    label: "CAPEX",
+    labelKey: "capitalConfigPanelLeverCapex",
     inputKey: "capexOptionId",
     options: capexOptions,
   },
@@ -80,19 +83,20 @@ export interface ScenarioConfigurationPanelProps {
 }
 
 function TuitionBandDetail({ scenarioId }: { scenarioId: string }) {
+  const { t, locale } = useLocale();
   const option = tuitionArchitecture.find((o) => o.id === scenarioId);
   if (!option?.bandDetails) return null;
   return (
     <details className="rounded-lg border border-slate-100 bg-slate-50 p-3 text-xs">
       <summary className="cursor-pointer font-semibold text-slate-600">
-        Tuition bands — monthly &amp; annual gross contract value
+        {t("capitalConfigPanelTuitionBandsSummary")}
       </summary>
       <table className="mt-2 w-full">
         <thead>
           <tr className="text-left text-slate-400">
-            <th className="pb-1 pr-2 font-medium">Band</th>
-            <th className="pb-1 pr-2 font-medium text-right">Monthly (R$)</th>
-            <th className="pb-1 font-medium text-right">Annual gross (R$)</th>
+            <th className="pb-1 pr-2 font-medium">{t("capitalConfigPanelColBand")}</th>
+            <th className="pb-1 pr-2 font-medium text-right">{t("capitalConfigPanelColMonthly")}</th>
+            <th className="pb-1 font-medium text-right">{t("capitalConfigPanelColAnnualGross")}</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-100">
@@ -100,10 +104,10 @@ function TuitionBandDetail({ scenarioId }: { scenarioId: string }) {
             <tr key={band.bandLabel}>
               <td className="py-1 pr-2 text-slate-700">{band.bandLabel}</td>
               <td className="py-1 pr-2 text-right text-slate-600">
-                {band.monthlyTuitionBRL.toLocaleString("pt-BR")}
+                {formatNumber(band.monthlyTuitionBRL, locale, 0)}
               </td>
               <td className="py-1 text-right text-slate-600">
-                {band.annualGrossContractValueBRL.toLocaleString("pt-BR")}
+                {formatNumber(band.annualGrossContractValueBRL, locale, 0)}
               </td>
             </tr>
           ))}
@@ -124,6 +128,7 @@ export function ScenarioConfigurationPanel({
   onDuplicateScenario,
   onRemoveScenario,
 }: ScenarioConfigurationPanelProps) {
+  const { t } = useLocale();
   const atMax = scenarios.length >= MAX_SAVED_SCENARIOS;
 
   return (
@@ -131,10 +136,10 @@ export function ScenarioConfigurationPanel({
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
-            Scenario Configuration
+            {t("capitalConfigPanelSectionLabel")}
           </p>
           <h2 id="scenario-configuration-heading" className="text-lg font-semibold text-slate-900">
-            Decision levers
+            {t("capitalConfigPanelDecisionLeversTitle")}
           </h2>
         </div>
         <button
@@ -144,13 +149,13 @@ export function ScenarioConfigurationPanel({
           className="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
           aria-disabled={atMax}
         >
-          Add scenario
+          {t("capitalConfigPanelAddScenario")}
         </button>
       </div>
 
       {atMax && (
         <p className="text-xs text-slate-500" role="note">
-          Maximum of {MAX_SAVED_SCENARIOS} saved scenarios reached.
+          {t("capitalConfigPanelMaxReached").replace("{max}", String(MAX_SAVED_SCENARIOS))}
         </p>
       )}
 
@@ -167,8 +172,8 @@ export function ScenarioConfigurationPanel({
               subtitle={scenario.id}
               actions={
                 <div className="flex flex-wrap items-center gap-2">
-                  {isDuplicate && <Badge variant="warning">Identical configuration</Badge>}
-                  {isSelected && <Badge variant="success">Selected for result</Badge>}
+                  {isDuplicate && <Badge variant="warning">{t("capitalConfigPanelDuplicateBadge")}</Badge>}
+                  {isSelected && <Badge variant="success">{t("capitalConfigPanelSelectedBadge")}</Badge>}
                 </div>
               }
             >
@@ -178,7 +183,7 @@ export function ScenarioConfigurationPanel({
                     htmlFor={`scenario-name-${scenario.id}`}
                     className="block text-xs font-semibold uppercase tracking-wide text-slate-400"
                   >
-                    Scenario name
+                    {t("capitalConfigPanelScenarioNameLabel")}
                   </label>
                   <input
                     id={`scenario-name-${scenario.id}`}
@@ -191,7 +196,7 @@ export function ScenarioConfigurationPanel({
 
                 <fieldset className="space-y-3">
                   <legend className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                    Decision levers
+                    {t("capitalConfigPanelDecisionLeversTitle")}
                   </legend>
                   {LEVER_FIELDS.map((field) => {
                     const selectId = `lever-${field.id}-${scenario.id}`;
@@ -201,7 +206,7 @@ export function ScenarioConfigurationPanel({
                           htmlFor={selectId}
                           className="block text-sm font-medium text-slate-700"
                         >
-                          {field.label}
+                          {t(field.labelKey)}
                         </label>
                         <select
                           id={selectId}
@@ -231,7 +236,7 @@ export function ScenarioConfigurationPanel({
                     disabled={isSelected}
                     className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    View result
+                    {t("capitalConfigPanelViewResult")}
                   </button>
                   <button
                     type="button"
@@ -239,7 +244,7 @@ export function ScenarioConfigurationPanel({
                     disabled={atMax}
                     className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    Duplicate
+                    {t("capitalConfigPanelDuplicate")}
                   </button>
                   <button
                     type="button"
@@ -247,7 +252,7 @@ export function ScenarioConfigurationPanel({
                     disabled={scenarios.length <= 1}
                     className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-rose-600 transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    Remove
+                    {t("capitalConfigPanelRemove")}
                   </button>
                 </div>
               </div>
@@ -256,15 +261,15 @@ export function ScenarioConfigurationPanel({
         })}
       </div>
 
-      <Card title="Fixed and future context" subtitle="Not selectable in this version">
+      <Card title={t("capitalConfigPanelFixedContextTitle")} subtitle={t("capitalConfigPanelFixedContextSubtitle")}>
         <ul className="space-y-2 text-sm leading-6 text-slate-600">
           <li>
-            <span className="font-semibold text-slate-700">Service Contracts: </span>
-            Service Contracts use the fixed approved DRE assumptions for this version.
+            <span className="font-semibold text-slate-700">{t("capitalConfigPanelServiceContractsLabel")}</span>
+            {t("capitalConfigPanelServiceContractsBody")}
           </li>
           <li>
-            <span className="font-semibold text-slate-700">MS/HS Progression Model: </span>
-            The MS/HS Progression Model is not yet connected to the financial simulation.
+            <span className="font-semibold text-slate-700">{t("capitalConfigPanelMsHsLabel")}</span>
+            {t("capitalConfigPanelMsHsBody")}
           </li>
         </ul>
       </Card>
@@ -281,12 +286,12 @@ export default ScenarioConfigurationPanel;
 // shown as a badge. A "CAPEX variant" button creates a variant with the
 // alternative CAPEX option.
 
-// Maps a lever inputKey to a human-readable label for read-only display.
-const DRE_FIELD_LABELS: Record<string, string> = {
-  openingGrades: "Opening Grades",
-  occupancy: "Occupancy",
-  orgDesignStructure: "Org Design Structure",
-  tuition: "Tuition",
+// Maps a lever inputKey to a translation key for read-only display.
+const DRE_FIELD_LABEL_KEYS: Record<string, TranslationKey> = {
+  openingGrades: "capitalConfigPanelLeverOpeningGrades",
+  occupancy: "capitalConfigPanelLeverOccupancy",
+  orgDesignStructure: "capitalConfigPanelLeverOrgDesignStructure",
+  tuition: "capitalConfigPanelLeverTuition",
 };
 
 // Resolve a data-value ID to its display label.
@@ -309,13 +314,13 @@ function resolveLabel(inputKey: keyof CapitalDecisionEngineInput, value: string)
 
 const INTEGRATED_DRE_FIELDS: ReadonlyArray<{
   leverId: string;
-  label: string;
+  labelKey: TranslationKey;
   inputKey: keyof CapitalDecisionEngineInput;
 }> = [
-  { leverId: "openingGrades", label: DRE_FIELD_LABELS["openingGrades"], inputKey: "openingPackageId" },
-  { leverId: "occupancy", label: DRE_FIELD_LABELS["occupancy"], inputKey: "occupancyScenarioId" },
-  { leverId: "orgDesignStructure", label: DRE_FIELD_LABELS["orgDesignStructure"], inputKey: "orgDesignOptionId" },
-  { leverId: "tuition", label: DRE_FIELD_LABELS["tuition"], inputKey: "tuitionScenarioId" },
+  { leverId: "openingGrades", labelKey: DRE_FIELD_LABEL_KEYS["openingGrades"], inputKey: "openingPackageId" },
+  { leverId: "occupancy", labelKey: DRE_FIELD_LABEL_KEYS["occupancy"], inputKey: "occupancyScenarioId" },
+  { leverId: "orgDesignStructure", labelKey: DRE_FIELD_LABEL_KEYS["orgDesignStructure"], inputKey: "orgDesignOptionId" },
+  { leverId: "tuition", labelKey: DRE_FIELD_LABEL_KEYS["tuition"], inputKey: "tuitionScenarioId" },
 ];
 
 export interface IntegratedScenarioConfigurationPanelProps {
@@ -337,6 +342,7 @@ export function IntegratedScenarioConfigurationPanel({
   onRemoveScenario,
   onNavigateToDre,
 }: IntegratedScenarioConfigurationPanelProps) {
+  const { t } = useLocale();
   const atMax = scenarios.length >= MAX_SAVED_SCENARIOS;
 
   return (
@@ -344,10 +350,10 @@ export function IntegratedScenarioConfigurationPanel({
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
-            Integrated Scenario Configuration
+            {t("capitalConfigPanelIntegratedSectionLabel")}
           </p>
           <h2 id="integrated-scenario-config-heading" className="text-lg font-semibold text-slate-900">
-            DRE-imported scenarios
+            {t("capitalConfigPanelDreImportedTitle")}
           </h2>
         </div>
         <button
@@ -355,20 +361,23 @@ export function IntegratedScenarioConfigurationPanel({
           onClick={onNavigateToDre}
           className="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
         >
-          ← Go to DRE Simulator
+          {t("capitalConfigPanelGoToDreSimulator")}
         </button>
       </div>
 
       {atMax && (
         <p className="text-xs text-slate-500" role="note">
-          Maximum of {MAX_SAVED_SCENARIOS} saved scenarios reached.
+          {t("capitalConfigPanelMaxReached").replace("{max}", String(MAX_SAVED_SCENARIOS))}
         </p>
       )}
 
       <div className="grid gap-4 xl:grid-cols-2">
         {scenarios.map((scenario) => {
           const isActive = scenario.id === activeScenarioId;
-          const kindLabel = scenario.scenarioKind === "dre_import" ? "DRE Import" : "CAPEX Variant";
+          const kindLabel =
+            scenario.scenarioKind === "dre_import"
+              ? t("capitalConfigPanelKindDreImport")
+              : t("capitalConfigPanelKindCapexVariant");
           const kindVariant = scenario.scenarioKind === "dre_import" ? "info" : "purple" as const;
 
           // Determine the alternate CAPEX option for variant creation.
@@ -383,7 +392,7 @@ export function IntegratedScenarioConfigurationPanel({
               actions={
                 <div className="flex flex-wrap items-center gap-2">
                   <Badge variant={kindVariant}>{kindLabel}</Badge>
-                  {isActive && <Badge variant="success">Active</Badge>}
+                  {isActive && <Badge variant="success">{t("capitalConfigPanelActiveBadge")}</Badge>}
                 </div>
               }
             >
@@ -391,12 +400,12 @@ export function IntegratedScenarioConfigurationPanel({
                 {/* DRE fields — read-only */}
                 <fieldset className="space-y-2">
                   <legend className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                    DRE fields (read-only — set in DRE Simulator)
+                    {t("capitalConfigPanelDreFieldsReadonlyLegend")}
                   </legend>
                   {INTEGRATED_DRE_FIELDS.map((field) => (
                     <div key={field.leverId} className="flex items-center gap-2">
                       <span className="min-w-[120px] text-xs font-medium text-slate-500">
-                        {field.label}
+                        {t(field.labelKey)}
                       </span>
                       <span className="rounded border border-slate-100 bg-slate-50 px-2 py-1 text-xs text-slate-700">
                         {resolveLabel(field.inputKey, scenario.input[field.inputKey] as string)}
@@ -411,7 +420,7 @@ export function IntegratedScenarioConfigurationPanel({
                     htmlFor={`capex-${scenario.id}`}
                     className="block text-sm font-medium text-slate-700"
                   >
-                    CAPEX
+                    {t("capitalConfigPanelLeverCapex")}
                   </label>
                   <select
                     id={`capex-${scenario.id}`}
@@ -436,7 +445,7 @@ export function IntegratedScenarioConfigurationPanel({
                     disabled={isActive}
                     className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    View result
+                    {t("capitalConfigPanelViewResult")}
                   </button>
                   {altCapex && (
                     <button
@@ -445,7 +454,7 @@ export function IntegratedScenarioConfigurationPanel({
                       onClick={() => onDuplicateForCapexVariant(scenario.id, altCapex.id)}
                       className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      CAPEX variant ({altCapex.label})
+                      {t("capitalConfigPanelCapexVariantButton").replace("{label}", altCapex.label)}
                     </button>
                   )}
                   <button
@@ -454,7 +463,7 @@ export function IntegratedScenarioConfigurationPanel({
                     disabled={scenarios.length <= 1}
                     className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-rose-600 transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    Remove
+                    {t("capitalConfigPanelRemove")}
                   </button>
                 </div>
               </div>
@@ -463,15 +472,15 @@ export function IntegratedScenarioConfigurationPanel({
         })}
       </div>
 
-      <Card title="Fixed and future context" subtitle="Not selectable in this version">
+      <Card title={t("capitalConfigPanelFixedContextTitle")} subtitle={t("capitalConfigPanelFixedContextSubtitle")}>
         <ul className="space-y-2 text-sm leading-6 text-slate-600">
           <li>
-            <span className="font-semibold text-slate-700">Service Contracts: </span>
-            Service Contracts use the fixed approved DRE assumptions for this version.
+            <span className="font-semibold text-slate-700">{t("capitalConfigPanelServiceContractsLabel")}</span>
+            {t("capitalConfigPanelServiceContractsBody")}
           </li>
           <li>
-            <span className="font-semibold text-slate-700">MS/HS Progression Model: </span>
-            The MS/HS Progression Model is not yet connected to the financial simulation.
+            <span className="font-semibold text-slate-700">{t("capitalConfigPanelMsHsLabel")}</span>
+            {t("capitalConfigPanelMsHsBody")}
           </li>
         </ul>
       </Card>

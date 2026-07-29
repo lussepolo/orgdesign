@@ -14,6 +14,7 @@ import {
   Users,
 } from "lucide-react";
 import { cn } from "../../lib/utils";
+import { useLocale } from "../../i18n/useLocale";
 
 const Card = ({ children, className, title, subtitle, icon: Icon, actions, style }: { children: React.ReactNode, className?: string, title?: string, subtitle?: string, icon?: React.ElementType, actions?: React.ReactNode, style?: React.CSSProperties }) => (
   <div className={cn("bg-white rounded-2xl md:rounded-3xl border border-slate-200 shadow-sm overflow-hidden", className)} style={style}>
@@ -59,18 +60,96 @@ type ScenarioBudgetComparison = {
   strategicFrame: string;
   rows: BudgetComparisonRow[];
 };
+type SpecialistFinalGrade = "Grade 3" | "Grade 4" | "Grade 5" | "Grade 6";
+type SpecialistSectionsPerGrade = 1 | 2;
+type SpecialistBlocksPerGrade = 1 | 2;
+type SpecialistBlockDuration = 45 | 50;
+type SpecialistCapacityThreshold = 24 | 26 | 30;
+
+export default function OfferScenariosTab() {
+  const { t } = useLocale();
+
+  // Semantic ID / display-label separation (Phase V10-X2T.3A): these keys are
+  // the raw stable identifiers still used for React state, .find()/.indexOf()
+  // comparisons, map keys, and CSS-class lookups elsewhere in this file. Only
+  // the rendered label is localized here — the underlying data value is
+  // never mutated.
+  const offerLabel: Record<string, string> = {
+    "Scenario A": t("offerScenarioATitle"),
+    "Scenario B": t("offerScenarioBTitle"),
+    "Scenario C": t("offerScenarioCTitle"),
+    "Scenario D": t("offerScenarioDTitle"),
+    "Grade 3": t("offerSpecialistFinalGradeOption1"),
+    "Grade 4": t("offerSpecialistFinalGradeOption2"),
+    "Grade 5": t("offerSpecialistFinalGradeOption3"),
+    "Grade 6": t("offerSpecialistFinalGradeOption4"),
+    "Early Years": t("offerDivisionEarlyYearsLabel"),
+    "Lower School": t("offerDivisionLowerSchoolLabel"),
+    "Middle School": t("offerDivisionMiddleSchoolLabel"),
+    "High School, future stage": t("offerDivisionHighSchoolLabel"),
+    "Classroom ownership": t("offerMinAcademicOpsSystemClassroomOwnership"),
+    "Classroom package": t("offerMinAcademicOpsSystemClassroomPackage"),
+    "Specialist access": t("offerMinAcademicOpsSystemSpecialistAccess"),
+    "Academic performance and language acquisition": t("offerMinAcademicOpsSystemAcademicPerformanceLanguageAcquisition"),
+    "Curriculum and assessment coherence": t("offerMinAcademicOpsSystemCurriculumAssessmentCoherence"),
+    "Documentation and portfolio": t("offerMinAcademicOpsSystemDocumentationPortfolio"),
+    "Signature program routines": t("offerMinAcademicOpsSystemSignatureProgramRoutines"),
+    "Divisional leadership and coaching": t("offerMinAcademicOpsSystemDivisionalLeadershipCoaching"),
+    "Baseline control": t("offerBudgetSharedRowLeadershipStatus"),
+    "Mapping validation": t("offerBudgetSharedRowAfterSchoolRoleMappingStatus"),
+    "Not active": t("offerBudgetScenarioCRowPassionProjectsStatus"),
+    "Potential increment": t("offerBudgetScenarioARowLapCoachStatus"),
+    "Scenario driver": t("offerBudgetScenarioCRowFullClassPdjStatus"),
+    "Conditional increment": t("offerBudgetScenarioDRowDedicatedProjectMentorStatus"),
+    "Estrutura básica": t("offerEcosystemClassroomRowScenarioAStatus"),
+    "Estrutura básica fortalecida": t("offerEcosystemClassroomRowScenarioBStatus"),
+    "Preparação ativa": t("offerEcosystemClassroomRowScenarioCStatus"),
+    "Mudança de modelo": t("offerEcosystemClassroomRowScenarioDStatus"),
+    "Investimento recomendado": t("offerEcosystemAcademicLanguageRowScenarioAStatus"),
+    "Necessário para transição": t("offerEcosystemAcademicLanguageRowScenarioCStatus"),
+    "Necessário": t("offerEcosystemAcademicLanguageRowScenarioDStatus"),
+    "Capacidade compartilhada": t("offerEcosystemSpecialistsRowScenarioAStatus"),
+    "Capacidade compartilhada fortalecida": t("offerEcosystemSpecialistsRowScenarioBStatus"),
+    "Continuidade LS completa": t("offerEcosystemSpecialistsRowScenarioCStatus"),
+    "Capacidade compartilhada EY/LS/MS": t("offerEcosystemSpecialistsRowScenarioDStatus"),
+    "Progressão acadêmica": t("offerEcosystemSignatureRowScenarioBStatus"),
+    "Ativo": t("offerEcosystemSignatureRowScenarioCStatus"),
+    "Ativo + add-on potencial": t("offerEcosystemSignatureRowScenarioDStatus"),
+    "Não ativo": t("offerEcosystemMsHsRowScenarioAStatus"),
+    "Preparação cultural": t("offerEcosystemMsHsRowScenarioBStatus"),
+    "Ponte formal": t("offerEcosystemMsHsRowScenarioCStatus"),
+    "Add-on potencial": t("offerEcosystemBudgetRowScenarioAStatus"),
+  };
+
+  // Numeric source-of-truth for target enrollment / modeled capacity, keyed
+  // by the stable "Scenario A"-"D" id. The `targetEnrollment`/`modeledCapacity`
+  // data fields stay locale-invariant English literals (e.g. "228 learners");
+  // these maps let the UI render a localized "228 alunos" without parsing or
+  // mutating that data string.
+  const offerEnrollmentCount: Record<string, number> = {
+    "Scenario A": 228,
+    "Scenario B": 258,
+    "Scenario C": 288,
+    "Scenario D": 318,
+  };
+  const offerCapacityCount: Record<string, number> = {
+    "Scenario A": 302,
+    "Scenario B": 348,
+    "Scenario C": 390,
+    "Scenario D": 440,
+  };
 
 const offerScenarioViews: Array<{ id: OfferScenarioView; label: string }> = [
-  { id: "brief", label: "01 Síntese executiva" },
-  { id: "ladder", label: "02 Escada de cenários" },
-  { id: "scenario", label: "03 Cenário selecionado" },
-  { id: "budget", label: "04 Implicações de recursos" },
-  { id: "architecture", label: "05 Arquitetura acadêmica" },
-  { id: "appendix", label: "06 Premissas operacionais" },
+  { id: "brief", label: t("offerViewBriefLabel") },
+  { id: "ladder", label: t("offerViewLadderLabel") },
+  { id: "scenario", label: t("offerViewScenarioLabel") },
+  { id: "budget", label: t("offerViewBudgetLabel") },
+  { id: "architecture", label: t("offerViewArchitectureLabel") },
+  { id: "appendix", label: t("offerViewAppendixLabel") },
 ];
 
 const OFFER_SCENARIO_GOVERNANCE_BOUNDARY =
-  "A-D are offer/narrative scenarios. They describe pedagogical thresholds and implementation implications; they do not authorize headcount, payroll, budget, final staffing, or final implementation.";
+  t("offerGovernanceBoundary");
 
 // ─────────────────────────────────────────────────────────────────────────────
 // OFFER SCENARIOS TAB — board-facing scenario architecture only
@@ -79,219 +158,223 @@ const OFFER_SCENARIO_GOVERNANCE_BOUNDARY =
 const pedagogicalOfferScenarios = [
 {
 title: "Scenario A",
-gradeCeiling: "Up to Grade 3",
+gradeCeiling: t("offerScenarioAGradeCeiling"),
 targetEnrollment: "228 learners",
 modeledCapacity: "302 learners",
 impliedOccupancy: "75.5%",
-strategicIdentity: "Foundation + early academic evidence",
-offerStage: "Early Years + first Lower School cycle",
+strategicIdentity: t("offerScenarioAStrategicIdentity"),
+offerStage: t("offerScenarioAOfferStage"),
 classroomPackage: [
-"Fixed classroom package: EY = reference educator + assistant + monitor; LS = reference educator + assistant",
-"PDJ operates through full-class experiential projects embedded in classroom routines",
-"Learning Experience Design function supports project quality, documentation, and learning-engine fidelity",
+t("offerScenarioAClassroomPackage1"),
+t("offerScenarioAClassroomPackage2"),
+t("offerScenarioAClassroomPackage3"),
 ],
 specialistEcosystem: [
-"Specialist planning premise: see Operating Assumptions.",
+t("offerScenarioASpecialistEcosystem1"),
 ],
 signaturePrograms: [
-"MAP Testing begins in Grade 1",
-"PDJ embedded in classroom routines",
-"Language acquisition and academic evidence routines begin",
+t("offerScenarioASignaturePrograms1"),
+t("offerScenarioASignaturePrograms2"),
+t("offerScenarioASignaturePrograms3"),
 ],
 notActiveYet: [
-"Pathways",
-"Creative Hub",
-"MUN",
-"Middle School advisory and project mentorship",
-"Academic electives",
+t("offerScenarioANotActiveYet1"),
+t("offerScenarioANotActiveYet2"),
+t("offerScenarioANotActiveYet3"),
+t("offerScenarioANotActiveYet4"),
+t("offerScenarioANotActiveYet5"),
 ],
-middleSchoolLogic: "Not active",
-recommendedPathway: "Coached Foundation",
+middleSchoolLogic: t("offerScenarioAMiddleSchoolLogic"),
+recommendedPathway: t("offerScenarioARecommendedPathway"),
 roles: [
-"Teaching & Learning Coach: recommended",
-"Language & Academic Performance Coach: recommended for validation",
-"Learning Experience Design function: indicated — supports project quality, documentation, and educator planning",
-"Curriculum & Assessment Designer: optional/shared",
+t("offerScenarioARoles1"),
+t("offerScenarioARoles2"),
+t("offerScenarioARoles3"),
+t("offerScenarioARoles4"),
 ],
 risk:
-"If too lean, the school may open with operational viability but uneven classroom quality. The main risk is variation across founding educators.",
+t("offerScenarioARisk"),
 boardSentence:
-"Scenario A establishes the basic offer and early academic evidence without adding Middle School or signature-program infrastructure.",
+t("offerScenarioABoardSentence"),
 tone: "border-emerald-200 bg-emerald-50 text-emerald-700",
 },
 {
 title: "Scenario B",
-gradeCeiling: "Up to Grade 4",
+gradeCeiling: t("offerScenarioBGradeCeiling"),
 targetEnrollment: "258 learners",
 modeledCapacity: "348 learners",
 impliedOccupancy: "74.1%",
-strategicIdentity: "Researchers progression + Concept identity",
-offerStage: "Lower School progression",
+strategicIdentity: t("offerScenarioBStrategicIdentity"),
+offerStage: t("offerScenarioBOfferStage"),
 classroomPackage: [
-"Fixed classroom package continues: EY = reference educator + assistant + monitor; LS = reference educator + assistant",
-"Grade 4 makes the Lower School Researchers engine more visible through inquiry, evidence-making, Math reasoning, Scientific Literacy, documentation, and academic language",
-"PDJ remains full-class; Learning Experience Design becomes more important as documentation and academic evidence deepen",
+t("offerScenarioBClassroomPackage1"),
+t("offerScenarioBClassroomPackage2"),
+t("offerScenarioBClassroomPackage3"),
 ],
 specialistEcosystem: [
-"Specialist planning premise: see Operating Assumptions.",
+t("offerScenarioBSpecialistEcosystem1"),
 ],
 signaturePrograms: [
-"MAP cycles and performance visibility increase",
-"Inquiry, evidence-making, academic language, and research routines consolidate",
-"Preparation for Grade 5 Pathways",
-"Early portfolio evidence begins",
+t("offerScenarioBSignaturePrograms1"),
+t("offerScenarioBSignaturePrograms2"),
+t("offerScenarioBSignaturePrograms3"),
+t("offerScenarioBSignaturePrograms4"),
 ],
 notActiveYet: [
-"Formal Grade 5 Pathways",
-"Creative Hub",
-"MUN",
-"Middle School advisory and project mentorship",
-"Academic electives",
+t("offerScenarioBNotActiveYet1"),
+t("offerScenarioBNotActiveYet2"),
+t("offerScenarioBNotActiveYet3"),
+t("offerScenarioBNotActiveYet4"),
+t("offerScenarioBNotActiveYet5"),
 ],
-middleSchoolLogic: "Not active",
-recommendedPathway: "Academic Progression",
+middleSchoolLogic: t("offerScenarioBMiddleSchoolLogic"),
+recommendedPathway: t("offerScenarioBRecommendedPathway"),
 roles: [
-"Teaching & Learning Coach: recommended",
-"Language & Academic Performance Coach: recommended for validation",
-"Curriculum & Assessment Designer: recommended/shared",
-"Learning Experience Design function: more important as documentation, academic evidence, and research routines deepen; Project Mentorship is not active yet",
+t("offerScenarioBRoles1"),
+t("offerScenarioBRoles2"),
+t("offerScenarioBRoles3"),
+t("offerScenarioBRoles4"),
 ],
 risk:
-"If Scenario B is treated only as one additional grade, the campus misses the opportunity to make the Lower School Researchers engine academically visible before Middle School. Grade 4 should consolidate inquiry, evidence-making, Math reasoning, Scientific Literacy, academic language, and research routines that make Grade 5 Pathways and Grade 6 Middle School more coherent.",
+t("offerScenarioBRisk"),
 boardSentence:
-"Scenario B turns Grade 4 into the main Researchers progression step, preparing learners for Grade 5 Pathways.",
+t("offerScenarioBBoardSentence"),
 tone: "border-blue-200 bg-blue-50 text-blue-700",
 },
 {
 title: "Scenario C",
-gradeCeiling: "Up to Grade 5",
+gradeCeiling: t("offerScenarioCGradeCeiling"),
 targetEnrollment: "288 learners",
 modeledCapacity: "390 learners",
 impliedOccupancy: "73.8%",
-strategicIdentity: "Lower School completion + Pathways activation",
-offerStage: "Complete Lower School pathway",
+strategicIdentity: t("offerScenarioCStrategicIdentity"),
+offerStage: t("offerScenarioCOfferStage"),
 classroomPackage: [
-"Fixed classroom package continues: EY = reference educator + assistant + monitor; LS = reference educator + assistant",
-"Grade 5 activates Pathways and transition protocols; projects remain full-class experiential projects",
-"Passion Projects are not active yet; Project Mentorship begins with the Grade 6 Passion Project model",
+t("offerScenarioCClassroomPackage1"),
+t("offerScenarioCClassroomPackage2"),
+t("offerScenarioCClassroomPackage3"),
 ],
 specialistEcosystem: [
-"Specialist planning premise: see Operating Assumptions.",
+t("offerScenarioCSpecialistEcosystem1"),
 ],
 signaturePrograms: [
-"Pathway classes active in Grade 5",
-"PDJ remains full-class: educator-guided whole-class inquiry projects, evidence gathering, and presentation routines",
-"Learning Experience Design and pathway coordination become stronger",
-"Portfolio evidence, Festival of Learning quality, and family-facing narratives mature",
+t("offerScenarioCSignaturePrograms1"),
+t("offerScenarioCSignaturePrograms2"),
+t("offerScenarioCSignaturePrograms3"),
+t("offerScenarioCSignaturePrograms4"),
 ],
 notActiveYet: [
-"Creative Hub",
-"Middle School clusters",
-"PSAT mock",
-"College readiness testing",
-"AP and College Counseling",
+t("offerScenarioCNotActiveYet1"),
+t("offerScenarioCNotActiveYet2"),
+t("offerScenarioCNotActiveYet3"),
+t("offerScenarioCNotActiveYet4"),
+t("offerScenarioCNotActiveYet5"),
 ],
-middleSchoolLogic: "Preparation only",
-recommendedPathway: "Transition Readiness",
+middleSchoolLogic: t("offerScenarioCMiddleSchoolLogic"),
+recommendedPathway: t("offerScenarioCRecommendedPathway"),
 roles: [
-"Teaching & Learning Coach: recommended",
-"Language & Academic Performance Coach: recommended for validation",
-"Curriculum & Assessment Designer: recommended",
-"Learning Experience Design function: recommended for validation — strongest pre-Middle School PDJ coordination",
-"Project Mentorship: not active yet",
+t("offerScenarioCRoles1"),
+t("offerScenarioCRoles2"),
+t("offerScenarioCRoles3"),
+t("offerScenarioCRoles4"),
+t("offerScenarioCRoles5"),
 ],
 risk:
-"The risk is opening Grade 5 as a normal Lower School grade without preparing the academic and project architecture for Grade 6.",
+t("offerScenarioCRisk"),
 boardSentence:
-"Scenario C completes Lower School, activates Grade 5 Pathways, and prepares the system for Middle School without launching Grade 6 structures.",
+t("offerScenarioCBoardSentence"),
 tone: "border-indigo-200 bg-indigo-50 text-indigo-700",
 },
 {
 title: "Scenario D",
-gradeCeiling: "Up to Grade 6",
+gradeCeiling: t("offerScenarioDGradeCeiling"),
 targetEnrollment: "318 learners",
 modeledCapacity: "440 learners",
 impliedOccupancy: "72.3%",
-strategicIdentity: "Middle School launch + global/program activation",
-offerStage: "First Middle School year",
-mainClaim: "Grade 6 is not one more Lower School grade. It activates a different operating rhythm.",
+strategicIdentity: t("offerScenarioDStrategicIdentity"),
+offerStage: t("offerScenarioDOfferStage"),
+mainClaim: t("offerScenarioDMainClaim"),
 offerActivated: [
-"Core academics",
-"Cluster themes",
-"Creative Hub",
-"MUN",
-"Pathways continue from Grade 5",
-"Academic elective, 1 weekly option",
-"Passion Project",
-"Advisory",
-"Project mentorship",
-"Multiple educators",
-"Multiple learning spaces",
+t("offerScenarioDOfferActivated1"),
+t("offerScenarioDOfferActivated2"),
+t("offerScenarioDOfferActivated3"),
+t("offerScenarioDOfferActivated4"),
+t("offerScenarioDOfferActivated5"),
+t("offerScenarioDOfferActivated6"),
+t("offerScenarioDOfferActivated7"),
+t("offerScenarioDOfferActivated8"),
+t("offerScenarioDOfferActivated9"),
+t("offerScenarioDOfferActivated10"),
+t("offerScenarioDOfferActivated11"),
 ],
 classroomPackage: [
-"Fixed classroom package continues: EY = reference educator + assistant + monitor; LS = reference educator + assistant",
-"Grade 6 shifts toward cluster architecture; Middle School operating rhythm begins",
-"Passion Projects begin in Grade 6: small-group learner-led projects, typically 3–5 learners per group",
+t("offerScenarioDClassroomPackage1"),
+t("offerScenarioDClassroomPackage2"),
+t("offerScenarioDClassroomPackage3"),
 ],
 grade6ClusterModel: [
-"STEM Cluster: Integrated Mathematics + Natural Sciences",
-"Humanities Cluster: Língua Portuguesa + Social Sciences",
-"Global Studies & Project Design: ELA + Passion Project + Global Expression / early pathways",
-"Shared specialist ecosystem: Body & Movement, Creative Hub, Arts, Design, electives",
+t("offerScenarioDGrade6ClusterModel1"),
+t("offerScenarioDGrade6ClusterModel2"),
+t("offerScenarioDGrade6ClusterModel3"),
+t("offerScenarioDGrade6ClusterModel4"),
 ],
 specialistEcosystem: [
-"Specialist planning premise: see Operating Assumptions.",
+t("offerScenarioDSpecialistEcosystem1"),
 ],
 signaturePrograms: [
-"Grade 6 cluster model launches",
-"PDJ shifts from classroom design system to mentorship architecture through Passion Projects",
-"Projects shift from full-class to small-group learner-led; groups are typically 3–5 learners",
-"Advisory, Passion Project, MUN, Creative Hub, and academic elective active",
-"Project mentorship becomes a coordinated operating function",
+t("offerScenarioDSignaturePrograms1"),
+t("offerScenarioDSignaturePrograms2"),
+t("offerScenarioDSignaturePrograms3"),
+t("offerScenarioDSignaturePrograms4"),
+t("offerScenarioDSignaturePrograms5"),
 ],
 notActiveYet: [
-"Grade 7 PSAT mock",
-"Grade 8 college readiness testing",
-"AP and College Counseling",
+t("offerScenarioDNotActiveYet1"),
+t("offerScenarioDNotActiveYet2"),
+t("offerScenarioDNotActiveYet3"),
 ],
-middleSchoolLogic: "Active",
-recommendedPathway: "Middle School Signature Launch",
+middleSchoolLogic: t("offerScenarioDMiddleSchoolLogic"),
+recommendedPathway: t("offerScenarioDRecommendedPathway"),
 roles: [
-"Teaching & Learning Coach: recommended for validation",
-"Curriculum & Assessment Designer: recommended for validation",
-"Language & Academic Performance Coach: indicated for validation",
-"Signature Programs / Project Design Lead: recommended",
-"Project mentorship support: coordinated function, not an automatically authorized dedicated role in year one",
+t("offerScenarioDRoles1"),
+t("offerScenarioDRoles2"),
+t("offerScenarioDRoles3"),
+t("offerScenarioDRoles4"),
+t("offerScenarioDRoles5"),
 ],
 risk:
-"If Grade 6 opens with only classroom coverage, the Middle School offer may be underpowered. The school may claim electives, Passion Project, advisory, and project mentorship without the adult ecosystem to sustain them.",
+t("offerScenarioDRisk"),
 boardSentence:
-"Scenario D changes the category of the business plan by launching the first Middle School operating model.",
+t("offerScenarioDBoardSentence"),
 tone: "border-purple-200 bg-purple-50 text-purple-700",
 },
 		  ];
+
 const bodyMovementLoads = [
-["Scenario A", "32 blocos/semana", "Premissa de planejamento: 2 educadores + 1 monitor"],
-["Scenario B", "36 blocos/semana", "Premissa de planejamento: 2 educadores + 1 monitor"],
-["Scenario C", "40 blocos/semana", "Premissa de planejamento: 2 educadores + 1 monitor"],
-["Scenario D", "44 blocos/semana", "Premissa de planejamento: 2 educadores + 1 monitor; possible 3rd educator if shared MS/HS load expands"],
+[t("offerBodyMovementLoadScenarioALabel"), t("offerBodyMovementLoadScenarioABlocks"), t("offerBodyMovementLoadScenarioAPremise")],
+[t("offerBodyMovementLoadScenarioBLabel"), t("offerBodyMovementLoadScenarioBBlocks"), t("offerBodyMovementLoadScenarioBPremise")],
+[t("offerBodyMovementLoadScenarioCLabel"), t("offerBodyMovementLoadScenarioCBlocks"), t("offerBodyMovementLoadScenarioCPremise")],
+[t("offerBodyMovementLoadScenarioDLabel"), t("offerBodyMovementLoadScenarioDBlocks"), t("offerBodyMovementLoadScenarioDPremise")],
 		  ];
+
 const specialistLoadPremises = [
-["Body & Movement", "Highly recurring across every grade", "2 educators + 1 monitor", "2 educators + 1 monitor", "2 to 3 educators + 1 monitor"],
-["Sound Exploration / Music", "Broad EY/LS coverage, approximately 2-educator load in the current schedule", "1 to 2 educators", "2 educators", "2 educators, possible elective support"],
-["Artistic Design", "More than one educator load once LS expands", "1 educator", "2 educators", "2 educators + Creative Hub integration"],
-["Performing Arts", "Lower slot count but specific program/exhibition function", "1 educator", "1 educator + shared support", "2 educators if productions/electives expand"],
-["Design Technologies", "Depends on age band, space, setup, project format, and Creative Hub connection", "2 educators", "3 educators", "4 to 5 educators"],
-["Creative Hub", "Not active before Grade 6", "Not active", "Preparation only", "Active from Grade 6"],
+["Body & Movement", t("offerSpecialistLoadBodyMovementSignal"), t("offerSpecialistLoadBodyMovementLean"), t("offerSpecialistLoadBodyMovementBalanced"), t("offerSpecialistLoadBodyMovementPremium")],
+["Sound Exploration / Music", t("offerSpecialistLoadSoundExplorationSignal"), t("offerSpecialistLoadSoundExplorationLean"), t("offerSpecialistLoadSoundExplorationBalanced"), t("offerSpecialistLoadSoundExplorationPremium")],
+["Artistic Design", t("offerSpecialistLoadArtisticDesignSignal"), t("offerSpecialistLoadArtisticDesignLean"), t("offerSpecialistLoadArtisticDesignBalanced"), t("offerSpecialistLoadArtisticDesignPremium")],
+["Performing Arts", t("offerSpecialistLoadPerformingArtsSignal"), t("offerSpecialistLoadPerformingArtsLean"), t("offerSpecialistLoadPerformingArtsBalanced"), t("offerSpecialistLoadPerformingArtsPremium")],
+["Design Technologies", t("offerSpecialistLoadDesignTechnologiesSignal"), t("offerSpecialistLoadDesignTechnologiesLean"), t("offerSpecialistLoadDesignTechnologiesBalanced"), t("offerSpecialistLoadDesignTechnologiesPremium")],
+[t("offerScenarioANotActiveYet2"), t("offerSpecialistLoadCreativeHubSignal"), t("offerSpecialistLoadCreativeHubLean"), t("offerSpecialistLoadCreativeHubBalanced"), t("offerSpecialistLoadCreativeHubPremium")],
 		  ];
+
 const specialistBudgetImplications: Record<string, string> = {
-"Body & Movement": "Slot threshold can trigger added educator capacity above the lean premise.",
-"Sound Exploration / Music": "Coverage may require a second educator as Lower School usage broadens.",
-"Artistic Design": "Expansion pressure grows with Pathways, exhibitions, and Creative Hub integration.",
-"Performing Arts": "Productions, electives, and Festival of Learning can create incremental support needs.",
-"Design Technologies": "Space, setup, project format, and Creative Hub connection can raise capacity needs.",
-"Creative Hub": "Inactive before Grade 6; active launch creates specialist and space pressure.",
+"Body & Movement": t("offerSpecialistBudgetRiskBodyMovement"),
+"Sound Exploration / Music": t("offerSpecialistBudgetRiskSoundExploration"),
+"Artistic Design": t("offerSpecialistBudgetRiskArtisticDesign"),
+"Performing Arts": t("offerSpecialistBudgetRiskPerformingArts"),
+"Design Technologies": t("offerSpecialistBudgetRiskDesignTechnologies"),
+"Creative Hub": t("offerSpecialistBudgetRiskCreativeHub"),
 };
+
 const specialistCapacityDomains = specialistLoadPremises.map(
 ([domain, loadSignal, lean, balanced, premium]) => ({
 domain,
@@ -302,11 +385,7 @@ premium,
 risk: specialistBudgetImplications[domain] ?? "Validate load, space, and scope before converting premise into hiring.",
 })
 );
-type SpecialistFinalGrade = "Grade 3" | "Grade 4" | "Grade 5" | "Grade 6";
-type SpecialistSectionsPerGrade = 1 | 2;
-type SpecialistBlocksPerGrade = 1 | 2;
-type SpecialistBlockDuration = 45 | 50;
-type SpecialistCapacityThreshold = 24 | 26 | 30;
+
 const specialistPillarGradeSequence = [
 "Toddlers 1",
 "Toddlers 2",
@@ -320,716 +399,745 @@ const specialistPillarGradeSequence = [
 "Grade 5",
 "Grade 6",
 ] as const;
+
 const specialistFinalGradeOptions: SpecialistFinalGrade[] = ["Grade 3", "Grade 4", "Grade 5", "Grade 6"];
+
 const specialistSectionsPerGradeOptions: SpecialistSectionsPerGrade[] = [1, 2];
+
 const specialistBlocksPerGradeOptions: SpecialistBlocksPerGrade[] = [1, 2];
+
 const specialistBlockDurationOptions: SpecialistBlockDuration[] = [45, 50];
+
 const specialistCapacityThresholdOptions: SpecialistCapacityThreshold[] = [24, 26, 30];
+
 const specialistPillarSimulatorRows = [
-["Opening baseline", "1 section", "Grade 3", "16 blocks", "12 h", "Sustainable"],
-["Extended LS", "1 section", "Grade 5", "20 blocks", "15 h", "Sustainable"],
-["Two-section trigger", "2 sections", "Grade 3", "32 blocks", "24 h", "Requires second specialist"],
-["Full LS, two sections", "2 sections", "Grade 5", "40 blocks", "30 h", "Requires second specialist"],
+[t("offerSpecialistPillarSimulatorRow1Stage"), t("offerSpecialistPillarSimulatorRow1Sections"), t("offerSpecialistPillarSimulatorRow1FinalGrade"), t("offerSpecialistPillarSimulatorRow1Blocks"), t("offerSpecialistPillarSimulatorRow1Hours"), t("offerSpecialistPillarSimulatorRow1Status")],
+[t("offerSpecialistPillarSimulatorRow2Stage"), t("offerSpecialistPillarSimulatorRow2Sections"), t("offerSpecialistPillarSimulatorRow2FinalGrade"), t("offerSpecialistPillarSimulatorRow2Blocks"), t("offerSpecialistPillarSimulatorRow2Hours"), t("offerSpecialistPillarSimulatorRow2Status")],
+[t("offerSpecialistPillarSimulatorRow3Stage"), t("offerSpecialistPillarSimulatorRow3Sections"), t("offerSpecialistPillarSimulatorRow3FinalGrade"), t("offerSpecialistPillarSimulatorRow3Blocks"), t("offerSpecialistPillarSimulatorRow3Hours"), t("offerSpecialistPillarSimulatorRow3Status")],
+[t("offerSpecialistPillarSimulatorRow4Stage"), t("offerSpecialistPillarSimulatorRow4Sections"), t("offerSpecialistPillarSimulatorRow4FinalGrade"), t("offerSpecialistPillarSimulatorRow4Blocks"), t("offerSpecialistPillarSimulatorRow4Hours"), t("offerSpecialistPillarSimulatorRow4Status")],
 ];
+
 const currentSpecialistEcosystem = [
-["Body & Movement", "Marcello Humeniuk, Maíra Jardim, Felipe Pierrobon, Kirk Barros", "Reference planning premise: 4 educators"],
-["Sound Exploration / Music", "Igor, Bianca", "Reference planning premise: 2 educators"],
-["Artistic Design / Atelier", "Alexandre, Ariádine, Marcio, Lívia", "Reference planning premise includes atelier and exhibition infrastructure"],
-["Performing Arts", "Embedded through Sound Exploration / Music at launch", "Program layer, not one of the four simulator pillars"],
-["Design Technologies / Learning Experience Designer capacity", "Babi, Duda, Larissa, Juliana, Iris", "Reference planning premise: classroom-facing Learning Experience Designer capacity"],
-["Total specialist ecosystem reference", "Shared reference team", "Reference planning premise: 15 educators"],
+["Body & Movement", "Marcello Humeniuk, Maíra Jardim, Felipe Pierrobon, Kirk Barros", t("offerCurrentSpecialistBodyMovementPremise")],
+["Sound Exploration / Music", "Igor, Bianca", t("offerCurrentSpecialistSoundExplorationPremise")],
+["Artistic Design / Atelier", "Alexandre, Ariádine, Marcio, Lívia", t("offerCurrentSpecialistArtisticDesignPremise")],
+["Performing Arts", t("offerCurrentSpecialistPerformingArtsNames"), t("offerCurrentSpecialistPerformingArtsPremise")],
+["Design Technologies / Learning Experience Designer capacity", "Babi, Duda, Larissa, Juliana, Iris", t("offerCurrentSpecialistDesignTechnologiesPremise")],
+[t("offerCurrentSpecialistTotalRowLabel"), t("offerCurrentSpecialistTotalRowNames"), t("offerCurrentSpecialistTotalRowPremise")],
 		  ];
+
 const bodyMovementReferenceLoads = [
 ["Marcello Humeniuk", "25", "2", "-", "-", "-", "27"],
 ["Maíra Jardim", "2", "18", "-", "6", "-", "26"],
 ["Felipe Pierrobon", "-", "18", "-", "8", "-", "26"],
 ["Kirk Barros", "-", "-", "20", "6", "2", "28"],
 		  ];
-const bodyMovementReferenceTotals = ["Total Body & Movement load", "27", "38", "20", "20", "2", "107"];
+
+const bodyMovementReferenceTotals = [t("offerBodyMovementReferenceTotalsLabel"), "27", "38", "20", "20", "2", "107"];
+
 const middleSchoolClusters = [
-["Grade 6 STEM launch profile", "Mathematics + Natural Sciences foundations", "Grade 6 launch profile only; viable when complemented by Pathways, Advisory, STEAM elective, Project Mentorship, scientific inquiry, documentation, or critique cycles"],
-["Grade 7 hybrid specialization", "Mathematics, Portuguese, and English Language Arts become stronger full-load domains; Natural Sciences and Social Sciences become dedicated domains with aligned complementary functions", "Hybrid specialization stage; not a cluster-only model"],
-["Humanities coordination", "Portuguese and Social Sciences remain academically connected through argumentation, civic inquiry, academic language, and evidence routines", "Portuguese does not need Social Sciences for load viability once Grades 6-7 have two sections"],
-["English Language Arts / Global Studies coordination", "ELA, communication, documentation, early pathways, and project-based learning routines", "Coordinated function, not a default project-design role authorization"],
-["Shared specialist ecosystem", "Body & Movement, Sound Exploration / Music, Artistic Design / Atelier, and Design Technologies / Learning Experience Designer", "Distinct capacity domains; not one generic specialist pool"],
-["Grade 8 program transition", "Grades 6-7 use Passion Projects as the project-based learning structure", "Grade 8 transitions to Babson EPIC Certificate as the entrepreneurship and external-facing evidence experience"],
+[t("offerMiddleSchoolClusterSTEMName"), t("offerMiddleSchoolClusterSTEMDescription"), t("offerMiddleSchoolClusterSTEMNote")],
+[t("offerMiddleSchoolClusterHybridName"), t("offerMiddleSchoolClusterHybridDescription"), t("offerMiddleSchoolClusterHybridNote")],
+[t("offerMiddleSchoolClusterHumanitiesName"), t("offerMiddleSchoolClusterHumanitiesDescription"), t("offerMiddleSchoolClusterHumanitiesNote")],
+[t("offerMiddleSchoolClusterELAGlobalName"), t("offerMiddleSchoolClusterELAGlobalDescription"), t("offerMiddleSchoolClusterELAGlobalNote")],
+[t("offerMiddleSchoolClusterSharedEcosystemName"), t("offerMiddleSchoolClusterSharedEcosystemDescription"), t("offerMiddleSchoolClusterSharedEcosystemNote")],
+[t("offerMiddleSchoolClusterGrade8TransitionName"), t("offerMiddleSchoolClusterGrade8TransitionDescription"), t("offerMiddleSchoolClusterGrade8TransitionNote")],
 		  ];
+
 const middleSchoolProgression = [
-["Grade 6", "Cluster-based launch"],
-["Grade 7", "Transitional specialist model"],
-["Grade 8", "More mature specialist model and Babson EPIC culmination"],
-["Grades 9-12", "High School specialization, pathways, credentials, internships, university-facing evidence"],
+[t("offerMiddleSchoolProgressionGrade6Label"), t("offerMiddleSchoolProgressionGrade6Description")],
+[t("offerMiddleSchoolProgressionGrade7Label"), t("offerMiddleSchoolProgressionGrade7Description")],
+[t("offerMiddleSchoolProgressionGrade8Label"), t("offerMiddleSchoolProgressionGrade8Description")],
+[t("offerMiddleSchoolProgressionGrades9to12Label"), t("offerMiddleSchoolProgressionGrades9to12Description")],
 		  ];
+
 const mentorshipProgression = [
-["Up to Grade 5", "PDJ is a classroom design and documentation system; educators guide full-class experiential projects through each division's learning engine — Explorers in EY, Researchers in LS"],
-["Grade 6", "Educators act as mentors within coordinated project architecture"],
-["Grade 7", "Hybrid specialization and pathway logic strengthen mentorship routines"],
-["Grade 8", "Babson EPIC program-led mentorship and evidence routines"],
-["High School", "Specialist mentorship, capstones, internships, university-facing evidence"],
+[t("offerMentorshipProgressionUpToGrade5Label"), t("offerMentorshipProgressionUpToGrade5Description")],
+[t("offerMentorshipProgressionGrade6Label"), t("offerMentorshipProgressionGrade6Description")],
+[t("offerMentorshipProgressionGrade7Label"), t("offerMentorshipProgressionGrade7Description")],
+[t("offerMentorshipProgressionGrade8Label"), t("offerMentorshipProgressionGrade8Description")],
+[t("offerMentorshipProgressionHighSchoolLabel"), t("offerMentorshipProgressionHighSchoolDescription")],
 		  ];
+
 const projectMentorTriggers = [
-"Project volume exceeds educator capacity",
-"External partnerships become operationally heavy",
-"Babson EPIC requires consistent facilitation",
-"High School pathways require specialist mentorship",
-"Festival of Learning requires stronger curation",
-"Internships or external mentors require coordination",
+t("offerProjectMentorTrigger1"),
+t("offerProjectMentorTrigger2"),
+t("offerProjectMentorTrigger3"),
+t("offerProjectMentorTrigger4"),
+t("offerProjectMentorTrigger5"),
+t("offerProjectMentorTrigger6"),
 		  ];
+
 const pathwayOptions = [
 {
-title: "Lean Business Plan",
-purpose: "Basic offer posture for Scenario A or an A-B launch path.",
+title: t("offerPathwayLeanTitle"),
+purpose: t("offerPathwayLeanPurpose"),
 structure: [
-"Protect basic offer architecture without premature hierarchy",
-"Lean shared specialists and coaching support",
-"LAP Coach recommended from launch",
-"No Middle School rhythm or signature-program launch layer",
+t("offerPathwayLeanStructure1"),
+t("offerPathwayLeanStructure2"),
+t("offerPathwayLeanStructure3"),
+t("offerPathwayLeanStructure4"),
 ],
-bestFor: ["Lower enrollment certainty", "Margin protection", "Cost control", "Basic launch viability"],
+bestFor: [t("offerPathwayLeanBestFor1"), t("offerPathwayLeanBestFor2"), t("offerPathwayLeanBestFor3"), t("offerPathwayLeanBestFor4")],
 risk:
-"Risk: academic differentiation and specialist load depend heavily on shared adult capacity.",
+t("offerPathwayLeanRisk"),
 },
 {
-title: "Balanced Operating Model",
-purpose: "Lower School completion posture aligned to Scenario C.",
+title: t("offerPathwayBalancedTitle"),
+purpose: t("offerPathwayBalancedPurpose"),
 structure: [
-"Protect baseline and strengthen Grade 5 readiness",
-"Shared specialists across EY/LS and later MS",
-"Pathways, portfolio evidence, and transition routines become active",
-"Projects remain full-class; Passion Projects are not active yet",
+t("offerPathwayBalancedStructure1"),
+t("offerPathwayBalancedStructure2"),
+t("offerPathwayBalancedStructure3"),
+t("offerPathwayBalancedStructure4"),
 ],
-bestFor: ["Pedagogical credibility", "Cost discipline", "Progressive maturity", "Board-facing defensibility"],
-risk: "Risk: requires disciplined coordination before enrollment density fully matures.",
-recommendation: "Default recommendation",
+bestFor: [t("offerPathwayBalancedBestFor1"), t("offerPathwayBalancedBestFor2"), t("offerPathwayBalancedBestFor3"), t("offerPathwayBalancedBestFor4")],
+risk: t("offerPathwayBalancedRisk"),
+recommendation: t("offerPathwayBalancedRecommendation"),
 },
 {
-title: "Premium Signature-Program Launch",
-purpose: "Middle School rhythm posture aligned to Scenario D.",
+title: t("offerPathwayPremiumTitle"),
+purpose: t("offerPathwayPremiumPurpose"),
 structure: [
-"Use the offer as a visible market differentiator",
-"Fuller shared specialist ecosystem",
-"T&L, C&A, LAP, and signature-program leadership included",
-"Grade 6 activates Creative Hub, MUN, advisory, academic electives, Passion Projects, and project mentorship as a function",
+t("offerPathwayPremiumStructure1"),
+t("offerPathwayPremiumStructure2"),
+t("offerPathwayPremiumStructure3"),
+t("offerPathwayPremiumStructure4"),
 ],
-bestFor: ["Premium market positioning", "Differentiation in Rio", "Visible Concept identity", "Strong family-facing narrative"],
-risk: "Higher cost before enrollment density fully matures.",
+bestFor: [t("offerPathwayPremiumBestFor1"), t("offerPathwayPremiumBestFor2"), t("offerPathwayPremiumBestFor3"), t("offerPathwayPremiumBestFor4")],
+risk: t("offerPathwayPremiumRisk"),
 },
 		  ];
+
 const scenarioMatrix = [
-["Scenario A", "Grade 3", "228", "302", "75.5%", "Foundation + early academic evidence", "EY: reference educator + assistant + monitor; LS: reference educator + assistant", "Shared, lighter version", "MAP from Grade 1, classroom PDJ, language monitoring", "Not active", "Coached Foundation"],
-["Scenario B", "Grade 4", "258", "348", "74.1%", "Researchers progression + Concept identity", "EY: reference educator + assistant + monitor; LS: reference educator + assistant", "Shared, broader LS load", "MAP cycles, inquiry, evidence-making, academic language, early portfolio, Grade 5 Pathways preparation; PDJ full-class", "Not active", "Academic Progression"],
-["Scenario C", "Grade 5", "288", "390", "73.8%", "Lower School completion + Pathways activation", "EY: reference educator + assistant + monitor; LS: reference educator + assistant", "Full LS continuity", "Pathway classes active; PDJ full-class; no Passion Projects; Creative Hub preparation only", "Preparation only", "Transition Readiness"],
-["Scenario D", "Grade 6", "318", "440", "72.3%", "Middle School launch + global/program activation", "EY/LS remains; Grade 6 cluster model", "Shared EY/LS/MS ecosystem", "Creative Hub, MUN, Passion Project, advisory, electives, mentorship", "Active", "Middle School Signature Launch"],
+[t("capitalComparisonPanelScenarioALabel"), t("offerScenarioMatrixRowAGradeCeiling"), "228", "302", "75.5%", t("offerScenarioMatrixRowAStrategicIdentity"), t("offerScenarioMatrixRowAClassroomPackageSummary"), t("offerScenarioMatrixRowASpecialistSummary"), t("offerScenarioMatrixRowASignatureProgramsSummary"), t("offerScenarioMatrixRowAMiddleSchoolLogic"), t("offerScenarioMatrixRowARecommendedPathway")],
+[t("capitalComparisonPanelScenarioBLabel"), t("offerScenarioMatrixRowBGradeCeiling"), "258", "348", "74.1%", t("offerScenarioMatrixRowBStrategicIdentity"), t("offerScenarioMatrixRowBClassroomPackageSummary"), t("offerScenarioMatrixRowBSpecialistSummary"), t("offerScenarioMatrixRowBSignatureProgramsSummary"), t("offerScenarioMatrixRowBMiddleSchoolLogic"), t("offerScenarioMatrixRowBRecommendedPathway")],
+[t("offerScenarioCTitle"), t("offerScenarioMatrixRowCGradeCeiling"), "288", "390", "73.8%", t("offerScenarioMatrixRowCStrategicIdentity"), t("offerScenarioMatrixRowCClassroomPackageSummary"), t("offerScenarioMatrixRowCSpecialistSummary"), t("offerScenarioMatrixRowCSignatureProgramsSummary"), t("offerScenarioMatrixRowCMiddleSchoolLogic"), t("offerScenarioMatrixRowCRecommendedPathway")],
+[t("offerScenarioDTitle"), t("offerScenarioMatrixRowDGradeCeiling"), "318", "440", "72.3%", t("offerScenarioMatrixRowDStrategicIdentity"), t("offerScenarioMatrixRowDClassroomPackageSummary"), t("offerScenarioMatrixRowDSpecialistSummary"), t("offerScenarioMatrixRowDSignatureProgramsSummary"), t("offerScenarioMatrixRowDMiddleSchoolLogic"), t("offerScenarioMatrixRowDRecommendedPathway")],
 		  ];
+
 const experienceGrowthRoadmap = [
 {
 year: "2028",
-stage: "Foundational launch",
-ceiling: "EY + Grades 1-3",
-experience: "PDJ is already schoolwide: EY uses Reggio-inspired Explorers inquiry, while Grade 1 begins MAP and makes the Lower School Researchers engine more explicit through phenomenon-based learning.",
-ecosystem: "EY classroom package, LS classroom package, Language & Academic Performance Coach, coaching, and shared specialist coverage.",
+stage: t("offerRoadmap2028Stage"),
+ceiling: t("offerRoadmap2028Ceiling"),
+experience: t("offerRoadmap2028Experience"),
+ecosystem: t("offerRoadmap2028Ecosystem"),
 },
 {
 year: "2029",
-stage: "Lower School progression",
-ceiling: "Up to Grade 4",
-experience: "Grade 4 makes the Researchers engine more academically visible through inquiry, evidence-making, Math reasoning, Scientific Literacy, documentation, academic language, and MAP cycles.",
-ecosystem: "Reference educator model remains primary; curriculum, assessment, language acquisition, and academic performance support become more important.",
+stage: t("offerRoadmap2029Stage"),
+ceiling: t("offerRoadmap2029Ceiling"),
+experience: t("offerRoadmap2029Experience"),
+ecosystem: t("offerRoadmap2029Ecosystem"),
 },
 {
 year: "2030",
-stage: "Pathways activation",
-ceiling: "Up to Grade 5",
-experience: "Grade 5 completes Lower School, activates Pathways and transition routines, and keeps projects as full-class Researchers investigations. Creative Hub remains readiness only.",
-ecosystem: "Full LS specialist continuity, academic monitoring, portfolio evidence, project-design preparation, and Pathways facilitation.",
+stage: t("offerRoadmap2030Stage"),
+ceiling: t("offerRoadmap2030Ceiling"),
+experience: t("offerRoadmap2030Experience"),
+ecosystem: t("offerRoadmap2030Ecosystem"),
 },
 {
 year: "2031",
-stage: "Middle School launch",
-ceiling: "Up to Grade 6",
-experience: "Grade 6 begins Middle School rhythm: Passion Projects in small groups, Creative Hub, MUN, advisory, academic electives, and project mentorship as a coordinated function.",
-ecosystem: "Cluster educators plus shared specialist ecosystem; project mentorship starts as a coordinated function and Pathways continue from Grade 5.",
+stage: t("offerRoadmap2031Stage"),
+ceiling: t("offerRoadmap2031Ceiling"),
+experience: t("offerRoadmap2031Experience"),
+ecosystem: t("offerRoadmap2031Ecosystem"),
 },
 {
 year: "2032",
-stage: "Middle School expansion",
-ceiling: "Up to Grade 7",
-experience: "Grade 7 PSAT mock begins. The offer adds more specialist exposure, stronger rubrics, pathway language, and external evidence routines.",
-ecosystem: "Shared specialists continue across divisions with an incremental secondary academic layer.",
+stage: t("offerRoadmap2032Stage"),
+ceiling: t("offerRoadmap2032Ceiling"),
+experience: t("offerRoadmap2032Experience"),
+ecosystem: t("offerRoadmap2032Ecosystem"),
 },
 {
 year: "2033",
-stage: "Middle School maturity",
-ceiling: "Up to Grade 8",
-experience: "Grade 8 college readiness testing begins. The MS journey consolidates through program-led mentorship, exhibitions, and Babson EPIC culmination.",
-ecosystem: "More mature specialist model, coordinated mentorship, Creative Hub continuity, and pathway preparation.",
+stage: t("offerRoadmap2033Stage"),
+ceiling: t("offerRoadmap2033Ceiling"),
+experience: t("offerRoadmap2033Experience"),
+ecosystem: t("offerRoadmap2033Ecosystem"),
 },
 {
 year: "2034",
-stage: "High School launch",
-ceiling: "Up to Grade 9",
-experience: "Grade 9 College Counseling and AP classes begin. High School launches with academic pathways, credential-facing evidence, and stronger university-facing documentation.",
-ecosystem: "Shared specialist ecosystem remains active; secondary academic layer expands for HS launch needs.",
+stage: t("offerRoadmap2034Stage"),
+ceiling: t("offerRoadmap2034Ceiling"),
+experience: t("offerRoadmap2034Experience"),
+ecosystem: t("offerRoadmap2034Ecosystem"),
 },
 {
 year: "2035",
-stage: "High School continuity",
-ceiling: "Up to Grade 10",
-experience: "Grade 10 deepens pathway coherence, advanced elective choices, portfolio evidence, and interdisciplinary production.",
-ecosystem: "HS educator core carries continuity while specialist mentorship becomes more visible.",
+stage: t("offerRoadmap2035Stage"),
+ceiling: t("offerRoadmap2035Ceiling"),
+experience: t("offerRoadmap2035Experience"),
+ecosystem: t("offerRoadmap2035Ecosystem"),
 },
 {
 year: "2036",
-stage: "Advanced specialization",
-ceiling: "Up to Grade 11",
-experience: "Grade 11 strengthens advanced academics, capstone preparation, internships, external mentors, and pathway evidence.",
-ecosystem: "Additional specialist mentorship and coordination become more justified as external-facing work grows.",
+stage: t("offerRoadmap2036Stage"),
+ceiling: t("offerRoadmap2036Ceiling"),
+experience: t("offerRoadmap2036Experience"),
+ecosystem: t("offerRoadmap2036Ecosystem"),
 },
 {
 year: "2037",
-stage: "Full K-12 experience",
-ceiling: "Up to Grade 12",
-experience: "Grade 12 completes the learner journey through capstones, university-facing evidence, internships, and graduation pathways.",
-ecosystem: "Full shared specialist ecosystem plus mature secondary academic layer.",
+stage: t("offerRoadmap2037Stage"),
+ceiling: t("offerRoadmap2037Ceiling"),
+experience: t("offerRoadmap2037Experience"),
+ecosystem: t("offerRoadmap2037Ecosystem"),
 },
 		  ];
+
 const synthesisStatements = [
-"The Rio launch model should not reproduce São Paulo's mature organizational design. It should protect the same learning promise through a compressed adult ecosystem: fixed classroom ownership, shared specialist capacity, early academic performance and language monitoring, curriculum coherence, wellbeing support, Learning Experience Design, and visible documentation of learning.",
-"Grade 6 is the threshold where the model changes category. It activates Middle School clusters, electives, Passion Projects, advisory, project mentorship, and shared specialist infrastructure. It is not one more Lower School grade.",
-"Project Design Journey is the schoolwide umbrella for experiential learning. In Early Years, it is expressed through Reggio-inspired Explorers inquiry. In Lower School, it is expressed through Researchers and phenomenon-based learning. Through Grade 5, projects remain full-class investigations guided by educators. In Grade 6, Passion Projects begin in small groups of 3–5, and project mentorship becomes a coordinated operating function.",
-"Specialist capacity should not be treated as one generic FTE pool. Body & Movement, Sound Exploration / Music, Artistic Design / Atelier, and Design Technologies / Learning Experience Designer each carry different load patterns, space needs, age-band constraints, and links to the learning architecture. Performing Arts remains an embedded program layer initially absorbed by Sound Exploration / Music, not a separate pillar in the simulator.",
+t("offerSynthesisStatement1"),
+t("offerSynthesisStatement2"),
+t("offerSynthesisStatement3"),
+t("offerSynthesisStatement4"),
 ];
+
 const baselineDivisionArchitecture = [
 {
 division: "Early Years",
 tone: "border-emerald-100 bg-emerald-50",
 composition: [
-"Reference educator",
-"Assistant",
-"Monitor",
-"Shared specialist access: Body & Movement, Sound Exploration, Artistic Design, Design Technologies",
+t("offerDivisionEarlyYearsComposition1"),
+t("offerDivisionEarlyYearsComposition2"),
+t("offerDivisionEarlyYearsComposition3"),
+t("offerDivisionEarlyYearsComposition4"),
 ],
 minimum: [
-"Care routines",
-"Transitions",
-"Family relationship",
-"Learning documentation",
-"Language acquisition observation",
-"Age-appropriate specialist experiences",
-"Pedagogical coordination",
+t("offerDivisionEarlyYearsMinimum1"),
+t("offerDivisionEarlyYearsMinimum2"),
+t("offerDivisionEarlyYearsMinimum3"),
+t("offerDivisionEarlyYearsMinimum4"),
+t("offerDivisionEarlyYearsMinimum5"),
+t("offerDivisionEarlyYearsMinimum6"),
+t("offerDivisionEarlyYearsMinimum7"),
 ],
 inactive: [
-"MAP does not begin in Early Years",
-"Formal Pathways are not active",
-"Creative Hub is not active",
-"Middle School structures are not active",
+t("offerDivisionEarlyYearsInactive1"),
+t("offerDivisionEarlyYearsInactive2"),
+t("offerDivisionEarlyYearsInactive3"),
+t("offerDivisionEarlyYearsInactive4"),
 ],
-activation: "Active in all scenarios because every scenario includes Early Years",
+activation: t("offerDivisionEarlyYearsActivation"),
 },
 {
 division: "Lower School",
 tone: "border-blue-100 bg-blue-50",
 composition: [
-"Reference educator per section",
-"Assistant",
-"Supervision and transition routines",
-"Shared specialist ecosystem",
+t("offerDivisionLowerSchoolComposition1"),
+t("offerDivisionLowerSchoolComposition2"),
+t("offerDivisionLowerSchoolComposition3"),
+t("offerDivisionLowerSchoolComposition4"),
 ],
 minimum: [
-"Literacy and numeracy progression",
-"Project Design Journey routines",
-"MAP Testing from Grade 1",
-"Language acquisition monitoring",
-"Academic performance cycles",
-"Intervention and enrichment",
-"Portfolio / evidence routines",
-"Family-facing learning evidence",
-"Specialist access",
+t("offerDivisionLowerSchoolMinimum1"),
+t("offerDivisionLowerSchoolMinimum2"),
+t("offerDivisionLowerSchoolMinimum3"),
+t("offerDivisionLowerSchoolMinimum4"),
+t("offerDivisionLowerSchoolMinimum5"),
+t("offerDivisionLowerSchoolMinimum6"),
+t("offerDivisionLowerSchoolMinimum7"),
+t("offerDivisionLowerSchoolMinimum8"),
+t("offerDivisionLowerSchoolMinimum9"),
 ],
 inactive: [
-"Pathways classes begin in Grade 5",
-"Creative Hub begins only in Grade 6",
-"MUN begins only in Grade 6",
-"PSAT mock begins in Grade 7",
-"College readiness testing begins in Grade 8",
-"AP and College Counseling begin in Grade 9",
+t("offerDivisionLowerSchoolInactive1"),
+t("offerDivisionLowerSchoolInactive2"),
+t("offerDivisionLowerSchoolInactive3"),
+t("offerDivisionLowerSchoolInactive4"),
+t("offerDivisionLowerSchoolInactive5"),
+t("offerDivisionLowerSchoolInactive6"),
 ],
 activation:
-"Scenario A reaches Grade 3 with MAP and academic evidence; Scenario B adds Grade 4 Researchers progression; Scenario C activates Grade 5 Pathways",
+t("offerDivisionLowerSchoolActivation"),
 },
 {
 division: "Middle School",
 tone: "border-purple-100 bg-purple-50",
 composition: [
-"Cluster educators rather than reference educator model",
-"Shared specialists",
-"Advisory structure",
-"Passion Project",
-"Project mentorship function",
-"Creative Hub from Grade 6",
-"MUN from Grade 6",
-"Academic elective from Grade 6",
-"Pathways continue from Grade 5",
+t("offerDivisionMiddleSchoolComposition1"),
+t("offerDivisionMiddleSchoolComposition2"),
+t("offerDivisionMiddleSchoolComposition3"),
+t("offerDivisionMiddleSchoolComposition4"),
+t("offerDivisionMiddleSchoolComposition5"),
+t("offerDivisionMiddleSchoolComposition6"),
+t("offerDivisionMiddleSchoolComposition7"),
+t("offerDivisionMiddleSchoolComposition8"),
+t("offerDivisionMiddleSchoolComposition9"),
 ],
 minimum: [
-"Cluster model",
-"Academic progression",
-"Advisory",
-"Project mentorship",
-"Portfolio evidence",
-"Specialist coordination",
-"Language & Academic Performance monitoring",
-"Curriculum and assessment coherence",
-"Multiple learning spaces",
+t("offerDivisionMiddleSchoolMinimum1"),
+t("offerDivisionMiddleSchoolMinimum2"),
+t("offerDivisionMiddleSchoolMinimum3"),
+t("offerDivisionMiddleSchoolMinimum4"),
+t("offerDivisionMiddleSchoolMinimum5"),
+t("offerDivisionMiddleSchoolMinimum6"),
+t("offerDivisionMiddleSchoolMinimum7"),
+t("offerDivisionMiddleSchoolMinimum8"),
+t("offerDivisionMiddleSchoolMinimum9"),
 ],
 inactive: [
-"Grade 7 PSAT mock is not active in Scenario D",
-"Grade 8 college readiness testing is not active in Scenario D",
-"AP and College Counseling are not active until Grade 9",
+t("offerDivisionMiddleSchoolInactive1"),
+t("offerDivisionMiddleSchoolInactive2"),
+t("offerDivisionMiddleSchoolInactive3"),
 ],
 activation:
-"Scenario D activates Grade 6 Middle School launch; Grade 7 adds PSAT mock; Grade 8 adds college readiness testing",
+t("offerDivisionMiddleSchoolActivation"),
 },
 {
 division: "High School, future stage",
 tone: "border-slate-200 bg-slate-50",
 composition: [
-"Subject specialists",
-"Pathways",
-"AP classes from Grade 9",
-"College Counseling from Grade 9",
-"Capstone / portfolio / internship architecture",
-"Specialist mentorship",
+t("offerDivisionHighSchoolComposition1"),
+t("offerDivisionHighSchoolComposition2"),
+t("offerDivisionHighSchoolComposition3"),
+t("offerDivisionHighSchoolComposition4"),
+t("offerDivisionHighSchoolComposition5"),
+t("offerDivisionHighSchoolComposition6"),
 ],
 minimum: [
-"College readiness",
-"AP / advanced academic pathways",
-"Credential-facing documentation",
-"Portfolio evidence",
-"Internship or external mentorship coordination",
-"University-facing counseling",
-"Graduation profile evidence",
+t("offerDivisionHighSchoolMinimum1"),
+t("offerDivisionHighSchoolMinimum2"),
+t("offerDivisionHighSchoolMinimum3"),
+t("offerDivisionHighSchoolMinimum4"),
+t("offerDivisionHighSchoolMinimum5"),
+t("offerDivisionHighSchoolMinimum6"),
+t("offerDivisionHighSchoolMinimum7"),
 ],
 inactive: [
-"Not active in Scenarios A-D",
-"Begins when Grade 9 opens",
-"Full High School maturity arrives later in the 2028-2037 roadmap",
+t("offerDivisionHighSchoolInactive1"),
+t("offerDivisionHighSchoolInactive2"),
+t("offerDivisionHighSchoolInactive3"),
 ],
 activation:
-"Grade 9 launches High School; Grade 10 deepens pathways; Grade 11 strengthens specialization; Grade 12 completes the K-12 journey",
+t("offerDivisionHighSchoolActivation"),
 },
 ];
+
 const baselineEnxovalPackages = [
 {
-title: "Early Years classroom enxoval",
+title: t("offerEnxovalEarlyYearsTitle"),
 items: [
-"Reference educator",
-"Assistant",
-"Monitor",
-"Learning documentation system",
-"Family communication routines",
-"Age-appropriate materials and atelier access",
-"Body & Movement / Sound / Artistic Design access",
-"Language acquisition observation routines",
+t("offerEnxovalEarlyYearsItem1"),
+t("offerEnxovalEarlyYearsItem2"),
+t("offerEnxovalEarlyYearsItem3"),
+t("offerEnxovalEarlyYearsItem4"),
+t("offerEnxovalEarlyYearsItem5"),
+t("offerEnxovalEarlyYearsItem6"),
+t("offerEnxovalEarlyYearsItem7"),
+t("offerEnxovalEarlyYearsItem8"),
 ],
 },
 {
-title: "Lower School classroom enxoval",
+title: t("offerEnxovalLowerSchoolTitle"),
 items: [
-"Reference educator per section",
-"Assistant",
-"Learning documentation and portfolio routines",
-"MAP from Grade 1",
-"Intervention/enrichment cycles",
-"PDJ through Researchers inquiry",
-"Specialist access",
-"Family-facing evidence of learning",
-"Language & Academic Performance monitoring",
+t("offerEnxovalLowerSchoolItem1"),
+t("offerEnxovalLowerSchoolItem2"),
+t("offerEnxovalLowerSchoolItem3"),
+t("offerEnxovalLowerSchoolItem4"),
+t("offerEnxovalLowerSchoolItem5"),
+t("offerEnxovalLowerSchoolItem6"),
+t("offerEnxovalLowerSchoolItem7"),
+t("offerEnxovalLowerSchoolItem8"),
+t("offerEnxovalLowerSchoolItem9"),
 ],
 },
 {
-title: "Grade 6 cluster enxoval",
-note: "Grade 6 is no longer classroom-centered.",
+title: t("offerEnxovalGrade6ClusterTitle"),
+note: t("offerEnxovalGrade6ClusterNote"),
 items: [
-"Cluster educators",
-"Advisory routine",
-"Passion Projects",
-"Creative Hub access",
-"MUN activation",
-"Academic elective",
-"Project Mentorship as a coordinated function",
-"Shared specialists",
-"Performance/language monitoring",
-"Portfolio evidence",
-"Multiple learning spaces",
+t("offerEnxovalGrade6ClusterItem1"),
+t("offerEnxovalGrade6ClusterItem2"),
+t("offerEnxovalGrade6ClusterItem3"),
+t("offerEnxovalGrade6ClusterItem4"),
+t("offerEnxovalGrade6ClusterItem5"),
+t("offerEnxovalGrade6ClusterItem6"),
+t("offerEnxovalGrade6ClusterItem7"),
+t("offerEnxovalGrade6ClusterItem8"),
+t("offerEnxovalGrade6ClusterItem9"),
+t("offerEnxovalGrade6ClusterItem10"),
+t("offerEnxovalGrade6ClusterItem11"),
 ],
 },
 ];
+
 const minimumAcademicOperations = [
 {
 system: "Classroom ownership",
-why: "Every section needs an adult responsible for relationships, learning, routines, documentation, and family communication.",
-type: "Non-negotiable baseline",
+why: t("offerMinimumOpClassroomOwnershipWhy"),
+type: t("offerMinimumOpClassroomOwnershipType"),
 },
 {
 system: "Classroom package",
-why: "Defines the adult structure inside the classroom: EY = reference educator + assistant + monitor; LS = reference educator + assistant.",
-type: "Baseline adjusted by age band",
+why: t("offerMinimumOpClassroomPackageWhy"),
+type: t("offerMinimumOpClassroomPackageType"),
 },
 {
 system: "Specialist access",
-why: "Concept's experience depends on Body & Movement, Sound Exploration / Music, Artistic Design / Atelier, and Design Technologies / Learning Experience Designer. Design Technologies represents the Learning Experience Designer's classroom-facing capacity, not a separate specialist role authorization.",
-type: "Shared specialist ecosystem",
+why: t("offerMinimumOpSpecialistAccessWhy"),
+type: t("offerMinimumOpSpecialistAccessType"),
 },
 {
 system: "Academic performance and language acquisition",
-why: "MAP from Grade 1, the bilingual model, Science of Reading alignment, language monitoring, intervention, enrichment, and family-facing evidence work together to make academic progress visible.",
-type: "Recommended from launch; increasingly important as complexity grows",
-guardrail: "Do not present Language & Academic Performance Coach as a late-stage add-on.",
+why: t("offerMinimumOpAcademicLanguageWhy"),
+type: t("offerMinimumOpAcademicLanguageType"),
+guardrail: t("offerMinimumOpAcademicLanguageGuardrail"),
 },
 {
 system: "Curriculum and assessment coherence",
-why: "Connects teacher-as-researcher practice, shared curriculum, assessment, documentation, and evidence routines so educators do not invent the academic experience independently.",
-type: "Shared/recommended in early scenarios; stronger by Grade 4/5",
+why: t("offerMinimumOpCurriculumAssessmentWhy"),
+type: t("offerMinimumOpCurriculumAssessmentType"),
 },
 {
 system: "Documentation and portfolio",
-why: "Makes thinking visible, supports teacher interpretation and learner metacognition, creates family-facing evidence, and shows progression across divisions.",
-type: "Baseline from launch, matures over time",
+why: t("offerMinimumOpDocumentationPortfolioWhy"),
+type: t("offerMinimumOpDocumentationPortfolioType"),
 },
 {
 system: "Signature program routines",
-why: "Project Design Journey is the schoolwide umbrella for experiential learning. In Early Years, it is expressed through Reggio-inspired Explorers inquiry. In Lower School, it becomes more explicit through Researchers and phenomenon-based learning. Through Grade 5, projects remain full-class investigations guided by educators. Passion Projects begin in Grade 6.",
-type: "Scenario-dependent activation",
+why: t("offerMinimumOpSignatureProgramWhy"),
+type: t("offerMinimumOpSignatureProgramType"),
 },
 {
 system: "Divisional leadership and coaching",
-why: "Ensures onboarding, consistency, fidelity, and quality control.",
-type: "Baseline/recommended infrastructure",
+why: t("offerMinimumOpDivisionalLeadershipWhy"),
+type: t("offerMinimumOpDivisionalLeadershipType"),
 },
 ];
+
 const decisionPanelItems = [
 {
 scenario: "Scenario A",
-decision: "Establish basic offer",
-signal: "MAP + early evidence",
-budget: "Baseline includes Learning Experience Design; LAP Coach recommended",
+decision: t("offerDecisionPanelScenarioADecision"),
+signal: t("offerDecisionPanelScenarioASignal"),
+budget: t("offerDecisionPanelScenarioABudget"),
 tone: "border-emerald-200 bg-emerald-50 text-emerald-800",
 },
 {
 scenario: "Scenario B",
-decision: "Deepen Researchers engine",
-signal: "Grade 4 academic progression",
-budget: "C&A support likely",
+decision: t("offerDecisionPanelScenarioBDecision"),
+signal: t("offerDecisionPanelScenarioBSignal"),
+budget: t("offerDecisionPanelScenarioBBudget"),
 tone: "border-blue-200 bg-blue-50 text-blue-800",
 },
 {
 scenario: "Scenario C",
-decision: "Activate Pathways",
-signal: "Grade 5 Pathways active",
-budget: "Shared pathway coordination",
+decision: t("offerDecisionPanelScenarioCDecision"),
+signal: t("offerDecisionPanelScenarioCSignal"),
+budget: t("offerDecisionPanelScenarioCBudget"),
 tone: "border-indigo-200 bg-indigo-50 text-indigo-800",
 },
 {
 scenario: "Scenario D",
-decision: "Launch Middle School model",
-signal: "Creative Hub, MUN, clusters, advisory",
-budget: "Signature/MS add-ons",
+decision: t("offerDecisionPanelScenarioDDecision"),
+signal: t("offerDecisionPanelScenarioDSignal"),
+budget: t("offerDecisionPanelScenarioDBudget"),
 tone: "border-purple-200 bg-purple-50 text-purple-800",
 },
 ];
+
 const minimumAcademicOperationGroups = [
 {
-label: "Student-facing baseline",
-title: "Linha de base vivida pelo estudante",
-description: "O que estudantes e famílias experimentam diretamente desde o primeiro dia.",
-systems: ["Classroom ownership", "Classroom package", "Specialist access"],
+label: t("offerMinimumOpGroupStudentFacingLabel"),
+title: t("offerMinimumOpGroupStudentFacingTitle"),
+description: t("offerMinimumOpGroupStudentFacingDescription"),
+systems: [t("offerMinimumOpClassroomOwnershipSystem"), t("offerMinimumOpClassroomPackageSystem"), t("offerDivisionLowerSchoolMinimum9")],
 tone: "border-emerald-100 bg-emerald-50",
 },
 {
-label: "Academic intelligence layer",
-title: "Camada de inteligência acadêmica",
-description: "Evidência, avaliação e língua como sistemas que tornam a aprendizagem visível.",
+label: t("offerMinimumOpGroupAcademicIntelLabel"),
+title: t("offerMinimumOpGroupAcademicIntelTitle"),
+description: t("offerMinimumOpGroupAcademicIntelDescription"),
 systems: [
-"Academic performance and language acquisition",
-"Curriculum and assessment coherence",
-"Documentation and portfolio",
+t("offerMinimumOpAcademicLanguageSystem"),
+t("offerDivisionMiddleSchoolMinimum8"),
+t("offerMinimumOpDocumentationPortfolioSystem"),
 ],
 tone: "border-indigo-100 bg-indigo-50",
 },
 {
-label: "Quality control layer",
-title: "Camada de controle de qualidade",
-description: "Rotinas e liderança que mantêm o modelo coerente durante o crescimento.",
-systems: ["Signature program routines", "Divisional leadership and coaching"],
+label: t("offerMinimumOpGroupQualityControlLabel"),
+title: t("offerMinimumOpGroupQualityControlTitle"),
+description: t("offerMinimumOpGroupQualityControlDescription"),
+systems: [t("offerMinimumOpSignatureProgramSystem"), t("offerMinimumOpDivisionalLeadershipSystem")],
 tone: "border-slate-200 bg-slate-50",
 },
 ];
+
 const budgetImpactDecisions = [
 {
-decision: "Language & Academic Performance Coach",
-trigger: "Scenario A",
-status: "Recommended from launch",
-requiredDecision: "Validar escopo e alocação do coach.",
+decision: t("offerBudgetImpactDecisionLapCoachDecision"),
+trigger: t("offerBudgetImpactDecisionLapCoachTrigger"),
+status: t("offerBudgetImpactDecisionLapCoachStatus"),
+requiredDecision: t("offerBudgetImpactDecisionLapCoachRequiredDecision"),
 budgetSlot: "R$ ________",
 },
 {
-decision: "Curriculum & Assessment Designer",
-trigger: "Scenario B/C",
-status: "Shared/recommended",
-requiredDecision: "Definir suporte compartilhado ou dedicado.",
+decision: t("offerBudgetImpactDecisionCurriculumAssessmentDecision"),
+trigger: t("offerBudgetImpactDecisionCurriculumAssessmentTrigger"),
+status: t("offerBudgetImpactDecisionCurriculumAssessmentStatus"),
+requiredDecision: t("offerBudgetImpactDecisionCurriculumAssessmentRequiredDecision"),
 budgetSlot: "R$ ________",
 },
 {
-decision: "Pathways / Signature Programs coordination",
-trigger: "Scenario C",
-status: "Possible add-on",
-requiredDecision: "Definir coordenação parcial/compartilhada.",
+decision: t("offerBudgetImpactDecisionPathwaysCoordinationDecision"),
+trigger: t("offerBudgetImpactDecisionPathwaysCoordinationTrigger"),
+status: t("offerBudgetImpactDecisionPathwaysCoordinationStatus"),
+requiredDecision: t("offerBudgetImpactDecisionPathwaysCoordinationRequiredDecision"),
 budgetSlot: "R$ ________",
 },
 {
-decision: "Signature Programs / Project Design Lead",
-trigger: "Scenario D",
-status: "Governance placeholder",
-requiredDecision: "Validar escopo de liderança de programas autorais/MS.",
+decision: t("offerBudgetImpactDecisionProjectDesignLeadDecision"),
+trigger: t("offerBudgetImpactDecisionProjectDesignLeadTrigger"),
+status: t("offerBudgetImpactDecisionProjectDesignLeadStatus"),
+requiredDecision: t("offerBudgetImpactDecisionProjectDesignLeadRequiredDecision"),
 budgetSlot: "R$ ________",
 },
 {
-decision: "Additional specialist capacity",
-trigger: "Scenario D",
-status: "Add-on",
-requiredDecision: "Validar carga, espaços e Creative Hub.",
+decision: t("offerBudgetImpactDecisionAdditionalSpecialistDecision"),
+trigger: t("offerBudgetImpactDecisionAdditionalSpecialistTrigger"),
+status: t("offerBudgetImpactDecisionAdditionalSpecialistStatus"),
+requiredDecision: t("offerBudgetImpactDecisionAdditionalSpecialistRequiredDecision"),
 budgetSlot: "R$ ________",
 },
 {
-decision: "Additional cluster educator capacity",
-trigger: "Scenario D",
-status: "Conditional add-on",
-requiredDecision: "Validar somente se carga exceder premissa.",
+decision: t("offerBudgetImpactDecisionAdditionalClusterEducatorDecision"),
+trigger: t("offerBudgetImpactDecisionAdditionalClusterEducatorTrigger"),
+status: t("offerBudgetImpactDecisionAdditionalClusterEducatorStatus"),
+requiredDecision: t("offerBudgetImpactDecisionAdditionalClusterEducatorRequiredDecision"),
 budgetSlot: "R$ ________",
 },
 ];
+
 const budgetComparisonColumns = [
-"Area",
-"Original basis",
-"Current recommendation",
-"Increment rule",
-"Validation needed",
+t("offerBudgetColumnArea"),
+t("offerBudgetColumnOriginalBasis"),
+t("offerBudgetColumnCurrentRecommendation"),
+t("offerBudgetColumnIncrementRule"),
+t("offerBudgetColumnValidationNeeded"),
 ];
+
 const scenarioBudgetComparisonColumns = [
-"Status",
-"Area",
-"Original basis",
-"Current recommendation",
-"Increment rule",
-"Why it matters / validation",
+t("offerScenarioBudgetColumnStatus"),
+t("offerScenarioBudgetColumnArea"),
+t("offerScenarioBudgetColumnOriginalBasis"),
+t("offerScenarioBudgetColumnCurrentRecommendation"),
+t("offerScenarioBudgetColumnIncrementRule"),
+t("offerScenarioBudgetColumnWhyItMatters"),
 ];
+
 const sharedBudgetRows: BudgetComparisonRow[] = [
 {
-area: "Classroom package",
+area: t("offerBudgetSharedRowClassroomPackageArea"),
 status: "Baseline control",
-originallyBudgeted: "EY and LS classroom package.",
-currentRecommendation: "EY = reference educator + assistant + monitor. LS = reference educator + assistant.",
-incrementalBudgetImpact: "No increment unless quantity, FTE, salary band, or coverage changes.",
-whyNecessary: "Validate only if quantity, FTE, salary band, or coverage changes.",
+originallyBudgeted: t("offerBudgetSharedRowClassroomPackageOriginallyBudgeted"),
+currentRecommendation: t("offerBudgetSharedRowClassroomPackageCurrentRecommendation"),
+incrementalBudgetImpact: t("offerBudgetSharedRowClassroomPackageIncrementalImpact"),
+whyNecessary: t("offerBudgetSharedRowClassroomPackageWhyNecessary"),
 },
 {
-area: "Leadership",
+area: t("offerBudgetSharedRowLeadershipArea"),
 status: "Baseline control",
-originallyBudgeted: "Division Principal / division leadership basis.",
-currentRecommendation: "Keep as baseline.",
-incrementalBudgetImpact: "No increment unless scope or FTE changes.",
-whyNecessary: "Confirm title and scope mapping against the salary basis.",
+originallyBudgeted: t("offerBudgetSharedRowLeadershipOriginallyBudgeted"),
+currentRecommendation: t("offerBudgetSharedRowLeadershipCurrentRecommendation"),
+incrementalBudgetImpact: t("offerBudgetSharedRowLeadershipIncrementalImpact"),
+whyNecessary: t("offerBudgetSharedRowLeadershipWhyNecessary"),
 },
 {
-area: "Learning Experience Design",
+area: t("offerBudgetSharedRowLearningExperienceDesignArea"),
 status: "Baseline control",
-originallyBudgeted: "Learning Experience Designer.",
-currentRecommendation: "Keep as baseline.",
-incrementalBudgetImpact: "No increment unless scope or FTE changes.",
-whyNecessary: "Validate only if scope, FTE, salary band, or coverage changes.",
+originallyBudgeted: t("offerBudgetSharedRowLearningExperienceDesignOriginallyBudgeted"),
+currentRecommendation: t("offerBudgetSharedRowLearningExperienceDesignCurrentRecommendation"),
+incrementalBudgetImpact: t("offerBudgetSharedRowLearningExperienceDesignIncrementalImpact"),
+whyNecessary: t("offerBudgetSharedRowLearningExperienceDesignWhyNecessary"),
 },
 {
-area: "After School role mapping",
+area: t("offerBudgetSharedRowAfterSchoolRoleMappingArea"),
 status: "Mapping validation",
-originallyBudgeted: "After School Educator, HC 1 from 2028. Coordinator scope not confirmed.",
-currentRecommendation: "Add or validate After School Coordinator scope.",
-incrementalBudgetImpact: "No increment only if existing After School Educator covers coordinator scope. Otherwise, keep coordinator scope as a source-validation item.",
-whyNecessary: "Confirm whether coordinator scope is baseline, a scope upgrade, or a reclassification.",
+originallyBudgeted: t("offerBudgetSharedRowAfterSchoolRoleMappingOriginallyBudgeted"),
+currentRecommendation: t("offerBudgetSharedRowAfterSchoolRoleMappingCurrentRecommendation"),
+incrementalBudgetImpact: t("offerBudgetSharedRowAfterSchoolRoleMappingIncrementalImpact"),
+whyNecessary: t("offerBudgetSharedRowAfterSchoolRoleMappingWhyNecessary"),
 },
 {
-area: "Specialist baseline",
+area: t("offerBudgetSharedRowSpecialistBaselineArea"),
 status: "Baseline control",
-originallyBudgeted: "1 Body & Movement, 1 Arts, 1 Music.",
-currentRecommendation: "Keep as the original specialist baseline.",
-incrementalBudgetImpact: "Only capacity beyond 1 + 1 + 1 is a potential increment.",
-whyNecessary: "Validate scenario-specific specialist deltas separately by load, schedule, space, and program ambition.",
+originallyBudgeted: t("offerBudgetSharedRowSpecialistBaselineOriginallyBudgeted"),
+currentRecommendation: t("offerBudgetSharedRowSpecialistBaselineCurrentRecommendation"),
+incrementalBudgetImpact: t("offerBudgetSharedRowSpecialistBaselineIncrementalImpact"),
+whyNecessary: t("offerBudgetSharedRowSpecialistBaselineWhyNecessary"),
 },
 ];
+
 const scenarioBudgetComparisons: ScenarioBudgetComparison[] = [
 {
 scenario: "Scenario A",
-gradeCeiling: "Up to Grade 3",
-strategicFrame: "Minimum credible launch path",
+gradeCeiling: t("offerBudgetScenarioAGradeCeiling"),
+strategicFrame: t("offerBudgetScenarioAStrategicFrame"),
 rows: [
 {
-area: "Specialist expansion beyond baseline",
+area: t("offerBudgetScenarioARowSpecialistExpansionArea"),
 status: "Not active",
-originallyBudgeted: "1 Body & Movement, 1 Arts, 1 Music already covered in Baseline / Governance Controls.",
-currentRecommendation: "No specialist expansion beyond the original 1 + 1 + 1 baseline for Scenario A.",
-incrementalBudgetImpact: "No increment unless timetable validation shows coverage, age-band, setup, or program complexity exceeds baseline capacity.",
-whyNecessary: "Keeps Scenario A as the basic offer path while preserving the need to validate specialist load as usage deepens.",
+originallyBudgeted: t("offerBudgetScenarioARowSpecialistExpansionOriginallyBudgeted"),
+currentRecommendation: t("offerBudgetScenarioARowSpecialistExpansionCurrentRecommendation"),
+incrementalBudgetImpact: t("offerBudgetScenarioARowSpecialistExpansionIncrementalImpact"),
+whyNecessary: t("offerBudgetScenarioARowSpecialistExpansionWhyNecessary"),
 },
 {
-area: "Language Acquisition Coach / academic-language support",
+area: t("offerBudgetScenarioARowLapCoachArea"),
 status: "Potential increment",
-originallyBudgeted: "Not found in role-basis mapping; keep as source-validation item.",
-currentRecommendation: "LAP Coach / academic-language support recommended for validation.",
-incrementalBudgetImpact: "Scenario implication only unless a separate implementation process validates scope and cost.",
-whyNecessary: "Supports MAP, bilingual monitoring, intervention, enrichment, and family-facing evidence.",
+originallyBudgeted: t("offerBudgetScenarioARowLapCoachOriginallyBudgeted"),
+currentRecommendation: t("offerBudgetScenarioARowLapCoachCurrentRecommendation"),
+incrementalBudgetImpact: t("offerBudgetScenarioARowLapCoachIncrementalImpact"),
+whyNecessary: t("offerBudgetScenarioARowLapCoachWhyNecessary"),
 },
 {
-area: "Scenario-specific programs",
+area: t("offerBudgetScenarioARowScenarioSpecificProgramsArea"),
 status: "Not active",
-originallyBudgeted: "Not active.",
-currentRecommendation: "No Pathways, Creative Hub, MUN, Passion Projects, MS advisory, or academic electives.",
-incrementalBudgetImpact: "No increment.",
-whyNecessary: "Keeps Scenario A focused on the basic offer without funding later program layers.",
+originallyBudgeted: t("offerBudgetScenarioARowScenarioSpecificProgramsOriginallyBudgeted"),
+currentRecommendation: t("offerBudgetScenarioARowScenarioSpecificProgramsCurrentRecommendation"),
+incrementalBudgetImpact: t("offerBudgetScenarioARowScenarioSpecificProgramsIncrementalImpact"),
+whyNecessary: t("offerBudgetScenarioARowScenarioSpecificProgramsWhyNecessary"),
 },
 ],
 },
 {
 scenario: "Scenario B",
-gradeCeiling: "Up to Grade 4",
-strategicFrame: "Researchers progression + Concept identity",
+gradeCeiling: t("offerBudgetScenarioBGradeCeiling"),
+strategicFrame: t("offerBudgetScenarioBStrategicFrame"),
 rows: [
 {
-area: "Specialist load pressure",
+area: t("offerBudgetScenarioBRowSpecialistLoadPressureArea"),
 status: "Potential increment",
-originallyBudgeted: "Shared specialist baseline covers 1 Body & Movement, 1 Arts, 1 Music.",
-currentRecommendation: "Validate load as Lower School usage deepens.",
-incrementalBudgetImpact: "Only the delta beyond the original 1 + 1 + 1 specialist baseline.",
-whyNecessary: "Keeps specialist coverage viable as Grade 4 adds inquiry, documentation, evidence-making, and program load.",
+originallyBudgeted: t("offerBudgetScenarioBRowSpecialistLoadPressureOriginallyBudgeted"),
+currentRecommendation: t("offerBudgetScenarioBRowSpecialistLoadPressureCurrentRecommendation"),
+incrementalBudgetImpact: t("offerBudgetScenarioBRowSpecialistLoadPressureIncrementalImpact"),
+whyNecessary: t("offerBudgetScenarioBRowSpecialistLoadPressureWhyNecessary"),
 },
 {
-area: "Language Acquisition Coach / academic-language support",
+area: t("offerBudgetScenarioBRowLapCoachArea"),
 status: "Potential increment",
-originallyBudgeted: "Not found in role-basis mapping; keep as source-validation item.",
-currentRecommendation: "LAP Coach / academic-language support recommended for validation.",
-incrementalBudgetImpact: "Scenario implication only unless a separate implementation process validates scope and cost.",
-whyNecessary: "Supports stronger MAP cycles, intervention routines, and academic evidence.",
+originallyBudgeted: t("offerBudgetScenarioBRowLapCoachOriginallyBudgeted"),
+currentRecommendation: t("offerBudgetScenarioBRowLapCoachCurrentRecommendation"),
+incrementalBudgetImpact: t("offerBudgetScenarioBRowLapCoachIncrementalImpact"),
+whyNecessary: t("offerBudgetScenarioBRowLapCoachWhyNecessary"),
 },
 {
-area: "Researchers progression",
+area: t("offerBudgetScenarioBRowResearchersProgressionArea"),
 status: "Scenario driver",
-originallyBudgeted: "No Passion Projects or Middle School program layer.",
-currentRecommendation: "Strengthen phenomenon-based learning, documentation, evidence-making, Math reasoning, Scientific Literacy, academic language, and research routines.",
-incrementalBudgetImpact: "Only if added role allocation, specialist capacity, or external cost is required.",
-whyNecessary: "Uses Grade 4 to make academic inquiry and evidence routines visible before Grade 5 Pathways and Grade 6 Middle School.",
+originallyBudgeted: t("offerBudgetScenarioBRowResearchersProgressionOriginallyBudgeted"),
+currentRecommendation: t("offerBudgetScenarioBRowResearchersProgressionCurrentRecommendation"),
+incrementalBudgetImpact: t("offerBudgetScenarioBRowResearchersProgressionIncrementalImpact"),
+whyNecessary: t("offerBudgetScenarioBRowResearchersProgressionWhyNecessary"),
 },
 ],
 },
 {
 scenario: "Scenario C",
-gradeCeiling: "Up to Grade 5",
-strategicFrame: "Lower School completion + Pathways activation",
+gradeCeiling: t("offerBudgetScenarioCGradeCeiling"),
+strategicFrame: t("offerBudgetScenarioCStrategicFrame"),
 rows: [
 {
-area: "Specialist / Design Technologies load",
+area: t("offerBudgetScenarioCRowSpecialistDesignTechLoadArea"),
 status: "Potential increment",
-originallyBudgeted: "Shared specialist baseline covers 1 Body & Movement, 1 Arts, 1 Music.",
-currentRecommendation: "Validate specialist and Design Technologies load for Pathways readiness.",
-incrementalBudgetImpact: "Only the delta beyond the original 1 + 1 + 1 specialist baseline.",
-whyNecessary: "Prevents Pathways and transition readiness from overloading the shared specialist model.",
+originallyBudgeted: t("offerBudgetScenarioCRowSpecialistDesignTechLoadOriginallyBudgeted"),
+currentRecommendation: t("offerBudgetScenarioCRowSpecialistDesignTechLoadCurrentRecommendation"),
+incrementalBudgetImpact: t("offerBudgetScenarioCRowSpecialistDesignTechLoadIncrementalImpact"),
+whyNecessary: t("offerBudgetScenarioCRowSpecialistDesignTechLoadWhyNecessary"),
 },
 {
-area: "Language Acquisition Coach / academic-language support",
+area: t("offerBudgetScenarioCRowLapCoachArea"),
 status: "Potential increment",
-originallyBudgeted: "Not found in role-basis mapping; keep as source-validation item.",
-currentRecommendation: "LAP Coach / academic-language support recommended for validation.",
-incrementalBudgetImpact: "Scenario implication only unless a separate implementation process validates scope and cost.",
-whyNecessary: "Supports Grade 5 monitoring, intervention, enrichment, and transition evidence.",
+originallyBudgeted: t("offerBudgetScenarioCRowLapCoachOriginallyBudgeted"),
+currentRecommendation: t("offerBudgetScenarioCRowLapCoachCurrentRecommendation"),
+incrementalBudgetImpact: t("offerBudgetScenarioCRowLapCoachIncrementalImpact"),
+whyNecessary: t("offerBudgetScenarioCRowLapCoachWhyNecessary"),
 },
 {
-area: "Grade 5 Pathways and transition protocols",
+area: t("offerBudgetScenarioCRowGrade5PathwaysTransitionArea"),
 status: "Scenario driver",
-originallyBudgeted: "Grade 5 Pathways coordination not confirmed in role-basis mapping.",
-currentRecommendation: "Activate Grade 5 Pathways, transition protocols, portfolio evidence, and readiness routines.",
-incrementalBudgetImpact: "Only if Pathways requires added FTE, role allocation, specialist capacity, or external cost.",
-whyNecessary: "Completes Lower School and builds the Middle School bridge.",
+originallyBudgeted: t("offerBudgetScenarioCRowGrade5PathwaysTransitionOriginallyBudgeted"),
+currentRecommendation: t("offerBudgetScenarioCRowGrade5PathwaysTransitionCurrentRecommendation"),
+incrementalBudgetImpact: t("offerBudgetScenarioCRowGrade5PathwaysTransitionIncrementalImpact"),
+whyNecessary: t("offerBudgetScenarioCRowGrade5PathwaysTransitionWhyNecessary"),
 },
 {
-area: "Full-class PDJ",
+area: t("offerBudgetScenarioCRowFullClassPdjArea"),
 status: "Scenario driver",
-originallyBudgeted: "PDJ is part of the schoolwide learning model.",
-currentRecommendation: "Keep Grade 5 projects as full-class experiential projects through the Researchers engine.",
-incrementalBudgetImpact: "No automatic increment unless delivery requires added role allocation, specialist capacity, or external cost.",
-whyNecessary: "Preserves the Scenario C boundary without implying Passion Projects are active.",
+originallyBudgeted: t("offerBudgetScenarioCRowFullClassPdjOriginallyBudgeted"),
+currentRecommendation: t("offerBudgetScenarioCRowFullClassPdjCurrentRecommendation"),
+incrementalBudgetImpact: t("offerBudgetScenarioCRowFullClassPdjIncrementalImpact"),
+whyNecessary: t("offerBudgetScenarioCRowFullClassPdjWhyNecessary"),
 },
 {
-area: "Passion Projects",
+area: t("offerBudgetScenarioCRowPassionProjectsArea"),
 status: "Not active",
-originallyBudgeted: "Not active before Grade 6.",
-currentRecommendation: "Do not activate Passion Projects or Project Mentorship in Scenario C.",
-incrementalBudgetImpact: "No increment.",
-whyNecessary: "Builds the Middle School bridge without implying Passion Projects or Project Mentorship are active.",
+originallyBudgeted: t("offerBudgetScenarioCRowPassionProjectsOriginallyBudgeted"),
+currentRecommendation: t("offerBudgetScenarioCRowPassionProjectsCurrentRecommendation"),
+incrementalBudgetImpact: t("offerBudgetScenarioCRowPassionProjectsIncrementalImpact"),
+whyNecessary: t("offerBudgetScenarioCRowPassionProjectsWhyNecessary"),
 },
 ],
 },
 {
 scenario: "Scenario D",
-gradeCeiling: "Up to Grade 6",
-strategicFrame: "Middle School launch + program activation",
+gradeCeiling: t("offerBudgetScenarioDGradeCeiling"),
+strategicFrame: t("offerBudgetScenarioDStrategicFrame"),
 rows: [
 {
-area: "Creative Hub / Design Technologies / shared Middle School capacity",
+area: t("offerBudgetScenarioDRowCreativeHubDesignTechCapacityArea"),
 status: "Potential increment",
-originallyBudgeted: "Shared specialist baseline covers 1 Body & Movement, 1 Arts, 1 Music; Creative Hub and MS capacity not confirmed as covered.",
-currentRecommendation: "Validate expanded specialist, Creative Hub, Design Technologies, and shared MS capacity.",
-incrementalBudgetImpact: "Only the delta beyond the original 1 + 1 + 1 specialist baseline.",
-whyNecessary: "Grade 6 adds a Middle School rhythm, spaces, schedules, and program layers.",
+originallyBudgeted: t("offerBudgetScenarioDRowCreativeHubDesignTechCapacityOriginallyBudgeted"),
+currentRecommendation: t("offerBudgetScenarioDRowCreativeHubDesignTechCapacityCurrentRecommendation"),
+incrementalBudgetImpact: t("offerBudgetScenarioDRowCreativeHubDesignTechCapacityIncrementalImpact"),
+whyNecessary: t("offerBudgetScenarioDRowCreativeHubDesignTechCapacityWhyNecessary"),
 },
 {
-area: "Language Acquisition Coach / academic-language support",
+area: t("offerBudgetScenarioDRowLapCoachArea"),
 status: "Potential increment",
-originallyBudgeted: "Not found in role-basis mapping; keep as source-validation item.",
-currentRecommendation: "LAP Coach / academic-language support indicated for validation.",
-incrementalBudgetImpact: "Scenario implication only unless a separate implementation process validates scope and cost.",
-whyNecessary: "Supports bilingual monitoring, intervention, enrichment, and MS-facing academic evidence.",
+originallyBudgeted: t("offerBudgetScenarioDRowLapCoachOriginallyBudgeted"),
+currentRecommendation: t("offerBudgetScenarioDRowLapCoachCurrentRecommendation"),
+incrementalBudgetImpact: t("offerBudgetScenarioDRowLapCoachIncrementalImpact"),
+whyNecessary: t("offerBudgetScenarioDRowLapCoachWhyNecessary"),
 },
 {
-area: "Project Mentorship / Passion Projects",
+area: t("offerBudgetScenarioDRowProjectMentorshipPassionProjectsArea"),
 status: "Scenario driver",
-originallyBudgeted: "Not active before Grade 6. No dedicated Project Mentor role authorization currently modeled.",
-currentRecommendation: "Activate Project Mentorship as a coordinated function for Grade 6 Passion Projects. First allocate to cluster educators if timetable capacity allows.",
-incrementalBudgetImpact: "No automatic increment for the function itself.",
-whyNecessary: "Passion Projects require adult mentorship for learner agency, feedback cycles, documentation, critique, and public presentation quality.",
+originallyBudgeted: t("offerBudgetScenarioDRowProjectMentorshipPassionProjectsOriginallyBudgeted"),
+currentRecommendation: t("offerBudgetScenarioDRowProjectMentorshipPassionProjectsCurrentRecommendation"),
+incrementalBudgetImpact: t("offerBudgetScenarioDRowProjectMentorshipPassionProjectsIncrementalImpact"),
+whyNecessary: t("offerBudgetScenarioDRowProjectMentorshipPassionProjectsWhyNecessary"),
 },
 {
-area: "Cluster educator capacity validation",
+area: t("offerBudgetScenarioDRowClusterEducatorCapacityValidationArea"),
 status: "Mapping validation",
-originallyBudgeted: "Grade 6 / Grade 7 cluster educator capacity exists in the model, but unused mentorship capacity is not calculated.",
-currentRecommendation: "Validate timetable capacity after teaching, advisory, Passion Projects, Creative Hub, MUN, electives, documentation, critique, and planning.",
-incrementalBudgetImpact: "No increment if mentorship can be absorbed by cluster educators.",
-whyNecessary: "Prevents Project Mentorship from being treated as a dedicated role authorization before load is validated.",
+originallyBudgeted: t("offerBudgetScenarioDRowClusterEducatorCapacityValidationOriginallyBudgeted"),
+currentRecommendation: t("offerBudgetScenarioDRowClusterEducatorCapacityValidationCurrentRecommendation"),
+incrementalBudgetImpact: t("offerBudgetScenarioDRowClusterEducatorCapacityValidationIncrementalImpact"),
+whyNecessary: t("offerBudgetScenarioDRowClusterEducatorCapacityValidationWhyNecessary"),
 },
 {
-area: "Dedicated Project Mentor",
+area: t("offerBudgetScenarioDRowDedicatedProjectMentorArea"),
 status: "Conditional increment",
-originallyBudgeted: "No dedicated Project Mentor role authorization currently modeled.",
-currentRecommendation: "Flag dedicated or partial project-mentorship support only if validated mentorship load exceeds available cluster educator capacity.",
-incrementalBudgetImpact: "Conditional resource implication only; no staffing or payroll authorization in this view.",
-whyNecessary: "Keeps Scenario D neutral while preserving the staffing trigger for Passion Project fidelity.",
+originallyBudgeted: t("offerBudgetScenarioDRowDedicatedProjectMentorOriginallyBudgeted"),
+currentRecommendation: t("offerBudgetScenarioDRowDedicatedProjectMentorCurrentRecommendation"),
+incrementalBudgetImpact: t("offerBudgetScenarioDRowDedicatedProjectMentorIncrementalImpact"),
+whyNecessary: t("offerBudgetScenarioDRowDedicatedProjectMentorWhyNecessary"),
 },
 ],
 },
 ];
+
 const budgetComparisonValidationNotes = [
-"Use repo salary basis where roles already exist; do not create new salary values inside this view.",
-"If a role mapping is ambiguous, keep it as a source-validation item before any staffing or cost interpretation.",
-"Confirm whether After School Educator and After School Coordinator are the same role; if not, classify the coordinator as a new role, scope upgrade, or reclassification.",
-"Keep missing increments as governance placeholders until a separate implementation process validates scope and cost.",
+t("offerBudgetValidationNoteSalaryBasis"),
+t("offerBudgetValidationNoteAmbiguousMapping"),
+t("offerBudgetValidationNoteAfterSchoolRoleConfirm"),
+t("offerBudgetValidationNoteGovernancePlaceholder"),
 ];
+
 const budgetStatusClassName: Record<BudgetRowStatus, string> = {
 "Baseline control": "bg-emerald-50 text-emerald-700 border-emerald-100",
 "Mapping validation": "bg-amber-50 text-amber-700 border-amber-100",
@@ -1039,361 +1147,368 @@ const budgetStatusClassName: Record<BudgetRowStatus, string> = {
 "Governance placeholder": "bg-indigo-50 text-indigo-700 border-indigo-100",
 "Not active": "bg-slate-50 text-slate-500 border-slate-200",
 };
+
 const governanceQuestions = [
-"Which scenario becomes the business-plan baseline?",
-"Which adult ecosystem roles are confirmed as baseline?",
-"Which roles remain add-on budget slots?",
-"Is Scenario D being read as a Middle School operating launch scenario, or only as a future pathway?",
+t("offerGovernanceQuestion1"),
+t("offerGovernanceQuestion2"),
+t("offerGovernanceQuestion3"),
+t("offerGovernanceQuestion4"),
 ];
+
 const roadmapPrintPhases = [
 {
 period: "2028-2030",
-title: "Foundation and readiness",
-summary: "MAP begins in Grade 1, Lower School progression becomes visible, and Grade 5 Pathways classes begin.",
+title: t("offerRoadmapPrintPhase1Title"),
+summary: t("offerRoadmapPrintPhase1Summary"),
 },
 {
 period: "2031-2033",
-title: "Middle School identity",
-summary: "Grade 6 launches Creative Hub and MUN, Grade 7 begins PSAT mock, and Grade 8 begins college readiness testing.",
+title: t("offerRoadmapPrintPhase2Title"),
+summary: t("offerRoadmapPrintPhase2Summary"),
 },
 {
 period: "2034-2037",
-title: "High School pathway maturity",
-summary: "Grade 9 begins College Counseling and AP classes, then expands credentials, internships, capstones, and university-facing evidence.",
+title: t("offerRoadmapPrintPhase3Title"),
+summary: t("offerRoadmapPrintPhase3Summary"),
 },
 ];
+
 const printExperienceGrowthRoadmap = [
 {
 year: "2028",
-stage: "Foundational launch",
-ceiling: "EY + Grades 1-3",
-experience: "MAP begins in Grade 1; learning evidence and PDJ routines become visible.",
-ecosystem: "EY classroom package, LS classroom package, LAP Coach, coaching, shared specialists.",
+stage: t("offerPrintRoadmap2028Stage"),
+ceiling: t("offerPrintRoadmap2028Ceiling"),
+experience: t("offerPrintRoadmap2028Experience"),
+ecosystem: t("offerPrintRoadmap2028Ecosystem"),
 },
 {
 year: "2029",
-stage: "Lower School progression",
-ceiling: "Up to Grade 4",
-experience: "MAP cycles, intervention, enrichment, and early portfolio habits mature.",
-ecosystem: "C&A, language acquisition, and academic performance support gain weight.",
+stage: t("offerPrintRoadmap2029Stage"),
+ceiling: t("offerPrintRoadmap2029Ceiling"),
+experience: t("offerPrintRoadmap2029Experience"),
+ecosystem: t("offerPrintRoadmap2029Ecosystem"),
 },
 {
 year: "2030",
-stage: "Pathways activation",
-ceiling: "Up to Grade 5",
-experience: "Grade 5 Pathways begin; agency, portfolio, and project protocols sharpen.",
-ecosystem: "Full LS continuity, Pathways facilitation, project-design preparation.",
+stage: t("offerPrintRoadmap2030Stage"),
+ceiling: t("offerPrintRoadmap2030Ceiling"),
+experience: t("offerPrintRoadmap2030Experience"),
+ecosystem: t("offerPrintRoadmap2030Ecosystem"),
 },
 {
 year: "2031",
-stage: "Middle School launch",
-ceiling: "Up to Grade 6",
-experience: "Creative Hub, MUN, clusters, advisory, elective, and Passion Project activate.",
-ecosystem: "Cluster educators, project mentorship, shared specialist ecosystem.",
+stage: t("offerPrintRoadmap2031Stage"),
+ceiling: t("offerPrintRoadmap2031Ceiling"),
+experience: t("offerPrintRoadmap2031Experience"),
+ecosystem: t("offerPrintRoadmap2031Ecosystem"),
 },
 {
 year: "2032",
-stage: "Middle School expansion",
-ceiling: "Up to Grade 7",
-experience: "PSAT mock begins; specialist exposure and external evidence routines expand.",
-ecosystem: "Shared specialists plus incremental secondary academic layer.",
+stage: t("offerPrintRoadmap2032Stage"),
+ceiling: t("offerPrintRoadmap2032Ceiling"),
+experience: t("offerPrintRoadmap2032Experience"),
+ecosystem: t("offerPrintRoadmap2032Ecosystem"),
 },
 {
 year: "2033",
-stage: "Middle School maturity",
-ceiling: "Up to Grade 8",
-experience: "College readiness testing, exhibitions, mentorship, and Babson EPIC consolidate.",
-ecosystem: "Mature specialist model, coordinated mentorship, Creative Hub continuity.",
+stage: t("offerPrintRoadmap2033Stage"),
+ceiling: t("offerPrintRoadmap2033Ceiling"),
+experience: t("offerPrintRoadmap2033Experience"),
+ecosystem: t("offerPrintRoadmap2033Ecosystem"),
 },
 {
 year: "2034",
-stage: "High School launch",
-ceiling: "Up to Grade 9",
-experience: "College Counseling and AP classes begin with credential-facing evidence.",
-ecosystem: "Secondary academic layer expands while shared specialists remain active.",
+stage: t("offerPrintRoadmap2034Stage"),
+ceiling: t("offerPrintRoadmap2034Ceiling"),
+experience: t("offerPrintRoadmap2034Experience"),
+ecosystem: t("offerPrintRoadmap2034Ecosystem"),
 },
 {
 year: "2035",
-stage: "High School continuity",
-ceiling: "Up to Grade 10",
-experience: "Pathways, advanced electives, portfolio evidence, and production deepen.",
-ecosystem: "HS educator core gains continuity; specialist mentorship becomes visible.",
+stage: t("offerPrintRoadmap2035Stage"),
+ceiling: t("offerPrintRoadmap2035Ceiling"),
+experience: t("offerPrintRoadmap2035Experience"),
+ecosystem: t("offerPrintRoadmap2035Ecosystem"),
 },
 {
 year: "2036",
-stage: "Advanced specialization",
-ceiling: "Up to Grade 11",
-experience: "Advanced academics, capstone preparation, internships, and mentors grow.",
-ecosystem: "External-facing work justifies added mentorship and coordination.",
+stage: t("offerPrintRoadmap2036Stage"),
+ceiling: t("offerPrintRoadmap2036Ceiling"),
+experience: t("offerPrintRoadmap2036Experience"),
+ecosystem: t("offerPrintRoadmap2036Ecosystem"),
 },
 {
 year: "2037",
-stage: "Full K-12 experience",
-ceiling: "Up to Grade 12",
-experience: "Capstones, university-facing evidence, internships, and graduation pathways complete.",
-ecosystem: "Full shared specialist ecosystem plus mature secondary academic layer.",
+stage: t("offerPrintRoadmap2037Stage"),
+ceiling: t("offerPrintRoadmap2037Ceiling"),
+experience: t("offerPrintRoadmap2037Experience"),
+ecosystem: t("offerPrintRoadmap2037Ecosystem"),
 },
 ];
+
 const ecosystemScenarioLadder = [
 {
 id: "A",
 title: "Scenario A",
-identity: "Foundation + early academic evidence",
-delta: "Launch baseline + MAP from Grade 1",
+identity: t("offerEcosystemLadderScenarioAIdentity"),
+delta: t("offerEcosystemLadderScenarioADelta"),
 tone: "border-emerald-200 bg-emerald-50 text-emerald-800",
 },
 {
 id: "B",
 title: "Scenario B",
-identity: "Researchers progression + Concept identity",
-delta: "Researchers engine becomes academically visible before Middle School",
+identity: t("offerEcosystemLadderScenarioBIdentity"),
+delta: t("offerEcosystemLadderScenarioBDelta"),
 tone: "border-blue-200 bg-blue-50 text-blue-800",
 },
 {
 id: "C",
 title: "Scenario C",
-identity: "Lower School completion + Pathways activation",
-delta: "Grade 5 Pathways become active",
+identity: t("offerEcosystemLadderScenarioCIdentity"),
+delta: t("offerEcosystemLadderScenarioCDelta"),
 tone: "border-indigo-200 bg-indigo-50 text-indigo-800",
 },
 {
 id: "D",
 title: "Scenario D",
-identity: "Middle School launch + global/program activation",
-delta: "Creative Hub, MUN, clusters, advisory, Passion Project activate",
+identity: t("offerEcosystemLadderScenarioDIdentity"),
+delta: t("offerEcosystemLadderScenarioDDelta"),
 tone: "border-purple-200 bg-purple-50 text-purple-800",
 },
 		  ];
+
 const ecosystemLayerControls = [
-{ id: "all", label: "Todos" },
-{ id: "classroom", label: "Sala de aula" },
-{ id: "academic-language", label: "Performance acadêmica & aquisição de língua" },
-{ id: "specialists", label: "Especialistas" },
-{ id: "signature", label: "Programas autorais" },
-{ id: "ms-hs", label: "MS/HS readiness" },
-{ id: "budget", label: "Add-ons orçamentários" },
+{ id: "all", label: t("offerEcosystemLayerControlAllLabel") },
+{ id: "classroom", label: t("offerEcosystemLayerControlClassroomLabel") },
+{ id: "academic-language", label: t("offerEcosystemLayerControlAcademicLanguageLabel") },
+{ id: "specialists", label: t("offerEcosystemLayerControlSpecialistsLabel") },
+{ id: "signature", label: t("offerEcosystemLayerControlSignatureLabel") },
+{ id: "ms-hs", label: t("offerEcosystemLayerControlMsHsLabel") },
+{ id: "budget", label: t("offerEcosystemLayerControlBudgetLabel") },
 		  ];
+
 const ecosystemLayerPrintSummaries: Record<string, string> = {
-classroom: "A estrutura de sala permanece como baseline; o avanço dos cenários muda a intensidade de documentação, transição e cluster.",
-"academic-language": "MAP, aquisição de língua e performance acadêmica começam cedo e deixam de ser opcionais conforme a complexidade cresce.",
-specialists: "Especialistas funcionam como ecossistema compartilhado; o risco é subcontar carga, espaço e conexão com programas autorais.",
-signature: "Programas autorais amadurecem por limiares: PDJ como framework de sala EY–Grade 5, Pathways em Grade 5, Passion Projects e Creative Hub apenas em Grade 6.",
-"ms-hs": "A prontidão secundária evolui de cultura e ponte formal para lançamento real de Middle School em Grade 6.",
-budget: "Add-ons permanecem placeholders de governança; nenhum valor é integrado a cálculo de custo nesta leitura.",
+classroom: t("offerEcosystemLayerPrintSummaryClassroom"),
+"academic-language": t("offerEcosystemLayerPrintSummaryAcademicLanguage"),
+specialists: t("offerEcosystemLayerPrintSummarySpecialists"),
+signature: t("offerEcosystemLayerPrintSummarySignature"),
+"ms-hs": t("offerEcosystemLayerPrintSummaryMsHs"),
+budget: t("offerEcosystemLayerPrintSummaryBudget"),
 };
+
 const ecosystemDecisionLayers = {
 classroom: {
-title: "Sala de aula",
+title: t("offerEcosystemClassroomTitle"),
 rows: [
 {
 scenario: "Scenario A",
 status: "Estrutura básica",
-commitment: "Baseline classroom promise from the architecture above.",
-adult: "Founding package must hold consistently.",
-budget: "Baseline.",
+commitment: t("offerEcosystemClassroomRowScenarioACommitment"),
+adult: t("offerEcosystemClassroomRowScenarioAAdult"),
+budget: t("offerEcosystemClassroomRowScenarioABudget"),
 },
 {
 scenario: "Scenario B",
 status: "Estrutura básica fortalecida",
-commitment: "Grade 4 deepens Concept learning identity.",
-adult: "More intentional documentation and reflection routines.",
-budget: "Possible additional support for documentation load.",
+commitment: t("offerEcosystemClassroomRowScenarioBCommitment"),
+adult: t("offerEcosystemClassroomRowScenarioBAdult"),
+budget: t("offerEcosystemClassroomRowScenarioBBudget"),
 },
 {
 scenario: "Scenario C",
 status: "Preparação ativa",
-commitment: "Grade 5 transition routines and Pathways readiness.",
-adult: "More formal protocols and portfolio routines.",
-budget: "Possible shared pathways/project coordination.",
+commitment: t("offerEcosystemClassroomRowScenarioCCommitment"),
+adult: t("offerEcosystemClassroomRowScenarioCAdult"),
+budget: t("offerEcosystemClassroomRowScenarioCBudget"),
 },
 {
 scenario: "Scenario D",
 status: "Mudança de modelo",
-commitment: "EY/LS classroom model remains; Grade 6 shifts to clusters.",
-adult: "Cluster educator structure begins.",
-budget: "Possible additional cluster educator if load exceeds launch premise.",
+commitment: t("offerEcosystemClassroomRowScenarioDCommitment"),
+adult: t("offerEcosystemClassroomRowScenarioDAdult"),
+budget: t("offerEcosystemClassroomRowScenarioDBudget"),
 },
 ],
 },
 "academic-language": {
-title: "Performance acadêmica & aquisição de língua",
+title: t("offerEcosystemAcademicLanguageTitle"),
 guardrail:
-"See baseline minimum operations: this layer starts early and matures as complexity grows.",
+t("offerEcosystemAcademicLanguageGuardrail"),
 rows: [
 {
 scenario: "Scenario A",
 status: "Investimento recomendado",
-commitment: "Early evidence starts because Grade 1 is active.",
-adult: "Language & Academic Performance Coach recommended for validation.",
-budget: "Recommended from launch, not late add-on.",
+commitment: t("offerEcosystemAcademicLanguageRowScenarioACommitment"),
+adult: t("offerEcosystemAcademicLanguageRowScenarioAAdult"),
+budget: t("offerEcosystemAcademicLanguageRowScenarioABudget"),
 },
 {
 scenario: "Scenario B",
 status: "Investimento recomendado",
-commitment: "Performance visibility becomes more important.",
-adult: "Strengthen C&A and intervention routines.",
-budget: "Shared Curriculum & Assessment support may be needed.",
+commitment: t("offerEcosystemAcademicLanguageRowScenarioBCommitment"),
+adult: t("offerEcosystemAcademicLanguageRowScenarioBAdult"),
+budget: t("offerEcosystemAcademicLanguageRowScenarioBBudget"),
 },
 {
 scenario: "Scenario C",
 status: "Necessário para transição",
-commitment: "Academic monitoring supports Grade 5 Pathways.",
-adult: "Language & Academic Performance Coach recommended for validation.",
-budget: "Stronger intervention and enrichment cycles.",
+commitment: t("offerEcosystemAcademicLanguageRowScenarioCCommitment"),
+adult: t("offerEcosystemAcademicLanguageRowScenarioCAdult"),
+budget: t("offerEcosystemAcademicLanguageRowScenarioCBudget"),
 },
 {
 scenario: "Scenario D",
 status: "Necessário",
-commitment: "Evidence supports the first MS operating rhythm.",
-adult: "LAP Coach indicated for validation to sustain MS complexity.",
-budget: "Academic infrastructure signal, not implementation approval.",
+commitment: t("offerEcosystemAcademicLanguageRowScenarioDCommitment"),
+adult: t("offerEcosystemAcademicLanguageRowScenarioDAdult"),
+budget: t("offerEcosystemAcademicLanguageRowScenarioDBudget"),
 },
 ],
 },
 specialists: {
-title: "Especialistas",
+title: t("offerEcosystemSpecialistsTitle"),
 rows: [
 {
 scenario: "Scenario A",
 status: "Capacidade compartilhada",
-commitment: "Shared specialists support the baseline.",
-adult: "Lean shared ecosystem.",
-budget: "Baseline specialist planning.",
+commitment: t("offerEcosystemSpecialistsRowScenarioACommitment"),
+adult: t("offerEcosystemSpecialistsRowScenarioAAdult"),
+budget: t("offerEcosystemSpecialistsRowScenarioABudget"),
 },
 {
 scenario: "Scenario B",
 status: "Capacidade compartilhada fortalecida",
-commitment: "Broader Lower School specialist usage.",
-adult: "Specialist planning becomes more intentional.",
-budget: "Possible second music educator / expanded arts coverage.",
+commitment: t("offerEcosystemSpecialistsRowScenarioBCommitment"),
+adult: t("offerEcosystemSpecialistsRowScenarioBAdult"),
+budget: t("offerEcosystemSpecialistsRowScenarioBBudget"),
 },
 {
 scenario: "Scenario C",
 status: "Continuidade LS completa",
-commitment: "Specialists support Pathways and transition readiness.",
-adult: "Specialist coordination increases.",
-budget: "Possible expanded Design Technologies capacity.",
+commitment: t("offerEcosystemSpecialistsRowScenarioCCommitment"),
+adult: t("offerEcosystemSpecialistsRowScenarioCAdult"),
+budget: t("offerEcosystemSpecialistsRowScenarioCBudget"),
 },
 {
 scenario: "Scenario D",
 status: "Capacidade compartilhada EY/LS/MS",
-commitment: "Specialists now support EY/LS/MS.",
-adult: "Shared ecosystem + incremental secondary academic layer. Avoid double-counting.",
-budget: "Possible 3rd Body & Movement educator, Creative Hub support, expanded Design Tech.",
+commitment: t("offerEcosystemSpecialistsRowScenarioDCommitment"),
+adult: t("offerEcosystemSpecialistsRowScenarioDAdult"),
+budget: t("offerEcosystemSpecialistsRowScenarioDBudget"),
 },
 ],
 },
 signature: {
-title: "Programas autorais",
+title: t("offerEcosystemSignatureTitle"),
 guardrail:
-"Signature programs do not begin only in Scenario D. Grade 5 Pathways are active in Scenario C; Creative Hub and MUN begin only in Grade 6.",
+t("offerEcosystemSignatureGuardrail"),
 rows: [
 {
 scenario: "Scenario A",
 status: "Estrutura básica",
-commitment: "PDJ operates through full-class experiential projects embedded in classroom routines; Learning Experience Design supports project quality and documentation.",
-adult: "Learning Experience Design function indicated; no dedicated Project Mentor.",
-budget: "Baseline includes Learning Experience Design; no dedicated Project Mentor authorization.",
+commitment: t("offerEcosystemSignatureRowScenarioACommitment"),
+adult: t("offerEcosystemSignatureRowScenarioAAdult"),
+budget: t("offerEcosystemSignatureRowScenarioABudget"),
 },
 {
 scenario: "Scenario B",
 status: "Progressão acadêmica",
-commitment: "Full-class PDJ continues; inquiry, evidence-making, Math reasoning, Scientific Literacy, documentation, and academic language deepen through Grade 4; Learning Experience Design becomes more intentional.",
-adult: "Use Grade 4 to strengthen the Researchers engine before MS; Learning Experience Design gains importance; Project Mentorship is not active yet.",
-budget: "No dedicated Signature Programs Lead yet.",
+commitment: t("offerEcosystemSignatureRowScenarioBCommitment"),
+adult: t("offerEcosystemSignatureRowScenarioBAdult"),
+budget: t("offerEcosystemSignatureRowScenarioBBudget"),
 },
 {
 scenario: "Scenario C",
 status: "Ativo",
-commitment: "Grade 5 Pathways classes are active; PDJ remains full-class; Learning Experience Design and pathway coordination strengthen.",
-adult: "Learning Experience Design coordination is important; Project Mentorship begins with the Grade 6 Passion Project model.",
-budget: "Possible shared Signature/Pathways coordination.",
+commitment: t("offerEcosystemSignatureRowScenarioCCommitment"),
+adult: t("offerEcosystemSignatureRowScenarioCAdult"),
+budget: t("offerEcosystemSignatureRowScenarioCBudget"),
 },
 {
 scenario: "Scenario D",
 status: "Ativo + add-on potencial",
-commitment: "Grade 6 signature-program layer activates.",
-adult: "Signature Programs / Project Design Lead recommended.",
-budget: "Placeholder de recurso para validação: R$ ________",
+commitment: t("offerEcosystemSignatureRowScenarioDCommitment"),
+adult: t("offerEcosystemSignatureRowScenarioDAdult"),
+budget: t("offerEcosystemSignatureRowScenarioDBudget"),
 budgetPlaceholder: true,
 },
 ],
 },
 "ms-hs": {
-title: "MS/HS readiness",
+title: t("offerEcosystemMsHsTitle"),
 rows: [
 {
 scenario: "Scenario A",
 status: "Não ativo",
-commitment: "Build foundations only.",
-adult: "No MS structure.",
-budget: "None.",
+commitment: t("offerEcosystemMsHsRowScenarioACommitment"),
+adult: t("offerEcosystemMsHsRowScenarioAAdult"),
+budget: t("offerEcosystemMsHsRowScenarioABudget"),
 },
 {
 scenario: "Scenario B",
 status: "Preparação cultural",
-commitment: "Researchers progression before Middle School.",
-adult: "Stronger reflection, documentation, agency routines.",
-budget: "Low/moderate support and coaching.",
+commitment: t("offerEcosystemMsHsRowScenarioBCommitment"),
+adult: t("offerEcosystemMsHsRowScenarioBAdult"),
+budget: t("offerEcosystemMsHsRowScenarioBBudget"),
 },
 {
 scenario: "Scenario C",
 status: "Ponte formal",
-commitment: "Grade 5 Pathways and transition readiness.",
-adult: "Prepare for Grade 6 clusters, Creative Hub, MUN.",
-budget: "Possible shared pathways coordination.",
+commitment: t("offerEcosystemMsHsRowScenarioCCommitment"),
+adult: t("offerEcosystemMsHsRowScenarioCAdult"),
+budget: t("offerEcosystemMsHsRowScenarioCBudget"),
 },
 {
 scenario: "Scenario D",
 status: "Ativo",
-commitment: "Grade 6 MS launch, Creative Hub, MUN, clusters, advisory.",
-adult: "Cluster model, project mentorship, shared specialists.",
-budget: "Possible incremental MS infrastructure.",
+commitment: t("offerEcosystemMsHsRowScenarioDCommitment"),
+adult: t("offerEcosystemMsHsRowScenarioDAdult"),
+budget: t("offerEcosystemMsHsRowScenarioDBudget"),
 },
 ],
 },
 budget: {
-title: "Add-ons orçamentários",
+title: t("offerEcosystemBudgetTitle"),
 guardrail:
-"Resource add-ons remain governance placeholders only. This view does not connect any assumption to cost calculation.",
+t("offerEcosystemBudgetGuardrail"),
 rows: [
 {
 scenario: "Scenario A",
 status: "Add-on potencial",
-commitment: "Learning Experience Design is baseline; LAP Coach recommended from launch.",
-adult: "Validate incremental coaching, documentation support beyond baseline, and academic performance scope.",
-budget: "Placeholder de recurso para validação: R$ ________",
+commitment: t("offerEcosystemBudgetRowScenarioACommitment"),
+adult: t("offerEcosystemBudgetRowScenarioAAdult"),
+budget: t("offerEcosystemBudgetRowScenarioABudget"),
 budgetPlaceholder: true,
 },
 {
 scenario: "Scenario B",
 status: "Add-on potencial",
-commitment: "Shared C&A Designer; expanded performance routines; documentation / portfolio culture support.",
-adult: "Validate shared curriculum, assessment, intervention, and evidence routines.",
-budget: "Placeholder de recurso para validação: R$ ________",
+commitment: t("offerEcosystemBudgetRowScenarioBCommitment"),
+adult: t("offerEcosystemBudgetRowScenarioBAdult"),
+budget: t("offerEcosystemBudgetRowScenarioBBudget"),
 budgetPlaceholder: true,
 },
 {
 scenario: "Scenario C",
 status: "Add-on potencial",
-commitment: "Shared Pathways / Signature Programs coordination; expanded Design Technologies; transition readiness support.",
-adult: "Validate Pathways coordination, project support, and Design Technologies load.",
-budget: "Placeholder de recurso para validação: R$ ________",
+commitment: t("offerEcosystemBudgetRowScenarioCCommitment"),
+adult: t("offerEcosystemBudgetRowScenarioCAdult"),
+budget: t("offerEcosystemBudgetRowScenarioCBudget"),
 budgetPlaceholder: true,
 },
 {
 scenario: "Scenario D",
 status: "Add-on potencial",
-commitment: "Signature Programs / Project Design Lead; mentorship coordination; Creative Hub support; additional specialist or cluster capacity.",
-adult: "Validate MS launch structure, project mentorship, Creative Hub, specialists, and cluster load.",
-budget: "Placeholder de recurso para validação: R$ ________",
+commitment: t("offerEcosystemBudgetRowScenarioDCommitment"),
+adult: t("offerEcosystemBudgetRowScenarioDAdult"),
+budget: t("offerEcosystemBudgetRowScenarioDBudget"),
 budgetPlaceholder: true,
 },
 ],
 },
 		  };
 
-export default function OfferScenariosTab() {
+
   const [selectedEcosystemLayer, setSelectedEcosystemLayer] = useState("all");
   const [activeView, setActiveView] = useState<OfferScenarioView>("brief");
   const [selectedScenarioTitle, setSelectedScenarioTitle] = useState<string>(
@@ -1412,8 +1527,7 @@ export default function OfferScenariosTab() {
   if (!selectedScenario) {
     return (
       <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm font-semibold leading-6 text-amber-900">
-        Cenários da Oferta data is unavailable. Confirm the offer scenario source before using this tab.
-      </div>
+        {t("offerNullStateMessage")}</div>
     );
   }
 
@@ -1425,12 +1539,12 @@ export default function OfferScenariosTab() {
   const specialistCapacityEquivalentAcrossFourPillars = specialistRecommendedFTEPerPillar * 4;
   const specialistCapacityStatus =
     specialistBlocksPerPillar <= 20
-      ? "Sustainable"
+      ? t("offerSpecialistCapacityStatusSustainable")
       : specialistBlocksPerPillar <= specialistCapacityThreshold
-        ? "High but manageable"
+        ? t("offerSpecialistCapacityStatusHighButManageable")
         : specialistBlocksPerPillar <= 30
-          ? "Pressure point"
-          : "Requires second specialist";
+          ? t("offerSpecialistCapacityStatusPressurePoint")
+          : t("offerSpecialistCapacityStatusRequiresSecondSpecialist");
   const specialistHoursDisplay = Number.isInteger(specialistHoursPerPillar)
     ? `${specialistHoursPerPillar} h`
     : `${specialistHoursPerPillar.toFixed(1)} h`;
@@ -1739,23 +1853,17 @@ export default function OfferScenariosTab() {
         <section className="offer-scenarios-print-only offer-scenarios-print-cover offer-scenarios-print-page flex-col justify-between">
           <div>
             <div className="offer-scenarios-print-label inline-flex rounded-full bg-white/70 px-3 py-1 text-[10px] text-[#214B74]">
-              Board Review
-            </div>
+              {t("offerPrintCoverBadge")}</div>
             <h1 className="mt-10 max-w-4xl text-6xl leading-none tracking-tight text-slate-950">
-              Cenários da Oferta
-            </h1>
+              {t("offerBrandTitle")}</h1>
             <p className="mt-5 text-2xl text-slate-700">
-              Rio Strategic Organizational Architecture
-            </p>
+              {t("offerPrintCoverSubtitle")}</p>
             <p className="mt-10 max-w-3xl text-base leading-relaxed text-slate-600">
-              Baseline architecture, scenario adjustments, operating assumptions, and 2028–2037
-              experience growth roadmap.
-            </p>
+              {t("offerPrintCoverDescription")}</p>
           </div>
           <div className="offer-scenarios-print-blue-panel p-6">
             <p className="text-base leading-relaxed text-white">
-              Full strategic dossier. Offer and narrative scenarios only.
-            </p>
+              {t("offerPrintCoverDossierNote")}</p>
             <p className="mt-3 text-sm leading-relaxed text-blue-50/80">
               {OFFER_SCENARIO_GOVERNANCE_BOUNDARY}
             </p>
@@ -1766,33 +1874,25 @@ export default function OfferScenariosTab() {
             <div className="grid grid-cols-1 gap-5 md:grid-cols-[1.2fr_0.8fr]">
               <div className="offer-scenarios-print-soft-panel p-6">
                 <div className="offer-scenarios-print-label text-sm text-[#214B74]">
-                  Executive decision frame
-                </div>
+                  {t("offerPrintExecutiveFrameLabel")}</div>
                 <h2 className="mt-4 text-4xl leading-tight text-slate-950">
-                  Cada cenário é uma promessa operacional.
-                </h2>
+                  {t("offerTaglineOperatingPromise")}</h2>
                 <p className="mt-4 text-sm leading-relaxed text-slate-600">
-                  O modelo organiza limite de série, capacidade, matrícula-alvo, ecossistema adulto e
-                  maturidade dos programas autorais para apoiar a decisão do business plan.
-                </p>
+                  {t("offerModelSummaryBody")}</p>
               </div>
               <div className="offer-scenarios-print-blue-panel p-6">
                 <h3 className="text-2xl leading-tight">
-                  O Cenário D não é apenas uma série a mais.
-                </h3>
+                  {t("offerPrintScenarioDCalloutHeading")}</h3>
                 <p className="mt-4 text-sm leading-relaxed text-blue-50/85">
-                  Ele muda a categoria operacional da escola. Se Grade 6 for lançado, o business plan
-                  precisa contemplar cluster, advisory, Creative Hub, MUN, mentoria de projeto e
-                  capacidade especialista compartilhada.
-                </p>
+                  {t("offerPrintScenarioDCalloutBody")}</p>
               </div>
             </div>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               {[
-                ["Promessa", "O que a escola pode sustentar para famílias e estudantes."],
-                ["Limiar", "O que muda quando o cenário avança."],
-                ["Exposição", "Quais papéis, sistemas ou rotinas criam implicações de recursos para validação posterior."],
-                ["Prova", "Quais premissas acadêmicas e operacionais sustentam a decisão."],
+                [t("offerDefinitionCard1Field1"), t("offerDefinitionCard1Field2")],
+                [t("offerDefinitionCard2Field1"), t("offerDefinitionCard2Field2")],
+                [t("offerDefinitionCard3Field1"), t("offerDefinitionCard3Field2")],
+                [t("offerDefinitionCard4Field1"), t("offerDefinitionCard4Field2")],
               ].map(([label, detail]) => (
                 <div key={`print-definition-${label}`} className="offer-scenarios-print-soft-panel p-5">
                   <h4 className="text-xl text-slate-950">{label}</h4>
@@ -1805,9 +1905,8 @@ export default function OfferScenariosTab() {
           <section className="offer-scenarios-print-page space-y-6">
             <div>
               <div className="offer-scenarios-print-label text-sm text-[#214B74]">
-                Scenario decision snapshot
-              </div>
-              <h2 className="mt-3 text-3xl text-slate-950">A-D decision row</h2>
+                {t("offerPrintDecisionSnapshotLabel")}</div>
+              <h2 className="mt-3 text-3xl text-slate-950">{t("offerPrintDecisionRowHeading")}</h2>
             </div>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
               {decisionPanelItems.map((item) => {
@@ -1818,9 +1917,9 @@ export default function OfferScenariosTab() {
                     <h3 className="mt-4 text-xl leading-tight text-slate-950">{item.decision}</h3>
                     <p className="mt-3 text-sm leading-relaxed text-slate-600">{scenario?.strategicIdentity}</p>
                     <div className="mt-5 space-y-2 text-xs leading-relaxed text-slate-600">
-                      <p><span className="text-slate-900">Grade ceiling:</span> {scenario?.gradeCeiling}</p>
-                      <p><span className="text-slate-900">Signal:</span> {item.signal}</p>
-                      <p><span className="text-slate-900">Resource signal:</span> {item.budget}</p>
+                      <p><span className="text-slate-900">{t("offerPrintGradeCeilingLabel")}</span> {scenario?.gradeCeiling}</p>
+                      <p><span className="text-slate-900">{t("offerPrintSignalLabel")}</span> {item.signal}</p>
+                      <p><span className="text-slate-900">{t("offerPrintResourceSignalLabel")}</span> {item.budget}</p>
                     </div>
                   </div>
                 );
@@ -1831,15 +1930,14 @@ export default function OfferScenariosTab() {
           <section className="offer-scenarios-print-page offer-scenarios-print-page-break space-y-5">
             <div>
               <div className="offer-scenarios-print-label text-sm text-[#214B74]">
-                Scenario Commercial Snapshot
-              </div>
-              <h2 className="mt-3 text-3xl text-slate-950">Commercial values by scenario</h2>
+                {t("offerPrintCommercialSnapshotLabel")}</div>
+              <h2 className="mt-3 text-3xl text-slate-950">{t("offerPrintCommercialSnapshotHeading")}</h2>
             </div>
             <div className="overflow-x-auto rounded-[18px] bg-white">
               <table className="w-full text-left">
                 <thead>
                   <tr>
-                    {["Scenario", "Grade ceiling", "Target enrollment", "Modeled capacity", "Implied occupancy"].map((header) => (
+                    {[t("offerPrintCommercialHeader1"), t("offerPrintCommercialHeader2"), t("offerPrintCommercialHeader3"), t("offerPrintCommercialHeader4"), t("offerPrintCommercialHeader5")].map((header) => (
                       <th key={`print-commercial-matrix-${header}`} className="px-4 py-3">{header}</th>
                     ))}
                   </tr>
@@ -1862,15 +1960,14 @@ export default function OfferScenariosTab() {
           <section className="offer-scenarios-print-page space-y-5">
             <div>
               <div className="offer-scenarios-print-label text-sm text-[#214B74]">
-                Scenario Operating Meaning
-              </div>
-              <h2 className="mt-3 text-3xl text-slate-950">Academic and organizational meaning</h2>
+                {t("offerPrintOperatingMeaningLabel")}</div>
+              <h2 className="mt-3 text-3xl text-slate-950">{t("offerPrintOperatingMeaningHeading")}</h2>
             </div>
             <div className="overflow-x-auto rounded-[18px] bg-white">
               <table className="w-full text-left">
                 <thead>
                   <tr>
-                    {["Scenario", "Strategic identity", "Classroom package", "Specialist ecosystem", "Signature / program layer", "MS / HS readiness", "Recommended pathway"].map((header) => (
+                    {[t("offerPrintCommercialHeader1"), t("offerPrintOperatingHeader2"), t("offerMinimumOpClassroomPackageSystem"), t("offerPrintOperatingHeader4"), t("offerPrintOperatingHeader5"), t("offerPrintOperatingHeader6"), t("offerPrintOperatingHeader7")].map((header) => (
                       <th key={`print-operating-matrix-${header}`} className="px-3 py-3">{header}</th>
                     ))}
                   </tr>
@@ -1889,20 +1986,16 @@ export default function OfferScenariosTab() {
               </table>
             </div>
             <p className="mt-3 text-xs leading-relaxed text-slate-500">
-              Classroom package refers only to the adult structure inside the classroom. Broader support roles, including leadership, Learning Experience Design, counseling, academic support, and specialists, are treated separately in the support ecosystem layer.
-            </p>
+              {t("offerPrintClassroomPackageNote")}</p>
           </section>
 
           <section className="offer-scenarios-print-page offer-scenarios-print-page-break space-y-6">
             <div>
               <div className="offer-scenarios-print-label text-sm text-[#214B74]">
-                Scenario adjustment layers
-              </div>
-              <h2 className="mt-3 text-3xl text-slate-950">Mapa de Ajustes da Oferta e do Ecossistema</h2>
+                {t("offerPrintAdjustmentLayersLabel")}</div>
+              <h2 className="mt-3 text-3xl text-slate-950">{t("offerPrintAdjustmentLayersHeading")}</h2>
               <p className="mt-3 max-w-4xl text-sm leading-relaxed text-slate-600">
-                O baseline permanece; o que muda é a maturidade da oferta, a intensidade da infraestrutura
-                adulta e a implicação potencial de recursos.
-              </p>
+                {t("offerPrintAdjustmentLayersBody")}</p>
             </div>
             <div className="space-y-4">
               {ecosystemLayerControls
@@ -1928,7 +2021,7 @@ export default function OfferScenariosTab() {
                             <div key={`print-new-layer-${layer.id}-${row.scenario}`} className="rounded-[14px] bg-white/75 px-3 py-3">
                               <div className="flex items-baseline justify-between gap-2">
                                 <div className="text-sm text-slate-950">{row.scenario.replace("Scenario ", "")}</div>
-                                <div className="text-[10px] leading-snug text-[#214B74]">{row.status}</div>
+                                <div className="text-[10px] leading-snug text-[#214B74]">{offerLabel[row.status] ?? row.status}</div>
                               </div>
                               <p className="mt-3 text-xs leading-relaxed text-slate-600">{row.commitment}</p>
                               <p className="mt-2 text-xs leading-relaxed text-[#4b254b]">{row.budget}</p>
@@ -1945,11 +2038,9 @@ export default function OfferScenariosTab() {
           <section className="offer-scenarios-print-page space-y-6">
             <div className="grid grid-cols-1 gap-5 md:grid-cols-[0.8fr_1.2fr]">
               <div className="offer-scenarios-print-blue-panel p-6">
-                <h2 className="text-3xl leading-tight">Decisão necessária para avançar</h2>
+                <h2 className="text-3xl leading-tight">{t("offerPrintGovernanceQuestionsHeading")}</h2>
                 <p className="mt-4 text-sm leading-relaxed text-blue-50/85">
-                  Estas perguntas organizam governança antes de qualquer conversão para orçamento,
-                  staffing, custo ou implementação final.
-                </p>
+                  {t("offerPrintGovernanceQuestionsBody")}</p>
               </div>
               <div className="grid grid-cols-1 gap-3">
                 {governanceQuestions.map((question, index) => (
@@ -1966,23 +2057,22 @@ export default function OfferScenariosTab() {
           <section className="offer-scenarios-print-page offer-scenarios-print-page-break space-y-6">
             <div>
               <div className="offer-scenarios-print-label text-sm text-[#214B74]">
-                Arquitetura por Divisão
-              </div>
-              <h2 className="mt-3 text-3xl text-slate-950">What must exist before scenario adjustments</h2>
+                {t("offerPrintDivisionArchitectureLabel")}</div>
+              <h2 className="mt-3 text-3xl text-slate-950">{t("offerPrintDivisionArchitectureHeading")}</h2>
             </div>
             <div className="space-y-3">
               {baselineDivisionArchitecture.map((division) => (
                 <div key={`print-division-${division.division}`} className="offer-scenarios-print-architecture-row offer-scenarios-print-soft-panel p-4">
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-[0.62fr_1fr_1fr_0.9fr_1.25fr]">
                     <div>
-                      <div className="offer-scenarios-print-label text-xs text-[#214B74]">Division</div>
-                      <h3 className="mt-1 text-xl text-slate-950">{division.division}</h3>
+                      <div className="offer-scenarios-print-label text-xs text-[#214B74]">{t("offerPrintDivisionColumnLabel")}</div>
+                      <h3 className="mt-1 text-xl text-slate-950">{offerLabel[division.division] ?? division.division}</h3>
                     </div>
                     {[
-                      ["Operating model", division.composition.slice(0, 3).join(" · ")],
-                      ["Non-negotiable baseline", division.minimum.slice(0, 3).join(" · ")],
-                      ["Not active yet", division.inactive.slice(0, 2).join(" · ")],
-                      ["Activation logic", division.activation],
+                      [t("offerPrintDivisionOperatingModelLabel"), division.composition.slice(0, 3).join(" · ")],
+                      [t("offerMinimumOpClassroomOwnershipType"), division.minimum.slice(0, 3).join(" · ")],
+                      [t("offerPrintDivisionNotActiveYetLabel"), division.inactive.slice(0, 2).join(" · ")],
+                      [t("offerPrintDivisionActivationLogicLabel"), division.activation],
                     ].map(([label, items]) => (
                       <div key={`print-division-${division.division}-${label}`}>
                         <div className="offer-scenarios-print-label text-xs text-[#214B74]">{label as string}</div>
@@ -1998,9 +2088,8 @@ export default function OfferScenariosTab() {
           <section className="offer-scenarios-print-page space-y-5">
             <div>
               <div className="offer-scenarios-print-label text-sm text-[#214B74]">
-                Base por Sala e Cluster
-              </div>
-              <h2 className="mt-3 text-3xl text-slate-950">Operational packages</h2>
+                {t("offerPrintEnxovalLabel")}</div>
+              <h2 className="mt-3 text-3xl text-slate-950">{t("offerPrintEnxovalHeading")}</h2>
             </div>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
               {baselineEnxovalPackages.map((packageItem) => (
@@ -2016,9 +2105,8 @@ export default function OfferScenariosTab() {
           <section className="offer-scenarios-print-page space-y-5">
             <div>
               <div className="offer-scenarios-print-label text-sm text-[#214B74]">
-                Mínimo Operacional da Experiência Acadêmica
-              </div>
-              <h2 className="mt-3 text-3xl text-slate-950">Systems indicated for consistency</h2>
+                {t("offerPrintMinimumOpsLabel")}</div>
+              <h2 className="mt-3 text-3xl text-slate-950">{t("offerPrintMinimumOpsHeading")}</h2>
             </div>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
               {minimumAcademicOperationGroups.map((group) => (
@@ -2031,7 +2119,7 @@ export default function OfferScenariosTab() {
                       if (!operation) return null;
                       return (
                         <div key={`print-minimum-${group.title}-${operation.system}`}>
-                          <div className="text-sm text-slate-950">{operation.system}</div>
+                          <div className="text-sm text-slate-950">{offerLabel[operation.system] ?? operation.system}</div>
                           <p className="mt-1 text-xs leading-relaxed text-slate-600">{operation.why}</p>
                           <p className="mt-1 text-[10px] leading-relaxed text-[#214B74]">{operation.type}</p>
                         </div>
@@ -2046,23 +2134,18 @@ export default function OfferScenariosTab() {
           <section className="offer-scenarios-print-page offer-scenarios-print-page-break space-y-5">
             <div>
               <div className="offer-scenarios-print-label text-sm text-[#214B74]">
-                Budget comparison
-              </div>
-              <h2 className="mt-3 text-3xl text-slate-950">Comparativo Orçamentário por Cenário</h2>
+                {t("offerPrintBudgetComparisonLabel")}</div>
+              <h2 className="mt-3 text-3xl text-slate-950">{t("offerPrintBudgetComparisonHeading")}</h2>
               <p className="mt-3 max-w-4xl text-sm leading-relaxed text-slate-600">
-                Incremento significa apenas o delta além da base original: novo papel, FTE, faixa,
-                cobertura, escopo ou reclassificação.
-              </p>
+                {t("offerPrintBudgetComparisonNote")}</p>
             </div>
             <div className="offer-scenarios-print-avoid-break overflow-hidden rounded-[18px] bg-white">
               <div className="border-b border-slate-100 px-4 py-3">
                 <div className="offer-scenarios-print-label text-xs text-[#214B74]">
-                  Shared controls
-                </div>
-                <h3 className="mt-1 text-xl text-slate-950">Baseline / Governance Controls</h3>
+                  {t("offerSharedControlsLabel")}</div>
+                <h3 className="mt-1 text-xl text-slate-950">{t("offerBaselineGovernanceControlsHeading")}</h3>
                 <p className="mt-1 text-xs leading-relaxed text-slate-600">
-                  Linhas de base renderizadas uma vez para preservar rastreabilidade sem diluir os drivers materiais de cada cenário.
-                </p>
+                  {t("offerPrintBaselineGovernanceNote")}</p>
               </div>
               <table className="w-full text-left">
                 <thead>
@@ -2078,7 +2161,7 @@ export default function OfferScenariosTab() {
                       <td className="px-3 py-3 text-slate-950">
                         {row.area}
                         <div className={cn("mt-2 inline-flex rounded-full border px-2 py-1 text-[9px] font-black uppercase tracking-widest", budgetStatusClassName[row.status])}>
-                          {row.status}
+                          {offerLabel[row.status] ?? row.status}
                         </div>
                       </td>
                       <td className="px-3 py-3 text-slate-600">{row.originallyBudgeted}</td>
@@ -2096,7 +2179,7 @@ export default function OfferScenariosTab() {
                   <div className="offer-scenarios-print-label text-xs text-[#214B74]">
                     {scenario.gradeCeiling}
                   </div>
-                  <h3 className="mt-1 text-xl text-slate-950">{scenario.scenario}</h3>
+                  <h3 className="mt-1 text-xl text-slate-950">{offerLabel[scenario.scenario] ?? scenario.scenario}</h3>
                   <p className="mt-1 text-xs leading-relaxed text-slate-600">{scenario.strategicFrame}</p>
                 </div>
                 <table className="w-full text-left">
@@ -2112,7 +2195,7 @@ export default function OfferScenariosTab() {
                       <tr key={`print-budget-comparison-${scenario.scenario}-${row.area}`} className="border-t border-slate-100 align-top">
                         <td className="px-3 py-3">
                           <div className={cn("inline-flex rounded-full border px-2 py-1 text-[9px] font-black uppercase tracking-widest", budgetStatusClassName[row.status])}>
-                            {row.status}
+                            {offerLabel[row.status] ?? row.status}
                           </div>
                         </td>
                         <td className="px-3 py-3 text-slate-950">{row.area}</td>
@@ -2136,16 +2219,14 @@ export default function OfferScenariosTab() {
             <div className="overflow-hidden rounded-[18px] bg-white">
               <div className="border-b border-slate-100 px-4 py-3">
                 <div className="offer-scenarios-print-label text-xs text-[#214B74]">
-                  Secondary validation slots
-                </div>
+                  {t("offerSecondaryValidationSlotsLabel")}</div>
                 <p className="mt-1 text-xs leading-relaxed text-slate-600">
-                  Decisões que permanecem como placeholders até que um processo separado valide escopo, custo e implementação.
-                </p>
+                  {t("offerSecondaryValidationSlotsBody")}</p>
               </div>
               <table className="w-full text-left">
                 <thead>
                   <tr>
-                    {["Decisão", "Gatilho", "Status", "Validação necessária", "Placeholder de recurso"].map((header) => (
+                    {[t("offerBudgetColumnDecisionLabel"), t("offerBudgetColumnTriggerLabel"), t("bannerStatusLabel"), t("offerBudgetColumnValidationNeeded"), t("offerBudgetColumnResourcePlaceholderLabel")].map((header) => (
                       <th key={`print-budget-${header}`} className="px-4 py-3">{header}</th>
                     ))}
                   </tr>
@@ -2155,7 +2236,7 @@ export default function OfferScenariosTab() {
                     <tr key={`print-budget-${row.decision}`} className="border-t border-slate-100 align-top">
                       <td className="px-4 py-3 text-slate-950">{row.decision}</td>
                       <td className="px-4 py-3 text-slate-600">{row.trigger}</td>
-                      <td className="px-4 py-3 text-[#214B74]">{row.status}</td>
+                      <td className="px-4 py-3 text-[#214B74]">{offerLabel[row.status] ?? row.status}</td>
                       <td className="px-4 py-3 text-slate-600">{row.requiredDecision}</td>
                       <td className="px-4 py-3 text-[#4b254b]">{row.budgetSlot}</td>
                     </tr>
@@ -2170,7 +2251,7 @@ export default function OfferScenariosTab() {
               <div className="grid grid-cols-1 gap-5 md:grid-cols-[0.75fr_1.25fr]">
                 <div className={cn("p-6", scenario.title === "Scenario D" ? "offer-scenarios-print-blue-panel" : "offer-scenarios-print-soft-panel")}>
                   <div className={cn("text-5xl leading-none", scenario.title === "Scenario D" ? "text-white" : "text-[#214B74]")}>
-                    {scenario.title}
+                    {offerLabel[scenario.title] ?? scenario.title}
                   </div>
                   <h2 className={cn("mt-5 text-3xl leading-tight", scenario.title === "Scenario D" ? "text-white" : "text-slate-950")}>
                     {scenario.strategicIdentity}
@@ -2182,10 +2263,10 @@ export default function OfferScenariosTab() {
                 <div className="offer-scenarios-print-soft-panel p-6">
                   <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
                     {[
-                      ["Grade ceiling", scenario.gradeCeiling],
-                      ["Target enrollment", scenario.targetEnrollment],
-                      ["Modeled capacity", scenario.modeledCapacity],
-                      ["Occupancy", scenario.impliedOccupancy],
+                      [t("offerPrintCommercialHeader2"), scenario.gradeCeiling],
+                      [t("offerPrintCommercialHeader3"), `${offerEnrollmentCount[scenario.title]} ${t("offerLearnersUnitLabel")}`],
+                      [t("offerPrintCommercialHeader4"), `${offerCapacityCount[scenario.title]} ${t("offerLearnersUnitLabel")}`],
+                      [t("exportMatrixColOccupancy"), scenario.impliedOccupancy],
                     ].map(([label, value]) => (
                       <div key={`print-plate-${scenario.title}-${label}`}>
                         <div className="offer-scenarios-print-label text-xs text-[#214B74]">{label}</div>
@@ -2195,9 +2276,9 @@ export default function OfferScenariosTab() {
                   </div>
                   <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
                     {[
-                      ["Core shift", scenario.classroomPackage],
-                      ["Active offer elements", scenario.signaturePrograms],
-                      ["Strategic caution", [scenario.risk]],
+                      [t("offerPrintPlateCoreShiftLabel"), scenario.classroomPackage],
+                      [t("offerPrintPlateActiveOfferElementsLabel"), scenario.signaturePrograms],
+                      [t("offerPrintPlateStrategicCautionLabel"), [scenario.risk]],
                     ].map(([label, values]) => (
                       <div key={`print-plate-${scenario.title}-${label}`}>
                         <div className="offer-scenarios-print-label text-xs text-[#214B74]">{label as string}</div>
@@ -2217,14 +2298,10 @@ export default function OfferScenariosTab() {
           <section className="offer-scenarios-print-page offer-scenarios-print-page-break space-y-6">
             <div>
               <div className="offer-scenarios-print-label text-sm text-[#214B74]">
-                Specialist Capacity System
-              </div>
-              <h2 className="mt-3 text-3xl text-slate-950">Specialist domains are planned as a system</h2>
+                {t("offerPrintSpecialistSystemLabel")}</div>
+              <h2 className="mt-3 text-3xl text-slate-950">{t("offerPrintSpecialistSystemHeading")}</h2>
               <p className="mt-3 max-w-4xl text-sm leading-relaxed text-slate-600">
-                Body & Movement uses the clearest slot threshold, but it is one specialist domain among
-                several. Sound, arts, Design Technologies, and Creative Hub also depend on age band,
-                space, setup, project format, and program maturity.
-              </p>
+                {t("offerPrintSpecialistSystemBody")}</p>
             </div>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               {specialistCapacityDomains.map((domain) => (
@@ -2232,10 +2309,10 @@ export default function OfferScenariosTab() {
                   <h3 className="text-xl text-slate-950">{domain.domain}</h3>
                   <p className="mt-2 text-xs leading-relaxed text-slate-600">{domain.loadSignal}</p>
                   <div className="mt-4 grid grid-cols-1 gap-2 text-xs leading-relaxed text-slate-600">
-                    <p><span className="text-[#214B74]">Lean:</span> {domain.lean}</p>
-                    <p><span className="text-[#214B74]">Balanced:</span> {domain.balanced}</p>
-                    <p><span className="text-[#214B74]">Premium / Grade 6:</span> {domain.premium}</p>
-                    <p><span className="text-[#4b254b]">Budget implication / risk:</span> {domain.risk}</p>
+                    <p><span className="text-[#214B74]">{t("offerSpecialistLeanLabel")}</span> {domain.lean}</p>
+                    <p><span className="text-[#214B74]">{t("offerSpecialistBalancedLabel")}</span> {domain.balanced}</p>
+                    <p><span className="text-[#214B74]">{t("offerSpecialistPremiumLabel")}</span> {domain.premium}</p>
+                    <p><span className="text-[#4b254b]">{t("offerSpecialistBudgetRiskLabel")}</span> {domain.risk}</p>
                   </div>
                 </div>
               ))}
@@ -2245,20 +2322,16 @@ export default function OfferScenariosTab() {
           <section className="offer-scenarios-print-page offer-scenarios-print-page-break space-y-6">
             <div>
               <div className="offer-scenarios-print-label text-sm text-[#214B74]">
-                Operating assumptions appendix
-              </div>
-              <h2 className="mt-3 text-3xl text-slate-950">Premissas de suporte</h2>
+                {t("offerPrintAppendixLabel")}</div>
+              <h2 className="mt-3 text-3xl text-slate-950">{t("offerPrintAppendixHeading")}</h2>
               <p className="mt-3 max-w-4xl text-sm leading-relaxed text-slate-600">
-                Estas premissas sustentam o modelo decisório; elas não são o primeiro caminho de leitura.
-              </p>
+                {t("offerAppendixIntroNote")}</p>
             </div>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="offer-scenarios-print-soft-panel p-5">
-                <h3 className="text-xl text-slate-950">Body & Movement load proof</h3>
+                <h3 className="text-xl text-slate-950">{t("offerPrintBodyMovementProofHeading")}</h3>
                 <p className="mt-2 text-xs leading-relaxed text-slate-600">
-                  Cada série possui 2 blocos semanais por seção; o modelo assume 2 seções por série e
-                  limite de 30 blocos semanais por educador.
-                </p>
+                  {t("offerPrintBodyMovementProofBody")}</p>
                 <div className="mt-4 space-y-2">
                   {bodyMovementLoads.map(([scenario, load, premise]) => (
                     <div key={`print-bm-${scenario}`} className="rounded-xl bg-white p-3 text-xs leading-relaxed text-slate-600">
@@ -2268,10 +2341,9 @@ export default function OfferScenariosTab() {
                 </div>
               </div>
               <div className="offer-scenarios-print-soft-panel p-5">
-                <h3 className="text-xl text-slate-950">São Paulo specialist reference</h3>
+                <h3 className="text-xl text-slate-950">{t("offerPrintSaoPauloReferenceHeading")}</h3>
                 <p className="mt-2 text-xs leading-relaxed text-slate-600">
-                  São Paulo represents the mature flagship ecosystem — a contrast model, not a staffing template for Rio. A composição abaixo é referência de arquitetura especialista. Para Rio, os números permanecem premissas de planejamento.
-                </p>
+                  {t("offerPrintSaoPauloReferenceBody")}</p>
                 <div className="mt-4 space-y-2">
                   {currentSpecialistEcosystem.map(([area, names, count]) => (
                     <div key={`print-current-specialist-${area}`} className="rounded-xl bg-white p-3 text-xs leading-relaxed text-slate-600">
@@ -2281,7 +2353,7 @@ export default function OfferScenariosTab() {
                 </div>
               </div>
               <div className="offer-scenarios-print-soft-panel p-5">
-                <h3 className="text-xl text-slate-950">Middle School instructional model by stage</h3>
+                <h3 className="text-xl text-slate-950">{t("offerPrintMiddleSchoolModelHeading")}</h3>
                 <div className="mt-4 space-y-2">
                   {middleSchoolClusters.map(([cluster, coverage, premise]) => (
                     <div key={`print-cluster-${cluster}`} className="rounded-xl bg-white p-3 text-xs leading-relaxed text-slate-600">
@@ -2291,7 +2363,7 @@ export default function OfferScenariosTab() {
                 </div>
               </div>
               <div className="offer-scenarios-print-soft-panel p-5">
-                <h3 className="text-xl text-slate-950">Mentorship model</h3>
+                <h3 className="text-xl text-slate-950">{t("offerPrintMentorshipModelHeading")}</h3>
                 <div className="mt-4 space-y-2">
                   {mentorshipProgression.map(([stage, model]) => (
                     <div key={`print-mentor-${stage}`} className="rounded-xl bg-white p-3 text-xs leading-relaxed text-slate-600">
@@ -2319,9 +2391,8 @@ export default function OfferScenariosTab() {
           <section className="offer-scenarios-print-page offer-scenarios-print-page-break space-y-5">
             <div>
               <div className="offer-scenarios-print-label text-sm text-[#214B74]">
-                Roadmap 2028–2037
-              </div>
-              <h2 className="mt-3 text-3xl text-slate-950">Roadmap de Crescimento da Experiência</h2>
+                {t("offerPrintRoadmapLabel")}</div>
+              <h2 className="mt-3 text-3xl text-slate-950">{t("offerPrintRoadmapHeading")}</h2>
             </div>
             <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
               {roadmapPrintPhases.map((phase) => (
@@ -2351,9 +2422,8 @@ export default function OfferScenariosTab() {
           <section className="offer-scenarios-print-page offer-scenarios-print-page-break offer-scenarios-print-blue-panel min-h-[230mm] space-y-14 p-10">
             <div>
               <div className="offer-scenarios-print-label text-sm text-blue-50/75">
-                Board-ready synthesis
-              </div>
-              <h2 className="mt-5 max-w-3xl text-5xl leading-tight text-white">Synthesis for decision</h2>
+                {t("offerPrintSynthesisLabel")}</div>
+              <h2 className="mt-5 max-w-3xl text-5xl leading-tight text-white">{t("offerPrintSynthesisHeading")}</h2>
             </div>
             <div className="grid grid-cols-1 gap-10 md:grid-cols-2">
               {synthesisStatements.map((statement, index) => (
@@ -2371,14 +2441,11 @@ export default function OfferScenariosTab() {
               <div className="flex h-full flex-col">
                 <div>
                   <div className="text-[10px] font-black uppercase tracking-[0.3em] text-blue-100/70">
-                    Rio Strategic Architecture
-                  </div>
+                    {t("offerRailBrandLabel")}</div>
                   <h2 className="mt-5 text-3xl font-black leading-none tracking-tight">
-                    Cenários da Oferta
-                  </h2>
+                    {t("offerBrandTitle")}</h2>
                   <p className="mt-4 text-sm font-semibold leading-relaxed text-blue-50/80">
-                    Cada cenário é uma promessa operacional.
-                  </p>
+                    {t("offerTaglineOperatingPromise")}</p>
                 </div>
 
                 <nav className="mt-8 hidden space-y-2 lg:block">
@@ -2401,19 +2468,16 @@ export default function OfferScenariosTab() {
 
                 <div className="mt-6 rounded-[1.75rem] bg-white/10 p-4 lg:mt-auto">
                   <div className="text-[10px] font-black uppercase tracking-[0.26em] text-blue-100/70">
-                    Board artifact
-                  </div>
+                    {t("offerRailBoardArtifactLabel")}</div>
                   <button
                     type="button"
                     onClick={handlePrintOfferScenarios}
                     className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-white px-4 py-3 text-xs font-black uppercase tracking-wider text-[#214B74] transition-colors hover:bg-blue-50"
                   >
                     <Download className="h-4 w-4" />
-                    Exportar dossiê estratégico completo
-                  </button>
+                    {t("offerExportDossierButtonLabel")}</button>
                   <p className="mt-3 text-xs leading-relaxed text-blue-50/70">
-                    Abre a janela de impressão para salvar a versão completa como PDF.
-                  </p>
+                    {t("offerExportDossierHint")}</p>
                 </div>
               </div>
             </aside>
@@ -2422,25 +2486,19 @@ export default function OfferScenariosTab() {
               <div className="grid gap-6 xl:grid-cols-[1.25fr_0.75fr]">
                 <div>
                   <div className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">
-                    Business plan decision console
-                  </div>
+                    {t("offerConsoleEyebrowLabel")}</div>
                   <h1 className="mt-4 max-w-4xl text-4xl font-black leading-[0.95] tracking-tight text-slate-950 md:text-6xl">
-                    Cenários da Oferta
-                  </h1>
+                    {t("offerBrandTitle")}</h1>
                   <p className="mt-5 max-w-3xl text-base font-semibold leading-relaxed text-slate-600 md:text-lg">
-                    O modelo organiza limite de série, capacidade, matrícula-alvo, ecossistema adulto e maturidade dos programas autorais para apoiar a decisão do business plan.
-                  </p>
+                    {t("offerModelSummaryBody")}</p>
                 </div>
                 <div className="rounded-[2rem] bg-[#16334f] p-5 text-white">
                   <div className="text-[10px] font-black uppercase tracking-[0.26em] text-blue-100/70">
-                    Leitura estratégica
-                  </div>
+                    {t("offerStrategicReadingLabel")}</div>
                   <p className="mt-4 text-xl font-black leading-tight">
-                    Compare antes de decidir.
-                  </p>
+                    {t("offerStrategicReadingHeading")}</p>
                   <p className="mt-4 text-sm font-semibold leading-relaxed text-blue-50/80">
-                    Cada cenário deve ser lido pela mesma lógica: o que já estava orçado, o que passa a ser recomendado, qual é o incremento e que risco o incremento mitiga.
-                  </p>
+                    {t("offerStrategicReadingBody")}</p>
                 </div>
               </div>
 
@@ -2469,24 +2527,21 @@ export default function OfferScenariosTab() {
                   <div className="grid gap-4 xl:grid-cols-[0.9fr_1.1fr]">
                     <div className="rounded-[2rem] bg-white p-6">
                       <div className="text-[10px] font-black uppercase tracking-[0.28em] text-slate-400">
-                        Síntese executiva
-                      </div>
+                        {t("offerBriefEyebrowLabel")}</div>
                       <h3 className="mt-4 text-3xl font-black tracking-tight text-slate-950">
-                        Comece pela decisão, não pelo inventário.
-                      </h3>
+                        {t("offerBriefHeading")}</h3>
                       <p className="mt-4 text-sm font-semibold leading-relaxed text-slate-600">
-                        O tab separa promessa acadêmica, limiar operacional, implicações de recursos e prova de viabilidade para que a conversa de liderança não vire uma lista de cargos.
-                      </p>
+                        {t("offerBriefBody")}</p>
                       <div className="mt-5 rounded-2xl border border-amber-100 bg-amber-50 px-4 py-3 text-xs font-bold leading-relaxed text-amber-900">
                         {OFFER_SCENARIO_GOVERNANCE_BOUNDARY}
                       </div>
                     </div>
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                       {[
-                        ["Promessa", "O que a escola pode sustentar para famílias e estudantes."],
-                        ["Limiar", "O que muda quando o cenário avança."],
-                        ["Exposição", "Quais papéis, sistemas ou rotinas criam implicações de recursos para validação posterior."],
-                        ["Prova", "Quais premissas acadêmicas e operacionais sustentam a decisão."],
+                        [t("offerDefinitionCard1Field1"), t("offerDefinitionCard1Field2")],
+                        [t("offerDefinitionCard2Field1"), t("offerDefinitionCard2Field2")],
+                        [t("offerDefinitionCard3Field1"), t("offerDefinitionCard3Field2")],
+                        [t("offerDefinitionCard4Field1"), t("offerDefinitionCard4Field2")],
                       ].map(([label, detail]) => (
                         <div key={label} className="rounded-[1.75rem] bg-white p-5">
                           <div className="text-[10px] font-black uppercase tracking-[0.22em] text-[#214B74]">
@@ -2500,10 +2555,10 @@ export default function OfferScenariosTab() {
 
                   <div className="grid gap-4 lg:grid-cols-4">
                     {[
-                      ["Caminho básico da oferta", "Cenário A", "Estabelece a base da experiência escolar, com pacote de sala, MAP, PDJ em rotina e Learning Experience Design, mas ainda sem uma camada robusta de diferenciação acadêmica."],
-                      ["Caminho de progressão acadêmica", "Cenário B", "Grade 4 torna o motor Researchers mais visível por investigação, evidências, raciocínio matemático, Scientific Literacy, documentação e linguagem acadêmica."],
-                      ["Caminho pré-Middle School", "Cenário C", "Grade 5 ativa Pathways e protocolos de transição; projetos seguem em lógica full-class."],
-                      ["Caminho com mudança operacional", "Cenário D", "Grade 6 ativa ritmo de Middle School, Passion Projects, clusters e mentoria de projeto."],
+                      [t("offerBriefPathCard1Field1"), t("capitalComparisonPanelScenarioALabel"), t("offerBriefPathCard1Field3")],
+                      [t("offerBriefPathCard2Field1"), t("capitalComparisonPanelScenarioBLabel"), t("offerBriefPathCard2Field3")],
+                      [t("offerBriefPathCard3Field1"), t("offerScenarioCTitle"), t("offerBriefPathCard3Field3")],
+                      [t("offerBriefPathCard4Field1"), t("offerScenarioDTitle"), t("offerBriefPathCard4Field3")],
                     ].map(([label, scenario, detail]) => (
                       <div key={label} className="rounded-[2rem] bg-[#e8eef3] p-5">
                         <div className="text-[10px] font-black uppercase tracking-[0.24em] text-[#214B74]">{label}</div>
@@ -2525,14 +2580,14 @@ export default function OfferScenariosTab() {
                         className="rounded-[1.75rem] bg-white p-5 text-left transition-all hover:-translate-y-0.5 hover:shadow-md"
                       >
                         <div className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-400">
-                          {scenario.title}
+                          {offerLabel[scenario.title] ?? scenario.title}
                         </div>
                         <div className="mt-3 text-lg font-black leading-tight text-slate-950">
                           {scenario.strategicIdentity}
                         </div>
                         <div className="mt-4 grid grid-cols-3 gap-2 text-[10px] font-black uppercase tracking-wider text-slate-500">
-                          <span>{scenario.targetEnrollment.replace(" learners", "")} alvo</span>
-                          <span>{scenario.modeledCapacity.replace(" learners", "")} cap.</span>
+                          <span>{offerEnrollmentCount[scenario.title]} {t("offerBriefTargetSuffix")}</span>
+                          <span>{offerCapacityCount[scenario.title]} {t("offerBriefCapacitySuffix")}</span>
                           <span>{scenario.impliedOccupancy}</span>
                         </div>
                       </button>
@@ -2544,15 +2599,13 @@ export default function OfferScenariosTab() {
                   <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
                     <div>
                       <div className="text-[10px] font-black uppercase tracking-[0.28em] text-slate-400">
-                        Escada de cenários
-                      </div>
+                        {t("offerLadderEyebrowLabel")}</div>
                       <h3 className="mt-3 text-3xl font-black tracking-tight text-slate-950">
                         A → B → C → D
                       </h3>
                     </div>
                     <p className="max-w-xl text-sm font-semibold leading-relaxed text-slate-600">
-                      Cada avanço muda o limite da oferta, a maturidade do programa e a pressão de infraestrutura adulta.
-                    </p>
+                      {t("offerLadderBody")}</p>
                   </div>
                   <div className="grid gap-4 xl:grid-cols-4">
                     {ecosystemScenarioLadder.map((scenario, index) => {
@@ -2594,7 +2647,7 @@ export default function OfferScenariosTab() {
                               />
                             </div>
                             <div className="mt-4 text-xs font-black uppercase tracking-wider text-slate-500">
-                              {scenarioData.targetEnrollment} · {scenarioData.modeledCapacity} · {scenarioData.impliedOccupancy}
+                              {offerEnrollmentCount[scenarioData.title]} {t("offerLearnersUnitLabel")} · {offerCapacityCount[scenarioData.title]} {t("offerLearnersUnitLabel")} · {scenarioData.impliedOccupancy}
                             </div>
                             <div className="mt-2 text-xs font-bold leading-relaxed text-slate-500">
                               {decision?.budget}
@@ -2622,17 +2675,16 @@ export default function OfferScenariosTab() {
                                 : "bg-white/10 text-white/70 hover:bg-white/15 hover:text-white"
                             )}
                           >
-                            {scenario.title}
+                            {offerLabel[scenario.title] ?? scenario.title}
                           </button>
                         ))}
                       </div>
                       <div className="mt-10 text-[10px] font-black uppercase tracking-[0.28em] text-blue-100/70">
-                        Cenário selecionado
-                      </div>
+                        {t("offerScenarioSelectedLabel")}</div>
                       {selectedScenario ? (
                         <>
                           <h3 className="mt-4 text-4xl font-black leading-none tracking-tight">
-                            {selectedScenario.title}
+                            {offerLabel[selectedScenario.title] ?? selectedScenario.title}
                           </h3>
                           <p className="mt-4 text-2xl font-black leading-tight text-blue-50">
                             {selectedScenario.strategicIdentity}
@@ -2651,8 +2703,7 @@ export default function OfferScenariosTab() {
                         </>
                       ) : (
                         <p className="mt-4 text-sm font-semibold leading-relaxed text-blue-50/75">
-                          Select a scenario to inspect its operating implications.
-                        </p>
+                          {t("offerScenarioEmptyStateMessage")}</p>
                       )}
                     </div>
 
@@ -2661,10 +2712,10 @@ export default function OfferScenariosTab() {
                         <>
                           <div className="grid gap-3 sm:grid-cols-4">
                             {[
-                              ["Limite", selectedScenario.gradeCeiling],
-                              ["Matrícula-alvo", selectedScenario.targetEnrollment],
-                              ["Capacidade", selectedScenario.modeledCapacity],
-                              ["Ocupação", selectedScenario.impliedOccupancy],
+                              [t("offerScenarioMetricLabel1"), selectedScenario.gradeCeiling],
+                              [t("offerPrintCommercialHeader3"), `${offerEnrollmentCount[selectedScenario.title]} ${t("offerLearnersUnitLabel")}`],
+                              [t("offerScenarioMetricLabel3"), `${offerCapacityCount[selectedScenario.title]} ${t("offerLearnersUnitLabel")}`],
+                              [t("exportMatrixColOccupancy"), selectedScenario.impliedOccupancy],
                             ].map(([label, value]) => (
                               <div key={label} className="rounded-[1.5rem] bg-white p-4">
                                 <div className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">{label}</div>
@@ -2674,10 +2725,10 @@ export default function OfferScenariosTab() {
                           </div>
                           <div className="grid gap-4 lg:grid-cols-2">
                             {[
-                              ["Promessa operacional", selectedScenario.classroomPackage],
-                              ["Sistemas ativos", selectedScenario.signaturePrograms],
-                              ["Ainda não ativo", selectedScenario.notActiveYet],
-                              ["Suporte recomendado", selectedScenario.roles],
+                              [t("offerScenarioGroupLabel1"), selectedScenario.classroomPackage],
+                              [t("offerScenarioGroupLabel2"), selectedScenario.signaturePrograms],
+                              [t("offerScenarioGroupLabel3"), selectedScenario.notActiveYet],
+                              [t("offerScenarioGroupLabel4"), selectedScenario.roles],
                             ].map(([label, values]) => (
                               <div key={label as string} className="rounded-[2rem] bg-white p-5">
                                 <div className="text-[10px] font-black uppercase tracking-[0.24em] text-[#214B74]">
@@ -2696,8 +2747,7 @@ export default function OfferScenariosTab() {
                           </div>
                           <div className="rounded-[2rem] bg-[#fff1f1] p-5">
                             <div className="text-[10px] font-black uppercase tracking-[0.24em] text-rose-700">
-                              Risco crítico
-                            </div>
+                              {t("offerScenarioRiskLabel")}</div>
                             <p className="mt-3 text-sm font-semibold leading-relaxed text-slate-700">
                               {selectedScenario.risk}
                             </p>
@@ -2711,21 +2761,17 @@ export default function OfferScenariosTab() {
                 <div className={cn(viewClassName("budget"), "space-y-6")}>
                   <div className="rounded-[2rem] bg-white p-6">
                     <div className="text-[10px] font-black uppercase tracking-[0.28em] text-slate-400">
-                      Implicações de recursos
-                    </div>
+                      {t("offerBudgetEyebrowLabel")}</div>
                     <h3 className="mt-3 text-3xl font-black tracking-tight text-slate-950">
-                      O que já estava orçado, o que muda e por quê
-                    </h3>
+                      {t("offerBudgetHeading")}</h3>
                     <p className="mt-3 max-w-3xl text-sm font-semibold leading-relaxed text-slate-600">
-                      Incremento significa apenas o que excede a base original: novo papel, FTE adicional,
-                      mudança de faixa, cobertura, escopo ou reclassificação.
-                    </p>
+                      {t("offerBudgetIntroNote")}</p>
                   </div>
                   <div className="grid gap-3 rounded-[2rem] bg-white p-5 lg:grid-cols-3">
                     {[
-                      ["Baseline confirmado", "Pacote de sala EY/LS, liderança divisional, Learning Experience Design e 1 Body & Movement + 1 Arts + 1 Music."],
-                      ["Validar mapeamento", "After School Educator existe no mapeamento de papéis; escopo de Coordinator ainda precisa confirmação."],
-                      ["Incremento real", "Somente o delta além da base original vira implicação de recurso para validação posterior."],
+                      [t("offerBudgetRuleCard1Field1"), t("offerBudgetRuleCard1Field2")],
+                      [t("offerBudgetRuleCard2Field1"), t("offerBudgetRuleCard2Field2")],
+                      [t("offerBudgetRuleCard3Field1"), t("offerBudgetRuleCard3Field2")],
                     ].map(([label, detail]) => (
                       <div key={`budget-rule-${label}`} className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
                         <div className="text-[10px] font-black uppercase tracking-widest text-[#214B74]">{label}</div>
@@ -2736,12 +2782,10 @@ export default function OfferScenariosTab() {
                   <div className="overflow-hidden rounded-[2rem] bg-white">
                     <div className="border-b border-slate-100 px-5 py-4">
                       <div className="text-[10px] font-black uppercase tracking-[0.24em] text-[#214B74]">
-                        Shared controls
-                      </div>
-                      <h4 className="mt-1 text-xl font-black text-slate-950">Baseline / Governance Controls</h4>
+                        {t("offerSharedControlsLabel")}</div>
+                      <h4 className="mt-1 text-xl font-black text-slate-950">{t("offerBaselineGovernanceControlsHeading")}</h4>
                       <p className="mt-1 text-xs font-bold leading-relaxed text-slate-500">
-                        Linhas de base renderizadas uma vez para preservar rastreabilidade sem repetir controles genéricos dentro de cada cenário.
-                      </p>
+                        {t("offerScreenBaselineGovernanceNote")}</p>
                     </div>
                     <div className="overflow-x-auto">
                       <table className="min-w-[1180px] w-full text-left">
@@ -2758,7 +2802,7 @@ export default function OfferScenariosTab() {
                               <td className="px-4 py-3 font-black text-slate-950">
                                 {row.area}
                                 <div className={cn("mt-2 inline-flex rounded-full border px-2 py-1 text-[9px] font-black uppercase tracking-widest", budgetStatusClassName[row.status])}>
-                                  {row.status}
+                                  {offerLabel[row.status] ?? row.status}
                                 </div>
                               </td>
                               <td className="px-4 py-3 font-semibold leading-relaxed">{row.originallyBudgeted}</td>
@@ -2777,7 +2821,7 @@ export default function OfferScenariosTab() {
                         <div className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-400">
                           {scenario.gradeCeiling}
                         </div>
-                        <h4 className="mt-1 text-xl font-black text-slate-950">{scenario.scenario}</h4>
+                        <h4 className="mt-1 text-xl font-black text-slate-950">{offerLabel[scenario.scenario] ?? scenario.scenario}</h4>
                         <p className="mt-1 text-xs font-bold leading-relaxed text-slate-500">
                           {scenario.strategicFrame}
                         </p>
@@ -2796,7 +2840,7 @@ export default function OfferScenariosTab() {
                               <tr key={`${scenario.scenario}-${row.area}`} className="border-t border-slate-100 align-top text-xs text-slate-600">
                                 <td className="px-4 py-3">
                                   <div className={cn("inline-flex rounded-full border px-2 py-1 text-[9px] font-black uppercase tracking-widest", budgetStatusClassName[row.status])}>
-                                    {row.status}
+                                    {offerLabel[row.status] ?? row.status}
                                   </div>
                                 </td>
                                 <td className="px-4 py-3 font-black text-slate-950">{row.area}</td>
@@ -2813,8 +2857,7 @@ export default function OfferScenariosTab() {
                   ))}
                   <div className="rounded-[2rem] bg-white p-5">
                     <div className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-400">
-                      Governance validation note
-                    </div>
+                      {t("offerGovernanceValidationNoteLabel")}</div>
                     <div className="mt-3 grid gap-2 md:grid-cols-2">
                       {budgetComparisonValidationNotes.map((note) => (
                         <div key={`budget-validation-${note}`} className="rounded-2xl border border-purple-100 bg-purple-50 px-4 py-3 text-xs font-bold leading-relaxed text-purple-800">
@@ -2826,18 +2869,16 @@ export default function OfferScenariosTab() {
                   <div className="overflow-hidden rounded-[2rem] bg-white">
                     <div className="border-b border-slate-100 px-5 py-4">
                       <div className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-400">
-                        Secondary validation slots
-                      </div>
+                        {t("offerSecondaryValidationSlotsLabel")}</div>
                       <p className="mt-1 text-xs font-semibold leading-relaxed text-slate-600">
-                        Decisões que permanecem como placeholders até que um processo separado valide escopo, custo e implementação.
-                      </p>
+                        {t("offerSecondaryValidationSlotsBody")}</p>
                     </div>
                     <div className="hidden grid-cols-[1.25fr_0.7fr_0.8fr_1.2fr_0.8fr] gap-4 bg-[#edf3f7] px-5 py-4 text-[10px] font-black uppercase tracking-[0.22em] text-[#214B74] lg:grid">
-                      <div>Decisão</div>
-                      <div>Gatilho</div>
-                      <div>Status</div>
-                      <div>Decisão necessária</div>
-                      <div>Placeholder de recurso</div>
+                      <div>{t("offerBudgetColumnDecisionLabel")}</div>
+                      <div>{t("offerBudgetColumnTriggerLabel")}</div>
+                      <div>{t("offerBudgetColumnStatusLabel")}</div>
+                      <div>{t("offerBudgetColumnRequiredDecisionLabel")}</div>
+                      <div>{t("offerBudgetColumnResourcePlaceholderLabel")}</div>
                     </div>
                     <div className="divide-y divide-slate-100">
                       {budgetImpactDecisions.map((row) => (
@@ -2846,7 +2887,7 @@ export default function OfferScenariosTab() {
                           <div className="text-xs font-bold text-slate-500">{row.trigger}</div>
                           <div>
                             <span className="inline-flex rounded-full bg-[#e8eef3] px-3 py-1 text-[10px] font-black uppercase tracking-wider text-[#214B74]">
-                              {row.status}
+                              {offerLabel[row.status] ?? row.status}
                             </span>
                           </div>
                           <div className="text-xs font-semibold leading-relaxed text-slate-600">{row.requiredDecision}</div>
@@ -2862,11 +2903,9 @@ export default function OfferScenariosTab() {
                 <div className={cn(viewClassName("architecture"), "space-y-6")}>
                   <div className="rounded-[2rem] bg-white p-6">
                     <div className="text-[10px] font-black uppercase tracking-[0.28em] text-slate-400">
-                      Arquitetura acadêmica
-                    </div>
+                      {t("offerArchitectureEyebrowLabel")}</div>
                     <h3 className="mt-3 text-3xl font-black tracking-tight text-slate-950">
-                      Três camadas para sustentar a promessa.
-                    </h3>
+                      {t("offerArchitectureHeading")}</h3>
                   </div>
                   <div className="grid gap-4 xl:grid-cols-3">
                     {minimumAcademicOperationGroups.map((group) => (
@@ -2887,7 +2926,7 @@ export default function OfferScenariosTab() {
 
                             return (
                               <div key={`console-${operation.system}`} className="rounded-[1.5rem] bg-[#f5f0e7] p-4">
-                                <div className="text-sm font-black text-slate-950">{operation.system}</div>
+                                <div className="text-sm font-black text-slate-950">{offerLabel[operation.system] ?? operation.system}</div>
                                 <p className="mt-2 text-xs font-semibold leading-relaxed text-slate-600">
                                   {operation.why}
                                 </p>
@@ -2916,78 +2955,64 @@ export default function OfferScenariosTab() {
                 <div className={cn(viewClassName("appendix"), "space-y-6")}>
                   <div className="rounded-[2rem] bg-white p-6">
                     <div className="text-[10px] font-black uppercase tracking-[0.28em] text-slate-400">
-                      Premissas operacionais
-                    </div>
+                      {t("offerAppendixEyebrowLabel")}</div>
                     <h3 className="mt-3 text-3xl font-black tracking-tight text-slate-950">
-                      Evidência por trás da decisão.
-                    </h3>
+                      {t("offerAppendixHeading")}</h3>
                     <p className="mt-3 max-w-3xl text-sm font-semibold leading-relaxed text-slate-600">
-                      Estas premissas sustentam o modelo decisório; elas não são o primeiro caminho de leitura.
-                    </p>
+                      {t("offerAppendixIntroNote")}</p>
                   </div>
 
                   <div className="rounded-[2rem] bg-white p-6">
                     <div className="text-[10px] font-black uppercase tracking-[0.28em] text-slate-400">
-                      Specialist Pillar Load & Growth Triggers
-                    </div>
+                      {t("offerSpecialistPillarLabel")}</div>
                     <h4 className="mt-3 text-2xl font-black tracking-tight text-slate-950">
-                      Quando a capacidade especialista deixa de ser viável?
-                    </h4>
+                      {t("offerSpecialistPillarHeading")}</h4>
                     <div className="mt-4 space-y-4">
                       <p className="text-sm font-semibold leading-relaxed text-slate-600">
-                        Especialistas não são um bloco único de FTE. Cada área possui uma lógica própria
-                        de carga, espaço e progressão: Body & Movement é altamente recorrente; Sound
-                        Exploration exige cobertura ampla em EY/LS; Design Technologies / Learning Experience Designer se conecta à
-                        arquitetura de projetos e Creative Hub; Artistic Design / Atelier e Performing Arts
-                        sustentam expressão, exposição e programas autorais.
-                      </p>
+                        {t("offerSpecialistPillarBody1")}</p>
                       <p className="text-sm font-semibold leading-relaxed text-slate-600">
-                        Design Technologies / Learning Experience Designer é o tempo de sala do Learning Experience Designer, não um
-                        papel especialista separado. Os quatro pilares abaixo simulam capacidade de
-                        agenda; eles não convertem automaticamente quatro pilares em quatro cargos
-                        distintos de payroll.
-                      </p>
+                        {t("offerSpecialistPillarBody2")}</p>
                       <div className="rounded-2xl border border-amber-100 bg-amber-50 px-4 py-3 text-xs font-semibold leading-relaxed text-slate-700">
-                        Body & Movement, Sound Exploration / Music, and Artistic Design / Atelier represent
-                        specialist educator capacity. Design Technologies / Learning Experience Designer
-                        represents classroom-facing Learning Experience Designer capacity. Performing Arts
-                        is initially embedded through Sound Exploration / Music; Creative Hub is not active
-                        as a scheduled learner program before Grade 6.
-                      </div>
+                        {t("offerSpecialistPillarGuardrail")}</div>
                       <div className="grid grid-cols-1 gap-3 md:grid-cols-5">
                         {[
                           {
-                            label: "Final grade offered",
+                            id: "finalGrade",
+                            label: t("offerSimulatorControlLabel1"),
                             value: specialistFinalGrade,
                             options: specialistFinalGradeOptions,
                             onChange: (value: string) => setSpecialistFinalGrade(value as SpecialistFinalGrade),
                           },
                           {
-                            label: "Sections per grade",
+                            id: "sectionsPerGrade",
+                            label: t("offerSimulatorControlLabel2"),
                             value: specialistSectionsPerGrade,
                             options: specialistSectionsPerGradeOptions,
                             onChange: (value: string) => setSpecialistSectionsPerGrade(Number(value) as SpecialistSectionsPerGrade),
                           },
                           {
-                            label: "Blocks per pillar / grade",
+                            id: "blocksPerGrade",
+                            label: t("offerSimulatorControlLabel3"),
                             value: specialistBlocksPerGrade,
                             options: specialistBlocksPerGradeOptions,
                             onChange: (value: string) => setSpecialistBlocksPerGrade(Number(value) as SpecialistBlocksPerGrade),
                           },
                           {
-                            label: "Block duration",
+                            id: "blockDuration",
+                            label: t("offerSimulatorControlLabel4"),
                             value: specialistBlockDuration,
                             options: specialistBlockDurationOptions,
                             onChange: (value: string) => setSpecialistBlockDuration(Number(value) as SpecialistBlockDuration),
                           },
                           {
-                            label: "Capacity threshold",
+                            id: "capacityThreshold",
+                            label: t("offerSimulatorControlLabel5"),
                             value: specialistCapacityThreshold,
                             options: specialistCapacityThresholdOptions,
                             onChange: (value: string) => setSpecialistCapacityThreshold(Number(value) as SpecialistCapacityThreshold),
                           },
                         ].map((control) => (
-                          <label key={`visible-${control.label}`} className="space-y-2 rounded-2xl border border-slate-100 bg-slate-50 p-3">
+                          <label key={`visible-${control.id}`} className="space-y-2 rounded-2xl border border-slate-100 bg-slate-50 p-3">
                             <span className="block text-[9px] font-black uppercase tracking-widest text-slate-400">{control.label}</span>
                             <select
                               className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 outline-none focus:border-[#214B74]"
@@ -2995,8 +3020,8 @@ export default function OfferScenariosTab() {
                               onChange={(event) => control.onChange(event.target.value)}
                             >
                               {control.options.map((option) => (
-                                <option key={`visible-${control.label}-${option}`} value={option}>
-                                  {typeof option === "number" && control.label === "Block duration" ? `${option} min` : option}
+                                <option key={`visible-${control.id}-${option}`} value={option}>
+                                  {typeof option === "number" ? (control.id === "blockDuration" ? `${option} ${t("offerBlockDurationMinutesSuffix")}` : (offerLabel[option] ?? option)) : (offerLabel[option] ?? option)}
                                 </option>
                               ))}
                             </select>
@@ -3005,12 +3030,12 @@ export default function OfferScenariosTab() {
                       </div>
                       <div className="grid grid-cols-2 gap-3 lg:grid-cols-6">
                         {[
-                          ["Grade levels included", `${specialistGradeLevelCount} levels`],
-                          ["Blocks per pillar/week", `${specialistBlocksPerPillar} blocks`],
-                          ["Hours per pillar/week", specialistHoursDisplay],
-                          ["Capacity status", specialistCapacityStatus],
-                          ["Recommended FTE per pillar", `${specialistRecommendedFTEPerPillar}`],
-                          ["Capacity-equivalent across four pillars", `${specialistCapacityEquivalentAcrossFourPillars}`],
+                          [t("offerSimulatorOutputLabel1"), `${specialistGradeLevelCount} levels`],
+                          [t("offerSimulatorOutputLabel2"), `${specialistBlocksPerPillar} blocks`],
+                          [t("offerSimulatorOutputLabel3"), specialistHoursDisplay],
+                          [t("offerSimulatorOutputLabel4"), specialistCapacityStatus],
+                          [t("offerSimulatorOutputLabel5"), `${specialistRecommendedFTEPerPillar}`],
+                          [t("offerSimulatorOutputLabel6"), `${specialistCapacityEquivalentAcrossFourPillars}`],
                         ].map(([label, value]) => (
                           <div key={`visible-specialist-simulator-output-${label}`} className="rounded-2xl border border-slate-100 bg-slate-50 p-3">
                             <div className="text-[9px] font-black uppercase tracking-widest text-slate-400">{label}</div>
@@ -3022,12 +3047,12 @@ export default function OfferScenariosTab() {
                         <table className="min-w-[720px] w-full text-left">
                           <thead>
                             <tr className="bg-slate-50 text-[10px] uppercase tracking-widest text-slate-400">
-                              <th className="px-3 py-3">Reference case</th>
-                              <th className="px-3 py-3">Sections</th>
-                              <th className="px-3 py-3">Final grade</th>
-                              <th className="px-3 py-3">Blocks</th>
-                              <th className="px-3 py-3">Hours</th>
-                              <th className="px-3 py-3">Status</th>
+                              <th className="px-3 py-3">{t("offerSimulatorColumnReferenceCaseLabel")}</th>
+                              <th className="px-3 py-3">{t("offerSimulatorColumnSectionsLabel")}</th>
+                              <th className="px-3 py-3">{t("offerSimulatorColumnFinalGradeLabel")}</th>
+                              <th className="px-3 py-3">{t("offerSimulatorColumnBlocksLabel")}</th>
+                              <th className="px-3 py-3">{t("offerSimulatorColumnHoursLabel")}</th>
+                              <th className="px-3 py-3">{t("offerSimulatorColumnStatusLabel")}</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -3045,23 +3070,15 @@ export default function OfferScenariosTab() {
                         </table>
                       </div>
                       <div className="rounded-2xl border border-[#214B74]/15 bg-[#edf3f7] px-4 py-3 text-xs font-semibold leading-relaxed text-slate-700">
-                        With one section per grade, one full-time educator per specialist pillar remains
-                        viable through Grade 5. With two sections per grade, each pillar reaches at least
-                        32 weekly blocks, which triggers the need to double specialist capacity or redesign
-                        the role. For Design Technologies / Learning Experience Designer, this refers to
-                        the Learning Experience Designer's classroom-facing capacity, not a separate
-                        specialist role.
-                      </div>
+                        {t("offerSimulatorGuardrailNote")}</div>
                     </div>
                   </div>
 
                   <div className="grid gap-4 xl:grid-cols-2">
                     <div className="rounded-[2rem] bg-white p-6">
-                      <h4 className="text-xl font-black text-slate-950">Specialist capacity trigger examples</h4>
+                      <h4 className="text-xl font-black text-slate-950">{t("offerSpecialistTriggerExamplesHeading")}</h4>
                       <p className="mt-3 text-sm font-semibold leading-relaxed text-slate-600">
-                        Estes exemplos seguem a mesma lógica do simulador acima. A linha de duas seções é
-                        um stress test de capacidade, não a premissa default dos cenários.
-                      </p>
+                        {t("offerSpecialistTriggerExamplesBody")}</p>
                       <div className="mt-5 space-y-2">
                         {specialistPillarSimulatorRows.map(([label, sections, grade, blocks, hours, status]) => (
                           <div key={`console-specialist-trigger-${label}`} className="grid gap-2 rounded-2xl bg-[#f5f0e7] p-3 text-xs font-semibold text-slate-600 md:grid-cols-[1fr_0.7fr_0.7fr_0.7fr_0.5fr_1fr]">
@@ -3076,12 +3093,9 @@ export default function OfferScenariosTab() {
                       </div>
                     </div>
                     <div className="rounded-[2rem] bg-white p-6">
-                      <h4 className="text-xl font-black text-slate-950">Referência São Paulo</h4>
+                      <h4 className="text-xl font-black text-slate-950">{t("offerSaoPauloReferenceScreenHeading")}</h4>
                       <p className="mt-3 text-sm font-semibold leading-relaxed text-slate-600">
-                        São Paulo is a mature ecosystem reference, not a Rio staffing template. It shows
-                        how specialist infrastructure expands when the school reaches mature enrollment,
-                        space use, program density, and signature-program complexity.
-                      </p>
+                        {t("offerSaoPauloReferenceScreenBody")}</p>
                       <div className="mt-5 grid gap-2">
                         {currentSpecialistEcosystem.map(([area, names, count]) => (
                           <div key={`console-${area}`} className="rounded-2xl bg-[#f5f0e7] p-3">
@@ -3096,7 +3110,7 @@ export default function OfferScenariosTab() {
 
                   <div className="grid gap-4 xl:grid-cols-2">
                     <div className="rounded-[2rem] bg-white p-6">
-                      <h4 className="text-xl font-black text-slate-950">Middle School instructional model by stage</h4>
+                      <h4 className="text-xl font-black text-slate-950">{t("offerMsInstructionalModelByStageHeading")}</h4>
                       <div className="mt-5 space-y-2">
                         {middleSchoolClusters.map(([cluster, coverage, premise]) => (
                           <div key={`console-${cluster}`} className="rounded-2xl bg-[#e8eef3] p-4">
@@ -3108,7 +3122,7 @@ export default function OfferScenariosTab() {
                       </div>
                     </div>
                     <div className="rounded-[2rem] bg-white p-6">
-                      <h4 className="text-xl font-black text-slate-950">Mentoria e caminhos estruturais</h4>
+                      <h4 className="text-xl font-black text-slate-950">{t("offerMentorshipStructuralPathwaysHeading")}</h4>
                       <div className="mt-5 space-y-3">
                         {mentorshipProgression.slice(0, 5).map(([stage, model]) => (
                           <div key={`console-${stage}`} className="rounded-2xl bg-[#f5f0e7] p-3 text-xs font-semibold leading-relaxed text-slate-600">
@@ -3120,18 +3134,13 @@ export default function OfferScenariosTab() {
                   </div>
 
                   <div className="rounded-[2rem] bg-white p-6">
-                    <h4 className="text-xl font-black text-slate-950">How to read the scenarios</h4>
+                    <h4 className="text-xl font-black text-slate-950">{t("offerHowToReadScenariosHeading")}</h4>
                     <p className="mt-3 max-w-4xl text-sm font-semibold leading-relaxed text-slate-600">
-                      Scenario A protects the basic launch offer. Scenario B strengthens Lower School
-                      academic visibility through the Researchers engine. Scenario C completes the Lower
-                      School pathway and transition architecture. Scenario D changes category by activating
-                      Middle School rhythm, Passion Projects, cluster logic, and conditional project
-                      mentorship capacity.
-                    </p>
+                      {t("offerHowToReadScenariosBody")}</p>
                   </div>
 
                   <div className="rounded-[2rem] bg-white p-6">
-                    <h4 className="text-xl font-black text-slate-950">Roadmap 2028-2037</h4>
+                    <h4 className="text-xl font-black text-slate-950">{t("offerRoadmapHeading")}</h4>
                     <div className="mt-5 grid gap-2">
                       {experienceGrowthRoadmap.map((row) => (
                         <div key={`console-${row.year}`} className="grid gap-2 rounded-2xl bg-[#f5f0e7] p-3 text-xs font-semibold leading-relaxed text-slate-600 lg:grid-cols-[0.35fr_0.8fr_0.7fr_2fr]">
@@ -3146,13 +3155,12 @@ export default function OfferScenariosTab() {
 
                   <div className="rounded-[2rem] bg-slate-950 p-6 text-white">
                     <div className="text-[10px] font-black uppercase tracking-[0.28em] text-slate-400">
-                      Board synthesis
-                    </div>
+                      {t("offerBoardSynthesisHeading")}</div>
                     <div className="mt-5 grid gap-3 md:grid-cols-2">
                       {synthesisStatements.map((statement, index) => (
                         <div key={`console-${statement}`} className="rounded-[1.5rem] bg-white/10 p-4">
                           <div className="text-[10px] font-black uppercase tracking-wider text-slate-400">
-                            Ponto {index + 1}
+                            {t("offerSynthesisPointLabel")}{index + 1}
                           </div>
                           <p className="mt-2 text-sm font-semibold leading-relaxed text-slate-200">{statement}</p>
                         </div>

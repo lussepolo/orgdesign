@@ -6,6 +6,7 @@
 import { useState } from "react";
 import * as XLSX from "xlsx";
 import { Download, AlertTriangle, CheckCircle2, PackageCheck } from "lucide-react";
+import { useLocale } from "../../i18n/useLocale";
 import {
   PAYROLL_EXPORT_MATRIX,
   PAYROLL_EXPORT_ZIP_FILENAME,
@@ -38,17 +39,22 @@ function buildMeta(validationStatus: string): PayrollExportWorkbookMeta {
   };
 }
 
-function validationStatusFor(record: PayrollExportMatrixRecord): {
+function validationStatusFor(
+  record: PayrollExportMatrixRecord,
+  readyLabel: string,
+  blockedLabel: string,
+): {
   ok: boolean;
   label: string;
 } {
   const scenarioResult = buildPayrollExportScenarioResult(record);
   return scenarioResult.fopagOutput.calculationReady
-    ? { ok: true, label: "Pronto" }
-    : { ok: false, label: "Bloqueado" };
+    ? { ok: true, label: readyLabel }
+    : { ok: false, label: blockedLabel };
 }
 
 export default function PayrollExportMatrixTab() {
+  const { t } = useLocale();
   const [generatingId, setGeneratingId] = useState<string | null>(null);
   const [isBatchGenerating, setIsBatchGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -68,7 +74,9 @@ export default function PayrollExportMatrixTab() {
       XLSX.writeFile(workbook, record.filename);
     } catch (e) {
       setError(
-        `Falha ao gerar ${record.filename}: ${e instanceof Error ? e.message : String(e)}`,
+        t("exportMatrixErrorIndividual")
+          .replace("{filename}", record.filename)
+          .replace("{message}", e instanceof Error ? e.message : String(e)),
       );
     } finally {
       setGeneratingId(null);
@@ -115,7 +123,9 @@ export default function PayrollExportMatrixTab() {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     } catch (e) {
-      setError(`Falha ao gerar o ZIP: ${e instanceof Error ? e.message : String(e)}`);
+      setError(
+        t("exportMatrixErrorBatch").replace("{message}", e instanceof Error ? e.message : String(e)),
+      );
     } finally {
       setIsBatchGenerating(false);
     }
@@ -125,11 +135,8 @@ export default function PayrollExportMatrixTab() {
     <div className="space-y-6">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-lg font-bold text-slate-900">Matriz de Exportação de Folha</h2>
-          <p className="text-sm text-slate-500">
-            Doze cenários governados de folha de pagamento — Início G4/G6 × Folha
-            Balanced/Lean × Ocupação Conservadora/Base/Otimista.
-          </p>
+          <h2 className="text-lg font-bold text-slate-900">{t("exportMatrixTitle")}</h2>
+          <p className="text-sm text-slate-500">{t("exportMatrixSubtitle")}</p>
         </div>
         <button
           type="button"
@@ -138,7 +145,7 @@ export default function PayrollExportMatrixTab() {
           className="inline-flex items-center gap-2 rounded-xl border border-cockpit-navy bg-cockpit-navy px-4 py-2 text-sm font-bold text-white transition hover:bg-cockpit-ink disabled:cursor-not-allowed disabled:opacity-50"
         >
           <PackageCheck className="h-4 w-4" />
-          {isBatchGenerating ? "Gerando ZIP…" : "Baixar os 12 cenários"}
+          {isBatchGenerating ? t("exportMatrixDownloadAllBusyLabel") : t("exportMatrixDownloadAllLabel")}
         </button>
       </div>
 
@@ -153,16 +160,16 @@ export default function PayrollExportMatrixTab() {
         <table className="min-w-full divide-y divide-slate-200 text-sm">
           <thead className="bg-slate-50">
             <tr>
-              <th className="px-4 py-2 text-left font-semibold text-slate-600">Início</th>
-              <th className="px-4 py-2 text-left font-semibold text-slate-600">Folha</th>
-              <th className="px-4 py-2 text-left font-semibold text-slate-600">Ocupação</th>
-              <th className="px-4 py-2 text-left font-semibold text-slate-600">Status</th>
-              <th className="px-4 py-2 text-left font-semibold text-slate-600">Ação</th>
+              <th className="px-4 py-2 text-left font-semibold text-slate-600">{t("exportMatrixColOpening")}</th>
+              <th className="px-4 py-2 text-left font-semibold text-slate-600">{t("exportMatrixColPayroll")}</th>
+              <th className="px-4 py-2 text-left font-semibold text-slate-600">{t("exportMatrixColOccupancy")}</th>
+              <th className="px-4 py-2 text-left font-semibold text-slate-600">{t("exportMatrixColStatus")}</th>
+              <th className="px-4 py-2 text-left font-semibold text-slate-600">{t("exportMatrixColAction")}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
             {PAYROLL_EXPORT_MATRIX.map((record) => {
-              const status = validationStatusFor(record);
+              const status = validationStatusFor(record, t("exportMatrixStatusReady"), t("exportMatrixStatusBlocked"));
               const rowBusy = generatingId === record.matrixScenarioId;
               return (
                 <tr key={record.matrixScenarioId}>
@@ -189,7 +196,7 @@ export default function PayrollExportMatrixTab() {
                       className="inline-flex items-center gap-1.5 rounded-lg border border-cockpit-teal-muted bg-cockpit-teal-fill px-3 py-1.5 text-xs font-bold text-cockpit-teal transition hover:bg-cockpit-positive-fill disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       <Download className="h-3.5 w-3.5" />
-                      {rowBusy ? "Gerando…" : "Baixar XLSX"}
+                      {rowBusy ? t("exportMatrixDownloadXlsxBusyLabel") : t("exportMatrixDownloadXlsxLabel")}
                     </button>
                   </td>
                 </tr>

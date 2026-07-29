@@ -1,7 +1,8 @@
 import { Area, AreaChart, CartesianGrid, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { TrendingUp } from "lucide-react";
 import { Card } from "../common/Card";
-import { formatBRL } from "../../lib/utils";
+import { useLocale } from "../../i18n/useLocale";
+import { formatCurrencyBRL } from "../../i18n/formatters";
 import type { DreEngineOutput } from "../../features/rio-scenario-resilience/model/dreEngineContract";
 import { RECEITA_PROJECTION_YEARS } from "../../features/rio-scenario-resilience/model/receitaEngineContract";
 
@@ -14,6 +15,7 @@ interface DreEbitdaChartProps {
 // derived from dreOutput.byYear (already-computed engine output) — no new
 // calculations, no chart-library upgrade.
 export default function DreEbitdaChart({ dreOutput }: DreEbitdaChartProps) {
+  const { t, locale } = useLocale();
   const series = RECEITA_PROJECTION_YEARS.map((year) => ({
     year,
     ebitda: dreOutput.byYear[year].ebitda,
@@ -23,24 +25,24 @@ export default function DreEbitdaChart({ dreOutput }: DreEbitdaChartProps) {
 
   return (
     <Card
-      title="EBITDA Operating Trajectory"
+      title={t("dreEbitdaChartTitle")}
       icon={TrendingUp}
       className="border-cockpit-border bg-cockpit-card shadow-[0_12px_32px_rgba(15,23,42,0.06)]"
     >
       <p className="mb-4 text-sm leading-relaxed text-cockpit-meta">
-        Shows DRE EBITDA across the projection period. This is not cash flow and does not include CAPEX.
+        {t("dreEbitdaChartIntro")}
       </p>
 
       <div className="mb-4 rounded-2xl border border-cockpit-amber-border bg-cockpit-amber-fill p-4">
         <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-cockpit-meta">
-          EBITDA-Positive Year
+          {t("dreEbitdaPositiveYearLabel")}
         </div>
         <div className="mt-1 text-sm font-bold text-cockpit-ink">
           {ebitdaPositiveYear
-            ? `EBITDA turns positive in ${ebitdaPositiveYear}`
-            : "Not reached within the projection horizon (2028–2047)"}
+            ? t("dreEbitdaTurnsPositive").replace("{year}", String(ebitdaPositiveYear))
+            : t("dreEbitdaNotReached")}
         </div>
-        <div className="mt-1 text-xs text-cockpit-meta">DRE EBITDA &gt; 0; not investment payback.</div>
+        <div className="mt-1 text-xs text-cockpit-meta">{t("dreEbitdaNotInvestmentPayback")}</div>
       </div>
 
       <div
@@ -63,7 +65,7 @@ export default function DreEbitdaChart({ dreOutput }: DreEbitdaChartProps) {
                 tickFormatter={(value) => `${Math.round(value / 1000000)}M`}
               />
               <Tooltip
-                formatter={(value: number) => formatBRL(value)}
+                formatter={(value: number) => formatCurrencyBRL(value, locale)}
                 contentStyle={{ borderRadius: 16, borderColor: "#e3e0d8" }}
               />
               <ReferenceLine y={0} stroke="#94a3b8" strokeDasharray="3 3" />

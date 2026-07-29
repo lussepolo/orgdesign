@@ -1,6 +1,7 @@
 import { SlidersHorizontal } from "lucide-react";
 import { Card } from "../common/Card";
 import type { ThresholdControl } from "../../lib/viability/types";
+import { useLocale } from "../../i18n/useLocale";
 
 interface ThresholdControlPanelProps {
   controls: ThresholdControl[];
@@ -9,16 +10,16 @@ interface ThresholdControlPanelProps {
 export default function ThresholdControlPanel({
   controls,
 }: ThresholdControlPanelProps) {
+  const { t } = useLocale();
   return (
     <Card
-      title="Threshold Question Setup"
-      subtitle="Define the threshold question to be assessed"
+      title={t("thresholdControlTitle")}
+      subtitle={t("thresholdControlSubtitle")}
       icon={SlidersHorizontal}
     >
       <div className="mb-4 rounded-2xl border border-amber-100 bg-amber-50 p-4">
         <p className="text-sm leading-relaxed text-slate-600">
-          Use this screen to frame questions such as minimum conditions for viability, maximum viable
-          CAPEX, minimum viable tuition, and minimum enrollment required.
+          {t("thresholdControlIntro")}
         </p>
       </div>
       <div className="space-y-3">

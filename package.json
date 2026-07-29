@@ -13,6 +13,9 @@
     "qa:phase15f": "tsx tests/phase15f/phase15f.run.ts",
     "validate:phase15g2": "tsx scripts/validate-phase15g2.ts",
     "qa:phase15g2": "tsx tests/phase15g2/dre-capital-handoff.run.ts",
+    "qa:x2t-state-invariance": "tsx tests/phase15g2/x2t-state-invariance.run.ts",
+    "qa:x2t-accessibility": "tsx tests/phase15g2/x2t-accessibility-audit.run.ts",
+    "qa:x2t-crawl-and-screenshots": "tsx tests/phase15g2/x2t-bilingual-crawl-and-screenshots.run.ts",
     "validate:phase15h2": "tsx scripts/validate-phase15h2.ts",
     "qa:phase15h2": "tsx tests/phase15h2/secondary-capacity.run.ts",
     "validate:phase15i1": "tsx scripts/validate-phase15i1.ts",
@@ -42,6 +45,7 @@
     "validate:v10-p1": "tsx scripts/validate-v10-p1.ts",
     "validate:v10-f2": "tsx scripts/validate-v10-f2.ts",
     "validate:v10-x1": "tsx scripts/validate-v10-x1-payroll-export-matrix.ts",
+    "validate:v10-x2t": "tsx scripts/validate-v10-x2t-workspace-architecture-i18n.ts",
     "validate:phase15u2": "tsx scripts/validate-phase15u2.ts",
     "qa:v10-e1": "tsx tests/v10e1/v10-e1.run.ts"
   },

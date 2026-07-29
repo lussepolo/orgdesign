@@ -23,6 +23,8 @@ import ThresholdNarrativePanel from "../viability/ThresholdNarrativePanel";
 import { Card } from "../common/Card";
 import { useViabilitySimulator } from "../../hooks/useViabilitySimulator";
 import { cn } from "../../lib/utils";
+import { useLocale } from "../../i18n/useLocale";
+import type { TranslationKey } from "../../i18n/localeContract";
 
 function formatSensitivityLabel(value: string) {
   return value
@@ -31,6 +33,7 @@ function formatSensitivityLabel(value: string) {
 }
 
 export default function ViabilitySimulatorTab() {
+  const { t } = useLocale();
   const {
     state,
     setState,
@@ -50,12 +53,12 @@ export default function ViabilitySimulatorTab() {
   const [isProfilePinned, setIsProfilePinned] = useState(false);
   const [activeBaselineSection, setActiveBaselineSection] = useState("baseline-setup");
 
-  const baselineSections = useMemo(
+  const baselineSections: Array<{ id: string; labelKey: TranslationKey }> = useMemo(
     () => [
-      { id: "baseline-setup", label: "Setup" },
-      { id: "baseline-kpis", label: "Decision Summary" },
-      { id: "baseline-profile", label: "Operating Profile" },
-      { id: "baseline-table", label: "Annual Audit" },
+      { id: "baseline-setup", labelKey: "viabilityTabSectionSetup" },
+      { id: "baseline-kpis", labelKey: "viabilityTabSectionKpis" },
+      { id: "baseline-profile", labelKey: "viabilityTabSectionProfile" },
+      { id: "baseline-table", labelKey: "viabilityTabSectionTable" },
     ],
     [],
   );
@@ -112,37 +115,67 @@ export default function ViabilitySimulatorTab() {
       : null;
 
   const activeCapexCount = state.capexCategories.filter((row) => row.included).length;
-  const compactBaselineContext = [
+  const compactBaselineContext: Array<{ labelKey: TranslationKey; value: string }> = [
     {
-      label: "Enrollment",
+      labelKey: "viabilityTabContextLabelEnrollment",
       value:
         state.enrollmentScenario === "full-seat"
-          ? "Full Seat"
-          : state.enrollmentScenario === "intermediario"
-            ? "Intermediário"
+          ? t("scenarioFullSeat")
+          : state.enrollmentScenario === "base"
+            ? t("scenarioBase")
             : state.enrollmentScenario === "pessimista"
-              ? "Pessimista"
-              : "Otimista",
+              ? t("scenarioPessimista")
+              : t("scenarioOtimista"),
     },
     {
-      label: "Tuition",
+      labelKey: "viabilityTabContextLabelTuition",
       value: state.tuitionScenario.toUpperCase().replace("CEN", "RJ Cen "),
     },
     {
-      label: "Cost",
+      labelKey: "viabilityTabContextLabelCost",
       value: state.costScenario[0].toUpperCase() + state.costScenario.slice(1),
     },
     {
-      label: "CAPEX",
+      labelKey: "viabilityTabContextLabelCapex",
       value:
         state.capexMode === "structured"
-          ? `Structured (${activeCapexCount} active)`
-          : "Single total",
+          ? t("viabilityTabCapexStructuredValue").replace("{count}", String(activeCapexCount))
+          : t("viabilityTabCapexSingleTotalValue"),
     },
     {
-      label: "Discount Rate",
+      labelKey: "viabilityTabContextLabelDiscountRate",
       value: `${state.discountRate.toFixed(1)}%`,
     },
+  ];
+
+  const modeCards: Array<{ icon: typeof BarChart3; titleKey: TranslationKey; textKey: TranslationKey }> = [
+    {
+      icon: BarChart3,
+      titleKey: "viabilityTabModeCardBaselineTitle",
+      textKey: "viabilityTabModeCardBaselineText",
+    },
+    {
+      icon: Grid2x2,
+      titleKey: "viabilityTabModeCardSensitivityTitle",
+      textKey: "viabilityTabModeCardSensitivityText",
+    },
+    {
+      icon: Target,
+      titleKey: "viabilityTabModeCardThresholdsTitle",
+      textKey: "viabilityTabModeCardThresholdsText",
+    },
+    {
+      icon: Target,
+      titleKey: "viabilityTabModeCardBoundaryTitle",
+      textKey: "viabilityTabModeCardBoundaryText",
+    },
+  ];
+
+  const thresholdQuestionKeys: TranslationKey[] = [
+    "viabilityTabThresholdQ1",
+    "viabilityTabThresholdQ2",
+    "viabilityTabThresholdQ3",
+    "viabilityTabThresholdQ4",
   ];
 
   return (
@@ -156,102 +189,80 @@ export default function ViabilitySimulatorTab() {
         <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-3xl">
             <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">
-              Board workflow
+              {t("viabilityTabBoardWorkflowEyebrow")}
             </div>
             <h3 className="text-xl font-bold text-white">
-              One simulator, three board review modes
+              {t("viabilityTabWorkflowHeadline")}
             </h3>
             <p className="mt-1 text-sm leading-relaxed text-slate-300">
-              Baseline summarizes the current business case. Sensitivity compares selected assumption
-              changes. Thresholds frames the conditions required to support viability.
+              {t("viabilityTabWorkflowIntro")}
             </p>
           </div>
           <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200">
-            Planning horizon: <strong className="text-white">2028–2047</strong>
+            {t("viabilityTabPlanningHorizonLabel")} <strong className="text-white">2028–2047</strong>
           </div>
         </div>
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-4">
-          {[
-            {
-              icon: BarChart3,
-              title: "Baseline",
-              text: "Review the current case, inspect the annual profile, and assess the economic profile under the active assumptions.",
-            },
-            {
-              icon: Grid2x2,
-              title: "Sensitivity",
-              text: "Compare a grid of model runs where only the selected row and column variables change.",
-            },
-            {
-              icon: Target,
-              title: "Thresholds",
-              text: "Assess the conditions the project would need to meet to support viability.",
-            },
-            {
-              icon: Target,
-              title: "Model Boundary",
-              text: "Teaching remains scenario-responsive; non-teaching remains shared/global in the current planning model.",
-            },
-          ].map((item) => (
-            <div key={item.title} className="rounded-2xl border border-white/10 bg-white/5 p-4">
+          {modeCards.map((item) => (
+            <div key={item.titleKey} className="rounded-2xl border border-white/10 bg-white/5 p-4">
               <item.icon className="h-5 w-5 text-white" />
-              <div className="mt-3 text-sm font-bold text-white">{item.title}</div>
-              <p className="mt-1 text-xs leading-relaxed text-slate-300">{item.text}</p>
+              <div className="mt-3 text-sm font-bold text-white">{t(item.titleKey)}</div>
+              <p className="mt-1 text-xs leading-relaxed text-slate-300">{t(item.textKey)}</p>
             </div>
           ))}
         </div>
       </Card>
 
       <Card
-        title="Model Context"
-        subtitle="Current assumptions and caveats for the active case"
+        title={t("viabilityTabModelContextTitle")}
+        subtitle={t("viabilityTabModelContextSubtitle")}
       >
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-5">
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
             <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">
-              Teaching model
+              {t("viabilityTabTeachingModelLabel")}
             </div>
-            <div className="mt-2 text-sm font-bold text-slate-900">Scenario-responsive</div>
+            <div className="mt-2 text-sm font-bold text-slate-900">{t("viabilityTabScenarioResponsiveValue")}</div>
             <p className="mt-1 text-xs leading-relaxed text-slate-500">
-              Students, sections, teaching payroll, revenue, and downstream cost outputs follow the selected enrollment path.
+              {t("viabilityTabTeachingModelBody")}
             </p>
           </div>
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
             <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">
-              Non-teaching model
+              {t("viabilityTabNonTeachingModelLabel")}
             </div>
-            <div className="mt-2 text-sm font-bold text-slate-900">Shared / global</div>
+            <div className="mt-2 text-sm font-bold text-slate-900">{t("viabilityTabSharedGlobalValue")}</div>
             <p className="mt-1 text-xs leading-relaxed text-slate-500">
-              Leadership, backoffice, and specialist institutional roles remain shared across scenarios.
+              {t("viabilityTabNonTeachingModelBody")}
             </p>
           </div>
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
             <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">
-              Horizon
+              {t("viabilityTabHorizonLabel")}
             </div>
             <div className="mt-2 text-sm font-bold text-slate-900">2028–2047</div>
             <p className="mt-1 text-xs leading-relaxed text-slate-500">
-              Baseline and annual tables run on the current 20-year planning window.
+              {t("viabilityTabHorizonBody")}
             </p>
           </div>
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
             <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">
-              Full Seat handling
+              {t("viabilityTabFullSeatHandlingLabel")}
             </div>
-            <div className="mt-2 text-sm font-bold text-slate-900">Uses optimistic path</div>
+            <div className="mt-2 text-sm font-bold text-slate-900">{t("viabilityTabUsesOptimisticPathValue")}</div>
             <p className="mt-1 text-xs leading-relaxed text-slate-500">
-              Full Seat currently reuses the optimistic operating path until a dedicated capacity schedule is added.
+              {t("viabilityTabFullSeatHandlingBody")}
             </p>
           </div>
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
             <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">
-              Active CAPEX mode
+              {t("viabilityTabActiveCapexModeLabel")}
             </div>
             <div className="mt-2 text-sm font-bold text-slate-900">
-              {state.capexMode === "structured" ? "Structured by category" : "Single total"}
+              {state.capexMode === "structured" ? t("viabilityTabStructuredByCategoryValue") : t("viabilityTabSingleTotalValue")}
             </div>
             <p className="mt-1 text-xs leading-relaxed text-slate-500">
-              Baseline cash flow follows the currently selected capital input mode.
+              {t("viabilityTabActiveCapexModeBody")}
             </p>
           </div>
         </div>
@@ -263,10 +274,10 @@ export default function ViabilitySimulatorTab() {
             <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
               <div>
                 <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">
-                  Baseline review path
+                  {t("viabilityTabBaselineReviewPathLabel")}
                 </div>
                 <p className="mt-1 text-sm text-slate-600">
-                  Move from setup context to decision summary, operating profile, and annual audit.
+                  {t("viabilityTabBaselineReviewPathBody")}
                 </p>
               </div>
               <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
@@ -282,7 +293,7 @@ export default function ViabilitySimulatorTab() {
                         : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:text-slate-900",
                     )}
                   >
-                    {section.label}
+                    {t(section.labelKey)}
                   </button>
                 ))}
               </div>
@@ -295,8 +306,8 @@ export default function ViabilitySimulatorTab() {
               className="scroll-mt-32 space-y-4 xl:sticky xl:top-40 xl:self-start"
             >
               <Card
-                title="Current Scenario Context"
-                subtitle="Summary for the active baseline case"
+                title={t("viabilityTabCurrentScenarioTitle")}
+                subtitle={t("viabilityTabCurrentScenarioSubtitle")}
                 icon={BarChart3}
                 actions={
                   <button
@@ -304,23 +315,22 @@ export default function ViabilitySimulatorTab() {
                     onClick={() => setIsSetupExpanded((current) => !current)}
                     className="rounded-full border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
                   >
-                    {isSetupExpanded ? "Hide full setup" : "Show full setup"}
+                    {isSetupExpanded ? t("viabilityTabHideFullSetup") : t("viabilityTabShowFullSetup")}
                   </button>
                 }
               >
                 <div className="space-y-4">
                   <p className="text-sm leading-relaxed text-slate-600">
-                      The active scenario stays visible here while the full setup form remains optional,
-                      keeping the baseline screen focused on review.
+                      {t("viabilityTabActiveScenarioNote")}
                   </p>
                   <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-1">
                     {compactBaselineContext.map((item) => (
                       <div
-                        key={item.label}
+                        key={item.labelKey}
                         className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3"
                       >
                         <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">
-                          {item.label}
+                          {t(item.labelKey)}
                         </div>
                         <div className="mt-1 text-sm font-bold text-slate-900">{item.value}</div>
                       </div>
@@ -328,11 +338,10 @@ export default function ViabilitySimulatorTab() {
                   </div>
                   <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
                     <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">
-                      Workflow
+                      {t("viabilityTabWorkflowLabel")}
                     </div>
                     <p className="mt-2 text-sm leading-relaxed text-slate-600">
-                      Expand setup to change assumptions, then return to the decision summary,
-                      operating profile, or annual audit.
+                      {t("viabilityTabWorkflowBody")}
                     </p>
                   </div>
                 </div>
@@ -348,58 +357,57 @@ export default function ViabilitySimulatorTab() {
 
             <div className="min-w-0 space-y-6">
               <Card
-                title="Baseline Board Review"
-                subtitle="Setup context, decision summary, operating profile, and annual audit"
+                title={t("viabilityTabBoardReviewTitle")}
+                subtitle={t("viabilityTabBoardReviewSubtitle")}
                 icon={BarChart3}
               >
                 <p className="text-sm leading-relaxed text-slate-600">
-                  Baseline is organized as a board review path: confirm context, read the headline
-                  metrics, inspect the operating profile, then audit the annual cash flow table.
+                  {t("viabilityTabBoardReviewBody")}
                 </p>
               </Card>
               <section id="baseline-kpis" className="scroll-mt-32">
                 <ViabilityKpiRow kpis={baseline.kpis} />
               </section>
               <Card
-                title="Baseline Assembly"
-                subtitle="How the current baseline is assembled"
+                title={t("viabilityTabBaselineAssemblyTitle")}
+                subtitle={t("viabilityTabBaselineAssemblySubtitle")}
                 icon={BarChart3}
               >
                 <div className="grid grid-cols-1 gap-4 lg:grid-cols-4">
                   <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
                     <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">
-                      Operating source
+                      {t("viabilityTabOperatingSourceLabel")}
                     </div>
-                    <div className="mt-2 text-sm font-bold text-slate-900">Live payroll path</div>
+                    <div className="mt-2 text-sm font-bold text-slate-900">{t("viabilityTabLivePayrollPathValue")}</div>
                     <p className="mt-1 text-xs leading-relaxed text-slate-500">
-                      Revenue, students, sections, and staffing start from the live payroll projection for the selected case.
+                      {t("viabilityTabOperatingSourceBody")}
                     </p>
                   </div>
                   <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
                     <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">
-                      Teaching assumptions
+                      {t("viabilityTabTeachingAssumptionsLabel")}
                     </div>
-                    <div className="mt-2 text-sm font-bold text-slate-900">Scenario-responsive</div>
+                    <div className="mt-2 text-sm font-bold text-slate-900">{t("viabilityTabScenarioResponsiveValue")}</div>
                     <p className="mt-1 text-xs leading-relaxed text-slate-500">
-                      Teaching demand and teaching-side cost outputs follow the selected enrollment and tuition path.
+                      {t("viabilityTabTeachingAssumptionsBody")}
                     </p>
                   </div>
                   <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
                     <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">
-                      Non-teaching assumptions
+                      {t("viabilityTabNonTeachingAssumptionsLabel")}
                     </div>
-                    <div className="mt-2 text-sm font-bold text-slate-900">Shared / global</div>
+                    <div className="mt-2 text-sm font-bold text-slate-900">{t("viabilityTabSharedGlobalValue")}</div>
                     <p className="mt-1 text-xs leading-relaxed text-slate-500">
-                      Leadership, backoffice, and specialist institutional roles remain shared across scenarios.
+                      {t("viabilityTabNonTeachingAssumptionsBody")}
                     </p>
                   </div>
                   <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
                     <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">
-                      Finance layer
+                      {t("viabilityTabFinanceLayerLabel")}
                     </div>
-                    <div className="mt-2 text-sm font-bold text-slate-900">Viability-specific overlays</div>
+                    <div className="mt-2 text-sm font-bold text-slate-900">{t("viabilityTabFinanceLayerValue")}</div>
                     <p className="mt-1 text-xs leading-relaxed text-slate-500">
-                      Opex, CAPEX, discounting, and KPI calculations are layered on top of the operating projection.
+                      {t("viabilityTabFinanceLayerBody")}
                     </p>
                   </div>
                 </div>
@@ -422,12 +430,12 @@ export default function ViabilitySimulatorTab() {
                         {isProfileCollapsed ? (
                           <span className="inline-flex items-center gap-1">
                             <ChevronDown className="h-3.5 w-3.5" />
-                            Expand
+                            {t("viabilityTabExpand")}
                           </span>
                         ) : (
                           <span className="inline-flex items-center gap-1">
                             <ChevronUp className="h-3.5 w-3.5" />
-                            Collapse
+                            {t("viabilityTabCollapse")}
                           </span>
                         )}
                       </button>
@@ -442,7 +450,7 @@ export default function ViabilitySimulatorTab() {
                             : "border-slate-200 text-slate-600 hover:border-slate-300 hover:text-slate-900",
                         )}
                       >
-                        {isProfilePinned ? "Unpin emphasis" : "Pin emphasis"}
+                        {isProfilePinned ? t("viabilityTabUnpinEmphasis") : t("viabilityTabPinEmphasis")}
                       </button>
                     </div>
                   }
@@ -463,7 +471,7 @@ export default function ViabilitySimulatorTab() {
                 className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 shadow-sm transition hover:border-slate-300 hover:text-slate-900"
               >
                 <ArrowUp className="h-4 w-4" />
-                {previousSection.label}
+                {t(previousSection.labelKey)}
               </button>
             )}
             {nextSection ? (
@@ -473,7 +481,7 @@ export default function ViabilitySimulatorTab() {
                 className="inline-flex items-center gap-2 rounded-full border border-slate-900 bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
               >
                 <ArrowDown className="h-4 w-4" />
-                {nextSection.label}
+                {t(nextSection.labelKey)}
               </button>
             ) : (
               <button
@@ -482,7 +490,7 @@ export default function ViabilitySimulatorTab() {
                 className="inline-flex items-center gap-2 rounded-full border border-slate-900 bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
               >
                 <ArrowUp className="h-4 w-4" />
-                Back to top
+                {t("viabilityTabBackToTop")}
               </button>
             )}
           </div>
@@ -492,26 +500,26 @@ export default function ViabilitySimulatorTab() {
       {state.activeScreen === "sensitivity" && (
         <div className="space-y-6">
           <Card
-            title="Sensitivity Matrix"
-            subtitle="Current dimensions, metric, and fixed context"
+            title={t("viabilityTabSensitivityMatrixTitle")}
+            subtitle={t("viabilityTabSensitivityMatrixSubtitle")}
             icon={Grid2x2}
           >
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-4">
               <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Rows vary</div>
+                <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">{t("viabilityTabRowsVaryLabel")}</div>
                 <div className="mt-2 text-sm font-bold text-slate-900">{formatSensitivityLabel(rowVariable)}</div>
               </div>
               <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Columns vary</div>
+                <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">{t("viabilityTabColumnsVaryLabel")}</div>
                 <div className="mt-2 text-sm font-bold text-slate-900">{formatSensitivityLabel(columnVariable)}</div>
               </div>
               <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Metric shown</div>
+                <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">{t("viabilityTabMetricShownLabel")}</div>
                 <div className="mt-2 text-sm font-bold text-slate-900">{sensitivityMetric}</div>
               </div>
               <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Held fixed</div>
-                <div className="mt-2 text-sm font-bold text-slate-900">Current model context</div>
+                <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">{t("viabilityTabHeldFixedLabel")}</div>
+                <div className="mt-2 text-sm font-bold text-slate-900">{t("viabilityTabCurrentModelContextValue")}</div>
               </div>
             </div>
           </Card>
@@ -531,19 +539,14 @@ export default function ViabilitySimulatorTab() {
       {state.activeScreen === "thresholds" && (
         <div className="space-y-6">
           <Card
-            title="Threshold Questions"
-            subtitle="Decision questions this view is intended to support"
+            title={t("viabilityTabThresholdQuestionsTitle")}
+            subtitle={t("viabilityTabThresholdQuestionsSubtitle")}
             icon={Target}
           >
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-4">
-              {[
-                "Minimum conditions for viability",
-                "Maximum viable CAPEX",
-                "Minimum viable tuition",
-                "Minimum enrollment required",
-              ].map((item) => (
-                <div key={item} className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm font-medium text-slate-700">
-                  {item}
+              {thresholdQuestionKeys.map((key) => (
+                <div key={key} className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm font-medium text-slate-700">
+                  {t(key)}
                 </div>
               ))}
             </div>

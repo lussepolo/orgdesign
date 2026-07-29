@@ -33,6 +33,7 @@ import {
 import { ScenarioConfigurationPanel, IntegratedScenarioConfigurationPanel } from "./ScenarioConfigurationPanel";
 import { ScenarioResultPanel } from "./ScenarioResultPanel";
 import { ScenarioComparisonPanel } from "./ScenarioComparisonPanel";
+import { useLocale } from "../../../../i18n/useLocale";
 
 // Canonical default configuration (production scenario input, not a cached
 // workbook fixture). The UI calls calculateInvestmentInterpretation on this
@@ -83,24 +84,32 @@ function configKey(input: CapitalDecisionEngineInput): string {
 // ── Inherited DRE governance disclosure (compact, non-blocking) ───────────────
 
 function CapitalDecisionGovernanceDisclosure() {
+  const { t } = useLocale();
   const gov = DRE_GOVERNANCE_READINESS;
-  const engineLabel = gov.engineeringReadiness === "engineering_ready" ? "validated" : "not ready";
+  const engineLabel =
+    gov.engineeringReadiness === "engineering_ready"
+      ? t("capitalDecisionGovEngineValidated")
+      : t("capitalDecisionGovEngineNotReady");
   const financeLabel =
-    gov.financeSourceReadiness === "confirmed" ? "confirmed" : "pending";
+    gov.financeSourceReadiness === "confirmed"
+      ? t("capitalDecisionGovFinanceConfirmed")
+      : t("capitalDecisionGovFinancePending");
   const boardLabel =
-    gov.boardRatificationReadiness === "board_ratified" ? "ratified" : "not ratified";
+    gov.boardRatificationReadiness === "board_ratified"
+      ? t("capitalDecisionGovBoardRatified")
+      : t("capitalDecisionGovBoardNotRatified");
   return (
     <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-xs text-slate-600">
       <p className="mb-1 font-semibold uppercase tracking-wide text-slate-500">
-        DRE Governance Status (inherited)
+        {t("capitalDecisionGovDisclosureTitle")}
       </p>
       <div className="flex flex-wrap gap-x-6 gap-y-1">
-        <span>Technical engine: <span className="font-medium text-slate-700">{engineLabel}</span></span>
-        <span>Finance-source confirmation: <span className="font-medium text-amber-700">{financeLabel}</span></span>
-        <span>Working scenario ratification: <span className="font-medium text-slate-700">{boardLabel}</span></span>
+        <span>{t("capitalDecisionGovTechnicalEngineLabel")} <span className="font-medium text-slate-700">{engineLabel}</span></span>
+        <span>{t("capitalDecisionGovFinanceConfirmationLabel")} <span className="font-medium text-amber-700">{financeLabel}</span></span>
+        <span>{t("capitalDecisionGovWorkingScenarioLabel")} <span className="font-medium text-slate-700">{boardLabel}</span></span>
       </div>
       <p className="mt-1.5 text-slate-500">
-        CAPEX and investment metrics calculate regardless of Finance-source confirmation or board ratification status.
+        {t("capitalDecisionGovFooterNote")}
       </p>
     </div>
   );
@@ -119,6 +128,7 @@ export type CapitalDecisionViewProps =
 // ── Standalone mode (Phase 15F, preserved exactly) ───────────────────────────
 
 function StandaloneCapitalDecisionView() {
+  const { t } = useLocale();
   const [scenarios, setScenarios] = useState<SavedScenario[]>(() => [
     createScenario("Scenario 1", DEFAULT_INPUT),
   ]);
@@ -205,18 +215,13 @@ function StandaloneCapitalDecisionView() {
   return (
     <div className="space-y-8">
       <Card
-        title="Capital Decision"
-        subtitle="Rio Scenario Resilience Simulator"
+        title={t("wsCapitalTitle")}
+        subtitle={t("capitalDecisionStandaloneSubtitle")}
         icon={Activity}
-        actions={<Badge variant="info">Phase 15 · Capital Decision</Badge>}
+        actions={<Badge variant="info">{t("capitalDecisionBadge")}</Badge>}
       >
         <p className="max-w-3xl text-sm leading-6 text-slate-600">
-          Configure up to {MAX_SAVED_SCENARIOS} scenarios using the five currently variable
-          decision levers (Opening Grades, Occupancy, Org Design Structure, Tuition, CAPEX).
-          Each configuration is evaluated by the committed Phase 15E investment-interpretation
-          engine. Results show calculation readiness, the investment reference (TIR versus the
-          reference WACC), VPL, and discounted payback -- factual figures only, without a Tier,
-          score, ranking, or recommendation.
+          {t("capitalDecisionStandaloneIntro").replace("{max}", String(MAX_SAVED_SCENARIOS))}
         </p>
       </Card>
 
@@ -237,7 +242,7 @@ function StandaloneCapitalDecisionView() {
       <section className="space-y-3">
         <div>
           <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
-            Scenario Result
+            {t("capitalDecisionScenarioResultLabel")}
           </p>
           <h2 className="text-lg font-semibold text-slate-900">{selectedScenario.name}</h2>
         </div>
@@ -264,6 +269,7 @@ function IntegratedCapitalDecisionView({
   workspace: CapitalDecisionWorkspaceController;
   onNavigateToDre: () => void;
 }) {
+  const { t } = useLocale();
   const { state, setActiveScenario, updateCapexOption, duplicateForCapexVariant, removeScenario } =
     workspace;
   const [scenarioAId, setScenarioAId] = useState<string | null>(null);
@@ -278,14 +284,13 @@ function IntegratedCapitalDecisionView({
     return (
       <div className="space-y-8">
         <Card
-          title="Decisão de Capital"
-          subtitle="Integrated mode — DRE handoff"
+          title={t("wsCapitalTitle")}
+          subtitle={t("capitalDecisionIntegratedSubtitle")}
           icon={Activity}
-          actions={<Badge variant="info">Phase 15 · Capital Decision</Badge>}
+          actions={<Badge variant="info">{t("capitalDecisionBadge")}</Badge>}
         >
           <p className="max-w-3xl text-sm leading-6 text-slate-600">
-            No scenarios yet. Go to the DRE Scenario Simulator, configure the four DRE levers,
-            and click "Send to Capital Decision" to create your first integrated scenario.
+            {t("capitalDecisionEmptyStateIntro")}
           </p>
           <div className="mt-4">
             <button
@@ -293,7 +298,7 @@ function IntegratedCapitalDecisionView({
               onClick={onNavigateToDre}
               className="rounded-full bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
             >
-              ← Go to DRE Scenario Simulator
+              {t("capitalDecisionGoToDreButton")}
             </button>
           </div>
         </Card>
@@ -304,15 +309,13 @@ function IntegratedCapitalDecisionView({
   return (
     <div className="space-y-8">
       <Card
-        title="Decisão de Capital"
-        subtitle="Integrated mode — DRE handoff"
+        title={t("wsCapitalTitle")}
+        subtitle={t("capitalDecisionIntegratedSubtitle")}
         icon={Activity}
-        actions={<Badge variant="info">Phase 15 · Capital Decision</Badge>}
+        actions={<Badge variant="info">{t("capitalDecisionBadge")}</Badge>}
       >
         <p className="max-w-3xl text-sm leading-6 text-slate-600">
-          Scenarios imported from the DRE Simulator. The four DRE fields are fixed per scenario
-          and can only be changed in the DRE Simulator. CAPEX is the one freely editable lever
-          here. Each configuration is evaluated by the Phase 15E investment-interpretation engine.
+          {t("capitalDecisionIntegratedIntro")}
         </p>
       </Card>
 
@@ -334,7 +337,7 @@ function IntegratedCapitalDecisionView({
         <section className="space-y-3">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
-              Scenario Result
+              {t("capitalDecisionScenarioResultLabel")}
             </p>
             <h2 className="text-lg font-semibold text-slate-900">{activeScenario.name}</h2>
           </div>

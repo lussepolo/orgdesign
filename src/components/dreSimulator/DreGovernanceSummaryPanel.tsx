@@ -7,6 +7,8 @@ import { useState } from "react";
 import { Info, CheckCircle2, Clock, ChevronDown, ChevronUp } from "lucide-react";
 import { Card } from "../common/Card";
 import { DRE_GOVERNANCE_READINESS } from "../../features/rio-scenario-resilience/model/dreGovernanceReadiness";
+import { useLocale } from "../../i18n/useLocale";
+import type { TranslationKey } from "../../i18n/localeContract";
 
 const F_CODE_MAP: Record<string, string> = {
   outras_receitas_reajuste: "F01",
@@ -16,49 +18,49 @@ const F_CODE_MAP: Record<string, string> = {
   instructional_capacity_payroll_sync: "F06",
 };
 
-const F_DESCRIPTIONS: Record<string, string> = {
-  outras_receitas_reajuste: "Outras Receitas C9 source/index pending",
-  tuition_source_provenance: "Tuition signed XLSX pending",
-  discount_schedule_provenance: "Discount schedule signed reference pending",
-  enrollment_baseline_parity: "228 vs 246 scenario mapping pending",
-  instructional_capacity_payroll_sync: "Payroll/capacity reconciliation ownership pending",
+const F_DESCRIPTION_KEYS: Record<string, TranslationKey> = {
+  outras_receitas_reajuste: "dreGovSummaryDescOutrasReceitas",
+  tuition_source_provenance: "dreGovSummaryDescTuitionProvenance",
+  discount_schedule_provenance: "dreGovSummaryDescDiscountProvenance",
+  enrollment_baseline_parity: "dreGovSummaryDescEnrollmentParity",
+  instructional_capacity_payroll_sync: "dreGovSummaryDescCapacitySync",
 };
 
-const STATUS_LABELS: Record<string, string> = {
-  provisional_source: "Provisional source",
-  reconciliation_required: "Reconciliation required",
-  pending_finance_confirmation: "Pending confirmation",
+const STATUS_LABEL_KEYS: Record<string, TranslationKey> = {
+  provisional_source: "dreGovSummaryStatusProvisional",
+  reconciliation_required: "dreGovSummaryStatusReconciliation",
+  pending_finance_confirmation: "dreGovSummaryStatusPendingConfirmation",
 };
 
 export default function DreGovernanceSummaryPanel() {
+  const { t } = useLocale();
   const [showDetails, setShowDetails] = useState(false);
   const openItems = DRE_GOVERNANCE_READINESS.openItems;
 
   return (
     <div data-testid="dre-governance-summary">
       <Card
-        title="Governance Status"
-        subtitle="Source-closure and ratification summary"
+        title={t("dreGovSummaryTitle")}
+        subtitle={t("dreGovSummarySubtitle")}
         icon={Info}
       >
         <div className="space-y-1.5 mb-4">
           <div className="flex items-center gap-2">
             <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-500" />
-            <span className="text-sm text-slate-700">Simulation available.</span>
+            <span className="text-sm text-slate-700">{t("dreGovSummarySimAvailable")}</span>
           </div>
           <div className="flex items-center gap-2">
             <Clock className="h-3.5 w-3.5 shrink-0 text-amber-500" />
-            <span className="text-sm text-slate-600">Finance-source closure pending.</span>
+            <span className="text-sm text-slate-600">{t("dreGovSummaryFinancePending")}</span>
           </div>
           <div className="flex items-center gap-2">
             <Clock className="h-3.5 w-3.5 shrink-0 text-slate-400" />
-            <span className="text-sm text-slate-600">Board ratification pending.</span>
+            <span className="text-sm text-slate-600">{t("dreGovSummaryBoardPending")}</span>
           </div>
         </div>
 
         <p className="text-xs text-slate-500 mb-4">
-          {openItems.length} non-blocking source-governance items remain pending before board
-          ratification. These items do not block scenario calculation.
+          {t("dreGovSummaryOpenItemsNote").replace("{n}", String(openItems.length))}
         </p>
 
         <button
@@ -71,20 +73,21 @@ export default function DreGovernanceSummaryPanel() {
           ) : (
             <ChevronDown className="h-3.5 w-3.5" />
           )}
-          Methodology &amp; Source Status
+          {t("dreGovSummaryMethodologyToggle")}
         </button>
 
         {showDetails && (
           <div className="mt-4 space-y-2">
             <p className="text-xs text-slate-500 mb-3">
-              The items below are assumption provenance and reconciliation gaps. They do not block
-              scenario calculation. These items must be resolved before board ratification is valid.
+              {t("dreGovSummaryDetailsIntro")}
             </p>
 
             {openItems.map((item) => {
               const fCode = F_CODE_MAP[item.key] ?? item.key;
-              const description = F_DESCRIPTIONS[item.key] ?? item.label;
-              const statusLabel = STATUS_LABELS[item.status] ?? item.status;
+              const descriptionKey = F_DESCRIPTION_KEYS[item.key];
+              const description = descriptionKey ? t(descriptionKey) : item.label;
+              const statusLabelKey = STATUS_LABEL_KEYS[item.status];
+              const statusLabel = statusLabelKey ? t(statusLabelKey) : item.status;
               return (
                 <div
                   key={item.key}
@@ -100,7 +103,7 @@ export default function DreGovernanceSummaryPanel() {
                       <span className="text-[10px] text-amber-600 font-medium">{statusLabel}</span>
                     </div>
                     <p className="mt-0.5 text-[11px] text-slate-500">
-                      Owner: {item.requiredOwner} · Simulation continues regardless
+                      {t("dreGovSummaryOwnerNote").replace("{owner}", item.requiredOwner)}
                     </p>
                   </div>
                 </div>
@@ -115,14 +118,14 @@ export default function DreGovernanceSummaryPanel() {
                     F02
                   </span>
                   <span className="text-xs font-semibold text-slate-700">
-                    Descontos Método de Assinatura — formula base relationship
+                    {t("dreGovSummaryF02Label")}
                   </span>
                   <span className="text-[10px] text-emerald-700 font-medium">
-                    resolved_engineering
+                    {t("dreGovSummaryResolvedEngineering")}
                   </span>
                 </div>
                 <p className="mt-0.5 text-[11px] text-slate-500">
-                  Resolved Phase 15I.2C · Engine corrected to use receitas_com_ensino_regular as base
+                  {t("dreGovSummaryF02Note")}
                 </p>
               </div>
             </div>

@@ -37,6 +37,8 @@ import {
   formatVpl,
   getInvestmentReferenceStatusLabel,
 } from "./capitalDecisionViewModel";
+import { useLocale } from "../../../../i18n/useLocale";
+import type { TranslationKey } from "../../../../i18n/localeContract";
 
 const SOURCE_STATUS_WARNING_COUNT = DRE_GOVERNANCE_READINESS.openItems.length;
 
@@ -52,28 +54,29 @@ function describeOutcome(
   outcome: DimensionComparisonOutcome,
   nameA: string,
   nameB: string,
+  t: (key: TranslationKey) => string,
 ): string {
   switch (outcome) {
     case "scenario_a_stronger":
-      return `${nameA} stronger on this dimension`;
+      return t("capitalComparisonPanelStrongerOnDimension").replace("{name}", nameA);
     case "scenario_b_stronger":
-      return `${nameB} stronger on this dimension`;
+      return t("capitalComparisonPanelStrongerOnDimension").replace("{name}", nameB);
     case "equal":
-      return "Equal on this dimension";
+      return t("capitalComparisonPanelEqualOnDimension");
     case "not_comparable":
-      return "Not comparable";
+      return t("capitalComparisonPanelNotComparable");
   }
 }
 
 interface ComparisonRow {
-  readonly label: string;
+  readonly labelKey: TranslationKey;
   readonly valueA: string;
   readonly valueB: string;
   readonly outcome: DimensionComparisonOutcome;
 }
 
 interface SimpleRow {
-  readonly label: string;
+  readonly labelKey: TranslationKey;
   readonly valueA: string;
   readonly valueB: string;
 }
@@ -93,15 +96,16 @@ export function ScenarioComparisonPanel({
   onSelectA,
   onSelectB,
 }: ScenarioComparisonPanelProps) {
+  const { t } = useLocale();
   if (scenarios.length < 2) {
     return (
       <section className="space-y-3" aria-labelledby="scenario-comparison-heading">
         <h2 id="scenario-comparison-heading" className="text-lg font-semibold text-slate-900">
-          Scenario comparison
+          {t("capitalComparisonPanelTitle")}
         </h2>
         <Card>
           <p className="text-sm leading-6 text-slate-600">
-            Add a second saved scenario to enable comparison.
+            {t("capitalComparisonPanelAddSecond")}
           </p>
         </Card>
       </section>
@@ -152,77 +156,77 @@ export function ScenarioComparisonPanel({
 
   const scenarioOverviewRows: SimpleRow[] = [
     {
-      label: "Scenario name",
+      labelKey: "capitalComparisonPanelRowScenarioName",
       valueA: scenarioA.name,
       valueB: scenarioB.name,
     },
     {
-      label: "Opening package",
+      labelKey: "capitalComparisonPanelRowOpeningPackage",
       valueA: formatOpeningPackageLabel(scenarioA.input.openingPackageId),
       valueB: formatOpeningPackageLabel(scenarioB.input.openingPackageId),
     },
     {
-      label: "Occupancy",
+      labelKey: "capitalComparisonPanelRowOccupancy",
       valueA: OCCUPANCY_LABELS[scenarioA.input.occupancyScenarioId] ?? scenarioA.input.occupancyScenarioId,
       valueB: OCCUPANCY_LABELS[scenarioB.input.occupancyScenarioId] ?? scenarioB.input.occupancyScenarioId,
     },
     {
-      label: "Tuition scenario",
+      labelKey: "capitalComparisonPanelRowTuitionScenario",
       valueA: TUITION_LABELS[scenarioA.input.tuitionScenarioId] ?? scenarioA.input.tuitionScenarioId,
       valueB: TUITION_LABELS[scenarioB.input.tuitionScenarioId] ?? scenarioB.input.tuitionScenarioId,
     },
     {
-      label: "Org design option",
+      labelKey: "capitalComparisonPanelRowOrgDesignOption",
       valueA: ORG_DESIGN_OPTION_LABELS[scenarioA.input.orgDesignOptionId] ?? scenarioA.input.orgDesignOptionId,
       valueB: ORG_DESIGN_OPTION_LABELS[scenarioB.input.orgDesignOptionId] ?? scenarioB.input.orgDesignOptionId,
     },
     {
-      label: "Learners 2028",
+      labelKey: "capitalComparisonPanelRowLearners2028",
       valueA: String(dreA.byYear[2028].numero_de_alunos),
       valueB: String(dreB.byYear[2028].numero_de_alunos),
     },
     {
-      label: "First EBITDA-positive year",
-      valueA: String(ebitdaPosYearA ?? "Not within horizon"),
-      valueB: String(ebitdaPosYearB ?? "Not within horizon"),
+      labelKey: "capitalComparisonPanelRowFirstEbitdaPositiveYear",
+      valueA: ebitdaPosYearA !== undefined ? String(ebitdaPosYearA) : t("dreScenarioContextBannerNotWithinHorizon"),
+      valueB: ebitdaPosYearB !== undefined ? String(ebitdaPosYearB) : t("dreScenarioContextBannerNotWithinHorizon"),
     },
     {
-      label: "EBITDA 2028",
+      labelKey: "capitalComparisonPanelRowEbitda2028",
       valueA: formatBRLCompact(dreA.byYear[2028].ebitda),
       valueB: formatBRLCompact(dreB.byYear[2028].ebitda),
     },
     {
-      label: "EBITDA 2032",
+      labelKey: "capitalComparisonPanelRowEbitda2032",
       valueA: formatBRLCompact(dreA.byYear[2032].ebitda),
       valueB: formatBRLCompact(dreB.byYear[2032].ebitda),
     },
     {
-      label: "EBITDA 2037",
+      labelKey: "capitalComparisonPanelRowEbitda2037",
       valueA: formatBRLCompact(dreA.byYear[2037].ebitda),
       valueB: formatBRLCompact(dreB.byYear[2037].ebitda),
     },
     {
-      label: "Cumulative EBITDA (2028–2047)",
+      labelKey: "capitalComparisonPanelRowCumulativeEbitda",
       valueA: formatBRLCompact(cumulativeEbitdaA),
       valueB: formatBRLCompact(cumulativeEbitdaB),
     },
     {
-      label: "VPL / NPV",
+      labelKey: "capitalComparisonPanelRowVplNpv",
       valueA: vplA.compact,
       valueB: vplB.compact,
     },
     {
-      label: "TIR",
+      labelKey: "capitalComparisonPanelRowTir",
       valueA: tirA,
       valueB: tirB,
     },
     {
-      label: "Discounted payback",
+      labelKey: "capitalComparisonPanelRowDiscountedPayback",
       valueA: paybackA.value,
       valueB: paybackB.value,
     },
     {
-      label: "Source-status warning count",
+      labelKey: "capitalComparisonPanelRowSourceStatusWarningCount",
       valueA: String(SOURCE_STATUS_WARNING_COUNT),
       valueB: String(SOURCE_STATUS_WARNING_COUNT),
     },
@@ -231,25 +235,25 @@ export function ScenarioComparisonPanel({
   const financialRows: ComparisonRow[] = comparison
     ? [
         {
-          label: "Investment-reference status",
+          labelKey: "capitalComparisonPanelRowInvestmentReferenceStatus",
           valueA: getInvestmentReferenceStatusLabel(scenarioA.result.investmentReferenceStatus),
           valueB: getInvestmentReferenceStatusLabel(scenarioB.result.investmentReferenceStatus),
           outcome: comparison.investmentReferenceComparison,
         },
         {
-          label: "TIR–WACC spread",
+          labelKey: "capitalComparisonPanelRowTirWaccSpread",
           valueA: formatSpreadPp(scenarioA.result.tirWaccSpreadRate),
           valueB: formatSpreadPp(scenarioB.result.tirWaccSpreadRate),
           outcome: comparison.tirWaccSpreadComparison,
         },
         {
-          label: "VPL",
+          labelKey: "capitalComparisonPanelRowVpl",
           valueA: vplA.compact,
           valueB: vplB.compact,
           outcome: comparison.npvComparison,
         },
         {
-          label: "Discounted payback",
+          labelKey: "capitalComparisonPanelRowDiscountedPayback",
           valueA: paybackA.value,
           valueB: paybackB.value,
           outcome: comparison.discountedPaybackComparison,
@@ -261,17 +265,17 @@ export function ScenarioComparisonPanel({
     <section className="space-y-4" aria-labelledby="scenario-comparison-heading">
       <div>
         <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
-          Scenario comparison
+          {t("capitalComparisonPanelTitle")}
         </p>
         <h2 id="scenario-comparison-heading" className="text-lg font-semibold text-slate-900">
-          Scenario output comparison
+          {t("capitalComparisonPanelOutputComparisonTitle")}
         </h2>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label htmlFor="scenario-a-select" className="block text-sm font-medium text-slate-700">
-            Scenario A
+            {t("capitalComparisonPanelScenarioALabel")}
           </label>
           <select
             id="scenario-a-select"
@@ -288,7 +292,7 @@ export function ScenarioComparisonPanel({
         </div>
         <div>
           <label htmlFor="scenario-b-select" className="block text-sm font-medium text-slate-700">
-            Scenario B
+            {t("capitalComparisonPanelScenarioBLabel")}
           </label>
           <select
             id="scenario-b-select"
@@ -310,22 +314,21 @@ export function ScenarioComparisonPanel({
       {!comparison ? (
         <Card>
           <p className="text-sm leading-6 text-slate-600">
-            Select two different saved scenarios to compare.
+            {t("capitalComparisonPanelSelectTwo")}
           </p>
         </Card>
       ) : (
         <>
-          <Card title="Scenario output overview">
+          <Card title={t("capitalComparisonPanelOverviewTitle")}>
             <p className="mb-3 text-xs text-slate-500">
-              Factual scenario outputs. No scenario is ranked, scored, or recommended.
-              Source-status warning count applies equally to all scenarios ({SOURCE_STATUS_WARNING_COUNT} open assumption items).
+              {t("capitalComparisonPanelOverviewIntro").replace("{n}", String(SOURCE_STATUS_WARNING_COUNT))}
             </p>
             <div className="overflow-x-auto">
               <table className="min-w-full">
                 <thead>
                   <tr>
                     <th scope="col" className="px-2 py-2 text-left text-xs font-bold uppercase tracking-wide text-slate-400 w-1/3">
-                      Field
+                      {t("capitalComparisonPanelFieldCol")}
                     </th>
                     <th scope="col" className="px-2 py-2 text-left text-xs font-bold uppercase tracking-wide text-slate-400">
                       {scenarioA.name}
@@ -337,12 +340,12 @@ export function ScenarioComparisonPanel({
                 </thead>
                 <tbody>
                   {scenarioOverviewRows.map((row) => (
-                    <tr key={row.label} className="border-t border-slate-100">
+                    <tr key={row.labelKey} className="border-t border-slate-100">
                       <th
                         scope="row"
                         className="px-2 py-2 text-left text-xs font-semibold text-slate-600"
                       >
-                        {row.label}
+                        {t(row.labelKey)}
                       </th>
                       <td className="px-2 py-2 text-xs text-slate-700 tabular-nums">
                         {row.valueA}
@@ -357,18 +360,18 @@ export function ScenarioComparisonPanel({
             </div>
           </Card>
 
-          <Card title="Dimension-by-dimension comparison">
+          <Card title={t("capitalComparisonPanelDimensionTitle")}>
             <p className="mb-3 text-xs text-slate-500">
-              Trade-off analysis by investment dimension. No overall conclusion or recommendation.
+              {t("capitalComparisonPanelDimensionIntro")}
             </p>
             <table className="block w-full md:table">
               <caption className="sr-only">
-                Dimension comparison of {scenarioA.name} and {scenarioB.name}
+                {t("capitalComparisonPanelCaption").replace("{a}", scenarioA.name).replace("{b}", scenarioB.name)}
               </caption>
               <thead className="hidden md:table-header-group">
                 <tr>
                   <th scope="col" className="px-2 py-2 text-left text-xs font-bold uppercase tracking-wide text-slate-400">
-                    Dimension
+                    {t("capitalComparisonPanelDimensionCol")}
                   </th>
                   <th scope="col" className="px-2 py-2 text-left text-xs font-bold uppercase tracking-wide text-slate-400">
                     {scenarioA.name}
@@ -377,21 +380,21 @@ export function ScenarioComparisonPanel({
                     {scenarioB.name}
                   </th>
                   <th scope="col" className="px-2 py-2 text-left text-xs font-bold uppercase tracking-wide text-slate-400">
-                    Sensitivity
+                    {t("capitalComparisonPanelSensitivityCol")}
                   </th>
                 </tr>
               </thead>
               <tbody className="block md:table-row-group">
                 {financialRows.map((row) => (
                   <tr
-                    key={row.label}
+                    key={row.labelKey}
                     className="block border-b border-slate-100 py-3 last:border-0 md:table-row md:border-b md:py-0"
                   >
                     <th
                       scope="row"
                       className="block px-2 pt-2 text-left text-sm font-semibold text-slate-700 md:table-cell md:py-3"
                     >
-                      {row.label}
+                      {t(row.labelKey)}
                     </th>
                     <td className="block px-2 text-sm text-slate-700 md:table-cell md:py-3">
                       <span className="text-xs font-semibold uppercase tracking-wide text-slate-400 md:hidden">
@@ -407,9 +410,9 @@ export function ScenarioComparisonPanel({
                     </td>
                     <td className="block px-2 pb-2 text-sm text-slate-600 md:table-cell md:py-3">
                       <span className="text-xs font-semibold uppercase tracking-wide text-slate-400 md:hidden">
-                        Sensitivity:{" "}
+                        {t("capitalComparisonPanelSensitivityCol")}:{" "}
                       </span>
-                      {describeOutcome(row.outcome, scenarioA.name, scenarioB.name)}
+                      {describeOutcome(row.outcome, scenarioA.name, scenarioB.name, t)}
                     </td>
                   </tr>
                 ))}
@@ -420,7 +423,7 @@ export function ScenarioComparisonPanel({
       )}
 
       {comparison && (
-        <Card title="Trade-off notes">
+        <Card title={t("capitalComparisonPanelTradeOffNotesTitle")}>
           <ul className="space-y-2 text-sm leading-6 text-slate-600">
             {comparison.tradeOffNotes.map((note, index) => (
               <li key={index}>{note}</li>

@@ -7,6 +7,8 @@ import type {
   ViabilitySimulatorState,
   ViabilityTuitionScenario,
 } from "../../lib/viability/types";
+import { useLocale } from "../../i18n/useLocale";
+import { formatCurrencyBRL } from "../../i18n/formatters";
 
 interface ViabilityInputsRailProps {
   state: ViabilitySimulatorState;
@@ -74,6 +76,7 @@ export default function ViabilityInputsRail({
   state,
   onStateChange,
 }: ViabilityInputsRailProps) {
+  const { t, locale } = useLocale();
   const structuredCapexTotal = sumIncludedCapex(state.capexCategories);
 
   const patchCapexCategory = (
@@ -94,26 +97,24 @@ export default function ViabilityInputsRail({
 
   return (
     <Card
-      title="Case Setup"
-      subtitle="Operating, pricing, cost, and capital assumptions for the active case"
+      title={t("viabilityRailTitle")}
+      subtitle={t("viabilityRailSubtitle")}
       icon={Settings2}
       className="h-full"
     >
       <div className="mb-4 rounded-2xl border border-indigo-100 bg-indigo-50 p-4">
         <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-indigo-700">
-          Current planning inputs
+          {t("viabilityRailCurrentInputsLabel")}
         </div>
         <p className="mt-2 text-sm leading-relaxed text-slate-600">
-          These inputs define the active case. Baseline uses them directly. Sensitivity and threshold
-          analysis inherit the same context except where a screen deliberately varies a selected
-          assumption.
+          {t("viabilityRailCurrentInputsBody")}
         </p>
       </div>
 
       <div className="space-y-4">
         <label className="block">
           <div className="mb-1 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">
-            Enrollment Scenario
+            {t("viabilityRailEnrollmentScenarioLabel")}
           </div>
           <select
             value={state.enrollmentScenario}
@@ -124,22 +125,19 @@ export default function ViabilityInputsRail({
             }
             className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700 outline-none transition focus:border-slate-400"
           >
-            <option value="pessimista">Pessimista</option>
-            <option value="intermediario">Intermediário</option>
-            <option value="otimista">Otimista</option>
-            <option value="full-seat">Full Seat</option>
+            <option value="pessimista">{t("scenarioPessimista")}</option>
+            <option value="base">{t("scenarioBase")}</option>
+            <option value="otimista">{t("scenarioOtimista")}</option>
+            <option value="full-seat">{t("scenarioFullSeat")}</option>
           </select>
           <p className="mt-1 text-[11px] leading-relaxed text-slate-500">
-            Sets the teaching-side operating path. This baseline run already propagates the selected
-            scenario through students, turmas, teaching payroll, revenue, and downstream cost outputs.
-            Full Seat currently reuses the optimistic operating path until a dedicated capacity schedule
-            is introduced.
+            {t("viabilityRailEnrollmentScenarioNote")}
           </p>
         </label>
 
         <label className="block">
           <div className="mb-1 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">
-            Tuition Scenario
+            {t("viabilityRailTuitionScenarioLabel")}
           </div>
           <select
             value={state.tuitionScenario}
@@ -155,13 +153,13 @@ export default function ViabilityInputsRail({
             <option value="cen3">RJ Cen 3</option>
           </select>
           <p className="mt-1 text-[11px] leading-relaxed text-slate-500">
-            Selects the pricing context for the active case. Held fixed unless a later analysis varies it.
+            {t("viabilityRailTuitionScenarioNote")}
           </p>
         </label>
 
         <label className="block">
           <div className="mb-1 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">
-            Cost Scenario
+            {t("viabilityRailCostScenarioLabel")}
           </div>
           <select
             value={state.costScenario}
@@ -172,71 +170,68 @@ export default function ViabilityInputsRail({
             }
             className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700 outline-none transition focus:border-slate-400"
           >
-            <option value="lean">Lean</option>
-            <option value="base">Base</option>
-            <option value="stress">Stress</option>
+            <option value="lean">{t("viabilityRailCostLean")}</option>
+            <option value="base">{t("viabilityRailCostBase")}</option>
+            <option value="stress">{t("viabilityRailCostStress")}</option>
           </select>
           <p className="mt-1 text-[11px] leading-relaxed text-slate-500">
-            Applies the non-payroll opex envelope around the live payroll model. Non-teaching staffing
-            remains shared/global and does not become scenario-responsive in the current model.
+            {t("viabilityRailCostScenarioNote")}
           </p>
         </label>
 
         <NumberField
-          label="Projection Horizon (Years)"
+          label={t("viabilityRailProjectionHorizonLabel")}
           value={state.projectionHorizonYears}
           disabled
-          note="Locked to the current planning horizon: 2028-2047."
+          note={t("viabilityRailProjectionHorizonNote")}
           onChange={(value) => onStateChange({ projectionHorizonYears: value })}
         />
         <NumberField
-          label="Discount Rate"
+          label={t("viabilityRailDiscountRateLabel")}
           value={state.discountRate}
           step={0.5}
-          note="Used to discount free cash flow across the full baseline projection."
+          note={t("viabilityRailDiscountRateNote")}
           onChange={(value) => onStateChange({ discountRate: value })}
         />
         <NumberField
-          label="Payroll Growth Rate"
+          label={t("viabilityRailPayrollGrowthRateLabel")}
           value={state.payrollGrowthRate}
           step={0.5}
-          note="Applies annual growth to payroll excluding benefits while preserving the live staffing path."
+          note={t("viabilityRailPayrollGrowthRateNote")}
           onChange={(value) => onStateChange({ payrollGrowthRate: value })}
         />
         <NumberField
-          label="Benefits Growth Rate"
+          label={t("viabilityRailBenefitsGrowthRateLabel")}
           value={state.benefitsGrowthRate}
           step={0.5}
-          note="Applies annual growth to benefits separately from payroll so the annual projection keeps the split explicit."
+          note={t("viabilityRailBenefitsGrowthRateNote")}
           onChange={(value) => onStateChange({ benefitsGrowthRate: value })}
         />
         <NumberField
-          label="Opex Growth Rate"
+          label={t("viabilityRailOpexGrowthRateLabel")}
           value={state.opexGrowthRate}
           step={0.5}
-          note="Applies to non-payroll operating expenses layered on top of live payroll output."
+          note={t("viabilityRailOpexGrowthRateNote")}
           onChange={(value) => onStateChange({ opexGrowthRate: value })}
         />
         <NumberField
-          label="Tuition Growth Rate"
+          label={t("viabilityRailTuitionGrowthRateLabel")}
           value={state.tuitionGrowthRate}
           step={0.5}
-          note="Overrides annual tuition escalation while keeping the selected student ramp and sections path."
+          note={t("viabilityRailTuitionGrowthRateNote")}
           onChange={(value) => onStateChange({ tuitionGrowthRate: value })}
         />
         <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">
-                CAPEX Structure
+                {t("viabilityRailCapexStructureLabel")}
               </div>
               <div className="mt-1 text-sm font-bold text-slate-900">
-                Define how opening capital is represented in the active case
+                {t("viabilityRailCapexStructureValue")}
               </div>
               <p className="mt-1 text-[11px] leading-relaxed text-slate-500">
-                Single total mode keeps one upfront CAPEX total in the first projection year.
-                Structured mode now uses included category rows and their declared years to phase
-                CAPEX across the annual baseline projection.
+                {t("viabilityRailCapexStructureBody")}
               </p>
             </div>
             <div className="rounded-full border border-slate-200 bg-white p-1 text-xs font-bold text-slate-600">
@@ -253,7 +248,7 @@ export default function ViabilityInputsRail({
                     : "text-slate-500"
                 }`}
               >
-                Single total
+                {t("viabilityTabSingleTotalValue")}
               </button>
               <button
                 type="button"
@@ -269,7 +264,7 @@ export default function ViabilityInputsRail({
                     : "text-slate-500"
                 }`}
               >
-                Structured by category
+                {t("viabilityTabStructuredByCategoryValue")}
               </button>
             </div>
           </div>
@@ -277,24 +272,24 @@ export default function ViabilityInputsRail({
           {state.capexMode === "single-total" ? (
             <div className="mt-4 space-y-4">
               <NumberField
-                label="Total CAPEX Amount"
+                label={t("viabilityRailTotalCapexAmountLabel")}
                 value={state.initialCapex}
                 step={500000}
-                note="One upfront capital outlay applied in the first projection year."
+                note={t("viabilityRailTotalCapexAmountNote")}
                 onChange={(value) => onStateChange({ initialCapex: value })}
               />
               <TextAreaField
-                label="What is included in this CAPEX"
+                label={t("viabilityRailCapexIncludedLabel")}
                 value={state.capexIncluded}
                 required
-                note="Required scope note so the capital program is explicit about what the total covers."
+                note={t("viabilityRailCapexIncludedNote")}
                 onChange={(value) => onStateChange({ capexIncluded: value })}
               />
               <TextAreaField
-                label="What is excluded from this CAPEX"
+                label={t("viabilityRailCapexExcludedLabel")}
                 value={state.capexExcluded}
                 required
-                note="Required boundary note so operating costs and later investments are not silently mixed into opening CAPEX."
+                note={t("viabilityRailCapexExcludedNote")}
                 onChange={(value) => onStateChange({ capexExcluded: value })}
               />
             </div>
@@ -302,25 +297,24 @@ export default function ViabilityInputsRail({
             <div className="mt-4 space-y-4">
               <div className="rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-3">
                 <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-700">
-                  Included Structured Total
+                  {t("viabilityRailIncludedStructuredTotalLabel")}
                 </div>
                 <div className="mt-1 text-lg font-bold text-slate-900">
-                  R$ {structuredCapexTotal.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  {formatCurrencyBRL(structuredCapexTotal, locale)}
                 </div>
                 <p className="mt-1 text-[11px] leading-relaxed text-slate-500">
-                  Included category rows are summed here and then scheduled into the baseline by their
-                  declared year.
+                  {t("viabilityRailIncludedStructuredTotalNote")}
                 </p>
               </div>
               <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white">
                 <table className="min-w-[860px] text-left">
                   <thead>
                     <tr className="border-b border-slate-100 text-[10px] uppercase tracking-[0.2em] text-slate-400">
-                      <th className="px-3 py-3">Category</th>
-                      <th className="px-3 py-3">Included</th>
-                      <th className="px-3 py-3">Year</th>
-                      <th className="px-3 py-3">Amount</th>
-                      <th className="px-3 py-3">Note</th>
+                      <th className="px-3 py-3">{t("viabilityRailColCategory")}</th>
+                      <th className="px-3 py-3">{t("viabilityRailColIncluded")}</th>
+                      <th className="px-3 py-3">{t("viabilityRailColYear")}</th>
+                      <th className="px-3 py-3">{t("viabilityRailColAmount")}</th>
+                      <th className="px-3 py-3">{t("viabilityRailColNote")}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -366,7 +360,7 @@ export default function ViabilityInputsRail({
                             onChange={(event) =>
                               patchCapexCategory(row.id, { note: event.target.value })
                             }
-                            placeholder="Scope note"
+                            placeholder={t("viabilityRailScopeNotePlaceholder")}
                             className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700 outline-none transition focus:border-slate-400"
                           />
                         </td>
@@ -376,17 +370,16 @@ export default function ViabilityInputsRail({
                 </table>
               </div>
               <p className="text-[11px] leading-relaxed text-slate-500">
-                Category year now drives annual CAPEX timing in the baseline model. Recurring CAPEX
-                still applies every year on top of these scheduled outflows.
+                {t("viabilityRailStructuredFooterNote")}
               </p>
             </div>
           )}
         </div>
         <NumberField
-          label="Recurring CAPEX / Year"
+          label={t("viabilityRailRecurringCapexLabel")}
           value={state.recurringCapexAnnual}
           step={100000}
-          note="Annual sustaining capital layered into free cash flow after the opening year."
+          note={t("viabilityRailRecurringCapexNote")}
           onChange={(value) => onStateChange({ recurringCapexAnnual: value })}
         />
       </div>
