@@ -1,6 +1,7 @@
 // Phase V10-X2T Completion Gate — bilingual crawl + governed screenshots.
 //
-// Crawls all 13 registered workspaces (6 primary + 7 supporting), plus both
+// Crawls all 13 registered workspaces (10 primary + 3 supporting — V10-X2T.3A-R1
+// restored early-years/lower-school/ms/hs to primary navigation), plus both
 // Payroll subviews, at both locales (pt-BR, en-US), recording per route:
 // locale, visible title, visible status, mixed-language findings (heuristic
 // scan for the opposite locale's known primary-nav vocabulary appearing in
@@ -187,15 +188,22 @@ async function main() {
       if (locale === "pt-BR") await shoot(page, "07_Navegacao_Apoio_pt-BR.png");
       else await shoot(page, "08_Supporting_Navigation_en-US.png");
 
-      // High School (supporting: academic group index 3 = hs)
-      await clickSupportingNavIndex(page, 3);
+      // High School (V10-X2T.3A-R1: restored to primary nav, index 9)
+      await clickPrimaryNavIndex(page, 9);
       await recordRoute(page, "hs", locale);
       if (locale === "pt-BR") await shoot(page, "17_Ensino_Medio_Status_pt-BR.png");
       else await shoot(page, "18_High_School_Status_en-US.png");
 
+      // Remaining primary division workspaces (crawl only, no dedicated screenshot):
+      // early-years(6), lower-school(7), ms(8) — restored to primary nav by V10-X2T.3A-R1
+      for (const [idx, id] of [[6, "early-years"], [7, "lower-school"], [8, "ms"]] as const) {
+        await clickPrimaryNavIndex(page, idx);
+        await recordRoute(page, id, locale);
+      }
+
       // Remaining supporting workspaces (crawl only, no dedicated screenshot):
-      // early-years(0), lower-school(1), ms(2), load(4), hr(5 - people group), viability(6 - analysis group)
-      for (const [idx, id] of [[0, "early-years"], [1, "lower-school"], [2, "ms"], [4, "load"], [5, "hr"], [6, "viability"]] as const) {
+      // load(0 - academic group, only member left), hr(1 - people group), viability(2 - analysis group)
+      for (const [idx, id] of [[0, "load"], [1, "hr"], [2, "viability"]] as const) {
         await clickSupportingNavIndex(page, idx);
         await recordRoute(page, id, locale);
       }

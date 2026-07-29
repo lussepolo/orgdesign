@@ -45,6 +45,15 @@ const src = (path: string) => readFileSync(join(ROOT, path), "utf8");
 
 // ── Section A: primary/supporting workspace set and order ──────────────────
 
+// V10-X2T.3A-R1: this list previously ended at "capital-decision" and put
+// early-years/lower-school/ms/hs in EXPECTED_SUPPORTING_BY_GROUP.academic
+// below — i.e. it asserted the reachability regression (four division
+// pages demoted from primary to a collapsed secondary nav by Candidate 4,
+// 25f1976, with no cited governance approval for that demotion) as the
+// correct, passing state. IMPLEMENTATION.md's last explicitly-approved
+// navigation state (Phase 15N, 2026-06-18) lists these four as flat
+// top-level primary items; R1 restores that and updates this oracle to
+// match the corrected architecture, not the regressed one.
 const EXPECTED_PRIMARY_ORDER = [
   "cover",
   "offer-scenarios",
@@ -52,6 +61,10 @@ const EXPECTED_PRIMARY_ORDER = [
   "payroll",
   "dre-scenario-simulator",
   "capital-decision",
+  "early-years",
+  "lower-school",
+  "ms",
+  "hs",
 ];
 check(
   "primary_workspace_order_exact",
@@ -66,8 +79,10 @@ check(
   `actual=${JSON.stringify(SUPPORTING_GROUPS)}`,
 );
 
+// V10-X2T.3A-R1: the four division pages moved to EXPECTED_PRIMARY_ORDER
+// above; only "load" remains a supporting-only academic-group destination.
 const EXPECTED_SUPPORTING_BY_GROUP: Record<string, string[]> = {
-  academic: ["early-years", "lower-school", "ms", "hs", "load"],
+  academic: ["load"],
   people: ["hr"],
   analysis: ["viability"],
 };

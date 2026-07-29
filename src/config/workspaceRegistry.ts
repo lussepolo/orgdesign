@@ -203,7 +203,15 @@ export const WORKSPACE_REGISTRY: WorkspaceDefinition[] = [
     visibleInSupportingNavigation: false,
   },
 
-  // ── Supporting: Academic Architecture ─────────────────────────────────
+  // ── Academic Architecture: four governed division pages ───────────────
+  // V10-X2T.3A-R1: restored to primary navigation. Phase 15N's last
+  // explicitly-approved navigation state (documented in IMPLEMENTATION.md,
+  // 2026-06-18) listed these four as flat, top-level primary navigation
+  // items. Candidate 4 (25f1976) moved them behind a collapsed-by-default
+  // "More Sections" accordion with no cited approval for that demotion —
+  // a reachability regression, not an authorized simplification. `load`
+  // below is unaffected; it was never part of the four division pages and
+  // is not implicated by this restoration.
   {
     id: "early-years",
     group: "academic",
@@ -216,9 +224,8 @@ export const WORKSPACE_REGISTRY: WorkspaceDefinition[] = [
     impactKey: "wsEarlyYearsImpact",
     resultKey: "wsEarlyYearsResult",
     status: "reference",
-    returnPathTo: "payroll",
-    visibleInPrimaryNavigation: false,
-    visibleInSupportingNavigation: true,
+    visibleInPrimaryNavigation: true,
+    visibleInSupportingNavigation: false,
   },
   {
     id: "lower-school",
@@ -232,9 +239,8 @@ export const WORKSPACE_REGISTRY: WorkspaceDefinition[] = [
     impactKey: "wsLowerSchoolImpact",
     resultKey: "wsLowerSchoolResult",
     status: "reference",
-    returnPathTo: "payroll",
-    visibleInPrimaryNavigation: false,
-    visibleInSupportingNavigation: true,
+    visibleInPrimaryNavigation: true,
+    visibleInSupportingNavigation: false,
   },
   {
     id: "ms",
@@ -265,9 +271,8 @@ export const WORKSPACE_REGISTRY: WorkspaceDefinition[] = [
         labelKey: "evidenceGovernedDataLabel",
       },
     ],
-    returnPathTo: "payroll",
-    visibleInPrimaryNavigation: false,
-    visibleInSupportingNavigation: true,
+    visibleInPrimaryNavigation: true,
+    visibleInSupportingNavigation: false,
   },
   {
     id: "hs",
@@ -304,9 +309,8 @@ export const WORKSPACE_REGISTRY: WorkspaceDefinition[] = [
         labelKey: "evidencePendingValidationLabel",
       },
     ],
-    returnPathTo: "payroll",
-    visibleInPrimaryNavigation: false,
-    visibleInSupportingNavigation: true,
+    visibleInPrimaryNavigation: true,
+    visibleInSupportingNavigation: false,
   },
   {
     id: "load",
