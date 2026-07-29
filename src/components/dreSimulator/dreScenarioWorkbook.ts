@@ -1848,7 +1848,7 @@ function buildGradeLevelStaffingDetailSheet(vm: DreScenarioWorkbookViewModel): X
 // workbook's other payroll sheets use. Corporate allocation and consolidated
 // people cost are shown as explicit, labeled "unavailable" cells citing the
 // blocker, never blank and never zero-substituted (V10-RC2.2 Gate 1/Gate 4).
-function buildDirectPayrollAndCorporateAllocationSheet(vm: DreScenarioWorkbookViewModel): XLSX.WorkSheet {
+function buildDirectPayrollAndCorpAllocSheet(vm: DreScenarioWorkbookViewModel): XLSX.WorkSheet {
   const UNAVAILABLE =
     "UNAVAILABLE — no corporate-allocation adapter exists in this codebase " +
     "(blocker CORPORATE-ALLOCATION, docs/audits/rio-resilience/phase-v10-rc2-2-gate1-blocker-register.json). " +
@@ -2076,7 +2076,7 @@ export function buildDreScenarioWorkbook(vm: DreScenarioWorkbookViewModel): XLSX
   XLSX.utils.book_append_sheet(wb, buildGradeLevelStaffingDetailSheet(vm), "Grade-Level Staffing Detail");
   XLSX.utils.book_append_sheet(
     wb,
-    buildDirectPayrollAndCorporateAllocationSheet(vm),
+    buildDirectPayrollAndCorpAllocSheet(vm),
     "Direct Payroll & Corp Alloc",
   );
 

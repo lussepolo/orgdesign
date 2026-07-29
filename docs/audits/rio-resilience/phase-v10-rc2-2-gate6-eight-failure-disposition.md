@@ -55,7 +55,7 @@ Reproduced each; pass/fail counts are byte-identical to their V10-RC2.1-disclose
 
 | Script | Before this gate | After this gate |
 |---|---|---|
-| `validate:phase15f` | crash | 179/185 (5 disclosed, out-of-boundary) |
+| `validate:phase15f` | crash | 179/185 (6 disclosed, out-of-boundary: 5 in Phase 15D.2 + 1 in Phase 15F) |
 | `validate:phase15i2c` | crash | **26/26** |
 | `validate:phase15j` | crash | **21/21** |
 | `validate:phase15i2-packet` | 24/25 | 24/25 (unchanged, disclosed) |

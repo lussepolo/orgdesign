@@ -59,9 +59,10 @@ import type {
   Phase15CValidationReport,
 } from "./phase15cInvestmentMetricsEngineValidationContract";
 
-// t1_g3/intermediario retired and rejected at the engine level since commit
-// 3f4da5c (V10-E1 governed package migration, 2026-07-24; "intermediario"
-// renamed to "base" the same commit). This fixture only feeds Surface 4's
+// t1_g3 retired and rejected at the engine level since commit 3f4da5c
+// (V10-E1 governed package migration, 2026-07-24; the legacy occupancy
+// alias was also renamed to "base" the same commit). This fixture only
+// feeds Surface 4's
 // structural/boundary checks (no-mutation, period count, exclusions
 // declaration, IRR-unavailable-still-has-NPV, invalid-WACC-blocks-terminal)
 // -- none of which assert package-specific numeric values -- so swapping to
