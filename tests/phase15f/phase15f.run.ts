@@ -130,7 +130,7 @@ async function runQa(page: Page) {
     const vAfter = await vplExtract();
     check("lever_occupancy_otimista_different", vBefore !== vAfter);
     await ss("03_desktop_occupancy_otimista");
-    await occSel.selectOption("intermediario"); await page.waitForTimeout(300);
+    await occSel.selectOption("base"); await page.waitForTimeout(300);
   }, undefined);
 
   await safe("lever_capex_90m", async () => {
@@ -312,7 +312,7 @@ async function runQa(page: Page) {
       t.includes("Não atingido em 20 anos") ? "✓ 'Não atingido em 20 anos'" : "(not found)");
     check("payback_20plus_horizon_note", t.includes("horizonte operacional de 20 anos"));
     await ss("12_desktop_20plus_payback");
-    await page.locator("select[id*='occupancy']").first().selectOption("intermediario");
+    await page.locator("select[id*='occupancy']").first().selectOption("base");
     await page.waitForTimeout(300);
   }, undefined);
 
@@ -521,7 +521,7 @@ async function runQa(page: Page) {
     check("aria_live_stable_no_continuous_rewrite",
       textAt0 === textAt3s ? "✓ stable after 3s" : "✗ changed without interaction");
 
-    await page.locator("select[id*='occupancy']").first().selectOption("intermediario");
+    await page.locator("select[id*='occupancy']").first().selectOption("base");
     await page.waitForTimeout(300);
   }, undefined);
 

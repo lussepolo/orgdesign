@@ -86,7 +86,7 @@ export function runDreGovernanceReadinessValidation(): DreGovernanceReadinessRep
   const gov = DRE_GOVERNANCE_READINESS;
   const payrollEntry = INPUT_READINESS_REGISTRY.payroll_adapter_output;
 
-  // Canonical fixture — use WORKING_SCENARIO_DRE_OUTPUT directly (t1_g3/intermediario/bp1/balanced)
+  // Canonical fixture — use WORKING_SCENARIO_DRE_OUTPUT directly (t1_g3/base/bp1/balanced)
   const dreOut = WORKING_SCENARIO_DRE_OUTPUT;
   const enrollment2028 = dreOut !== null ? dreOut.byYear[2028].numero_de_alunos : -1;
   const ebitdaPositiveYear = dreOut !== null
@@ -242,7 +242,7 @@ export function runDreGovernanceReadinessValidation(): DreGovernanceReadinessRep
       "canonical_fixture_2028_enrollment_228",
       enrollment2028,
       228,
-      "Canonical fixture (t1_g3 / intermediario / bp1_division_differentiated / balanced_experience) must produce 228 learners in 2028.",
+      "Canonical fixture (t1_g3 / base / bp1_division_differentiated / balanced_experience) must produce 228 learners in 2028.",
     ),
     check(
       "canonical_fixture_ebitda_positive_by_2032",

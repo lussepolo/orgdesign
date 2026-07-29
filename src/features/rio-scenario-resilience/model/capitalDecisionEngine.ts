@@ -12,7 +12,7 @@
 //
 // IMPORTANT (Phase 15B.2 source-parity finding, see IMPLEMENTATION.md):
 // calculateDre()'s 2028-2047 ebitda/receita_operacional_liquida outputs for
-// the canonical validation scenario (t1_g3 / intermediario /
+// the canonical validation scenario (t1_g3 / base /
 // bp1_division_differentiated / balanced_experience) do not numerically
 // match the workbook's cached PnL!236/273 values
 // (capitalDecisionR100mParitySourceData.ts: R100M_ROL_BRL/R100M_EBITDA_BRL).

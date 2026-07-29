@@ -163,19 +163,19 @@ console.log("\nSection F — Phase 15S values and Scenario B fixture:");
 
 const fopagOut = calculateFopag({
   openingPackageId: "t1_g4",
-  occupancyScenarioId: "intermediario",
+  occupancyScenarioId: "base",
   orgDesignOptionId: "balanced_experience",
 });
 check(
   16,
-  "t1_g4 / intermediario / 2028 engine still calculation_ready (enrollment 258 / capacity 358 intact)",
+  "t1_g4 / base / 2028 engine still calculation_ready (enrollment 258 / capacity 358 intact)",
   fopagOut.calculationReady,
   `engineStatus: ${fopagOut.engineStatus}`,
 );
 
 const hcTable = buildOrgDesignHcTable({
   openingPackageId: "t1_g4",
-  occupancyScenarioId: "intermediario",
+  occupancyScenarioId: "base",
   orgDesignOptionId: "balanced_experience",
   year: 2028,
 });

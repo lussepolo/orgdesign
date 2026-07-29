@@ -114,9 +114,9 @@ const OPEN_ITEMS: readonly DreFinanceSourceOpenItem[] = [
     label: "2028 enrollment baseline — engine vs PnL workbook scenario mapping",
     status: "reconciliation_required",
     currentEngineBehavior:
-      "Canonical engine produces 228 learners in 2028 (t1_g3 / intermediario). PnL workbook baseline: approximately 246 learners. The difference reflects a different scenario configuration; the engine is self-consistent. Scenario mapping to workbook baseline is not yet established.",
+      "Canonical engine produces 228 learners in 2028 (t1_g3 / base). PnL workbook baseline: approximately 246 learners. The difference reflects a different scenario configuration; the engine is self-consistent. Scenario mapping to workbook baseline is not yet established.",
     sourceProvenance:
-      "Engine: openingPackageOccupancySourceData.ts (t1_g3 / intermediario); Workbook: PNL_FORMULA_PARITY_SOURCE_DATA (~246 learners, Phase 13B)",
+      "Engine: openingPackageOccupancySourceData.ts (t1_g3 / base); Workbook: PNL_FORMULA_PARITY_SOURCE_DATA (~246 learners, Phase 13B)",
     requiredOwner: "Finance + Board",
     blocksEngineCalculation: false,
     blocksBoardRatification: true,

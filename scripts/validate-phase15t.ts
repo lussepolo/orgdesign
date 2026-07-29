@@ -50,14 +50,14 @@ function gitDiffNames(): string[] {
 // ── Pre-compute shared fixtures ────────────────────────────────────────────────
 const B_2028_BALANCED = buildOrgDesignHcTable({
   openingPackageId: "t1_g4",
-  occupancyScenarioId: "intermediario",
+  occupancyScenarioId: "base",
   orgDesignOptionId: "balanced_experience",
   year: 2028,
 });
 
 const B_2028_MIN = buildOrgDesignHcTable({
   openingPackageId: "t1_g4",
-  occupancyScenarioId: "intermediario",
+  occupancyScenarioId: "base",
   orgDesignOptionId: "minimum_experience",
   year: 2028,
 });
@@ -139,7 +139,7 @@ check(
 );
 check(
   13,
-  "Engine calculation_ready for t1_g4/intermediario/balanced_experience/2028",
+  "Engine calculation_ready for t1_g4/base/balanced_experience/2028",
   B_2028_BALANCED.calculationReady,
   `engineStatus=${B_2028_BALANCED.engineStatus}`,
 );

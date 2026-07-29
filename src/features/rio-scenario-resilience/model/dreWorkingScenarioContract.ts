@@ -23,7 +23,7 @@
 //                         balanced_experience | premium_experience
 //
 // SELECTED WORKING SCENARIO (Phase 13F):
-//   t1_g3 / intermediario / bp1_division_differentiated / balanced_experience
+//   t1_g3 / base / bp1_division_differentiated / balanced_experience
 //   — the same combination already used as VALIDATION_INPUT in dreEngineValidation.ts
 //   (Phase 13A, DRE_ENGINE_VALIDATION_REPORT allPass=true, 20/20). Phase 13F formalizes
 //   this combination as a typed ScenarioDecisionLeverSelections object and validates

@@ -68,7 +68,7 @@ export type CapitalDecisionBridgeFormulaParityStatus = "formula_validated";
 // "workbook_baseline_parity_not_established": this scenario's ROL/EBITDA do
 // not match the workbook-cached baseline fixture. Per Phase 15B.2, this is
 // expected for the current canonical validation scenario (t1_g3 /
-// intermediario / bp1_division_differentiated / balanced_experience): its
+// base / bp1_division_differentiated / balanced_experience): its
 // 2028 numero_de_alunos (228) differs from the workbook's PnL!221 (246),
 // i.e. a scenario/enrollment-input mismatch upstream of any revenue or
 // EBITDA formula -- not a bridge-formula defect. See

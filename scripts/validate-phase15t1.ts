@@ -52,7 +52,7 @@ function findNodeByIdRecursive(
 const treeBalanced2028 = buildExecutiveOrgDesignTree("balanced", 2028);
 const hcTable = buildOrgDesignHcTable({
   openingPackageId: "t1_g4",
-  occupancyScenarioId: "intermediario",
+  occupancyScenarioId: "base",
   orgDesignOptionId: "balanced_experience",
   year: 2028,
 });
@@ -143,12 +143,12 @@ console.log("\nSection C — Phase 15S values:");
 
 const fopagOut = calculateFopag({
   openingPackageId: "t1_g4",
-  occupancyScenarioId: "intermediario",
+  occupancyScenarioId: "base",
   orgDesignOptionId: "balanced_experience",
 });
 check(
   11,
-  "t1_g4 / intermediario / 2028 engine still calculation_ready (enrollment 258 / capacity 358 intact)",
+  "t1_g4 / base / 2028 engine still calculation_ready (enrollment 258 / capacity 358 intact)",
   fopagOut.calculationReady,
   `engineStatus: ${fopagOut.engineStatus}`,
 );
