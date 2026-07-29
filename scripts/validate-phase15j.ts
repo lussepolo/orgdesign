@@ -11,7 +11,7 @@
 //   8. DRE scenario outputs still calculate.
 //   9. Capital Decision handoff still works.
 //  10. DRE-to-Capital EBITDA parity remains zero.
-//  11. 108 scenarios remain finite.
+//  11. All scenarios (active opening packages) remain finite.
 //  12. No NaN.
 //  13. No Infinity.
 //  14. No silent-zero lookup.
@@ -34,15 +34,19 @@ import {
 } from "../src/features/rio-scenario-resilience/model/dreGovernanceReadiness";
 import { calculateInvestmentInterpretation } from "../src/features/rio-scenario-resilience/model/investmentInterpretationEngine";
 import { RECEITA_PROJECTION_YEARS } from "../src/features/rio-scenario-resilience/model/receitaEngineContract";
-import { DRE_ENROLLMENT_LEVER_OPENING_PACKAGE_IDS, DRE_ENROLLMENT_LEVER_OCCUPANCY_SCENARIO_IDS } from "../src/features/rio-scenario-resilience/model/dreEnrollmentCapacityLeverContract";
+import { DRE_ENROLLMENT_LEVER_ACTIVE_OPENING_PACKAGE_IDS, DRE_ENROLLMENT_LEVER_OCCUPANCY_SCENARIO_IDS } from "../src/features/rio-scenario-resilience/model/dreEnrollmentCapacityLeverContract";
 import { DRE_WORKING_SCENARIO_TUITION_SCENARIO_IDS, DRE_WORKING_SCENARIO_ORG_DESIGN_OPTION_IDS } from "../src/features/rio-scenario-resilience/model/dreWorkingScenarioContract";
 import { buildBoardReadableExplanation } from "../src/components/dreSimulator/DreBoardReadableExport";
 import { readFileSync } from "fs";
 
 // ── Canonical fixture ─────────────────────────────────────────────────────────
+// t1_g3/intermediario retired and rejected at the engine level since commit
+// 3f4da5c (V10-E1 governed package migration, 2026-07-24). Swapped to t1_g4
+// (currently supported); Check 8's hardcoded alunos value updated to match
+// (228 -> 258, t1_g4/base 2028).
 
 const CANONICAL_DRE = {
-  openingPackageId: "t1_g3" as const,
+  openingPackageId: "t1_g4" as const,
   occupancyScenarioId: "base" as const,
   tuitionScenarioId: "bp1_division_differentiated" as const,
   orgDesignOptionId: "balanced_experience" as const,
@@ -192,8 +196,8 @@ checkFalse(
 // ── Section D: Calculation correctness ───────────────────────────────────────
 console.log("\nSection D — Calculation Correctness");
 
-// Check 8: DRE scenario outputs calculate (canonical fixture 228 learners)
-check("dre_canonical_228_learners_2028", yr2028.numero_de_alunos, 228);
+// Check 8: DRE scenario outputs calculate (canonical fixture 258 learners, t1_g4/base)
+check("dre_canonical_258_learners_2028", yr2028.numero_de_alunos, 258);
 
 // Check 9: Capital Decision handoff still works
 const capitalResult = calculateInvestmentInterpretation(CANONICAL);
@@ -214,14 +218,19 @@ checkTrue(
   `EBITDA 2028: ${dreEbitda2028}`,
 );
 
-// ── Section E: 108 scenarios ──────────────────────────────────────────────────
-console.log("\nSection E — 108 Scenario Finite Check");
+// ── Section E: scenario finite check ──────────────────────────────────────────
+console.log("\nSection E — Scenario Finite Check");
 
-// Check 11: 108 scenarios remain finite
+// Check 11: all scenarios (active opening packages only) remain finite
 // Check 12: No NaN
 // Check 13: No Infinity
 // Check 14: No silent-zero lookup (ebitda must not be exactly 0 for any year after 2028)
-const allOpeningPackageIds = DRE_ENROLLMENT_LEVER_OPENING_PACKAGE_IDS;
+// t1_g3/t1_g5 retired since commit 3f4da5c -- rejected at the engine level.
+// Iterates DRE_ENROLLMENT_LEVER_ACTIVE_OPENING_PACKAGE_IDS (2 packages) only;
+// the original "108" fixture (4 packages incl. retired ones x 3 occupancy x 3
+// tuition x 3 org-design, from before the tuition scenario catalog grew to 5)
+// is superseded by the live product of currently-supported axes below.
+const allOpeningPackageIds = DRE_ENROLLMENT_LEVER_ACTIVE_OPENING_PACKAGE_IDS;
 const allOccupancyIds = DRE_ENROLLMENT_LEVER_OCCUPANCY_SCENARIO_IDS;
 const allTuitionIds = DRE_WORKING_SCENARIO_TUITION_SCENARIO_IDS;
 const allOrgDesignIds = DRE_WORKING_SCENARIO_ORG_DESIGN_OPTION_IDS;
@@ -256,9 +265,10 @@ for (const openingPackageId of allOpeningPackageIds) {
   }
 }
 
-check("all_108_scenarios_count", scenarioCount, 108);
-check("no_nan_across_108_scenarios", nanCount, 0);
-check("no_infinity_across_108_scenarios", infinityCount, 0);
+// 2 active opening packages x 3 occupancy x 5 tuition x 3 org-design = 90.
+check("all_90_scenarios_count", scenarioCount, 90);
+check("no_nan_across_90_scenarios", nanCount, 0);
+check("no_infinity_across_90_scenarios", infinityCount, 0);
 check("no_silent_zero_receita_after_2028", silentZeroCount, 0);
 
 // ── Section F: Comparison neutrality ─────────────────────────────────────────

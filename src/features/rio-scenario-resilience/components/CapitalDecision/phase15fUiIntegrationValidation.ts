@@ -15,6 +15,7 @@ import type { InvestmentInterpretationResult } from "../../model/investmentInter
 import { occupancyOptions } from "../../data/occupancyOptions";
 import { capexOptions } from "../../data/capexOptions";
 import { openingGrades } from "../../data/openingGrades";
+import { ACTIVE_OPENING_PACKAGE_IDS } from "../../model/openingPackageOccupancySourceDataContract";
 import { orgDesignStructure } from "../../data/orgDesignStructure";
 import { tuitionArchitecture } from "../../data/tuitionArchitecture";
 import { CAPITAL_DECISION_LEVER_IDS, MAX_SAVED_SCENARIOS } from "./capitalDecisionUiTypes";
@@ -188,11 +189,16 @@ export function runPhase15FUiIntegrationValidation(): Phase15FUiValidationReport
     );
   }
 
+  // t1_g3/t1_g5 retired since commit 3f4da5c -- rejected at the engine level.
+  // ScenarioConfigurationPanel.tsx now filters to ACTIVE_OPENING_PACKAGE_IDS
+  // only (same commit as this fix); this check mirrors that production
+  // filter rather than iterating openingGrades.ts's full (partly retired)
+  // catalog.
   checkLeverOptionsCalculate(
     "lever_opening_grades_options_all_calculate",
     "Opening Grades",
     "openingPackageId",
-    openingGrades.map((o) => o.id),
+    openingGrades.map((o) => o.id).filter((id) => (ACTIVE_OPENING_PACKAGE_IDS as readonly string[]).includes(id)),
   );
   checkLeverOptionsCalculate(
     "lever_occupancy_options_all_calculate",

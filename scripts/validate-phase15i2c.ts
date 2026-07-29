@@ -10,15 +10,25 @@
 // Run with: npx tsx scripts/validate-phase15i2c.ts
 
 import { calculateDre } from "../src/features/rio-scenario-resilience/model/dreEngine";
+import {
+  toReajusteDespesasBase2028,
+  resolveReajusteDespesasGrowthFactor,
+} from "../src/features/rio-scenario-resilience/model/reajusteDespesasGrowth";
 import { DRE_GOVERNANCE_READINESS } from "../src/features/rio-scenario-resilience/model/dreGovernanceReadiness";
 import { DRE_REVENUE_DRIVER_SOURCE_DATA } from "../src/features/rio-scenario-resilience/model/dreRevenueDriverSourceData";
 import { DRE_LINE_ITEM_MAP } from "../src/features/rio-scenario-resilience/model/dreLineItemMap";
 import { readFileSync } from "fs";
 
 // ── Canonical fixture ─────────────────────────────────────────────────────────
+// t1_g3/intermediario retired and rejected at the engine level since commit
+// 3f4da5c (V10-E1 governed package migration, 2026-07-24; "intermediario"
+// renamed to "base" the same commit). Swapped to t1_g4 (currently supported).
+// Every check below either recomputes its expectation from the engine's own
+// output (package-invariant) or is Check 26, the one package-specific
+// hardcoded value, updated accordingly (228 -> 258 alunos for t1_g4/base 2028).
 
 const CANONICAL = {
-  openingPackageId: "t1_g3" as const,
+  openingPackageId: "t1_g4" as const,
   occupancyScenarioId: "base" as const,
   tuitionScenarioId: "bp1_division_differentiated" as const,
   orgDesignOptionId: "balanced_experience",
@@ -149,20 +159,27 @@ for (const yr of years) {
 }
 checkTrue("f02_all_20_years_use_rce_base", allYearsRceBase);
 
-// ── Section B: F01 Branch B ───────────────────────────────────────────────────
-console.log("\nSection B — F01 Branch B (reajuste_despesas not applied)");
+// ── Section B: F01 (V10-F2.2 / D-R7 supersedes "Branch B") ───────────────────
+// V10-F2.2 (2026-07-27) / D-R7 superseded the "Branch B" (no reajuste factor)
+// reading this section originally tested: outras_receitas is now formula_layer
+// (dreLineItemMap.ts), computed as basePerLearnerRatio × 1.05 one-time
+// conversion × 4.9%/yr escalation from 2029 × numero_de_alunos — see
+// reajusteDespesasGrowth.ts and dreEngine.ts. The pre-V10-F2.2 "no reajuste"
+// expectation is obsolete; updated to match the current, independently
+// re-validated (validate:v10-f2, 76/76) formula. Section retitled to match.
+console.log("\nSection B — F01 (V10-F2.2/D-R7 reajuste_despesas formula)");
 
-// Check 9: outras_receitas = baseRatio × numero_de_alunos (no reajuste factor)
-// DRE_OUTRAS_RECEITAS_BASE_PER_LEARNER = 2571.866...
+// Check 9: outras_receitas = base2028 × growthFactor(year) × numero_de_alunos
 const alunos2028 = yr2028.numero_de_alunos ?? 0;
 const OR_BASE_RATIO = 2571.8660655737704; // from dreScenarioAdapters.ts
-const expected_outras_2028 = OR_BASE_RATIO * alunos2028;
+const OR_BASE_2028 = toReajusteDespesasBase2028(OR_BASE_RATIO);
+const expected_outras_2028 = OR_BASE_2028 * resolveReajusteDespesasGrowthFactor(2028) * alunos2028;
 checkClose(
-  "f01_outras_receitas_no_reajuste_factor_2028",
+  "f01_outras_receitas_reajuste_formula_2028",
   yr2028.outras_receitas ?? NaN,
   expected_outras_2028,
   1,
-  "outras_receitas must equal basePerLearnerRatio × numero_de_alunos without reajuste",
+  "outras_receitas must equal base2028 × growthFactor(2028)=1 × numero_de_alunos (V10-F2.2/D-R7)",
 );
 
 // Check 10: outrasReceitasReajusteNote is non-empty (disclosure present)
@@ -173,24 +190,24 @@ checkTrue(
   "outrasReceitasReajusteNote must be a non-empty disclosure string",
 );
 
-// Check 11: Note mentions PnL formula
+// Check 11: Note mentions the v10 PnL formula reference (E235, post-V10-F2.2)
 checkTrue(
   "f01_note_mentions_pnl_formula",
-  result.outrasReceitasReajusteNote.includes("C233"),
-  "outrasReceitasReajusteNote must reference PnL formula (C233)",
+  result.outrasReceitasReajusteNote.includes("E235"),
+  "outrasReceitasReajusteNote must reference the v10 PnL formula (E235)",
 );
 
-// Check 12: No double adjustment — outras_receitas is stable vs F01 Branch B calculation
+// Check 12: outras_receitas matches the reajuste-growth formula for all 20 years
 let allYearsStable = true;
 for (const yr of years) {
   const yData = result.byYear[yr];
   const alunos = yData.numero_de_alunos ?? 0;
-  const expected = OR_BASE_RATIO * alunos;
+  const expected = OR_BASE_2028 * resolveReajusteDespesasGrowthFactor(yr) * alunos;
   if (Math.abs((yData.outras_receitas ?? 0) - expected) > 1) {
     allYearsStable = false;
   }
 }
-checkTrue("f01_all_20_years_no_reajuste_applied", allYearsStable);
+checkTrue("f01_all_20_years_match_reajuste_formula", allYearsStable);
 
 // ── Section C: Finance Registry ───────────────────────────────────────────────
 console.log("\nSection C — Finance Registry Correctness");
@@ -297,8 +314,8 @@ checkTrue(
   `First positive EBITDA year: ${firstPositiveEbitdaYear}`,
 );
 
-// Check 26: 228 learners in canonical fixture 2028
-check("canonical_fixture_228_learners_2028", yr2028.numero_de_alunos, 228);
+// Check 26: 258 learners in canonical fixture 2028 (t1_g4/base)
+check("canonical_fixture_258_learners_2028", yr2028.numero_de_alunos, 258);
 
 // ── Summary ───────────────────────────────────────────────────────────────────
 

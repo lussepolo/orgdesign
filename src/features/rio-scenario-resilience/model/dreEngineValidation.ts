@@ -17,6 +17,7 @@ import { calculateFopag } from "./fopagEngine";
 import { DRE_REVENUE_DRIVER_SOURCE_DATA } from "./dreRevenueDriverSourceData";
 import { DRE_ANNUAL_ASSUMPTION_SOURCE_DATA } from "./dreAnnualAssumptionSourceData";
 import { DRE_OUTRAS_RECEITAS_BASE_PER_LEARNER } from "./dreScenarioAdapters";
+import { toReajusteDespesasBase2028, resolveReajusteDespesasGrowthFactor } from "./reajusteDespesasGrowth";
 import { FINANCE_SOURCE_CLOSURE_COMPLETE } from "./dreGovernanceReadiness";
 
 const VALIDATION_INPUT = {
@@ -332,7 +333,39 @@ export function runDreEngineValidation(): DreEngineValidationReport {
   // (consultoria_e_honorarios, tecnologia_..., energia_..., despesas_com_sinistro)
   // where a silent ?? 0 would otherwise zero the field and still pass a single
   // spot-check — the one case where a wrong EBITDA could hide behind 20/20.
+  //
+  // V10-F2.2 (2026-07-27) superseded static passthrough for the 22-line v10
+  // PnL row-11 dependency table (see reajusteDespesasGrowth.ts module header):
+  // these lines are now formula_layer (dreLineItemMap.ts), computed live from
+  // their own base-ratio/growth-factor formulas, not from this stale
+  // annual-assumption source table. Excluded here (same list as
+  // scripts/validate-v10-f2.ts's ROW_11_DEPENDENT_DRE_LINE_IDS, which
+  // independently validates all 22 formula-derived lines, 76/76).
   {
+    const ROW_11_DEPENDENT_DRE_LINE_IDS = new Set([
+      "receita_com_eventos",
+      "outras_receitas",
+      "eventos_seb",
+      "certificacoes",
+      "custos_com_alimentacao",
+      "materiais_pedagogicos",
+      "cursos_e_treinamentos",
+      "servicos_de_limpeza_e_seguranca",
+      "consultoria_e_honorarios",
+      "despesas_juridicas",
+      "rpa",
+      "conservacao_predial_e_manutencao_maquinas_e_moveis",
+      "locacao_de_maquinas_e_equipamentos",
+      "tecnologia_telefone_internet_licencas_e_servicos_de_informacao",
+      "energia_eletrica_agua_e_esgoto",
+      "materiais_de_limpeza",
+      "materiais_de_escritorio",
+      "despesas_com_viagens",
+      "demais_impostos_e_taxas",
+      "demais_custos_e_despesas",
+      "despesas_com_marketing",
+      "despesas_bancarias",
+    ]);
     const YEAR = 2028;
     const yr2028 = result.byYear[YEAR] as unknown as Record<string, number>;
     let ok = true;
@@ -346,6 +379,7 @@ export function runDreEngineValidation(): DreEngineValidationReport {
         typeof record.dreLineItemMapDreLineId === "string"
           ? record.dreLineItemMapDreLineId
           : record.dreLineId;
+      if (ROW_11_DEPENDENT_DRE_LINE_IDS.has(canonicalId)) continue;
       const sourceVal = (record.annualValuesByYear as Record<number, number>)[YEAR] ?? 0;
       const engineVal = yr2028[canonicalId];
       if (engineVal === undefined) {
@@ -368,8 +402,11 @@ export function runDreEngineValidation(): DreEngineValidationReport {
       ok
         ? pass(
             "annual_assumption_passthrough_correct",
-            "All 27 non-below-ebitda annual assumption rows match source for 2028 " +
-              "(includes 5 variant-key rows: consultoria_e_honorarios, tecnologia_telefone_..., energia_eletrica_..., despesas_com_sinistro)",
+            "All 6 remaining non-below-ebitda, non-formula-derived annual assumption rows " +
+              "(aluguel_iptu, corporativo_bu, rateio_corporativo, pcld, descontos_comerciais, " +
+              "despesas_com_sinistro) match source for 2028. The other 21 non-below-ebitda rows " +
+              "are the V10-F2.2 row-11-dependent formula_layer lines, excluded here and " +
+              "independently validated by validate:v10-f2 (76/76).",
           )
         : fail(
             "annual_assumption_passthrough_correct",
@@ -379,16 +416,25 @@ export function runDreEngineValidation(): DreEngineValidationReport {
   }
 
   // ── Check 12: outras_receitas_uses_base_per_learner_ratio ────────────────────
+  // V10-F2.2 (2026-07-27) / D-R7 superseded the pre-2028-benchmark-only
+  // reading of this ratio: the stored ratio is a pre-2028 benchmark (v10
+  // PnL!AA235/AA223), converted once via the explicit 2028 Reajuste Despesas
+  // factor (×1.05), then escalated 4.9%/yr from 2029 -- see
+  // reajusteDespesasGrowth.ts and dreEngine.ts's outras_receitas computation.
+  // This check's expectation is updated to match; the pre-V10-F2.2 "ratio ×
+  // alunos" reading (no conversion/escalation) is obsolete and independently
+  // re-validated by validate:v10-f2 (76/76).
   {
     const yr2028 = result.byYear[2028];
     const ratio = DRE_OUTRAS_RECEITAS_BASE_PER_LEARNER.sourceValues.basePerLearnerRatio;
-    const expected = ratio * yr2028.numero_de_alunos;
+    const base2028 = toReajusteDespesasBase2028(ratio);
+    const expected = base2028 * resolveReajusteDespesasGrowthFactor(2028) * yr2028.numero_de_alunos;
     const ok = Math.abs(yr2028.outras_receitas - expected) < EPS;
     checks.push(
       ok
         ? pass(
             "outras_receitas_uses_base_per_learner_ratio",
-            `outras_receitas 2028 = ratio(${ratio.toFixed(4)}) × alunos(${yr2028.numero_de_alunos}) = ${expected.toFixed(2)} — matches engine output`,
+            `outras_receitas 2028 = base2028(${base2028.toFixed(4)}) × growthFactor(1) × alunos(${yr2028.numero_de_alunos}) = ${expected.toFixed(2)} — matches engine output (V10-F2.2/D-R7 formula)`,
           )
         : fail(
             "outras_receitas_uses_base_per_learner_ratio",

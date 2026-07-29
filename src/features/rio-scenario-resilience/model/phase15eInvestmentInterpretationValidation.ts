@@ -172,7 +172,11 @@ const S1_CANONICAL_90M: CapitalDecisionEngineInput = {
 const S2_CANONICAL_100M: CapitalDecisionEngineInput = { ...S1_CANONICAL_90M, capexOptionId: "capex_100m_brl" };
 const S3_PESSIMISTA_100M: CapitalDecisionEngineInput = { ...S2_CANONICAL_100M, occupancyScenarioId: "conservador" };
 const S4_OTIMISTA_100M: CapitalDecisionEngineInput = { ...S2_CANONICAL_100M, occupancyScenarioId: "otimista" };
-const S5_T1G6_100M: CapitalDecisionEngineInput = { ...S2_CANONICAL_100M, openingPackageId: "t1_g6" };
+// t1_g3 retired since commit 3f4da5c; S2's canonical base package was
+// migrated to t1_g6 at that time but this comparison variant was left
+// pointing at t1_g6 too, collapsing it into a no-op vs S2 (matrix_independent_
+// interpretation_per_scenario). Swapped to the other active package (t1_g4).
+const S5_T1G4_100M: CapitalDecisionEngineInput = { ...S2_CANONICAL_100M, openingPackageId: "t1_g4" };
 const S6_BP2_100M: CapitalDecisionEngineInput = { ...S2_CANONICAL_100M, tuitionScenarioId: "bp2_ey_ls_unified" };
 const S7_PREMIUM_100M: CapitalDecisionEngineInput = { ...S2_CANONICAL_100M, orgDesignOptionId: "premium_experience" };
 const S8_MINIMUM_100M: CapitalDecisionEngineInput = { ...S2_CANONICAL_100M, orgDesignOptionId: "minimum_experience" };
@@ -182,7 +186,7 @@ const S1_S8: readonly { scenarioId: string; scenarioInput: CapitalDecisionEngine
   { scenarioId: "S2_canonical_100m", scenarioInput: S2_CANONICAL_100M },
   { scenarioId: "S3_pessimista_100m", scenarioInput: S3_PESSIMISTA_100M },
   { scenarioId: "S4_otimista_100m", scenarioInput: S4_OTIMISTA_100M },
-  { scenarioId: "S5_t1g6_100m", scenarioInput: S5_T1G6_100M },
+  { scenarioId: "S5_t1g4_100m", scenarioInput: S5_T1G4_100M },
   { scenarioId: "S6_bp2_100m", scenarioInput: S6_BP2_100M },
   { scenarioId: "S7_premium_100m", scenarioInput: S7_PREMIUM_100M },
   { scenarioId: "S8_minimum_100m", scenarioInput: S8_MINIMUM_100M },
@@ -714,13 +718,13 @@ export function runPhase15EInvestmentInterpretationValidation(): Phase15EValidat
 
   {
     const s2 = matrixResults["S2_canonical_100m"];
-    const s5 = matrixResults["S5_t1g6_100m"];
+    const s5 = matrixResults["S5_t1g4_100m"];
     const s6 = matrixResults["S6_bp2_100m"];
     checks.push(
       s2.npvBRL !== s5.npvBRL && s2.npvBRL !== s6.npvBRL
         ? pass(
             "matrix_independent_interpretation_per_scenario",
-            `S2 (t1_g3/bp1) npvBRL=${s2.npvBRL} differs from S5 (t1_g6) npvBRL=${s5.npvBRL} and ` +
+            `S2 (t1_g6/bp1) npvBRL=${s2.npvBRL} differs from S5 (t1_g4) npvBRL=${s5.npvBRL} and ` +
               `S6 (bp2_ey_ls_unified) npvBRL=${s6.npvBRL}; each scenario's interpretation is independently derived.`,
           )
         : fail("matrix_independent_interpretation_per_scenario", `S2=${s2.npvBRL}, S5=${s5.npvBRL}, S6=${s6.npvBRL}`),

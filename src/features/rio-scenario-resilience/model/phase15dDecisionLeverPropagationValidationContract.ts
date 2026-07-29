@@ -15,7 +15,7 @@ export type Phase15DLeverPropagationCheckId =
   | "lever_capex_90m_vs_100m_propagates"
   | "lever_occupancy_pessimista_propagates"
   | "lever_occupancy_otimista_propagates"
-  | "lever_opening_grades_t1g6_propagates"
+  | "lever_opening_grades_t1g4_propagates"
   | "lever_tuition_bp2_propagates"
   | "lever_org_design_premium_propagates_same_label_different_vpl"
   | "lever_org_design_minimum_propagates"

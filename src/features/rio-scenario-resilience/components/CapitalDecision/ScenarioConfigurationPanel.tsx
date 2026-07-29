@@ -8,6 +8,7 @@
 
 import { Badge, Card } from "../../../../components/common";
 import { openingGrades } from "../../data/openingGrades";
+import { ACTIVE_OPENING_PACKAGE_IDS } from "../../model/openingPackageOccupancySourceDataContract";
 import { occupancyOptions } from "../../data/occupancyOptions";
 import { orgDesignStructure } from "../../data/orgDesignStructure";
 import { tuitionArchitecture } from "../../data/tuitionArchitecture";
@@ -38,7 +39,13 @@ const LEVER_FIELDS: readonly LeverFieldConfig[] = [
     id: "openingGrades",
     labelKey: "capitalConfigPanelLeverOpeningGrades",
     inputKey: "openingPackageId",
-    options: openingGrades.map((option) => ({ id: option.id, label: option.label })),
+    // t1_g3/t1_g5 retired since commit 3f4da5c (V10-E1 governed package
+    // migration) -- rejected at the engine level. Only offer currently
+    // supported opening packages; selecting a retired one would crash
+    // calculateInvestmentInterpretation.
+    options: openingGrades
+      .filter((option) => (ACTIVE_OPENING_PACKAGE_IDS as readonly string[]).includes(option.id))
+      .map((option) => ({ id: option.id, label: option.label })),
   },
   {
     id: "occupancy",

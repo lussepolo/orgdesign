@@ -56,9 +56,13 @@ const S4_OTIMISTA_100M: CapitalDecisionEngineInput = {
   occupancyScenarioId: "otimista",
 };
 
-const S5_T1G6_100M: CapitalDecisionEngineInput = {
+// t1_g3 retired since commit 3f4da5c; S2's canonical base package was
+// migrated to t1_g6 at that time but this comparison variant was left
+// pointing at t1_g6 too, collapsing it into a no-op vs S2. Swapped to the
+// other currently-active package (t1_g4) so the lever genuinely differs.
+const S5_T1G4_100M: CapitalDecisionEngineInput = {
   ...S2_CANONICAL_100M,
-  openingPackageId: "t1_g6",
+  openingPackageId: "t1_g4",
 };
 
 const S6_BP2_100M: CapitalDecisionEngineInput = {
@@ -83,7 +87,7 @@ export function runPhase15DLeverPropagationValidation(): Phase15DLeverPropagatio
   const p2 = calculateDiscountedPaybackForCapitalDecision(S2_CANONICAL_100M);
   const p3 = calculateDiscountedPaybackForCapitalDecision(S3_PESSIMISTA_100M);
   const p4 = calculateDiscountedPaybackForCapitalDecision(S4_OTIMISTA_100M);
-  const p5 = calculateDiscountedPaybackForCapitalDecision(S5_T1G6_100M);
+  const p5 = calculateDiscountedPaybackForCapitalDecision(S5_T1G4_100M);
   const p6 = calculateDiscountedPaybackForCapitalDecision(S6_BP2_100M);
   const p7 = calculateDiscountedPaybackForCapitalDecision(S7_PREMIUM_100M);
   const p8 = calculateDiscountedPaybackForCapitalDecision(S8_MINIMUM_100M);
@@ -166,12 +170,12 @@ export function runPhase15DLeverPropagationValidation(): Phase15DLeverPropagatio
   checks.push(
     p5.npvBRL !== p2.npvBRL
       ? pass(
-          "lever_opening_grades_t1g6_propagates",
-          `S5 (t1_g6) npvBRL=${p5.npvBRL}, compactValue="${p5.compactValue}" vs ` +
-            `S2 (t1_g3) npvBRL=${p2.npvBRL}, compactValue="${p2.compactValue}".`,
+          "lever_opening_grades_t1g4_propagates",
+          `S5 (t1_g4) npvBRL=${p5.npvBRL}, compactValue="${p5.compactValue}" vs ` +
+            `S2 (t1_g6) npvBRL=${p2.npvBRL}, compactValue="${p2.compactValue}".`,
         )
       : fail(
-          "lever_opening_grades_t1g6_propagates",
+          "lever_opening_grades_t1g4_propagates",
           `S2 and S5 npvBRL unexpectedly identical (${p2.npvBRL}).`,
         ),
   );
