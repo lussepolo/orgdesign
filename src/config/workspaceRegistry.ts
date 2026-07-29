@@ -155,7 +155,11 @@ export const WORKSPACE_REGISTRY: WorkspaceDefinition[] = [
         inputsKey: "wsPayrollSubviewAInputs",
         impactKey: "wsPayrollSubviewAImpact",
         resultKey: "wsPayrollSubviewAResult",
-        status: "simulation",
+        // V10-RC2.2: reclassified from "simulation" to "governed_data" — this
+        // subview now reads directly from calculateFopag()/calculateDre()/
+        // buildOrgDesignHcTable() at runtime (no local calculation engine),
+        // the same engines Org Design and DRE already treat as governed.
+        status: "governed_data",
         noticeKey: "wsPayrollSubviewANotice",
       },
       {

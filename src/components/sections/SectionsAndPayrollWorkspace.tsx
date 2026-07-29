@@ -5,6 +5,8 @@ import { useLocale } from "../../i18n/useLocale";
 import WorkspaceContextBanner from "../common/WorkspaceContextBanner";
 import PayrollProjectionTab from "./PayrollProjectionTab";
 import PayrollExportMatrixTab from "./PayrollExportMatrixTab";
+import type { ActiveOpeningPackageId, OccupancyScenarioId } from "../../features/rio-scenario-resilience/model/openingPackageOccupancySourceDataContract";
+import type { TuitionScenarioId } from "../../features/rio-scenario-resilience/model/revenueInputs";
 
 type PayrollSubviewId = "sections-staffing-simulation" | "governed-payroll-exports";
 
@@ -13,12 +15,22 @@ const SUBVIEWS: Array<{ id: PayrollSubviewId; labelKey: "wsPayrollSubviewALabel"
   { id: "governed-payroll-exports", labelKey: "wsPayrollSubviewBLabel", icon: PackageCheck },
 ];
 
+interface SectionsAndPayrollWorkspaceProps {
+  readonly openingPackageId: ActiveOpeningPackageId;
+  readonly occupancyScenarioId: OccupancyScenarioId;
+  readonly tuitionScenarioId: TuitionScenarioId;
+}
+
 // V10-X2T: "Turmas, Equipe Pedagógica e Folha de Pagamento" primary
-// workspace. Wraps the existing, unmodified PayrollProjectionTab (locked
-// file — do not edit) and PayrollExportMatrixTab components as two
+// workspace. Wraps PayrollProjectionTab and PayrollExportMatrixTab as two
 // subviews rather than duplicating either. No calculation logic lives in
-// this file.
-export default function SectionsAndPayrollWorkspace() {
+// this file — it only forwards the shared scenario contract (V10-RC2.2)
+// down to PayrollProjectionTab, same as App.tsx does for ExecutiveOrgDesignTab.
+export default function SectionsAndPayrollWorkspace({
+  openingPackageId,
+  occupancyScenarioId,
+  tuitionScenarioId,
+}: SectionsAndPayrollWorkspaceProps) {
   const { t } = useLocale();
   const [activeSubview, setActiveSubview] = useState<PayrollSubviewId>("sections-staffing-simulation");
 
@@ -53,7 +65,15 @@ export default function SectionsAndPayrollWorkspace() {
 
       <WorkspaceContextBanner workspaceId="payroll" activeSubviewId={activeSubview} />
 
-      {activeSubview === "sections-staffing-simulation" ? <PayrollProjectionTab /> : <PayrollExportMatrixTab />}
+      {activeSubview === "sections-staffing-simulation" ? (
+        <PayrollProjectionTab
+          openingPackageId={openingPackageId}
+          occupancyScenarioId={occupancyScenarioId}
+          tuitionScenarioId={tuitionScenarioId}
+        />
+      ) : (
+        <PayrollExportMatrixTab />
+      )}
     </div>
   );
 }

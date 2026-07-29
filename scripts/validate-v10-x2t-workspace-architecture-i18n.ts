@@ -8,7 +8,9 @@
 // by en-US.ts's Record<TranslationKey,string> annotation); no accidental
 // mixed-language primary labels; Cover routes to Oferta e Ocupação; Export
 // Matrix is no longer an independent primary workspace and its component is
-// reused, not duplicated; the Payroll simulation/canonical boundary notice;
+// reused, not duplicated; the Payroll revenue-uncertified/MS-HS-unreconciled
+// notice (V10-RC2.2 — retired the prior simulation/canonical boundary notice
+// once Payroll was refactored onto the shared governed engines);
 // model-authority classification for every workspace; legacy StaffingTab is
 // unmounted; HS illustrative-data disclosure; version-label coherence; and —
 // via git blob-hash comparison against the V10-X2T entry-state snapshot —
@@ -247,12 +249,20 @@ check(
   "App.tsx must route through SectionsAndPayrollWorkspace, not import the leaf tabs directly",
 );
 
-// ── Section H: simulation/canonical boundary notice ─────────────────────────
+// ── Section H: Payroll revenue-uncertified / MS-HS-unreconciled notice ──────
 
+// V10-RC2.2: PayrollProjectionTab was refactored to consume calculateFopag()/
+// calculateDre()/buildOrgDesignHcTable() directly (the same engines Org
+// Design/DRE already treat as governed) — the prior "simulation, does not
+// modify canonical FOPAG/DRE" boundary no longer describes reality and was
+// retired by explicit phase authorization. The notice now pins the two
+// limitations that ARE still genuinely true: revenue is computed but not
+// Finance-certified (D-R6/F03), and MS/HS headcount is an unreconciled
+// engine aggregate, not a governed grade-level breakdown (F06).
 const REQUIRED_PT_NOTICE =
-  "As alterações de níveis de educadores nesta simulação ainda não modificam automaticamente o FOPAG, a DRE ou as exportações governadas.";
+  "Receita e cobertura são computadas, não certificadas pelo Financeiro (D-R6/F03). Efetivo docente EY/LS é governado; o efetivo do Fundamental II/Médio é uma estimativa agregada do motor, não um detalhamento por série reconciliado.";
 const REQUIRED_EN_NOTICE =
-  "Educator-tier changes in this simulation do not yet automatically modify canonical FOPAG, the operating P&L, or governed exports.";
+  "Revenue and coverage are computed, not Finance-certified (D-R6/F03). EY/LS instructional headcount is governed; Middle/High School headcount is an engine aggregate estimate, not a reconciled grade-level breakdown.";
 check(
   "payroll_subview_a_notice_pt_matches_spec",
   PT_BR.wsPayrollSubviewANotice === REQUIRED_PT_NOTICE,
@@ -274,9 +284,13 @@ for (const id of ["early-years", "lower-school", "ms", "hs", "hr", "offer-scenar
   check(`${id}_classified_reference`, getWorkspace(id as TabId).status === "reference", `status=${getWorkspace(id as TabId).status}`);
 }
 check("load_classified_diagnostic", getWorkspace("load" as TabId).status === "diagnostic", "");
+// V10-RC2.2: subview A reclassified from "simulation" to "governed_data" —
+// PayrollProjectionTab now reads calculateFopag()/calculateDre()/
+// buildOrgDesignHcTable() directly at runtime rather than an independent
+// local model, so "simulation, not yet canonical" no longer describes it.
 check(
-  "payroll_subviews_classified_simulation_and_canonical",
-  getWorkspace("payroll" as TabId).subviews?.[0]?.status === "simulation" &&
+  "payroll_subviews_classified_governed_data_and_canonical",
+  getWorkspace("payroll" as TabId).subviews?.[0]?.status === "governed_data" &&
     getWorkspace("payroll" as TabId).subviews?.[1]?.status === "canonical",
   JSON.stringify(getWorkspace("payroll" as TabId).subviews?.map((s) => s.status)),
 );
@@ -459,80 +473,56 @@ if (existsSync(join(ROOT, enrollmentSourcePath))) {
   );
 }
 
-// ── Section P: PayrollProjectionTab.tsx string-only edit — calculation-core parity ──
+// ── Section P: PayrollProjectionTab.tsx shared-engine refactor (V10-RC2.2) ──
 //
-// PayrollProjectionTab.tsx was authorized this phase for STRING-ONLY edits
-// (localization, translation-key integration, locale-aware formatting,
-// accessibility labels). It is no longer covered by the flat no_drift check
-// above (Section N) because a string-only edit necessarily changes its blob
-// hash. Instead: the pre-edit blob was captured into the git object store
-// (git hash-object -w) at V10-X2T entry state, and this section proves —
-// by extracting and byte-comparing the exact calculation-core substrings —
-// that no calculation, constant, or data-shape line was touched.
+// V10-RC2.2 explicitly authorized refactoring PayrollProjectionTab.tsx's
+// calculation core and export handler — the prior byte-identity checks
+// against the V10-X2T entry-state blob are retired (they would trivially
+// and permanently fail against an authorized rewrite, telling a reader
+// nothing). Replaced with behavior/structural checks proving the refactor
+// actually happened as directed: shared-scenario props received, the
+// governed engines consumed, the retired disconnected local axis removed,
+// and the governed export builder used instead of the standalone one.
 const PAYROLL_TAB_PATH = "src/components/sections/PayrollProjectionTab.tsx";
-const PAYROLL_TAB_ENTRY_HASH = "d928b88c6f6001827c1dd12163718e26ca7fdf48";
+const payrollTabSrc = src(PAYROLL_TAB_PATH);
 
-function extractBetween(source: string, startMarker: string, endMarker: string): string | null {
-  const startIdx = source.indexOf(startMarker);
-  if (startIdx === -1) return null;
-  const endIdx = source.indexOf(endMarker, startIdx);
-  if (endIdx === -1) return null;
-  return source.slice(startIdx, endIdx);
-}
-
-try {
-  const entrySrc = execSync(`git cat-file blob ${PAYROLL_TAB_ENTRY_HASH}`, { cwd: ROOT }).toString();
-  const currentSrc = src(PAYROLL_TAB_PATH);
-
-  const CORE_START = 'const [scenario, setScenario] = useState<PayrollScenario>("otimista");';
-  const CORE_END = "const scenarioLabels: Record<PayrollScenario";
-  const entryCore = extractBetween(entrySrc, CORE_START, CORE_END);
-  const currentCore = extractBetween(currentSrc, CORE_START, CORE_END);
-  check(
-    "payroll_tab_calculation_core_byte_identical",
-    entryCore !== null && currentCore !== null && entryCore === currentCore,
-    entryCore === null || currentCore === null
-      ? "marker not found — structural change to component, cannot verify"
-      : entryCore === currentCore
-        ? "getGradeLevel/turmasMatrix/projection/allScenariosData/matrixData/gradeDetail unchanged"
-        : "calculation-core substring differs from V10-X2T entry state",
-  );
-
-  const TAIL_START = "const selectedYearData = yearlyData[PAYROLL_YEARS.indexOf(selectedYear)];";
-  const TAIL_END = "\n  return (";
-  const entryTail = extractBetween(entrySrc, TAIL_START, TAIL_END);
-  const currentTail = extractBetween(currentSrc, TAIL_START, TAIL_END);
-  check(
-    "payroll_tab_export_handler_byte_identical",
-    entryTail !== null && currentTail !== null && entryTail === currentTail,
-    entryTail === null || currentTail === null
-      ? "marker not found — structural change to component, cannot verify"
-      : entryTail === currentTail
-        ? "selectedYearData/handleDownloadProjectionTable unchanged"
-        : "export-handler substring differs from V10-X2T entry state",
-  );
-
-  // scenarioLabels/scenarioColors block: values may change (display string →
-  // translation key), but the PayrollScenario keys and scenarioColors values
-  // (which drive no calculation) must be the same three scenario ids.
-  const LABELS_BLOCK_START = "const scenarioLabels: Record<PayrollScenario";
-  const LABELS_BLOCK_END = "const selectedYearData";
-  const currentLabelsBlock = extractBetween(currentSrc, LABELS_BLOCK_START, LABELS_BLOCK_END) ?? "";
-  check(
-    "payroll_tab_scenario_colors_unchanged",
-    currentLabelsBlock.includes(
-      'otimista: "bg-emerald-600 text-white", base: "bg-blue-600 text-white", pessimista: "bg-amber-600 text-white"',
-    ),
-    "scenarioColors values must be untouched (presentational styling only, not calculation)",
-  );
-  check(
-    "payroll_tab_no_formatbrl_left_in_calc_scope",
-    !currentSrc.includes("formatBRL("),
-    "formatBRL(...) must be fully replaced by formatCurrencyBRL(..., locale) — no mixed usage",
-  );
-} catch (err) {
-  check("payroll_tab_calculation_core_byte_identical", false, `error reading entry-state blob: ${err}`);
-}
+check(
+  "payroll_tab_receives_shared_scenario_props",
+  /openingPackageId:\s*ActiveOpeningPackageId/.test(payrollTabSrc) &&
+    /occupancyScenarioId:\s*OccupancyScenarioId/.test(payrollTabSrc) &&
+    /tuitionScenarioId:\s*TuitionScenarioId/.test(payrollTabSrc),
+  "PayrollProjectionTabProps must declare openingPackageId/occupancyScenarioId/tuitionScenarioId",
+);
+check(
+  "payroll_tab_consumes_governed_engines",
+  payrollTabSrc.includes('from "../../features/rio-scenario-resilience/model/fopagEngine"') &&
+    payrollTabSrc.includes('from "../../features/rio-scenario-resilience/model/dreEngine"') &&
+    payrollTabSrc.includes("buildOrgDesignHcTable"),
+  "must import calculateFopag/calculateDre/buildOrgDesignHcTable — the same engines Org Design and DRE already use",
+);
+check(
+  "payroll_tab_retired_disconnected_local_axis",
+  // Checks actual import/declaration/call sites, not prose — the file's own
+  // header comment documents what was retired and legitimately names these
+  // identifiers in passing.
+  !payrollTabSrc.includes('from "../../lib/payroll') &&
+    !/useState<PayrollScenario>|useState<TuitionScenario>/.test(payrollTabSrc) &&
+    !payrollTabSrc.includes("buildPayrollProjection(") &&
+    !payrollTabSrc.includes("buildScenarioComparison(") &&
+    !payrollTabSrc.includes("buildScenarioMatrix(") &&
+    !payrollTabSrc.includes("getLeadFteForGrade("),
+  "the retired local captação/tuition/turmas axis and hardcoded MS/HS FTE table must not be reintroduced or kept as a fallback (checked by import path and call sites, not prose)",
+);
+check(
+  "payroll_tab_export_uses_governed_workbook",
+  payrollTabSrc.includes("buildDreScenarioWorkbook") && !payrollTabSrc.includes("downloadTenYearProjectionXlsx"),
+  "export must use the same buildDreScenarioWorkbook() DreExportButton/the Fagundes Export Index use, not the standalone lib/payroll/exportXlsx.ts pathway",
+);
+check(
+  "payroll_tab_no_formatbrl_left_in_calc_scope",
+  !payrollTabSrc.includes("formatBRL("),
+  "formatBRL(...) must be fully replaced by formatCurrencyBRL(..., locale) — no mixed usage",
+);
 
 // Behavioral re-proof: the underlying lib/payroll functions PayrollProjectionTab
 // calls must be byte-unchanged from V10-X2T entry state (independent of the
@@ -760,10 +750,10 @@ check(
   stagedBinaries.length === 0 ? `${stagedFiles.length} files staged, 0 binaries` : `staged binaries: ${JSON.stringify(stagedBinaries)}`,
 );
 
-// Q16. Payroll subview boundary notice (simulation ≠ canonical) still wired
+// Q16. Payroll revenue-uncertified/MS-HS-unreconciled notice still wired
 // in both locales — re-asserted (belt-and-suspenders with Section H).
 check(
-  "q16_payroll_simulation_canonical_boundary_notice_both_locales",
+  "q16_payroll_revenue_uncertified_mshs_unreconciled_notice_both_locales",
   PT_BR.wsPayrollSubviewANotice === REQUIRED_PT_NOTICE && EN_US.wsPayrollSubviewANotice === REQUIRED_EN_NOTICE,
   "notice text must match spec exactly in both locales",
 );
@@ -785,14 +775,18 @@ check(
   `current=${checks.length} floor=${PRIOR_PHASE_CHECK_COUNT_FLOOR}`,
 );
 
-// Q19. PayrollProjectionTab.tsx calculation-core parity — re-asserted
+// Q19. PayrollProjectionTab.tsx shared-engine refactor — re-asserted
 // (belt-and-suspenders with Section P, in case Section P's checks are ever
-// reordered relative to this section).
+// reordered relative to this section). V10-RC2.2: this no longer pins
+// byte-identity (the refactor was explicitly authorized) — it pins that the
+// refactor's four defining properties all hold simultaneously.
 check(
-  "q19_payroll_tab_calc_core_parity_runtime",
-  checks.some((c) => c.id === "payroll_tab_calculation_core_byte_identical" && c.pass) &&
-    checks.some((c) => c.id === "payroll_tab_export_handler_byte_identical" && c.pass),
-  "PayrollProjectionTab.tsx calculation-core and export-handler substrings must be byte-identical to V10-X2T entry state",
+  "q19_payroll_tab_shared_engine_refactor_runtime",
+  checks.some((c) => c.id === "payroll_tab_receives_shared_scenario_props" && c.pass) &&
+    checks.some((c) => c.id === "payroll_tab_consumes_governed_engines" && c.pass) &&
+    checks.some((c) => c.id === "payroll_tab_retired_disconnected_local_axis" && c.pass) &&
+    checks.some((c) => c.id === "payroll_tab_export_uses_governed_workbook" && c.pass),
+  "PayrollProjectionTab.tsx must receive shared scenario props, consume the governed engines, have retired its disconnected local axis, and export via the governed workbook",
 );
 
 // Q20. No StaffingTab reintroduction and no premature Dashboard/Senior

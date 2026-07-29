@@ -164,17 +164,17 @@ export const PT_BR = {
   wsPayrollShortLabel: "Turmas e Folha",
   wsPayrollTitle: "Turmas, Equipe Pedagógica e Folha de Pagamento",
 
-  wsPayrollSubviewALabel: "Simulação de Turmas e Equipe",
-  wsPayrollSubviewATitle: "Simulação de Turmas e Equipe",
+  wsPayrollSubviewALabel: "Projeção de Turmas e Equipe",
+  wsPayrollSubviewATitle: "Projeção de Turmas e Equipe",
   wsPayrollSubviewAPurpose:
-    "Turmas por série, nível de educador por série, assistentes, monitores, quadro docente, sensibilidade salarial e comparação local de folha.",
-  wsPayrollSubviewADecision: "Como diferentes níveis de educador e cenários afetam o custo de quadro de pessoal simulado.",
-  wsPayrollSubviewAInputs: "Cenário, tabela de mensalidade, nível de educador por série e modo de margem.",
+    "Turmas por série, efetivo docente e não-docente, custo de FOPAG/Folha Direta e cobertura de receita, lidos diretamente do motor FOPAG/DRE compartilhado — não de um modelo local.",
+  wsPayrollSubviewADecision: "Como a versão de Desenho Organizacional (Enxuto/Balanceado/Premium) afeta a remuneração, sem alterar turmas, matrículas ou efetivo.",
+  wsPayrollSubviewAInputs: "Cenário compartilhado (pacote de abertura, captação, mensalidade), versão de Desenho Organizacional local e modo de margem.",
   wsPayrollSubviewAImpact:
-    "Afeta a simulação local de Projeção de Folha e sua exportação local; atualmente não altera o FOPAG/DRE canônicos.",
-  wsPayrollSubviewAResult: "Cenário exploratório de quadro de pessoal e remuneração.",
+    "Consome calculateFopag()/calculateDre()/buildOrgDesignHcTable() — os mesmos motores usados pelo Desenho Organizacional Executivo e pelo Simulador de Cenário DRE. Nenhum cálculo local independente.",
+  wsPayrollSubviewAResult: "Efetivo e custo docente/não-docente governados; efetivo do Fundamental II/Médio permanece agregado e não reconciliado (F06).",
   wsPayrollSubviewANotice:
-    "As alterações de níveis de educadores nesta simulação ainda não modificam automaticamente o FOPAG, a DRE ou as exportações governadas.",
+    "Receita e cobertura são computadas, não certificadas pelo Financeiro (D-R6/F03). Efetivo docente EY/LS é governado; o efetivo do Fundamental II/Médio é uma estimativa agregada do motor, não um detalhamento por série reconciliado.",
 
   wsPayrollSubviewBLabel: "Folha Governada e Exportações",
   wsPayrollSubviewBTitle: "Folha Governada e Exportações",
@@ -481,11 +481,27 @@ export const PT_BR = {
   scenarioPessimista: "Pessimista",
   scenarioFullSeat: "Full Seat",
 
-  // ── PayrollProjectionTab (V10-X2T completion gate — string-only edit) ──
+  // ── PayrollProjectionTab (V10-RC2.2: shared-scenario labels) ──
+  payrollSharedScenarioLabel: "Cenário compartilhado",
+  payrollSharedOpeningPackageLabel: "Pacote de abertura",
+  payrollSharedCaptacaoLabel: "Captação",
+  payrollSharedTuitionLabel: "Mensalidade",
+  payrollRevenueUncertifiedNote: "Computado, não certificado pelo Financeiro (D-R6/F03).",
+  payrollOrgDesignTierLabel: "Versão de Desenho Organizacional",
+  payrollTeamHeadcountLabel: "Efetivo da equipe",
+  payrollMsHsUnavailableLabel: "Ensino Fundamental II / Médio — detalhamento por série indisponível",
+  payrollMsHsUnavailableNote:
+    "F06 (V10-RC2 Gate 1): existem três fontes de efetivo docente do Fundamental II/Médio não reconciliadas neste repositório (modelo de capacidade instrucional da Fase 15H.2, a tabela de FTE fixo do adaptador FOPAG, e uma contagem da Fase 8B recuperada mas nunca integrada). A regra de EY/LS (educadores = seções) não é extrapolada para essas séries.",
+  payrollMsHsAggregateEstimateLabel: "Estimativa agregada do motor (não reconciliada)",
+  payrollCompareOrgDesignSubtitle: "Custo total de pessoal por versão de Desenho Organizacional, ano a ano",
+  payrollTierInvarianceFooterNote:
+    "A versão de Desenho Organizacional altera a composição de cargos e a remuneração; não altera turmas nem matrículas.",
+  payrollMatrixCaptacaoOrgDesignSubtitle: "Captação × Desenho Organizacional — {year}",
+
   payrollHowToUseLabel: "Como usar esta página",
   payrollHowToUseHeadline: "Cenário → Turmas → Educadores → Custo → Cobertura de Folha",
   payrollHowToUseIntro:
-    "Escolha um cenário de matrícula e uma tabela de mensalidade. O modelo consulta o número de turmas por série e ano, atribui um nível de educador e monta a pilha de custo anual completa. Receita = alunos × mensalidade anual crescendo 8%/ano a partir da base de 2028. Cobertura de folha = receita menos a pilha de custo de pessoal modelada.",
+    "O pacote de abertura, a captação e a mensalidade são herdados do cenário compartilhado (Desenho Organizacional Executivo / Simulador de Cenário DRE) — não são escolhidos nesta página. Escolha apenas a versão de Desenho Organizacional e o ano de detalhe. Efetivo docente e não-docente vêm do motor FOPAG/DRE governado; receita e cobertura são computadas a partir do mesmo motor, não certificadas pelo Financeiro.",
   payrollFopagIncludesLabel: "FOPAG Direto inclui",
   payrollFopagIncludesList:
     "Educadores líderes · Assistentes · Monitores · FTE MS/HS · Música · LED · Pool HS · Secretaria · TI · Manutenção · Marketing · RH · Secretário(a)",

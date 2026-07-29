@@ -165,17 +165,17 @@ export const EN_US: Record<TranslationKey, string> = {
   wsPayrollShortLabel: "Sections and Payroll",
   wsPayrollTitle: "Sections, Academic Staffing and Payroll",
 
-  wsPayrollSubviewALabel: "Sections and Staffing Simulation",
-  wsPayrollSubviewATitle: "Sections and Staffing Simulation",
+  wsPayrollSubviewALabel: "Sections and Staffing Projection",
+  wsPayrollSubviewATitle: "Sections and Staffing Projection",
   wsPayrollSubviewAPurpose:
-    "Sections by grade, educator tier by grade, assistants, monitors, teaching headcount, salary sensitivity, and local payroll comparison.",
-  wsPayrollSubviewADecision: "How different educator tiers and scenarios affect simulated staffing cost.",
-  wsPayrollSubviewAInputs: "Scenario, tuition table, educator tier by grade, and margin mode.",
+    "Sections by grade, instructional and non-instructional headcount, FOPAG/Folha Direta cost, and revenue coverage, read directly from the shared FOPAG/DRE engine — not a local model.",
+  wsPayrollSubviewADecision: "How the Org Design version (Minimum/Balanced/Premium) affects compensation, without changing sections, enrollment, or headcount.",
+  wsPayrollSubviewAInputs: "Shared scenario (opening package, captação, tuition), local Org Design version, and margin mode.",
   wsPayrollSubviewAImpact:
-    "Affects the local Payroll Projection simulation and its local export; currently does not alter canonical FOPAG/DRE.",
-  wsPayrollSubviewAResult: "Exploratory staffing and compensation scenario.",
+    "Consumes calculateFopag()/calculateDre()/buildOrgDesignHcTable() — the same engines Executive Org Design and the DRE Scenario Simulator use. No independent local calculation.",
+  wsPayrollSubviewAResult: "Governed instructional/non-instructional headcount and cost; Middle/High School headcount remains an unreconciled aggregate (F06).",
   wsPayrollSubviewANotice:
-    "Educator-tier changes in this simulation do not yet automatically modify canonical FOPAG, the operating P&L, or governed exports.",
+    "Revenue and coverage are computed, not Finance-certified (D-R6/F03). EY/LS instructional headcount is governed; Middle/High School headcount is an engine aggregate estimate, not a reconciled grade-level breakdown.",
 
   wsPayrollSubviewBLabel: "Governed Payroll and Exports",
   wsPayrollSubviewBTitle: "Governed Payroll and Exports",
@@ -482,11 +482,27 @@ export const EN_US: Record<TranslationKey, string> = {
   scenarioPessimista: "Pessimistic",
   scenarioFullSeat: "Full Seat",
 
-  // ── PayrollProjectionTab (V10-X2T completion gate — string-only edit) ──
+  // ── PayrollProjectionTab (V10-RC2.2: shared-scenario labels) ──
+  payrollSharedScenarioLabel: "Shared scenario",
+  payrollSharedOpeningPackageLabel: "Opening package",
+  payrollSharedCaptacaoLabel: "Captação",
+  payrollSharedTuitionLabel: "Tuition",
+  payrollRevenueUncertifiedNote: "Computed, not Finance-certified (D-R6/F03).",
+  payrollOrgDesignTierLabel: "Org Design version",
+  payrollTeamHeadcountLabel: "Team headcount",
+  payrollMsHsUnavailableLabel: "Middle School / High School — grade-level detail unavailable",
+  payrollMsHsUnavailableNote:
+    "F06 (V10-RC2 Gate 1): three non-identical MS/HS staffing sources exist in this repository, unreconciled (the Phase 15H.2 instructional-capacity model, the FOPAG adapter's own fixed-FTE table, and a recovered-but-never-committed Phase 8B count). The EY/LS rule (educators = sections) is not extrapolated to these grades.",
+  payrollMsHsAggregateEstimateLabel: "Engine aggregate estimate (unreconciled)",
+  payrollCompareOrgDesignSubtitle: "Total people cost by Org Design version, year by year",
+  payrollTierInvarianceFooterNote:
+    "Org Design version changes role composition and compensation; it does not change sections or enrollment.",
+  payrollMatrixCaptacaoOrgDesignSubtitle: "Captação × Org Design — {year}",
+
   payrollHowToUseLabel: "How to use this page",
   payrollHowToUseHeadline: "Scenario → Classes → Educators → Cost → Payroll Coverage",
   payrollHowToUseIntro:
-    "Pick an enrollment scenario and a tuition table. The model looks up the number of turmas per grade per year, assigns an educator tier, and builds the full annual cost stack. Revenue = students × annual tuition growing at 8%/year from the 2028 base. Payroll coverage = revenue minus the modeled people-cost stack.",
+    "Opening package, captação, and tuition are inherited from the shared scenario (Executive Org Design / DRE Scenario Simulator) — they are not chosen on this page. Pick only the Org Design version and the detail year. Instructional and non-instructional headcount come from the governed FOPAG/DRE engine; revenue and coverage are computed from that same engine, not Finance-certified.",
   payrollFopagIncludesLabel: "FOPAG Direto includes",
   payrollFopagIncludesList:
     "Lead educators · Assistants · Monitors · MS/HS FTE · Music · LED · HS Pool · Clerk · IT · Maintenance · Marketing · HR · Secretary",

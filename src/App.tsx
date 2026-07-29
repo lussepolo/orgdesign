@@ -419,7 +419,13 @@ function AppShell() {
               />
             )}
             {activeTab === "hs" && <HighSchoolTab sections={hsSections} setSections={setHsSections} />}
-            {activeTab === "payroll" && <SectionsAndPayrollWorkspace />}
+            {activeTab === "payroll" && (
+              <SectionsAndPayrollWorkspace
+                openingPackageId={orgDesignOpeningPackageId}
+                occupancyScenarioId={dreSelections.occupancyScenarioId}
+                tuitionScenarioId={dreSelections.tuitionScenarioId}
+              />
+            )}
             {activeTab === "viability" && <ViabilitySimulatorTab />}
             {activeTab === "dre-scenario-simulator" && (
               <DreScenarioSimulatorTab
