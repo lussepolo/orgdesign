@@ -5091,3 +5091,122 @@ whole-application translation closure: `OfferScenariosTab.tsx`, `MiddleSchoolTab
 `HighSchoolTab.tsx`, the 9 remaining DRE panels, and the Capital Decision panels remain
 untranslated, by explicit, unchanged scope decision. Nothing from this branch has been
 merged to `main`, and nothing has been pushed.
+
+---
+
+## Phase V10-RC1B / V10-RC1B.1 — Primary Worktree Reconciliation and Boundary Integration (2026-07-29)
+
+**Status: this branch (`v10-x2t-3a-r1-division-page-reachability`) was merged into
+`main` by V10-RC1B.1 (merge commit below). The "nothing merged, nothing pushed" line
+immediately above is accurate as of when it was written by this branch's own author; it
+is now historical and superseded by this section, per this project's convention of
+appending correcting sections rather than editing prior prose in place.**
+
+### What V10-RC1B (primary-worktree phase) committed directly to `main`
+
+Before this branch existed as a merge target for `main`, three commits were made
+directly on `main` (base `1cab331`) to capture content unique to the primary worktree's
+long-dirty index/working tree that existed nowhere else in git history:
+
+1. `9c90cb6` — Phase 15U.2 payroll governance sheets: `payrollGovernanceWorkbookAdapter.ts`
+   (new), `dreScenarioWorkbook.ts` sheets 23-24 ("Payroll Assumptions", "Role Scenario
+   Activation Matrix"), `scripts/validate-phase15u2.ts` (new, 81 checks), and the
+   `validate:phase15u2` npm script. This work had been quarantined across several prior
+   phases purely as a scope decision (confirmed zero localization content, zero
+   tuition/revenue values in payroll rows) — not a governance concern.
+2. `e29f56a` — Nine files completing the already-ratified `intermediario`→`base`
+   terminology rename in comments and test fixtures (`PayrollScenario`/
+   `ViabilityEnrollmentScenario` axis; unrelated to the separate `OccupancyScenarioId`
+   conservador/base/otimista taxonomy). Zero numeric impact.
+3. `3dba3c9` — Six previously-untracked `docs/audits/rio-resilience/*.md` evidence
+   documents, committed unmodified.
+
+### What V10-RC1B found but could not commit, and what V10-RC1B.1 did about it
+
+The primary worktree's remaining ~69 dirty paths, after the three commits above, were a
+large, already-completed localization/navigation-architecture body of work (i18n
+infrastructure, `workspaceRegistry.ts` redesign, Offer Scenarios localization,
+associated validators/QA) that had been staged directly in this worktree's index at
+some earlier point and never committed — and every one of those paths, per hash
+comparison, was either byte-identical to this branch's already-validated tip (`b64a0c4`,
+RC1A: PASS) or a strictly older, regression-carrying draft of a file this branch already
+has correctly (notably: the drafted `workspaceRegistry.ts` still hid the four division
+pages from primary navigation, the exact reachability regression this branch's own
+`V10-X2T.3A-R1` commits fixed).
+
+V10-RC1B.1 resolved this by: (1) capturing a full recovery record outside the
+repository (patches, untracked-file backups, SHA-256 hashes, and the exact stale-path
+classification) before touching anything; (2) a targeted, path-by-path restore of
+exactly those 69 proven-stale paths to `HEAD` (index and working tree), verified via
+direct hash comparison against `b64a0c4` for every path, not inferred; (3) a
+non-fast-forward merge of `b64a0c4` into `main`, preserving all three RC1B commits and
+this branch's full history. One conflict occurred, in `package.json` — both sides had
+independently added an unrelated npm script entry at the same anchor line
+(`validate:phase15u2` vs. `validate:v10-x2t`); resolved by keeping both, since neither
+overlaps or contradicts the other.
+
+### Checks rerun against the final integrated tree (post-merge)
+
+`npm run lint` (tsc --noEmit): clean. `npm run build`: clean. `validate:v10-e1`:
+100/100. `validate:v10-e2`: 309/309. `validate:v10-f1b`: 109/109. `validate:v10-p1`:
+58/58. `validate:v10-f2`: 76/76. `validate:v10-x1` (target:
+`validate-v10-x1-payroll-export-matrix.ts`): 39/39. `validate:phase15j2-simulator`:
+31/31. `validate:phase15u2`: 81/81. `validate:v10-x2t` (workspace architecture / i18n):
+**103/104** — the one failure (`q5_zero_unresolved_visible_strings_app_wide`,
+reachable_candidate_strings=2772) is the same pre-existing, disclosed, whole-application
+translation-closure gap this branch's own report above already names as explicit,
+unchanged scope (`OfferScenariosTab.tsx`, `MiddleSchoolTab.tsx`, `HighSchoolTab.tsx`,
+etc. remain untranslated) — not introduced by this merge. `qa:x2t-state-invariance`:
+12/12. `qa:x2t-accessibility`: 13/13. `qa:x2t-crawl-and-screenshots`: clean.
+`validate-v10-x2t-3a-offer-locale.ts` (no npm alias): all checks passed.
+`validate-v10-x2t-3a-r1-division-page-reachability.ts` (no npm alias): **43/45** — the
+2 failures (`no protected calculation/staffing/adapter files changed since 47b4987`,
+`restoration diff under src/ is scoped to workspaceRegistry.ts only`) are point-in-time
+assertions this validator's own author wrote to characterize *that specific phase's*
+diff against a fixed `47b4987` baseline; they correctly detect that further legitimate,
+separately-validated work (the 15U.2 sheets and adapter, the terminology sweep) has
+since landed on `dreScenarioWorkbook.ts` and the model files in the RC1B commits above —
+this is expected given the integration this phase performs, not a division-page
+reachability regression. All 43 of the validator's actual reachability/registry/i18n
+checks pass. `git diff --check` / `git diff --cached --check`: clean.
+
+One script, `scripts/validate-v10-x2t-3a-offer-inventory.ts`, was excluded from this
+regression suite after discovering it is a one-time development-phase extraction *tool*,
+not a pure validator: running it overwrites `docs/v10-x2t-3a/offer-inventory-raw.json`
+as a side effect and reported "116, expected exactly 1234" against the current source
+state. The unintended overwrite was reverted (`git restore`) before proceeding; this
+script should not be run as part of routine regression validation.
+
+### Unresolved cross-tab gaps (V10-RC1B Gate 4 finding, still open)
+
+Confirmed by direct source read: `ExecutiveOrgDesignTab.tsx` hardcodes its captação
+scenario to `"base"` with no selector. `PayrollProjectionTab.tsx` has no
+`openingPackageId` state at all (one grade-config table regardless of T1-G4/G6) and no
+org-design (Minimum/Balanced/Premium) selector; its own `PayrollScenario`/
+`TuitionScenario` state does not share type or storage with DRE's
+`OccupancyScenarioId`/`tuitionScenarioId`. `payrollExportScenarioAdapter.ts` reads
+governed FOPAG records independently of whatever `PayrollProjectionTab`'s live UI
+currently shows, so exported and displayed state can diverge. DRE's own selections
+(package/captação/org-design/tuition), by contrast, are correctly lifted to `App.tsx`
+and persist across DRE↔Capital Decision navigation. None of this was changed by V10-RC1B
+or V10-RC1B.1 — no new Payroll, Tuition, staffing, or numerical rule was implemented in
+either phase.
+
+### Governance blockers (unchanged, named again for this section's completeness)
+
+Full Payroll/Tuition scenario-dimension completion remains blocked on **D-R6** (base
+tuition source authority) — `docs/audits/rio-resilience/phase-v10-f1a-revenue-
+governance-decision-register.json` records `approvalStatus: "pending"`,
+`selectedOption: null`. Grade-level staffing completeness remains blocked on the
+section/staffing/Org-Design approvals `payrollRoleCostSourceData.ts:12` records as
+outstanding (`calculationReady: false`).
+
+### On the "Fagundes" export
+
+No scenario-complete export meeting the full specification requested in these phases
+exists yet. "Fagundes" is not an expected repository filename or artifact to search
+for — it names the intended recipient/user of a future export, not something this
+codebase should contain evidence of today. The nearest existing artifact is
+`dreScenarioWorkbook.ts` (via `payrollExportWorkbookBuilder.ts`), which as of the 15U.2
+integration above has 24 sheets, not the full set requested; building the requested
+export is out of scope for V10-RC1B and V10-RC1B.1 and was not attempted.
