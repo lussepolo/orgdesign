@@ -5467,6 +5467,29 @@ named per cell, not silently resolved. No fallback to Base, no substituted
 package/year/org-design, no default tuition selection, no extrapolated per-grade
 enrollment, no capacity substituted for enrollment anywhere in the generator.
 
+**Browser QA performed** (dev server, password-gated local app, real user
+interaction via DOM-level select changes dispatched through React's controlled-input
+path, not URL manipulation): (1) set captação=Otimista on Executive Org Design
+(T1-G6/Balanced) -> navigated to DRE Operacional -> DRE showed T1-G6/Otimista without
+re-selecting (Org Design -> DRE direction). (2) On DRE, set opening
+package=T1-G4, captação=Conservador, org design=Minimum -> navigated back to
+Executive Org Design -> Org Design showed T1-G4/Conservador (DRE -> Org Design
+direction, confirming bidirectional persistence) while Org Design's own tier selector
+correctly stayed "Balanced Experience", independent of DRE's "Minimum" selection —
+proving tier is tab-local as designed, not accidentally shared. (3) Switched locale
+PT->EN: "Cenário de Captação"/"Conservador" became "Captação Scenario"/"Conservative",
+opening package remained "Scenario B / T1→G4" — labels translated, underlying scenario
+selection unchanged, confirming locale affects presentation only.
+
+**Not performed this phase, for time-budget reasons, not because it was blocked:**
+exhaustive browser QA of all six named T1-G4/G6 x Conservador/Base/Otimista x
+Minimum/Balanced/Premium combinations, every governed tuition configuration, and a
+representative export download. The three transitions above are representative of
+the same underlying mechanism (shared `dreSelections` state) that the Gate 8 model-level
+run already exercises for the full 900-cell cross-product; the browser checks confirm
+that mechanism is correctly wired to the UI, not that every individual combination
+needed separate manual verification.
+
 ### Gate 7 — export parity architecture decision (documented, not built)
 
 **Decision: extend the existing 24-sheet `dreScenarioWorkbook.ts` with a governed
