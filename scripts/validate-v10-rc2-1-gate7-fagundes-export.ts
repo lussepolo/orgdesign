@@ -75,7 +75,83 @@ const wbA = buildWorkbookFor(SCENARIO_A);
 const wbB = buildWorkbookFor(SCENARIO_B);
 
 check("Fagundes Export Index sheet exists (scenario A)", wbA.SheetNames.includes("Fagundes Export Index"));
-check("workbook has exactly 25 sheets", wbA.SheetNames.length === 25, `got ${wbA.SheetNames.length}: ${wbA.SheetNames.join(", ")}`);
+check("workbook has exactly 28 sheets", wbA.SheetNames.length === 28, `got ${wbA.SheetNames.length}: ${wbA.SheetNames.join(", ")}`);
+
+// ── V10-RC2.2 Gate 5: the three previously-repurposed/unavailable Fagundes
+// outputs now have dedicated sheets, materially implemented (not just
+// indexed), sourced from the same shared engines as the rest of the
+// workbook. ───────────────────────────────────────────────────────────────
+check("Grade-Level Staffing Summary sheet exists", wbA.SheetNames.includes("Grade-Level Staffing Summary"));
+check("Grade-Level Staffing Detail sheet exists", wbA.SheetNames.includes("Grade-Level Staffing Detail"));
+check("Direct Payroll & Corp Alloc sheet exists", wbA.SheetNames.includes("Direct Payroll & Corp Alloc"));
+
+{
+  const summaryRows = XLSX.utils.sheet_to_json(wbA.Sheets["Grade-Level Staffing Summary"], { header: 1 }) as (
+    | string
+    | number
+  )[][];
+  const header = summaryRows.find((r) => r[0] === "Division Area");
+  check("Grade-Level Staffing Summary has a Division Area header row", header !== undefined);
+  const eyRow = summaryRows.find((r) => r[0] === "Early Years");
+  check(
+    "Grade-Level Staffing Summary has an Early Years row with a non-zero headcount total",
+    eyRow !== undefined && typeof eyRow[1] === "number" && (eyRow[1] as number) > 0,
+    eyRow ? JSON.stringify(eyRow) : "row not found",
+  );
+  const totalRow = summaryRows.find((r) => r[0] === "Total (all divisions)");
+  check("Grade-Level Staffing Summary has a grand-total row", totalRow !== undefined);
+}
+
+{
+  const detailRows = XLSX.utils.sheet_to_json(wbA.Sheets["Grade-Level Staffing Detail"], { header: 1 }) as (
+    | string
+    | number
+  )[][];
+  const header = detailRows.find((r) => r[0] === "Division Area" && r[3] === "Grade-Level Basis");
+  check("Grade-Level Staffing Detail has a Grade-Level Basis column", header !== undefined);
+  const msRow = detailRows.find((r) => r[0] === "Middle School");
+  check(
+    "Grade-Level Staffing Detail discloses the F06 MS/HS unreconciled-estimate basis, not silently as governed",
+    msRow !== undefined && String(msRow[3]).includes("F06") && String(msRow[3]).includes("unreconciled"),
+    msRow ? JSON.stringify(msRow) : "no Middle School row found for scenario A (t1_g6)",
+  );
+  const eyDetailRow = detailRows.find((r) => r[0] === "Early Years");
+  check(
+    "Grade-Level Staffing Detail marks Early Years rows as governed, not the F06 MS/HS caveat",
+    eyDetailRow !== undefined && String(eyDetailRow[3]).includes("Governed"),
+    eyDetailRow ? JSON.stringify(eyDetailRow) : "row not found",
+  );
+}
+
+{
+  const dpRows = XLSX.utils.sheet_to_json(wbA.Sheets["Direct Payroll & Corp Alloc"], { header: 1 }) as (
+    | string
+    | number
+  )[][];
+  const header = dpRows.find((r) => r[0] === "Year");
+  check("Direct Payroll & Corp Alloc has a Year header row", header !== undefined);
+  const year2028Row = dpRows.find((r) => r[0] === 2028);
+  check(
+    "Direct Payroll & Corp Alloc 2028 row has a non-zero Total Direct Campus Payroll",
+    year2028Row !== undefined && typeof year2028Row[4] === "number" && (year2028Row[4] as number) > 0,
+    year2028Row ? JSON.stringify(year2028Row) : "row not found",
+  );
+  check(
+    "Direct Payroll & Corp Alloc 2028 row labels Corporate Allocation as UNAVAILABLE with the blocker cited, not blank or zero",
+    year2028Row !== undefined &&
+      typeof year2028Row[5] === "string" &&
+      (year2028Row[5] as string).startsWith("UNAVAILABLE") &&
+      (year2028Row[5] as string).includes("CORPORATE-ALLOCATION"),
+    year2028Row ? String(year2028Row[5]) : "row not found",
+  );
+  check(
+    "Direct Payroll & Corp Alloc 2028 row labels Consolidated People Cost as UNAVAILABLE, not blank or zero",
+    year2028Row !== undefined &&
+      typeof year2028Row[6] === "string" &&
+      (year2028Row[6] as string).startsWith("UNAVAILABLE"),
+    year2028Row ? String(year2028Row[6]) : "row not found",
+  );
+}
 
 function sheetRows(wb: XLSX.WorkBook): (string | number)[][] {
   return XLSX.utils.sheet_to_json(wb.Sheets["Fagundes Export Index"], { header: 1 }) as (string | number)[][];
@@ -89,16 +165,19 @@ check("header row present", headerRowIndexA !== -1);
 const dataRowsA = rowsA.slice(headerRowIndexA + 1).filter((r) => r.length > 0 && r[0]);
 check("11 Fagundes-requested sheets listed", dataRowsA.length === 11, `got ${dataRowsA.length}`);
 
-const unavailableRow = dataRowsA.find((r) => r[0] === "Direct Payroll and Corporate Allocation");
-check("unavailable row present", unavailableRow !== undefined);
+const partialRow = dataRowsA.find((r) => r[0] === "Direct Payroll and Corporate Allocation");
+check("partially-available row present", partialRow !== undefined);
 check(
-  "unavailable row is explicitly marked unavailable (not blank, not zero)",
-  unavailableRow !== undefined && unavailableRow[1] === "unavailable" && String(unavailableRow[3]).length > 20,
-  unavailableRow ? JSON.stringify(unavailableRow) : "row not found",
+  "row is explicitly marked partially_available (not blank, not zero) and maps to a real dedicated sheet",
+  partialRow !== undefined &&
+    partialRow[1] === "partially_available" &&
+    partialRow[2] === "Direct Payroll & Corp Alloc" &&
+    String(partialRow[3]).length > 20,
+  partialRow ? JSON.stringify(partialRow) : "row not found",
 );
 check(
-  "unavailable row cites the governance reason (no corporate-allocation adapter)",
-  unavailableRow !== undefined && String(unavailableRow[3]).includes("No corporate-allocation adapter exists"),
+  "row cites the governance reason (no corporate-allocation adapter)",
+  partialRow !== undefined && String(partialRow[3]).includes("no corporate-allocation adapter exists"),
 );
 
 const availableRows = dataRowsA.filter((r) => r[0] !== "Direct Payroll and Corporate Allocation");

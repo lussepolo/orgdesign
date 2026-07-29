@@ -27,6 +27,7 @@ import {
 } from "../../features/rio-scenario-resilience/model/reajusteDespesasGrowth";
 import { RECEITA_PROJECTION_YEARS } from "../../features/rio-scenario-resilience/model/receitaEngineContract";
 import { ORG_DESIGN_PAYROLL_ACTIVATION } from "../../features/rio-scenario-resilience/model/orgDesignPayrollActivation";
+import { buildOrgDesignHcTable } from "../../features/rio-scenario-resilience/model/orgDesignHcTableAdapter";
 import { WORKING_SCENARIO_RATIFICATION_STATUS } from "../../features/rio-scenario-resilience/model/dreWorkingScenario";
 import { EXECUTIVE_ORG_SCENARIOS } from "../../features/rio-scenario-resilience/model/executiveOrgDesignModel";
 import type {
@@ -1726,7 +1727,167 @@ function buildRoleScenarioActivationMatrixSheet(vm: DreScenarioWorkbookViewModel
   return XLSX.utils.aoa_to_sheet(rows);
 }
 
-// ── Sheet 25: Fagundes Export Index (V10-RC2.1 Gate 7) ────────────────────────
+// ── Sheet: Grade-Level Staffing Summary (V10-RC2.2 Gate 5) ────────────────────
+// Per-division-area headcount totals by year, sourced from the identical
+// buildOrgDesignHcTable() call ExecutiveOrgDesignTab.tsx and
+// PayrollProjectionTab.tsx both use (V10-RC2.2 Gate 3 parity-by-construction).
+// No independent calculation.
+function buildGradeLevelStaffingSummarySheet(vm: DreScenarioWorkbookViewModel): XLSX.WorkSheet {
+  const { selections } = vm;
+
+  const rowsByYear = new Map<number, ReturnType<typeof buildOrgDesignHcTable>["rows"]>();
+  for (const year of YEARS) {
+    const result = buildOrgDesignHcTable({
+      openingPackageId: selections.openingPackageId,
+      occupancyScenarioId: selections.occupancyScenarioId,
+      orgDesignOptionId: selections.orgDesignOptionId,
+      year,
+    });
+    rowsByYear.set(year, result.rows);
+  }
+
+  const divisionAreas = new Set<string>();
+  for (const rows of rowsByYear.values()) {
+    for (const r of rows) divisionAreas.add(r.divisionArea);
+  }
+  const sortedDivisions = [...divisionAreas].sort();
+
+  const rows: (string | number)[][] = [
+    [
+      "Note: totals per division area, summed from the same buildOrgDesignHcTable() rows Org Design and " +
+        "Payroll both consume. Middle School / High School totals reflect the payroll adapter's per-grade " +
+        "fixed-FTE table (F06, docs/finance/dre-finance-confirmation-register.json) — one of three " +
+        "non-identical, unreconciled MS/HS staffing sources in this repository, not empirically reconciled " +
+        "grade-level counts like Early Years / Lower School. See 'Grade-Level Staffing Detail' for per-role rows.",
+    ],
+    ["Division Area", ...YEARS.map((y) => `Headcount/FTE ${y}`)],
+  ];
+
+  for (const division of sortedDivisions) {
+    const row: (string | number)[] = [division];
+    for (const year of YEARS) {
+      const yearRows = rowsByYear.get(year) ?? [];
+      const total = yearRows.filter((r) => r.divisionArea === division).reduce((s, r) => s + r.headcountOrFte, 0);
+      row.push(total);
+    }
+    rows.push(row);
+  }
+
+  const totalRow: (string | number)[] = ["Total (all divisions)"];
+  for (const year of YEARS) {
+    const yearRows = rowsByYear.get(year) ?? [];
+    totalRow.push(yearRows.reduce((s, r) => s + r.headcountOrFte, 0));
+  }
+  rows.push(totalRow);
+
+  return XLSX.utils.aoa_to_sheet(rows);
+}
+
+// ── Sheet: Grade-Level Staffing Detail (V10-RC2.2 Gate 5) ─────────────────────
+// One row per role, per year, sourced from the identical buildOrgDesignHcTable()
+// rows as the Summary sheet above. No independent calculation.
+function buildGradeLevelStaffingDetailSheet(vm: DreScenarioWorkbookViewModel): XLSX.WorkSheet {
+  const { selections } = vm;
+
+  const rowsByYear = new Map<number, ReturnType<typeof buildOrgDesignHcTable>["rows"]>();
+  for (const year of YEARS) {
+    const result = buildOrgDesignHcTable({
+      openingPackageId: selections.openingPackageId,
+      occupancyScenarioId: selections.occupancyScenarioId,
+      orgDesignOptionId: selections.orgDesignOptionId,
+      year,
+    });
+    rowsByYear.set(year, result.rows);
+  }
+
+  // Stable role key across years: divisionArea + role (roleGroupOrHub kept for
+  // display, not part of the identity — a role belongs to exactly one hub per
+  // division in this adapter's output).
+  const roleKeys = new Map<string, { divisionArea: string; roleGroupOrHub: string; role: string }>();
+  for (const rows of rowsByYear.values()) {
+    for (const r of rows) {
+      const key = `${r.divisionArea}::${r.role}`;
+      if (!roleKeys.has(key)) {
+        roleKeys.set(key, { divisionArea: r.divisionArea, roleGroupOrHub: r.roleGroupOrHub, role: r.role });
+      }
+    }
+  }
+  const sortedKeys = [...roleKeys.keys()].sort();
+
+  const rows: (string | number)[][] = [
+    [
+      "Grade-Level Basis: Early Years / Lower School rows are governed, section-count-derived headcount " +
+        "(payrollAdapter.ts, Phase 8H.1). Middle School / High School rows use the payroll adapter's " +
+        "per-grade fixed-FTE table, an unreconciled aggregate estimate per F06 — flagged in the 'Grade-Level " +
+        "Basis' column, not silently presented as equivalent to EY/LS.",
+    ],
+    ["Division Area", "Role Group / Hub", "Role", "Grade-Level Basis", ...YEARS.map((y) => `Headcount/FTE ${y}`)],
+  ];
+
+  for (const key of sortedKeys) {
+    const meta = roleKeys.get(key)!;
+    const basis =
+      meta.divisionArea === "Middle School" || meta.divisionArea === "High School"
+        ? "MS/HS fixed-FTE table (F06 — unreconciled aggregate estimate, not empirically reconciled per-grade count)"
+        : "Governed section-count-derived headcount";
+    const row: (string | number)[] = [meta.divisionArea, meta.roleGroupOrHub, meta.role, basis];
+    for (const year of YEARS) {
+      const yearRows = rowsByYear.get(year) ?? [];
+      const match = yearRows.find((r) => `${r.divisionArea}::${r.role}` === key);
+      row.push(match ? match.headcountOrFte : 0);
+    }
+    rows.push(row);
+  }
+
+  return XLSX.utils.aoa_to_sheet(rows);
+}
+
+// ── Sheet: Direct Payroll and Corporate Allocation (V10-RC2.2 Gate 5) ─────────
+// Direct campus payroll (fopagDireto/folhaDireta/benefits) is computed and
+// shown unconditionally from vm.fopagOutput.yearTotals — the same field this
+// workbook's other payroll sheets use. Corporate allocation and consolidated
+// people cost are shown as explicit, labeled "unavailable" cells citing the
+// blocker, never blank and never zero-substituted (V10-RC2.2 Gate 1/Gate 4).
+function buildDirectPayrollAndCorporateAllocationSheet(vm: DreScenarioWorkbookViewModel): XLSX.WorkSheet {
+  const UNAVAILABLE =
+    "UNAVAILABLE — no corporate-allocation adapter exists in this codebase " +
+    "(blocker CORPORATE-ALLOCATION, docs/audits/rio-resilience/phase-v10-rc2-2-gate1-blocker-register.json). " +
+    "Not zero-substituted; direct campus payroll to the left is never suppressed because of this.";
+  const CONSOLIDATED_UNAVAILABLE = "UNAVAILABLE — depends on Corporate Allocation (see column to the left)";
+
+  const rows: (string | number)[][] = [
+    [
+      "Direct campus payroll (FOPAG_DIRETO, FOLHA_DIRETA, Benefícios) is fully governed and shown below. " +
+        "Corporate Allocation and Consolidated People Cost remain unavailable — see the labeled cells, not " +
+        "blank and not zero.",
+    ],
+    [
+      "Year",
+      "FOPAG_DIRETO (Direct)",
+      "FOLHA_DIRETA (Direct)",
+      "Benefícios",
+      "Total Direct Campus Payroll",
+      "Corporate Allocation",
+      "Consolidated People Cost",
+    ],
+  ];
+
+  for (const yt of vm.fopagOutput.yearTotals) {
+    rows.push([
+      yt.year,
+      yt.fopagDireto,
+      yt.folhaDireta,
+      yt.benefits,
+      yt.totalPayroll,
+      UNAVAILABLE,
+      CONSOLIDATED_UNAVAILABLE,
+    ]);
+  }
+
+  return XLSX.utils.aoa_to_sheet(rows);
+}
+
+// ── Sheet 28: Fagundes Export Index (V10-RC2.1 Gate 7 / V10-RC2.2 Gate 5) ─────
 // A curated view/index over already-computed sheet data, not a second export
 // engine. Every "Maps to" cell names an existing sheet built from the same
 // vm (dreOutput/fopagOutput/threeVersionPayroll) as everything else in this
@@ -1735,7 +1896,7 @@ function buildRoleScenarioActivationMatrixSheet(vm: DreScenarioWorkbookViewModel
 // governance reason, never left blank and never shown as 0.
 interface FagundesIndexRow {
   fagundesSheet: string;
-  availability: "available" | "unavailable";
+  availability: "available" | "partially_available" | "unavailable";
   mapsTo: string;
   sourceAndLimitationLineage: string;
 }
@@ -1752,18 +1913,23 @@ function buildFagundesIndexRows(vm: DreScenarioWorkbookViewModel): FagundesIndex
     {
       fagundesSheet: "Grade-Level Staffing Summary",
       availability: "available",
-      mapsTo: "FOPAG Headcount Plan; EY/LS grade detail also in Payroll Role Audit",
+      mapsTo: "Grade-Level Staffing Summary",
       sourceAndLimitationLineage:
-        "calculateFopag().records, EY/LS section-based rule (payrollAdapter.ts, Phase 8H.1, Luciana " +
-        "2026-06-03). MS/HS grade-level rows are not included here — F06 (V10-RC2 Gate 1) records three " +
-        "non-identical, unreconciled MS/HS staffing figures in this repository; the EY/LS rule is not " +
-        "extrapolated to MS/HS grades.",
+        "buildOrgDesignHcTable() rows (same shared call PayrollProjectionTab.tsx and ExecutiveOrgDesignTab.tsx " +
+        "both use, V10-RC2.2 Gate 3 parity), summed per division area per year. EY/LS totals are governed, " +
+        "section-based (payrollAdapter.ts, Phase 8H.1, Luciana 2026-06-03). MS/HS division totals are the " +
+        "payroll adapter's fixed-FTE table — F06 (V10-RC2 Gate 1) records three non-identical, unreconciled " +
+        "MS/HS staffing sources in this repository; disclosed in-sheet, not extrapolated from the EY/LS rule.",
     },
     {
       fagundesSheet: "Grade-Level Staffing Detail",
       availability: "available",
-      mapsTo: "FOPAG Role Audit",
-      sourceAndLimitationLineage: "calculateFopag().records, one row per roleId x year. Same MS/HS limitation as above.",
+      mapsTo: "Grade-Level Staffing Detail",
+      sourceAndLimitationLineage:
+        "buildOrgDesignHcTable() rows (same shared call PayrollProjectionTab.tsx and ExecutiveOrgDesignTab.tsx " +
+        "both use, V10-RC2.2 Gate 3 parity), one row per role per year. Each row's 'Grade-Level Basis' column " +
+        "discloses whether it is governed section-count-derived (EY/LS) or the F06 unreconciled MS/HS " +
+        "fixed-FTE estimate.",
     },
     {
       fagundesSheet: "Non-Teaching Headcount",
@@ -1787,13 +1953,15 @@ function buildFagundesIndexRows(vm: DreScenarioWorkbookViewModel): FagundesIndex
     },
     {
       fagundesSheet: "Direct Payroll and Corporate Allocation",
-      availability: "unavailable",
-      mapsTo: "DRE Payroll Bridge (direct-campus payroll only)",
+      availability: "partially_available",
+      mapsTo: "Direct Payroll & Corp Alloc",
       sourceAndLimitationLineage:
-        "No corporate-allocation adapter exists in this codebase (V10-RC2 Gate 5 finding, reconfirmed " +
-        "V10-RC2.1). FopagYearTotals splits fopagDireto/folhaDireta/benefits (direct-campus only); nothing " +
-        "sums a corporate allocation against it, and none is invented here. This cell intentionally shows " +
-        "no monetary figure rather than a blank or a zero.",
+        "Direct campus payroll (FOPAG_DIRETO/FOLHA_DIRETA/Benefícios, vm.fopagOutput.yearTotals) is fully " +
+        "governed and shown unconditionally, per year. Corporate Allocation and Consolidated People Cost " +
+        "columns are explicitly labeled 'UNAVAILABLE' with the blocking evidence (CORPORATE-ALLOCATION, " +
+        "V10-RC2.2 Gate 1 blocker register) — no corporate-allocation adapter exists in this codebase " +
+        "(V10-RC2 Gate 5 finding, reconfirmed V10-RC2.1 and this phase). Never blank, never zero-substituted, " +
+        "and direct campus payroll is never suppressed because of this.",
     },
     {
       fagundesSheet: "Tuition and Revenue Assumptions",
@@ -1833,7 +2001,7 @@ function buildFagundesExportIndexSheet(vm: DreScenarioWorkbookViewModel): XLSX.W
     ["Export timestamp", vm.exportedAt.toISOString()],
     [],
     [
-      "This sheet is a curated index over the 24 sheets already in this workbook, mapped to the " +
+      "This sheet is a curated index over the 27 sheets already in this workbook, mapped to the " +
         "Fagundes-requested sheet set. It performs no independent calculation and adds no new export " +
         "engine — every 'Maps to' sheet is built from the same scenario result (dreOutput / fopagOutput / " +
         "threeVersionPayroll) as this sheet. Unsupported content is marked 'unavailable' with its " +
@@ -1898,6 +2066,19 @@ export function buildDreScenarioWorkbook(vm: DreScenarioWorkbookViewModel): XLSX
   // Phase 15U.2: payroll governance sheets
   XLSX.utils.book_append_sheet(wb, buildPayrollAssumptionsSheet(vm), "Payroll Assumptions");
   XLSX.utils.book_append_sheet(wb, buildRoleScenarioActivationMatrixSheet(vm), "Role Scenario Activation Matrix");
+
+  // V10-RC2.2 Gate 5: dedicated grade-level staffing and direct-payroll/
+  // corporate-allocation sheets, sourced from the same shared engines as the
+  // rest of this workbook. Materially implements three of the Fagundes
+  // Export Index's 11 requested outputs that were previously only mapped to
+  // sheets built for a different purpose.
+  XLSX.utils.book_append_sheet(wb, buildGradeLevelStaffingSummarySheet(vm), "Grade-Level Staffing Summary");
+  XLSX.utils.book_append_sheet(wb, buildGradeLevelStaffingDetailSheet(vm), "Grade-Level Staffing Detail");
+  XLSX.utils.book_append_sheet(
+    wb,
+    buildDirectPayrollAndCorporateAllocationSheet(vm),
+    "Direct Payroll & Corp Alloc",
+  );
 
   // V10-RC2.1 Gate 7: curated index over the sheets above, mapped to the
   // Fagundes-requested sheet set. No independent calculation.
