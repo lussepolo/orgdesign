@@ -53,7 +53,11 @@ async function openDreTab(page: Page): Promise<void> {
     localStorage.setItem("hasSeenAbout_v3.0", "true");
   });
   await page.goto(BASE_URL, { waitUntil: "commit", timeout: NAVIGATION_TIMEOUT_MS });
-  await page.getByRole("button", { name: /DRE Scenario Simulator/i }).click();
+  // "DRE Scenario Simulator" (locale infra commit a247d0e) was replaced by the
+  // wsDreShortLabel translation key before this test was ever run against it —
+  // pt-BR "DRE Operacional" / en-US "Operating P&L" (src/i18n/{pt-BR,en-US}.ts).
+  // No locale-independent test hook exists on nav buttons, so match both current labels.
+  await page.getByRole("button", { name: /DRE Operacional|Operating P&L/i }).click();
   await page.waitForTimeout(750);
 }
 
@@ -70,7 +74,10 @@ async function runQa(page: Page): Promise<void> {
   const body = await page.locator("body").innerText();
   check("app_loaded_dre_tab", /DRE|Receita|EBITDA/i.test(body), body.slice(0, 160));
 
-  const scenarioSelect = page.getByLabel(/Captação Scenario/i);
+  // pt-BR is the app's default locale (src/i18n/useLocale.tsx DEFAULT_LOCALE) — the field
+  // renders as "Cenário de Captação" (pt-BR) / "Captação Scenario" (en-US), per
+  // dreLeverPanelCaptacaoLabel in src/i18n/{pt-BR,en-US}.ts.
+  const scenarioSelect = page.getByLabel(/Cenário de Captação|Captação Scenario/i);
   const scenarioValues = await scenarioSelect.locator("option").evaluateAll((options) =>
     options.map((option) => ({
       value: (option as HTMLOptionElement).value,
@@ -101,7 +108,8 @@ async function runQa(page: Page): Promise<void> {
   await page.waitForTimeout(400);
   check("base_switch_succeeds", await scenarioSelect.inputValue() === "base", await scenarioSelect.inputValue());
 
-  const openingPackageSelect = page.getByLabel(/Opening Package/i);
+  // pt-BR: "Pacote de Abertura" / en-US: "Opening Package" (dreLeverPanelOpeningPackageLabel).
+  const openingPackageSelect = page.getByLabel(/Pacote de Abertura|Opening Package/i);
   const packageOptions = await openingPackageSelect.locator("option").evaluateAll((options) =>
     options.map((option) => ({
       value: (option as HTMLOptionElement).value,
@@ -145,7 +153,15 @@ async function runQa(page: Page): Promise<void> {
   await page.waitForTimeout(400);
   updatedBody = await page.locator("body").innerText();
   check("t1_g6_capacity_746_visible", updatedBody.includes("746"), updatedBody.match(/T1-G6[^\n]+/)?.[0] ?? "body checked");
-  check("t1_g4_governed_message_visible", /T1-G4 is governed by its own captação workbook/i.test(updatedBody), "T1-G4 message checked");
+  // pt-BR: "T1-G4 é governado por sua própria planilha de captação" / en-US: "T1-G4 is governed
+  // by its own captação workbook" (dreLeverPanelT1G4GovernedMessage-equivalent key).
+  check(
+    "t1_g4_governed_message_visible",
+    /T1-G4 é governado por sua própria planilha de captação|T1-G4 is governed by its own captação workbook/i.test(
+      updatedBody,
+    ),
+    "T1-G4 message checked",
+  );
   check("no_active_pessimista_text", !updatedBody.includes("Pessimista"), "current DRE tab body checked");
   check("no_js_errors", jsErrors.length === 0, JSON.stringify(jsErrors));
   check("no_network_failures", networkFailures.length === 0, JSON.stringify(networkFailures));

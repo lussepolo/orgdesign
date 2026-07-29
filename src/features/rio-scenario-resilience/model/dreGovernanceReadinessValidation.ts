@@ -44,7 +44,7 @@ export type DreGovernanceReadinessCheckId =
   | "calculation_engine_is_ready_flag_true"
   | "open_items_count_is_five"
   | "payroll_registry_status_blocked"
-  | "canonical_fixture_2028_enrollment_228"
+  | "canonical_fixture_2028_enrollment_258"
   | "canonical_fixture_ebitda_positive_by_2032";
 
 export interface DreGovernanceReadinessCheck {
@@ -86,7 +86,16 @@ export function runDreGovernanceReadinessValidation(): DreGovernanceReadinessRep
   const gov = DRE_GOVERNANCE_READINESS;
   const payrollEntry = INPUT_READINESS_REGISTRY.payroll_adapter_output;
 
-  // Canonical fixture — use WORKING_SCENARIO_DRE_OUTPUT directly (t1_g3/base/bp1/balanced)
+  // Canonical fixture — use WORKING_SCENARIO_DRE_OUTPUT directly (t1_g6/base/bp1/balanced).
+  // V10-E1 governed package migration (commit 3f4da5c, 2026-07-24) moved the fixture's
+  // openingGrades selection from the retired t1_g3 package to the active t1_g6 package
+  // (see WORKING_SCENARIO_SELECTIONS in dreWorkingScenario.ts); t1_g3/base is now rejected
+  // by assertSupportedDreEnrollmentCapacityLeverInput. 258 is t1_g6/base's governed 2028
+  // enrollment per the SHA256-verified G6 captação workbook in
+  // governedCaptacaoCapacitySourceData.ts (G6_ENROLLMENT_BY_SCENARIO.base, 2028 column,
+  // summed across the 11 active grades = 258) — independently cross-validated by
+  // validate:phase15s1/validate:phase15s2 (t1_g4/base/2028 = 258 under the same governed
+  // captação-workbook methodology). 228 was t1_g3's pre-migration figure.
   const dreOut = WORKING_SCENARIO_DRE_OUTPUT;
   const enrollment2028 = dreOut !== null ? dreOut.byYear[2028].numero_de_alunos : -1;
   const ebitdaPositiveYear = dreOut !== null
@@ -239,10 +248,10 @@ export function runDreGovernanceReadinessValidation(): DreGovernanceReadinessRep
     ),
     // ── Phase G: Canonical fixture invariants ──────────────────────────────────
     check(
-      "canonical_fixture_2028_enrollment_228",
+      "canonical_fixture_2028_enrollment_258",
       enrollment2028,
-      228,
-      "Canonical fixture (t1_g3 / base / bp1_division_differentiated / balanced_experience) must produce 228 learners in 2028.",
+      258,
+      "Canonical fixture (t1_g6 / base / bp1_division_differentiated / balanced_experience) must produce 258 learners in 2028 (V10-E1 governed captação workbook).",
     ),
     check(
       "canonical_fixture_ebitda_positive_by_2032",
