@@ -5213,143 +5213,6 @@ export is out of scope for V10-RC1B and V10-RC1B.1 and was not attempted.
 
 ## Phase V10-RC2 — Governance Decision Assimilation and Shared Scenario Contract (2026-07-29)
 
-### Gate 1 — decision recovery, corrected
-
-The full decision-assimilation matrix is
-`docs/audits/rio-resilience/phase-v10-rc2-gate1-decision-assimilation-matrix.md`. Summary:
-`D-R1`, `D-R2`, `D-R3`, `D-R4`, `D-R7`, `D-R8`, and `F02` (all in
-`phase-v10-f1a-revenue-governance-decision-register.json` /
-`dre-finance-confirmation-register.json`) are **approved by the project owner and
-already encoded** in live calculation code (`tuitionGrowth.ts`, `receitaEngine.ts`,
-`v10AverageDiscountSourceData.ts`, `reajusteDespesasGrowth.ts`,
-`openingPackageOccupancySourceData.ts`). `D-R5`, `D-R6`/`F03`, and `F05` remain
-**genuinely unresolved** — no invented value has been introduced for any of them.
-`F06` (MS/HS instructional-capacity vs. FOPAG reconciliation) remains **genuinely
-unresolved**, and Gate 1 additionally found a third, non-identical MS/HS staffing
-figure in a never-committed Phase 8B document (see below), which strengthens rather
-than changes that classification.
-
-**Correction to this section's own prior paragraph** ("Grade-level staffing
-completeness remains blocked on the section/staffing/Org-Design approvals
-`payrollRoleCostSourceData.ts:12` records as outstanding (`calculationReady: false`)"):
-that citation is a **Phase-13H-legacy static field**. `payrollAdapter.ts:160-164`
-documents, and `scripts/validate-v10-p1.ts` (58/58) confirms, that this per-record
-flag was superseded by `FopagEngineOutput.calculationReady`, computed dynamically per
-scenario from blocking diagnostics (`fopagEngine.ts`). A direct probe of
-`calculateFopag()` for all six V10-RC2 browser-QA combinations
-(T1-G4/G6 × Conservador/Base/Otimista × Minimum/Balanced/Premium) returns
-`calculationReady: true`, `engineStatus: "calculation_ready"`, zero blocking
-diagnostics for every combination. Grade-level staffing headcount and payroll cost
-**are** calculation-ready; what was actually missing was cross-tab scenario-state
-wiring (Gate 3 of this phase), not a payroll calculation approval.
-
-Payroll salary escalation (5.9%/yr from 2029, `Dissídio`), benefits escalation
-(10%/yr from 2029), and encargos (48.5% of salary) are governed by **Phase V10-P1 /
-V10-P1.1** (2026-07-26/27, above at "Phase V10-P1 — V10 Payroll Escalation and
-Benefits Separation") — a project-owner decision sourced from the same v10 workbook
-as the D-R series, implemented in `src/lib/payroll/payrollGrowth.ts` and consumed by
-both `fopagEngine.ts` and `src/lib/payroll/core.ts`. This was not previously named in
-the RC1B section above; it directly answers Gate 5's salary/dissídio/encargos
-governance question.
-
-The Early Years staffing rule (1 section = 1 teaching lead + 1 learning assistant + 1
-learning monitor) is documented in `payrollAdapter.ts:344-349` as "approved v1, Phase
-8H.1, Luciana 2026-06-03" and is already wired to governed section counts via
-`sectionCountEngine.ts`. It must not be extended to LS (1 lead + 1 assistant, no
-monitor), MS, or HS, which have their own, separately-governed and in MS/HS's case
-only partially-reconciled staffing evidence (see `F06` and the stash finding below).
-
-### Recovered stash evidence (read-only; stash untouched)
-
-The pre-existing stash (`stash@{0}`, "WIP rio-scenario-resilience supporting data",
-present before this phase and unmodified by it — verified via `git stash list` and
-`git cat-file`/`git show <blob-sha>` reads only, never `git stash pop`/`apply`)
-contains four untracked documents authored 2026-06-03 (Phase 8A/8B/8D.1) that were
-staged into the primary worktree at some point but never committed to any branch:
-`financeConventionSourceDecisions.md`, `payrollCalculationSourceAudit.md`,
-`payrollStaffingRuleSourceTrace.md`, `rawScenarioCapacitySourceAudit.md`. Their
-governance content, insofar as it remains uncontradicted by later, tracked decisions,
-is transcribed with an explicit live/superseded disposition in
-`docs/audits/rio-resilience/phase-v10-rc2-recovered-finance-convention-decisions.md`
-rather than committing the original files verbatim — the original
-`financeConventionSourceDecisions.md` asserts an 8% tuition escalation rate that
-`D-R2` (2026-07-27) explicitly retired, so committing it unmodified would make a
-superseded rate look currently governed. The three payroll/staffing audit documents
-are cited by blob SHA (`4c83c7d`, `3b1ebc6`, `0fdc990`) in the Gate 1 matrix rather
-than committed outright, for the same reason: they record a June 3 snapshot (e.g. an
-MS staffing count of g6=3/g7=4/g8=3 = 10 total) that is a *third*, non-identical
-figure alongside the Phase 15H.2 instructional model (MS 9 educators) and the FOPAG
-payroll adapter's own fixed-FTE table — `F06`'s reconciliation gap, restated with one
-more data point, not resolved by it.
-
-One committed-code contradiction was closed directly: `orgDesignPayrollActivation.ts`
-and `payrollAdapter.ts` cite a source named `PAYROLL_STAFFING_RULE_SOURCE_V1` by name
-in multiple live comments; no file by that name exists anywhere in tracked `src/`. The
-citation's target was the uncommitted Phase 8B/8C work in the stash. This
-IMPLEMENTATION.md section, together with the Gate 1 matrix and the recovered-decisions
-document, is now the durable, committed record of that source — the dangling citation
-is resolved by documentation, not by importing the stash's files into `src/`.
-
-### Gate 2 — governance-record corrections made
-
-1. `docs/finance/dre-finance-confirmation-register.json`: `F01`'s `currentEngineBehavior`
-   corrected from a stale "reajuste term omitted" / row-9 description to state the line
-   is formula-derived and live per `D-R7`; `F04`'s `currentEngineBehavior` corrected
-   from the stale "20/17/15/12.5" intermediate schedule to name the live
-   `workbook_v10_row224` schedule per `D-R3`. Both items keep `decisionStatus: "open"`
-   — only the Finance-signed provenance sign-off remains outstanding, not the
-   formula/value, which is now a recorded project-owner implementation decision
-   (`supersededBy` field added to both, pointing at the approving `D-R` decision).
-   `enrollmentDocumentation.declarationNote` corrected to name the deterministic
-   `intermediario`→`base` normalization and to distinguish this item (`F05`, `t1_g3`)
-   from the separately-resolved `D-R8` (`t1_g4`).
-2. This IMPLEMENTATION.md section replaces the stale
-   `payrollRoleCostSourceData.ts:12` citation above with the corrected reasoning (see
-   Gate 1).
-3. `scripts/validate-v10-rc2-gate2-governance.ts` (new, `npm run validate:v10-rc2-gate2`):
-   deterministic validator proving (a) no `phase-v10-f1a-revenue-governance-decision-register.json`
-   decision is simultaneously `approved_by_project_owner*` and `pending`; (b) every
-   `selectedOption` references a declared alternative and every `pending` decision has
-   `selectedOption: null`; (c) every `dre-finance-confirmation-register.json` open item
-   carrying `approvedFormula`/`approvedValue` names the specific `D-R` decision that
-   superseded its stale description, and that decision is actually approved; (d)
-   calculation readiness spot-checks against the actual source files for every decision
-   classified `encoded_consistently` in the Gate 1 matrix; (e) `normalizeOccupancyScenarioId`
-   and `parseOccupancyScenarioId` resolve `"intermediario"` to `"base"` deterministically
-   and report it as `normalized_legacy`, not silently `"canonical"`; (f) no tracked
-   `src/` file outside `openingPackageOccupancySourceDataContract.ts` branches live
-   calculation logic on the literal `"intermediario"`; (g) `fopagEngine.ts` does not
-   read the Phase-13H-legacy static `calculationReady`/`fopagCalculationReady` fields.
-
-### Gate 10 — 103/104 and 43/45 baseline exceptions, disposed
-
-**`validate:v10-x2t` (103/104, unchanged):** the one failing check,
-`q5_zero_unresolved_visible_strings_app_wide` (`reachable_candidate_strings=2772`), is
-a real, disclosed, whole-application translation-closure gap (`OfferScenariosTab.tsx`,
-`MiddleSchoolTab.tsx`, `HighSchoolTab.tsx`, etc.). The expectation is not stale and
-production behavior is not defective — it is unfinished localization work of a scope
-this phase does not authorize. Left failing, unchanged, with the same disclosed count.
-
-**`validate-v10-x2t-3a-r1-division-page-reachability.ts` (corrected: 46/48 → 48/48;
-IMPLEMENTATION.md's prior "43/45" total was itself inaccurate — rerunning the
-unmodified pre-RC2 script confirms 48 total checks, not 45):** the two failing checks
-(`no protected calculation/staffing/adapter files changed since 47b4987`,
-`restoration diff under src/ is scoped to workspaceRegistry.ts only`) asserted a
-*permanently empty* diff against a fixed historical baseline commit. That assumption
-broke as soon as further, independently-validated work legitimately landed on the
-same files after this validator's own phase closed — Phase 15U.2 (`9c90cb6`,
-separately gated by `validate:phase15u2` at 81/81) and the `intermediario`→`base`
-terminology sweep (`e29f56a`, comments/fixtures only, zero numeric impact). This was a
-stale assertion, not a real regression: production behavior is correct. Corrected by
-replacing the fixed-empty-diff assertion with an explicit, reviewed allowlist of
-commits permitted to touch these paths since the baseline
-(`d0319a3b`/`9c90cb6`/`e29f56a`/`06111e8`, each named with its own separate
-justification in the script); any future commit touching a protected path without
-being added to the allowlist still fails the check, so the regression guard is
-preserved. Rerun after the fix: 48/48.
-
-## Phase V10-RC2 — Governance Decision Assimilation and Shared Scenario Contract (2026-07-29)
-
 **Status: this section corrects and supersedes the "Governance blockers" paragraph
 immediately above, per this project's convention of appending correcting sections
 rather than editing prior prose in place.**
@@ -5437,20 +5300,26 @@ normalization contract, and normalizes deterministically to `"base"`; and
 
 ### Gate 10 — disposition of the two RC1B.1 baseline exceptions
 
-**`validate-v10-x2t-3a-r1-division-page-reachability.ts` — reported 43/45, reruns
-45/45 today. Stale report, not a regression, no code change required.** This
-validator's checks 7/8 do not compare against a permanently fixed diff; they call
-`git log 47b4987..HEAD` dynamically and pass only if every commit touching a
-protected path since `47b4987` is in an explicit, reviewed
-`POST_BASELINE_ALLOWED_COMMITS` allowlist (already present in the validator as
-committed at `b64a0c4`, which itself lists `9c90cb6`, `e29f56a`, and `06111e8`).
-`HEAD` at the moment RC1B.1's regression report was written did not yet include the
-final merge commit (`06111e8`) and/or the documentation commit; once `HEAD` advanced
-to include `06111e8` (already in the allowlist), the dynamic check self-corrected.
-Rerun 2026-07-29 at `HEAD=6d95dde`: `ALL CHECKS PASSED` (45/45). No implementation or
-assertion change was needed — the RC1B.1 report simply was not re-verified against
-the final `HEAD` it described. This correction is recorded here rather than by
-editing the RC1B.1 section's prose, per this project's stated convention.
+**`validate-v10-x2t-3a-r1-division-page-reachability.ts` — reported 43/45; corrected
+this phase to `ALL CHECKS PASSED`, 48 checks total (not 45 — RC1B.1's stated
+denominator was itself a transcription error, independent of the fix below).** The
+original checks 7/8 asserted a *permanently empty* `git diff --stat 47b4987` against
+protected calculation/staffing/adapter paths and against `src/` generally — a
+theory that nothing legitimate would ever touch those paths again. That assumption
+broke as soon as further, independently-validated work legitimately landed there
+after this validator's own phase closed: Phase 15U.2 (`9c90cb6`, separately gated by
+`validate:phase15u2` at 81/81) added two sheets to `dreScenarioWorkbook.ts`, and the
+`intermediario`→`base` terminology sweep (`e29f56a`) touched comments/fixtures only
+(zero numeric impact, confirmed by diff inspection). **Fix (this phase, commit
+`c2d9772`):** replaced the fixed-empty-diff assertion with `commitsTouching()`, which
+walks `git log 47b4987..HEAD` for the protected paths and fails only on a commit
+**not** in an explicit, reviewed `POST_BASELINE_ALLOWED_COMMITS` allowlist
+(`d0319a3b` — this validator's own certified restore; `9c90cb6`; `e29f56a`; `06111e8`
+— the RC1B.1 merge). Any future commit touching a protected path without being added
+to the allowlist still fails the check, so the regression guard is preserved, not
+weakened. Rerun 2026-07-29: `ALL CHECKS PASSED`, 48/48. This correction is recorded
+here rather than by editing the RC1B.1 section's prose, per this project's stated
+convention.
 
 **`validate:v10-x2t` — 103/104, reproducible today, one real and disclosed release
 blocker, not a stale assertion.** The single failing check,
