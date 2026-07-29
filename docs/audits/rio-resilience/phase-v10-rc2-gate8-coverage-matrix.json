@@ -51,7 +51,7 @@
       "D-R6_F03_base_tuition_source": "genuinely_unresolved — all cells, tuitionStatus=computed_uncertified",
       "F05_t1_g3_enrollment_mapping": "genuinely_unresolved — not applicable to this matrix (t1_g3 is retired, excluded from PACKAGES)",
       "F06_ms_hs_staffing_reconciliation": "genuinely_unresolved — aggregate payroll/staffing total in every cell includes MS/HS headcount from one of three unreconciled candidate sources",
-      "export_wiring": "not connected to visible shared scenario state — Gate 7, all cells"
+      "export_wiring": "dreScenarioWorkbook.ts's Fagundes Export Index (V10-RC2.1 Gate 7) is wired to the visible shared scenario state, but exports only the single currently-selected scenario, not all cells at once, and does not certify tuition/MS-HS-staffing figures — so exportAvailable remains false for every cell of this matrix. The separate Payroll export pathway (payrollExportScenarioAdapter.ts) remains genuinely disconnected from live UI state, per RC1B."
     },
     "supportLevelCounts": {
       "fully_supported": 0,

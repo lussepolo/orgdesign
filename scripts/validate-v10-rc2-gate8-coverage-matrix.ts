@@ -68,7 +68,9 @@ interface CoverageCell {
   // V10-RC2.1 Gate 2: a cell is "fully supported" only if every required output is
   // both available AND certified (not just computable). Tuition/revenue precision
   // (D-R5) and base tuition rates (D-R6/F03) are computed but never Finance-signed,
-  // and export is never wired (Gate 7) -- so no cell in this matrix is, honestly,
+  // and no cell's figures are export-certified (V10-RC2.1 Gate 7 wired a Fagundes
+  // export view for the single visible scenario, which does not certify per-cell
+  // tuition/MS-HS-staffing figures) -- so no cell in this matrix is, honestly,
   // "fully supported." "unavailable" is reserved for cells where the engine itself
   // cannot produce a required output at all (none exist in this governed 2-package
   // subset). Every cell is therefore "partially_supported" by construction; this
@@ -194,9 +196,14 @@ for (const openingPackageId of PACKAGES) {
             ebitdaValue: dreYear?.ebitda ?? null,
             exportAvailable: false,
             // No cell reaches "fully_supported" -- tuition is never certified
-            // (D-R6/F03), export is never wired (Gate 7), and MS/HS staffing
-            // authority is never reconciled (F06). "unavailable" would require a
-            // required output the engine cannot produce at all, which does not
+            // (D-R6/F03), and MS/HS staffing authority is never reconciled (F06).
+            // exportAvailable tracks CERTIFIED per-cell export availability, not
+            // whether an export mechanism exists: V10-RC2.1 Gate 7 wired the
+            // Fagundes Export Index sheet for the single currently-visible
+            // scenario (dreScenarioWorkbook.ts), but that does not certify any
+            // of the 900 cells' tuition/MS-HS-staffing figures -- so this stays
+            // false for every cell, unchanged by Gate 7. "unavailable" would
+            // require a required output the engine cannot produce at all, which does not
             // occur anywhere in this governed 2-package/3-captacao/3-org-design
             // subset (confirmed by the assertions at the bottom of this script).
             supportLevel: "partially_supported",
@@ -240,7 +247,12 @@ const summary = {
     "D-R6_F03_base_tuition_source": "genuinely_unresolved — all cells, tuitionStatus=computed_uncertified",
     F05_t1_g3_enrollment_mapping: "genuinely_unresolved — not applicable to this matrix (t1_g3 is retired, excluded from PACKAGES)",
     F06_ms_hs_staffing_reconciliation: "genuinely_unresolved — aggregate payroll/staffing total in every cell includes MS/HS headcount from one of three unreconciled candidate sources",
-    export_wiring: "not connected to visible shared scenario state — Gate 7, all cells",
+    export_wiring:
+      "dreScenarioWorkbook.ts's Fagundes Export Index (V10-RC2.1 Gate 7) is wired to the visible " +
+        "shared scenario state, but exports only the single currently-selected scenario, not all cells " +
+        "at once, and does not certify tuition/MS-HS-staffing figures — so exportAvailable remains " +
+        "false for every cell of this matrix. The separate Payroll export pathway " +
+        "(payrollExportScenarioAdapter.ts) remains genuinely disconnected from live UI state, per RC1B.",
   },
   // V10-RC2.1 Gate 2 — explicit support-level classification. See CoverageCell
   // comments for why no cell reaches fully_supported.
@@ -287,9 +299,12 @@ console.log(JSON.stringify(summary, null, 2));
 // Every governed dimension (enrollment/sections/staffing/payroll/revenue/DRE
 // handoff) must be available for all 900 cells — these are all backed by
 // approved_by_project_owner decisions (Gate 1) and should never silently
-// regress to unavailable. Export must remain false until Gate 7's wiring
-// lands — if it ever flips true, the matrix generator's own assumption about
-// the export gap is stale and must be revisited, not silently accepted.
+// regress to unavailable. Export must remain false for every cell until every
+// cell's tuition/MS-HS-staffing figures are certified (D-R6/F03, F06) — V10-RC2.1
+// Gate 7 wired a Fagundes export view for the single visible scenario without
+// certifying any cell, so this stays false. If it ever flips true, the matrix
+// generator's own assumption about per-cell export certification is stale and
+// must be revisited, not silently accepted.
 let failures = 0;
 function assertAll(name: string, predicate: (c: CoverageCell) => boolean) {
   const failing = cells.filter((c) => !predicate(c));
@@ -308,7 +323,10 @@ assertAll("staffingAvailable is true for every governed cell", (c) => c.staffing
 assertAll("payrollAvailable is true for every governed cell", (c) => c.payrollAvailable);
 assertAll("revenueAvailable is true for every governed cell", (c) => c.revenueAvailable);
 assertAll("dreHandoffAvailable is true for every governed cell", (c) => c.dreHandoffAvailable);
-assertAll("exportAvailable is false for every cell (Gate 7 not yet wired)", (c) => !c.exportAvailable);
+assertAll(
+  "exportAvailable is false for every cell (no cell's tuition/MS-HS-staffing figures are certified — V10-RC2.1 Gate 7's Fagundes Export Index does not change this)",
+  (c) => !c.exportAvailable,
+);
 assertAll(
   "supportLevel is partially_supported for every cell (none fully_supported, none unavailable)",
   (c) => c.supportLevel === "partially_supported",
@@ -322,7 +340,7 @@ assertAll("no cell claims fully_supported", (c) => c.supportLevel !== "fully_sup
 // production-ready.
 console.log(
   failures === 0
-    ? "\nGenerator invariants hold: computed-availability assertions pass; 0/900 cells are fully_supported (tuition uncertified, export unwired, MS/HS staffing unreconciled — by design, not by defect)."
+    ? "\nGenerator invariants hold: computed-availability assertions pass; 0/900 cells are fully_supported (tuition uncertified, no cell's export is certified, MS/HS staffing unreconciled — by design, not by defect)."
     : `\n${failures} GENERATOR INVARIANT(S) FAILED`,
 );
 process.exit(failures === 0 ? 0 : 1);
