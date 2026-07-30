@@ -6316,3 +6316,265 @@ phase declined to address them — and every supported output remains fully func
 around them.
 
 **V10-RC2.2 PAYROLL SHARED-ENGINE REFACTOR AND RELEASE-BOUNDARY CLOSURE: PASS**
+
+## Phase V10-RC2.3 — Turmas e Folha Scenario Control and Grade 6 Coverage Correction (2026-07-30)
+
+### Entry Gate
+
+Verified before any mutation: branch `main`; HEAD `99e789f`; `origin/main` also
+`99e789f` (0 ahead / 0 behind — this session had pushed V10-RC2.2's Gate 9 doc commit
+earlier); worktree clean; the same single pre-existing stash (`stash@{0}`, "WIP
+rio-scenario-resilience supporting data") untouched. **Correction on reported HEAD:**
+the directive referenced `b62c81b` as the prior phase's final HEAD; the actual current
+HEAD is `99e789f` (one commit further — the Gate 9 documentation commit, which this
+session had already pushed in a prior turn). V10-RC2.2 spans 10 commits total:
+`b055704`(G1) `a015a0a`(G2) `4247cbe`(G3) `7844767`(G4) `d150ae3`(G6) `bb3bcfa`(G5)
+`1bf3421`(G7) `f331697`(G8-fixes) `b62c81b`(G8-doc) `99e789f`(G9-doc).
+
+### Gate 1 — control-flow trace
+
+Traced the full shared-scenario data path. `openingPackageId`/`occupancyScenarioId`/
+`tuitionScenarioId` all live in `App.tsx`'s lifted `dreSelections` state
+(`useDreScenarioSimulator.ts`'s `DreScenarioSimulatorSelections`). `orgDesignOptionId`
+(tier) and the detail-year selector are, by design, tab-local state in both
+`ExecutiveOrgDesignTab.tsx` and `PayrollProjectionTab.tsx` — tier changes
+compensation/role composition only, never sections or enrollment, so it does not need
+to be a shared axis; this was already correctly wired and editable pre-phase, with no
+defect.
+
+Root cause of the read-only defect: `App.tsx` already threads
+`onOpeningPackageIdChange`/`onOccupancyScenarioIdChange` into `ExecutiveOrgDesignTab`
+(V10-RC2 Gate 3), but `SectionsAndPayrollWorkspace`/`PayrollProjectionTab` only ever
+received the three shared values, never change handlers — `PayrollProjectionTab.tsx`
+rendered them as plain `<div>`s in a "Shared Scenario" card, not `<select>`s. No
+scenario value was duplicated locally; this was a pure missing-wiring gap, not a
+state-duplication bug.
+
+### Gate 2 — grade-range defect trace, proven with a failing assertion
+
+Wrote and ran `scripts/validate-v10-rc2-3-gate2-grade-range-defect-proof.ts` against
+the pre-fix code (captured PASS on all 8 checks — see the script's header comment for
+the frozen transcript reference). It proved the Grade 6 omission was a hard,
+package-independent structural exclusion in `extractEyLsGradeRows()`
+(`if (row.divisionArea !== "Early Years" && row.divisionArea !== "Lower School")
+continue;`), not a missing-data problem: `buildOrgDesignHcTable()` does return Middle
+School rows for `t1_g6`, and governed per-grade Grade 6 enrollment/section source data
+(`GOVERNED_T1_G6_ENROLLMENT_BY_YEAR_AND_GRADE_RECORDS`,
+`GOVERNED_CAPACITY_BY_YEAR_AND_GRADE_RECORDS`) already existed and was non-null for
+every active captação scenario in 2028. Also proved the MS/HS warning conflated "grade
+coverage unavailable" with the real, narrower issue ("per-grade educator attribution
+unavailable") — Middle School rows collapse into a single division-wide "Middle
+School Teaching Team" role group with no per-grade breakdown in
+`buildOrgDesignHcTable()`, confirming Gate 5's `division_level_only` disposition is a
+real model boundary, not neglect. Re-running this same script after the fix now
+correctly FAILS 2 of its 8 checks (the exact pre-fix function signature no longer
+exists, having moved into the new adapter) — that flip is the documented before/after
+evidence pair; the script's header comment records this and directs regression
+coverage to `validate:v10-rc2-3-gate6`/`gate6a` instead.
+
+### Gate 3 — shared scenario controls implemented
+
+Added `onOpeningPackageIdChange`/`onOccupancyScenarioIdChange`/
+`onTuitionScenarioIdChange` props threaded `App.tsx` → `SectionsAndPayrollWorkspace` →
+`PayrollProjectionTab`. `App.tsx` reuses the exact same `handleOrgDesignOpeningPackageIdChange`/
+`handleOrgDesignOccupancyScenarioIdChange` handlers `ExecutiveOrgDesignTab` already
+uses (same `dreSelections` setter — no second shared-state store), plus a new,
+analogous `handleTuitionScenarioIdChange`. `PayrollProjectionTab.tsx`'s "Shared
+Scenario" card now renders three `<select>` controls (opening package restricted to
+`ACTIVE_OPENING_PACKAGE_IDS`; captação to `OCCUPANCY_SCENARIO_IDS`; tuition to
+`DRE_WORKING_SCENARIO_TUITION_SCENARIO_IDS`/`TUITION_LABELS`, exposed here — not just
+linked elsewhere — because this page renders tuition-driven revenue/coverage KPIs).
+The false "not chosen on this page" copy in `payrollHowToUseIntro` was replaced (both
+locales) with accurate "editable directly on this page, synced with..." copy;
+`validate:v10-rc2-3-gate6` asserts the old phrase is gone from both `en-US.ts` and
+`pt-BR.ts`.
+
+### Gate 4 — Grade 6 coverage restored
+
+New `src/features/rio-scenario-resilience/model/payrollGradeDetailAdapter.ts`
+(`buildPayrollGradeDetailRows()`) replaces the old in-component
+`extractEyLsGradeRows()`. It joins two already-governed sources per grade: EY/LS rows
+come from `buildOrgDesignHcTable()` (headcount, unchanged) matched against
+`calculateSectionCountsForScenario()` (enrollment/sections — the same engine proven to
+produce that headcount, `validate:v10-rc2-2-gate3`) by grade display-name; Grade 6
+(t1_g6 only) is appended from `GOVERNED_CAPACITY_BY_YEAR_AND_GRADE_RECORDS` /
+`GOVERNED_T1_G6_ENROLLMENT_BY_YEAR_AND_GRADE_RECORDS` directly — never through the
+EY/LS section-count formula (which `sectionCountEngine.ts` already explicitly scopes
+to EY/LS only). t1_g4 never renders a Middle School row (10/10 years verified,
+`validate:v10-rc2-3-gate6`); t1_g6 renders exactly one Grade 6 row every year (10/10
+verified), labeled Middle School, with governed sections/enrollment — never derived
+from annual capacity, never derived-learners-from-capacity.
+
+### Gate 4A/4B — per-grade operating drivers and scenario reactivity (added mid-phase per user request)
+
+Expanded the Grade Breakdown table from 4 columns (Grade/Lead FTE/Support/Total) to 9
+(Série/Divisão/Alunos/Turmas/Alunos-por-turma/Educador Líder/Assistente/Monitor/Total
+FTE) for **every** rendered grade, not just Grade 6 — Alunos/Turmas for EY/LS now come
+from the same `calculateSectionCountsForScenario()` join described in Gate 4, so the
+turma/learner figures shown are guaranteed consistent with the educator counts beside
+them (same source, same call). Lower School's Monitor column renders "—" (not "0") via
+a new `monitorApplicable` flag (`true` only for Early Years — Lower School has no
+monitor role in the governed model at all, so "—" signals "not applicable" rather than
+"computed as zero"). Alunos-por-turma is `Math.round(enrollment/sections)`, computed
+once in the adapter so the UI and validator share one rounding rule.
+
+**Verified empirically (not assumed) that captação scenario has zero effect on
+section counts for any grade in either package**, across all combinations
+(`scripts/_debug_sections.ts`, run and discarded — not committed): every active
+grade's committed-sections override in `GOVERNED_CAPACITY_BY_YEAR_AND_GRADE_RECORDS`
+is unconditionally 2, so `sectionCount = min(max(rawSections, 2), 2) = 2` whenever
+active, regardless of enrollment. This makes the "Alunos changes, Turmas/staffing stay
+stable" behavior browser-QA'd in Gate 7A the correct, universal case under current
+governed data — not a coincidence specific to Grade 6. **This same investigation is
+what led to the Gate 9 finding below** — the primary-source workbook does not actually
+support "flat 2 sections whenever active."
+
+### Gate 5 — Grade 6 educator staffing disposition
+
+Inspected whether `buildOrgDesignHcTable()`'s Middle School output attributes any
+educator count to Grade 6 specifically: it does not — MS rows collapse into one
+division-wide "Middle School Teaching Team" group (`ms_teaching_lead` fixed-FTE row
+source type), with no per-grade key at all. Per the required disposition for "does
+not provide a source-backed value": Grade 6 remains visible with real governed
+sections/enrollment; its Lead-Educator cell shows a "Nível de divisão"/"Division
+level" badge (title-text carries the full required bilingual sentence) instead of a
+number; Assistente/Monitor/Total FTE render "—", never "0", never a fabricated
+allocation. The combined MS+HS aggregate that previously fed a single warning box was
+split into separate `msAggregateHeadcount`/`hsAggregateHeadcount` values, each in its
+own division-level card — Middle School's aggregate (3, per the current unwired model)
+is never presented as Grade 6's number. `payrollMsHsUnavailableLabel`/Note were
+reworded (both locales) to scope the warning specifically to per-grade educator
+attribution, since Grade 6's turmas/learners are now correctly disclosed as governed
+and available, not "unavailable."
+
+### Gate 6 — reactive parity validators
+
+Two new validator scripts, both green:
+- `validate:v10-rc2-3-gate6` (35 checks): source-level wiring of all three new
+  `<select>`s and their change handlers end-to-end; no retired package/scenario
+  offered; functional recompute checks (captação changes DRE
+  enrollment/revenue and Grade 6's learner count; opening package changes FOPAG
+  output; Org Design changes DRE payroll fields; year changes FOPAG totals); no local
+  `Math.ceil(...)` section-derivation or retired-axis constants re-introduced in
+  `PayrollProjectionTab.tsx`; t1_g4 excludes Grade 6 for all 10 years, t1_g6 includes
+  exactly one Grade 6 row for all 10 years.
+- `validate:v10-rc2-3-gate6a` (13 checks, 597 grade/year/scenario cells): per-grade
+  learner/section parity against the governed source; sections never exceed 2;
+  alunos-por-turma matches the rounding rule; EY educator/assistant/monitor and LS
+  educator/assistant all equal the governed section-driven engine output exactly; no
+  LS monitor value is ever anything but `0`/`monitorApplicable: false` (never
+  invented); Grade 6 never consumes the EY/LS formula; captação changes propagate into
+  the same adapter the UI/export both consume.
+
+The pre-existing 180-combination Org-Design/Payroll HC parity
+(`validate:v10-rc2-2-gate3`) was re-run unchanged and remains green (10,272 role-rows,
+0 discrepancies) — this phase's per-grade join reads `buildOrgDesignHcTable()`'s
+output, it does not alter it.
+
+### Gate 7/7A — browser QA (PT and EN, live Chrome automation, dev server on :3001, `sessionStorage` auth-bypass)
+
+Verified live: T1→G4 stops cleanly at Grade 4 (no Grade 5/6 row); T1→G6 shows exactly
+one Grade 6 row (Middle School, governed turmas/learners, "Nível de divisão" badge,
+"—" for Assistente/Monitor/Total FTE); switching Captação
+Conservador→Base→Otimista visibly changes Alunos per grade (e.g. Grade 6: 16→16→20;
+Grade 1: 32→34→40) while Turmas/staffing stay stable at their governed cap — captured
+as three screenshots demonstrating the required "enrollment changes, sections don't"
+threshold behavior for the same package/year. Confirmed empirically (Gate 4A/4B) that
+no governed grade/year/package combination exists where sections actually change
+across captação scenarios — screenshot demonstration #2 (a case where section count
+does change) is not producible under current governed data; this is disclosed rather
+than fabricated. Lower School Monitor renders "—" live; Early Years Monitor renders
+real values. PT/EN locale switching correct throughout, including the new column
+headers and reworded warning copy. Export (`.xlsx`) triggered live with console
+clean, zero errors. No console errors or crashes observed in any of the above.
+
+### Gate 8 — documentation, validators, lint, build
+
+Documented above and in `docs/audits/rio-resilience/phase-v10-rc2-3-gate9-turma-and-staffing-source-discrepancies.md`
+(see below). Full regression: `npx tsc --noEmit` clean; `npm run build` exit 0; every
+in-scope validator green after two source-level updates —
+`validate-v10-rc2-2-gate1-blocker-register.ts`'s F06 live-disclosure check was updated
+(not weakened) to accept the new split `msAggregateHeadcount`/`hsAggregateHeadcount`
+names in place of the retired combined `msHsAggregateHeadcount`, since Gate 5
+correctly split that disclosure; `validate-v10-rc2-3-gate2-grade-range-defect-proof.ts`
+is a frozen pre-fix snapshot that is *expected* to fail 2/8 checks post-fix (documented
+in its own header) and is not a regression gate. `git diff --check` and `git diff
+--cached --check` both clean throughout. Nothing committed or pushed this phase.
+
+### Gate 9 — mid-phase governance-gap discovery (documented, not fixed)
+
+During Gate 7A browser QA the user supplied the primary-source workbook
+(`Concept Rio - 20 anos - Org BU - Apresentação v10.xlsx`, `PnL` tab) and pointed out
+turma counts vary by captação scenario. Cross-checking it against the app's governed
+capacity data revealed the app's `sections: active ? 2 : null` model (established in a
+prior phase, V10_E1_GOVERNANCE_DATE = 2026-07-24) contradicts the workbook, which shows
+sections ramping 1→2 as a newly-opened grade fills, not jumping straight to 2. The user
+also supplied specific staffing corrections (counselor activation year; Grade
+6/7/8-specific MS educator counts that sum to the already-existing-but-unwired
+`msHsStaffingReadinessContract.ts` canonical model; a specialist-educator FTE
+threshold). Given a decision only the user/product owner could make — whether to
+correct a foundational governed dataset that would move FOPAG headcount and DRE
+payroll/margin figures throughout the app, well beyond Turmas e Folha's UI — this was
+surfaced explicitly rather than acted on silently; the user's explicit direction was
+**document only, fix in a dedicated future phase**. Full detail, evidence, and
+next-step plan: `docs/audits/rio-resilience/phase-v10-rc2-3-gate9-turma-and-staffing-source-discrepancies.md`.
+
+### Files changed this phase
+
+New: `src/features/rio-scenario-resilience/model/payrollGradeDetailAdapter.ts`;
+`scripts/validate-v10-rc2-3-gate2-grade-range-defect-proof.ts`;
+`scripts/validate-v10-rc2-3-gate6-scenario-and-grade6-coverage.ts`;
+`scripts/validate-v10-rc2-3-gate6a-per-grade-data.ts`;
+`docs/audits/rio-resilience/phase-v10-rc2-3-gate9-turma-and-staffing-source-discrepancies.md`.
+Modified: `src/App.tsx` (tuition change handler, prop threading);
+`src/components/sections/SectionsAndPayrollWorkspace.tsx` (prop threading);
+`src/components/sections/PayrollProjectionTab.tsx` (editable scenario controls,
+9-column grade table, split MS/HS disclosure); `src/features/rio-scenario-resilience/model/orgDesignHcTableAdapter.ts`
+(exported `GRADE_DISPLAY_NAMES`/`gradeDisplayName` for reuse, no behavior change);
+`src/i18n/en-US.ts`, `src/i18n/pt-BR.ts` (new/reworded translation keys);
+`scripts/validate-v10-rc2-2-gate1-blocker-register.ts` (F06 disclosure check updated
+for the split MS/HS variable names); `package.json` (+3 npm scripts).
+
+### Final state
+
+Nothing committed this phase — all changes remain in the working tree, as directed
+("Do not commit or push until all gates pass"). `git status --short` shows 8 modified
++ 5 new files (see above); `git diff --check` / `git diff --cached --check` both
+clean; the same single pre-existing stash remains untouched; no new worktree, branch,
+or stash created; no push or deployment occurred.
+
+### Remaining blockers (unchanged in kind from V10-RC2.2, plus one new item)
+
+1–5. D-R5, D-R6/F03, F06 (now more precisely scoped to per-grade educator attribution
+only), corporate allocation/consolidated cost, and the six non-crashing pre-existing
+validator failures — all unchanged from V10-RC2.2's disposition, confirmed unaffected
+by this phase.
+6. **New (Gate 9): governed turma-count-per-grade data likely needs re-derivation from
+   the source workbook** (sections ramp 1→2, not flat 2) — affects FOPAG headcount for
+   every EY/LS grade in its opening years, both packages; plus unsourced staffing
+   corrections (counselor timing, MS per-grade educator attribution, specialist FTE
+   threshold) supplied by the user but not yet independently verified against the
+   workbook or wired into the engines. Recommended as a dedicated future phase per
+   explicit user direction this session.
+
+### Recommendation
+
+Every element of the directive's required outcome is met: Turmas e Folha now exposes
+editable opening package/captação/tuition controls wired to the same shared state
+Executive Org Design and the DRE Scenario Simulator use (no second store, no local
+scenario duplication); t1_g6 visibly includes a governed Grade 6 row while t1_g4
+correctly excludes it; Grade 6 never consumes the EY/LS section-per-educator formula;
+unknown Grade 6 educator attribution is never rendered as zero; per-grade
+Alunos/Turmas/Alunos-por-turma/Educador-Líder/Assistente/Monitor/Total-FTE are shown
+for every grade with LS's monitor correctly distinguished as "not applicable" rather
+than zero; reactive parity is proven with deterministic assertions (597 cells) and
+live browser QA in both locales; the pre-existing 180-combination HC parity is
+unaffected; nothing was committed or pushed. One significant governance gap was
+discovered outside this phase's mandate (governed turma-count data likely needs
+correction against its own cited source) and was explicitly surfaced to the user
+rather than silently fixed or silently ignored, per their direction to document it
+for a dedicated future phase.
+
+**V10-RC2.3 TURMAS E FOLHA SCENARIO CONTROL AND GRADE 6 COVERAGE CORRECTION: PASS**
+(scope as directed; Gate 9 finding explicitly deferred, not resolved, by user
+direction)

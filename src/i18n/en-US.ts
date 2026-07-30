@@ -482,18 +482,21 @@ export const EN_US: Record<TranslationKey, string> = {
   scenarioPessimista: "Pessimistic",
   scenarioFullSeat: "Full Seat",
 
-  // ── PayrollProjectionTab (V10-RC2.2: shared-scenario labels) ──
+  // ── PayrollProjectionTab (V10-RC2.2/V10-RC2.3: shared-scenario labels) ──
   payrollSharedScenarioLabel: "Shared scenario",
+  payrollSharedScenarioEditableNote: "Editable here — synced with Executive Org Design / DRE Scenario Simulator",
   payrollSharedOpeningPackageLabel: "Opening package",
   payrollSharedCaptacaoLabel: "Captação",
   payrollSharedTuitionLabel: "Tuition",
   payrollRevenueUncertifiedNote: "Computed, not Finance-certified (D-R6/F03).",
   payrollOrgDesignTierLabel: "Org Design version",
   payrollTeamHeadcountLabel: "Team headcount",
-  payrollMsHsUnavailableLabel: "Middle School / High School — grade-level detail unavailable",
+  payrollMsHsUnavailableLabel: "Middle School / High School — grade-level educator attribution unavailable",
   payrollMsHsUnavailableNote:
-    "F06 (V10-RC2 Gate 1): three non-identical MS/HS staffing sources exist in this repository, unreconciled (the Phase 15H.2 instructional-capacity model, the FOPAG adapter's own fixed-FTE table, and a recovered-but-never-committed Phase 8B count). The EY/LS rule (educators = sections) is not extrapolated to these grades.",
+    "F06 (V10-RC2 Gate 1): three non-identical MS/HS staffing sources exist in this repository, unreconciled (the Phase 15H.2 instructional-capacity model, the FOPAG adapter's own fixed-FTE table, and a recovered-but-never-committed Phase 8B count). The EY/LS rule (educators = sections) is not extrapolated to these grades. Grade 6's turmas and learners above are governed, grade-level values — only its per-grade educator count is unavailable; the totals below are division-level aggregates, not a Grade 6-specific allocation.",
   payrollMsHsAggregateEstimateLabel: "Engine aggregate estimate (unreconciled)",
+  payrollGrade6EducatorBadgeLabel: "Division level",
+  payrollGrade6EducatorFullNote: "Middle School staffing computed at the division level, not attributed to Grade 6 specifically.",
   payrollCompareOrgDesignSubtitle: "Total people cost by Org Design version, year by year",
   payrollTierInvarianceFooterNote:
     "Org Design version changes role composition and compensation; it does not change sections or enrollment.",
@@ -502,7 +505,7 @@ export const EN_US: Record<TranslationKey, string> = {
   payrollHowToUseLabel: "How to use this page",
   payrollHowToUseHeadline: "Scenario → Classes → Educators → Cost → Payroll Coverage",
   payrollHowToUseIntro:
-    "Opening package, captação, and tuition are inherited from the shared scenario (Executive Org Design / DRE Scenario Simulator) — they are not chosen on this page. Pick only the Org Design version and the detail year. Instructional and non-instructional headcount come from the governed FOPAG/DRE engine; revenue and coverage are computed from that same engine, not Finance-certified.",
+    "Opening package, captação, and tuition are the shared scenario inputs — editable directly on this page, and synced with Executive Org Design / DRE Scenario Simulator wherever they're changed. Pick the Org Design version and the detail year here too. Instructional and non-instructional headcount come from the governed FOPAG/DRE engine; revenue and coverage are computed from that same engine, not Finance-certified.",
   payrollFopagIncludesLabel: "FOPAG Direto includes",
   payrollFopagIncludesList:
     "Lead educators · Assistants · Monitors · MS/HS FTE · Music · LED · HS Pool · Clerk · IT · Maintenance · Marketing · HR · Secretary",
@@ -584,7 +587,13 @@ export const EN_US: Record<TranslationKey, string> = {
   payrollGradeBreakdownTitle: "Grade Breakdown · {year}",
   payrollDetailedTeachingLayerLabel: "detailed teaching layer",
   payrollGradeHeader: "Grade",
+  payrollDivisionHeader: "Division",
   payrollTurmasHeader: "Turmas",
+  payrollAlunosPorTurmaHeader: "Students/Turma",
+  payrollEducadorLiderHeader: "Lead Educator",
+  payrollAssistenteHeader: "Assistant",
+  payrollMonitorHeader: "Monitor",
+  payrollTotalFteHeader: "Total FTE",
   payrollLeadFteHeader: "Lead FTE",
   payrollSupportHeader: "Support",
   payrollTierHeader: "Tier",

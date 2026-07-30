@@ -109,10 +109,16 @@ check("F06 blocks 0 active coverage cells (aggregate MS/HS payroll cost is still
 
 // Cross-check against live source: PayrollProjectionTab must not extrapolate the
 // EY/LS rule into MS/HS (no getLeadFteForGrade-style hardcoded FTE table).
+// V10-RC2.3 Gate 5 split the combined msHsAggregateHeadcount into separate
+// msAggregateHeadcount/hsAggregateHeadcount (Middle School disclosed apart from
+// High School, since only Middle School's Grade 6 is now a governed, visible row) —
+// accept either the pre-V10-RC2.3 combined name or the current split names.
 const payrollTabSrc = readFileSync(join(ROOT, "src/components/sections/PayrollProjectionTab.tsx"), "utf8");
 check(
   "live check: PayrollProjectionTab.tsx discloses F06 for MS/HS, does not extrapolate EY/LS rule",
-  payrollTabSrc.includes("payrollMsHsUnavailableLabel") && payrollTabSrc.includes("msHsAggregateHeadcount"),
+  payrollTabSrc.includes("payrollMsHsUnavailableLabel") &&
+    (payrollTabSrc.includes("msHsAggregateHeadcount") ||
+      (payrollTabSrc.includes("msAggregateHeadcount") && payrollTabSrc.includes("hsAggregateHeadcount"))),
 );
 
 // ── Corporate allocation: never zero-substituted, never suppresses direct payroll ──

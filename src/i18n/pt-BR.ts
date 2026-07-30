@@ -481,18 +481,21 @@ export const PT_BR = {
   scenarioPessimista: "Pessimista",
   scenarioFullSeat: "Full Seat",
 
-  // ── PayrollProjectionTab (V10-RC2.2: shared-scenario labels) ──
+  // ── PayrollProjectionTab (V10-RC2.2/V10-RC2.3: shared-scenario labels) ──
   payrollSharedScenarioLabel: "Cenário compartilhado",
+  payrollSharedScenarioEditableNote: "Editável aqui — sincronizado com Desenho Organizacional Executivo / Simulador de Cenário DRE",
   payrollSharedOpeningPackageLabel: "Pacote de abertura",
   payrollSharedCaptacaoLabel: "Captação",
   payrollSharedTuitionLabel: "Mensalidade",
   payrollRevenueUncertifiedNote: "Computado, não certificado pelo Financeiro (D-R6/F03).",
   payrollOrgDesignTierLabel: "Versão de Desenho Organizacional",
   payrollTeamHeadcountLabel: "Efetivo da equipe",
-  payrollMsHsUnavailableLabel: "Ensino Fundamental II / Médio — detalhamento por série indisponível",
+  payrollMsHsUnavailableLabel: "Ensino Fundamental II / Médio — atribuição de efetivo docente por série indisponível",
   payrollMsHsUnavailableNote:
-    "F06 (V10-RC2 Gate 1): existem três fontes de efetivo docente do Fundamental II/Médio não reconciliadas neste repositório (modelo de capacidade instrucional da Fase 15H.2, a tabela de FTE fixo do adaptador FOPAG, e uma contagem da Fase 8B recuperada mas nunca integrada). A regra de EY/LS (educadores = seções) não é extrapolada para essas séries.",
+    "F06 (V10-RC2 Gate 1): existem três fontes de efetivo docente do Fundamental II/Médio não reconciliadas neste repositório (modelo de capacidade instrucional da Fase 15H.2, a tabela de FTE fixo do adaptador FOPAG, e uma contagem da Fase 8B recuperada mas nunca integrada). A regra de EY/LS (educadores = seções) não é extrapolada para essas séries. As turmas e matrículas da Série 6 (Grade 6) acima são valores governados por série — apenas o efetivo docente por série é indisponível; os totais abaixo são agregados no nível da divisão, não uma alocação específica da Série 6.",
   payrollMsHsAggregateEstimateLabel: "Estimativa agregada do motor (não reconciliada)",
+  payrollGrade6EducatorBadgeLabel: "Nível de divisão",
+  payrollGrade6EducatorFullNote: "Efetivo do Fundamental II calculado no nível da divisão, não atribuído especificamente à Série 6.",
   payrollCompareOrgDesignSubtitle: "Custo total de pessoal por versão de Desenho Organizacional, ano a ano",
   payrollTierInvarianceFooterNote:
     "A versão de Desenho Organizacional altera a composição de cargos e a remuneração; não altera turmas nem matrículas.",
@@ -501,7 +504,7 @@ export const PT_BR = {
   payrollHowToUseLabel: "Como usar esta página",
   payrollHowToUseHeadline: "Cenário → Turmas → Educadores → Custo → Cobertura de Folha",
   payrollHowToUseIntro:
-    "O pacote de abertura, a captação e a mensalidade são herdados do cenário compartilhado (Desenho Organizacional Executivo / Simulador de Cenário DRE) — não são escolhidos nesta página. Escolha apenas a versão de Desenho Organizacional e o ano de detalhe. Efetivo docente e não-docente vêm do motor FOPAG/DRE governado; receita e cobertura são computadas a partir do mesmo motor, não certificadas pelo Financeiro.",
+    "O pacote de abertura, a captação e a mensalidade são os inputs do cenário compartilhado — editáveis diretamente nesta página, e sincronizados com o Desenho Organizacional Executivo / Simulador de Cenário DRE onde quer que sejam alterados. Escolha também a versão de Desenho Organizacional e o ano de detalhe aqui. Efetivo docente e não-docente vêm do motor FOPAG/DRE governado; receita e cobertura são computadas a partir do mesmo motor, não certificadas pelo Financeiro.",
   payrollFopagIncludesLabel: "FOPAG Direto inclui",
   payrollFopagIncludesList:
     "Educadores líderes · Assistentes · Monitores · FTE MS/HS · Música · LED · Pool HS · Secretaria · TI · Manutenção · Marketing · RH · Secretário(a)",
@@ -584,6 +587,12 @@ export const PT_BR = {
   payrollGradeBreakdownTitle: "Detalhamento por Série · {year}",
   payrollDetailedTeachingLayerLabel: "camada pedagógica detalhada",
   payrollGradeHeader: "Série",
+  payrollDivisionHeader: "Divisão",
+  payrollAlunosPorTurmaHeader: "Alunos/Turma",
+  payrollEducadorLiderHeader: "Educador Líder",
+  payrollAssistenteHeader: "Assistente",
+  payrollMonitorHeader: "Monitor",
+  payrollTotalFteHeader: "Total FTE",
   payrollTurmasHeader: "Turmas",
   payrollLeadFteHeader: "FTE Líder",
   payrollSupportHeader: "Apoio",

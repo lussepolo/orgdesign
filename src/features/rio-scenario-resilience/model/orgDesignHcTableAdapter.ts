@@ -19,7 +19,7 @@ export interface OrgDesignHcTableResult {
   engineStatus: string;
 }
 
-const GRADE_DISPLAY_NAMES: Record<string, string> = {
+export const GRADE_DISPLAY_NAMES: Record<string, string> = {
   t1: "Toddlers 1",
   t2: "Toddlers 2",
   pk3: "Pre-K3",
@@ -54,7 +54,7 @@ const DIVISION_ORDER: Record<string, number> = {
   "High School": 7,
 };
 
-function gradeDisplayName(gradeId: string): string {
+export function gradeDisplayName(gradeId: string): string {
   return GRADE_DISPLAY_NAMES[gradeId] ?? gradeId;
 }
 

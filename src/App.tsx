@@ -56,6 +56,7 @@ import {
   type ActiveOpeningPackageId,
   type OccupancyScenarioId,
 } from "./features/rio-scenario-resilience/model/openingPackageOccupancySourceDataContract";
+import type { TuitionScenarioId } from "./features/rio-scenario-resilience/model/revenueInputs";
 import { useLocale } from "./i18n/useLocale";
 import type { Locale } from "./i18n/localeContract";
 import {
@@ -273,6 +274,12 @@ function AppShell() {
     setDreSelections({ ...dreSelections, openingPackageId: id });
   const handleOrgDesignOccupancyScenarioIdChange = (id: OccupancyScenarioId) =>
     setDreSelections({ ...dreSelections, occupancyScenarioId: id });
+  // V10-RC2.3 Gate 3: Turmas e Folha (SectionsAndPayrollWorkspace) reads/writes the
+  // same dreSelections shared state — openingPackageId/occupancyScenarioId reuse the
+  // exact handlers ExecutiveOrgDesignTab already uses; tuition gets its own handler
+  // since ExecutiveOrgDesignTab never needed to change it.
+  const handleTuitionScenarioIdChange = (id: TuitionScenarioId) =>
+    setDreSelections({ ...dreSelections, tuitionScenarioId: id });
 
   React.useEffect(() => {
     const hasSeenAbout = localStorage.getItem(APP_ABOUT_SEEN_STORAGE_KEY);
@@ -422,8 +429,11 @@ function AppShell() {
             {activeTab === "payroll" && (
               <SectionsAndPayrollWorkspace
                 openingPackageId={orgDesignOpeningPackageId}
+                onOpeningPackageIdChange={handleOrgDesignOpeningPackageIdChange}
                 occupancyScenarioId={dreSelections.occupancyScenarioId}
+                onOccupancyScenarioIdChange={handleOrgDesignOccupancyScenarioIdChange}
                 tuitionScenarioId={dreSelections.tuitionScenarioId}
+                onTuitionScenarioIdChange={handleTuitionScenarioIdChange}
               />
             )}
             {activeTab === "viability" && <ViabilitySimulatorTab />}

@@ -17,19 +17,26 @@ const SUBVIEWS: Array<{ id: PayrollSubviewId; labelKey: "wsPayrollSubviewALabel"
 
 interface SectionsAndPayrollWorkspaceProps {
   readonly openingPackageId: ActiveOpeningPackageId;
+  readonly onOpeningPackageIdChange: (id: ActiveOpeningPackageId) => void;
   readonly occupancyScenarioId: OccupancyScenarioId;
+  readonly onOccupancyScenarioIdChange: (id: OccupancyScenarioId) => void;
   readonly tuitionScenarioId: TuitionScenarioId;
+  readonly onTuitionScenarioIdChange: (id: TuitionScenarioId) => void;
 }
 
 // V10-X2T: "Turmas, Equipe Pedagógica e Folha de Pagamento" primary
 // workspace. Wraps PayrollProjectionTab and PayrollExportMatrixTab as two
 // subviews rather than duplicating either. No calculation logic lives in
-// this file — it only forwards the shared scenario contract (V10-RC2.2)
-// down to PayrollProjectionTab, same as App.tsx does for ExecutiveOrgDesignTab.
+// this file — it only forwards the shared scenario contract (V10-RC2.2/
+// V10-RC2.3, including the editable-here change handlers) down to
+// PayrollProjectionTab, same as App.tsx does for ExecutiveOrgDesignTab.
 export default function SectionsAndPayrollWorkspace({
   openingPackageId,
+  onOpeningPackageIdChange,
   occupancyScenarioId,
+  onOccupancyScenarioIdChange,
   tuitionScenarioId,
+  onTuitionScenarioIdChange,
 }: SectionsAndPayrollWorkspaceProps) {
   const { t } = useLocale();
   const [activeSubview, setActiveSubview] = useState<PayrollSubviewId>("sections-staffing-simulation");
@@ -68,8 +75,11 @@ export default function SectionsAndPayrollWorkspace({
       {activeSubview === "sections-staffing-simulation" ? (
         <PayrollProjectionTab
           openingPackageId={openingPackageId}
+          onOpeningPackageIdChange={onOpeningPackageIdChange}
           occupancyScenarioId={occupancyScenarioId}
+          onOccupancyScenarioIdChange={onOccupancyScenarioIdChange}
           tuitionScenarioId={tuitionScenarioId}
+          onTuitionScenarioIdChange={onTuitionScenarioIdChange}
         />
       ) : (
         <PayrollExportMatrixTab />
