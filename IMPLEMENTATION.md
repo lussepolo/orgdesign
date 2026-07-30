@@ -6973,3 +6973,282 @@ dispositioned; nothing was committed or pushed.
 **V10-RC2.4 GOVERNED TURMA RAMP-UP AND STAFFING SOURCE RECONCILIATION: PASS**
 (scope as directed; counselor activation year and specialist FTE/threshold
 explicitly deferred, not resolved, pending sourcing)
+
+## Phase V10-RC2.4A — High School Educator Allocation Reconciliation (2026-07-30)
+
+**Does not reopen RC2.4's turma/section correction.** That correction (governed
+enrollment-driven section ramp, the 150-cell primary-source check, the 1,200+627
+Gate 7 fidelity/parity totals, the `phase15f/i2c/j`/`phase15o` documentation
+corrections) is preserved unmodified above and remains PASS.
+
+**What this phase corrects:** RC2.4's own Gate 6 text represented the HS
+educator table as a single, self-reconciled, approved product-owner correction:
+`{g9:4, g10:0, g11:4, g12:3}`, sum 11. The actual product-owner correction
+supplied 2026-07-30 was **Grade 8 = 2 FTE, Grade 10 = 2 FTE**. RC2.4's committed
+code kept Grade 10 at 0 and moved 1 FTE to Grade 11 (3→4) to hold the sum at 11
+— an unapproved reassignment, not a product-owner decision. This phase corrects
+the record and the code; it does not touch the (uncontested, correctly-sourced)
+MS Grade 8 correction.
+
+Full evidence, gate-by-gate: `docs/audits/rio-resilience/
+phase-v10-rc2-4a-hs-educator-allocation-reconciliation.md`.
+
+### Gate 0 — entry state
+
+Branch `main`; HEAD `c268857` ("Correct governed section ramp-up and staffing
+parity"); `origin/main` at `99e789f`; 2 ahead / 0 behind, nothing pushed. Working
+tree clean at entry. No RC2.5 work had started. Single pre-existing stash
+(`stash@{0}`, "WIP rio-scenario-resilience supporting data") confirmed unchanged
+and left untouched throughout.
+
+### Gate 1 — RC2.4 staffing diff (as committed)
+
+`payrollAdapter.ts`: `MS_FTE_BY_GRADE` `{g6:3,g7:4,g8:3}`→`{g6:3,g7:4,g8:2}`
+(uncontested, canonical-matching, unchanged by this phase).
+`HS_FTE_BY_GRADE` `{g9:4,g10:0,g11:3,g12:3}`→`{g9:4,g10:0,g11:4,g12:3}` — g10 not
+moved to the stated 2; g11 bumped 3→4 to preserve sum=11. Claimed provenance
+("corrected by Luciana 2026-07-30, V10-RC2.4 Gate 6, self-reconciled") had no
+evidence beyond RC2.4's own prose — no separate transcript, workbook citation, or
+canonical model supports g11=4. Not explicitly approved by the product owner per
+this phase's directive. `orgDesignPayrollActivation.ts`: three descriptive
+citations carried the same unapproved values. No other file in the RC2.4 diff
+(`msHsStaffingReadiness.ts`, canonical MS/HS models, FOPAG/DRE/export adapters,
+staffing validators) was touched by RC2.4 — confirmed via `git show c268857` on
+each file individually (all zero-line diffs).
+
+### Gate 2/3 — canonical model trace and meaning of the per-grade values
+
+Two independent, pre-existing canonical sources traced: (1)
+`secondaryEducatorCapacityModel.ts` — a subject-**domain** model (10 core across
+5 domains + 1 flexible = 11), computed once for the whole HS division at full
+maturity, with no per-grade axis at all; `payrollWired: false` throughout. (2)
+`msHsStaffingReadiness.ts`'s `HIGH_SCHOOL_CANONICAL_FULL_MODEL`
+(`governanceStatus: "user_validated_simulator_modeling_rule"`, pre-existing, not
+created for this dispute): `rampIncrementFteByGrade: {g9:4,g10:0,g11:3,g12:3}`,
+`cumulativeFteByGrade: {g9:4,g10:4,g11:7,g12:10}`, `fullModelTotalEducators:11`
+— unambiguously incremental-activation semantics (Gate 3 interpretation B),
+independently corroborated by `HighSchoolTab.tsx`'s own structurally-embedded UI
+text ("No separate Grade 10 FTE step beyond the launch package," "bringing the
+current HS teaching-capacity assumption to 7 FTE," "completes the current
+cumulative planning ramp at 10 FTE"). `payrollAdapter.ts`'s per-grade loop (each
+grade's FTE constant applied for every year that grade is active, summed across
+currently-active grades) is arithmetically identical to this incremental-
+cumulative ramp. Neither canonical source decomposes core vs. flexible per
+grade — the flexible educator is a separate, always-1, payroll-unwired addition,
+never embedded in a grade's number. Pre-RC2.4, the live payroll table matched
+this canonical ramp exactly, value-for-value.
+
+**Activation calculation, printed per directive**: computed from
+`buildPayrollAdapterInput()`'s own active-grade lookup (package-specific,
+Finance-validated), not the canonical model's illustrative reference:
+
+| Package | g9 active from | g10 active from | g11 active from | g12 active from |
+|---|---|---|---|---|
+| t1_g4 | 2033 | 2034 | 2035 | 2036 |
+| t1_g6 | 2031 | 2032 | 2033 | 2034 |
+
+Both packages stagger one year apart, confirming the canonical model's
+*timing* semantics even though the specific calendar years differ from
+`msHsStaffingReadiness.ts`'s illustrative 2034-2037 reference. Printing this
+table surfaced a real gap in the first diagnostic draft (see Gate 6) and is
+the basis for the correction described there.
+
+### Gate 4 — preserving the product-owner correction
+
+`MS_FTE_BY_GRADE: {g6:3, g7:4, g8:2}` — unchanged (uncontested). `HS_FTE_BY_GRADE:
+{g9:4, g10:2, g11:3, g12:3}` — g10 restored to the direct product-owner value (2,
+not RC2.4's 0); g11 restored to its pre-RC2.4/canonical value (3, not RC2.4's
+fabricated 4); g9/g12 unchanged. Provenance recorded exactly as directed:
+"Product-owner correction supplied 2026-07-30; canonical MS/HS model
+reconciliation pending." Grade 10 is explicitly **not** claimed to be
+HighSchoolTab-sourced — the code states the opposite: HighSchoolTab's own ramp
+has g10=0, directly conflicting with the live g10=2 correction.
+
+### Gate 5 — the 12-vs-11 discrepancy
+
+All eight directive-listed possibilities evaluated with supporting/contradicting
+evidence (full table in the linked audit doc). Selected cause: **#6 — a direct,
+live 2026-07-30 product-owner correction conflicts with a pre-existing,
+"user-validated," structurally-embedded canonical HS tab ramp.** Both sides are
+genuinely, independently evidenced; this is not an arithmetic or interpretive
+error, and was not selected because it makes the sum reconcile (it does not).
+
+### Gate 6 — disposition: UNRECONCILED
+
+No canonical evidence proves g10=2 coexists with the 11-FTE envelope without
+changing an already-approved value; RECONCILED does not apply. The per-grade
+values are proven additive/incremental, not a different concept entirely;
+SEMANTIC MISCLASSIFICATION does not apply. Per the directive's UNRECONCILED
+requirements: g8=2 and g10=2 preserved as explicit product-owner decisions; the
+12-vs-11 gap retained, not forced to 11 by changing g9/g11/g12; no residual/
+shared/flexible allocation fabricated; `orgDesignPayrollActivation.ts`'s three HS
+citations now state UNRECONCILED and `needsReview: true` (was `false`) on the HS
+educator record; a new `unreconciled_grade_envelope` diagnostic type (added to
+`payrollAdapterContract.ts`) is emitted by `payrollAdapter.ts` for every year
+Grade 10 is active — not only at full HS maturity (the first draft's gate on
+"all four grades simultaneously active" missed the 2 years per package where
+g10's disputed FTE is costed before g11/g12 open; corrected after the
+activation table above was printed, then re-verified: `hs_educator_g10`'s
+nonzero-active years match the diagnostic's firing years exactly for both
+packages, zero gap) — naming that year's actual active-grade sum, the
+full-maturity sum, the envelope, and the conflict — the cost is **not netted
+out**, the disputed FTE flows through payroll as-is with the diagnostic as
+visible disclosure for every year it affects cost.
+`msHsStaffingReadiness.ts`/`secondaryEducatorCapacityModel.ts` (the governed
+envelope) were not touched. **UI-surfacing verified, not assumed**: grepped
+`src/components/` — `dreScenarioWorkbook.ts` (export pathway) forwards
+`fopagOutput.diagnostics` (confirmed `fopagEngine.ts` relays every adapter
+diagnostic, `isBlocking: false`) into a dedicated Diagnostics table on the
+exported workbook. The live `PayrollProjectionTab.tsx` UI renders no
+diagnostics at all (grepped, no matches) — it does not claim the HS allocation
+is reconciled, but it does not disclose the conflict either. Partial
+fulfillment of the UI requirement; flagged as a remaining blocker below rather
+than silently left unstated.
+
+### Gate 7 — downstream impact (t1_g6/conservador/balanced_experience)
+
+HS grade-attributable total at full maturity: 12 (was 11 under both RC2.4's
+committed values and the pre-RC2.4/canonical baseline). MS aggregate unchanged
+at 9. HS canonical core/flexible/total (10/1/11) unchanged, not touched.
+Confirmed via direct `buildPayrollAdapterInput()` invocation: `hs_educator_g10`
+records show `headcountOrFte: 2`, `active: true` from grade activation onward;
+`unreconciled_grade_envelope` diagnostic fires for every year g10 is active
+(t1_g6: 2032-2047, 16 years; t1_g4: 2034-2047, 14 years), including
+partial-maturity years, where the message reports that year's true active sum
+rather than always citing 12. Org Design/Payroll parity
+(`validate:v10-rc2-2-gate3`): still 1:1, 10,362 role-rows
+(up from 10,272 — g10 now carries real headcount rows), 372 role-activation-years
+(up from 366); parity intact but explicitly noted as internal-parity evidence,
+not fidelity evidence, per the directive's distinction. FOPAG/DRE: higher HS
+teaching-lead cost flows through both engines with no forked recalculation
+(unchanged import structure from RC2.4's own #12/#13 findings). Export
+(`validate:v10-x1`): still 39/39 pass, size grows 5,526 bytes (more headcount
+rows). Regenerated `docs/audits/rio-resilience/phase-v10-rc2-gate8-coverage-
+matrix.json`: `payrollTotalPayroll` rises and `ebitdaValue` falls by an identical
+amount in every affected cell — no drift between FOPAG and the coverage matrix.
+`docs/audits/rio-resilience/phase-v10-rc2-1-gate6-staffing-table.json`:
+byte-identical — that table is EY/LS-only by design (F06, pre-existing), never
+affected by MS/HS FTE values.
+
+### Gate 8 — documentation corrected
+
+RC2.4's claims "Grade 10 remains 0 by direct product-owner correction," "Grade 11
+changed to 4 by direct product-owner correction," "the HS allocation is fully
+reconciled," and "Gate 6 is resolved" (for HS) are superseded by this phase and
+corrected here; RC2.4's MS disposition (g8=2) and its turma-correction record
+stand unmodified. RC2.4's 150-cell primary-source check, Gate 7's 1,200+627-cell
+fidelity/parity totals, and its `phase15f/i2c/j`/`phase15o` reclassification are
+preserved unchanged.
+
+### Gate 9 — validation
+
+Full 34/34 `validate:*` sweep re-run three times in this phase (initial value
+correction; after the diagnostic-coverage fix; final confirmation): identical
+pass/fail pattern to the post-RC2.4 baseline in all three (exit-code diff:
+none). Content deltas confirmed as expected, correct consequences of the value
+correction (role-row/export-size growth, coverage-matrix payroll/EBITDA
+shift) — not weakened expectations. `phase15l/l2/m/o` (staffing-related
+pre-existing partial-pass scripts) byte-identical before/after — none read the
+actual FTE values. Diagnostic-coverage fix re-verified directly (not via a
+checked-in validator): `hs_educator_g10` nonzero-active years match
+`unreconciled_grade_envelope` diagnostic years exactly, both packages, zero
+gap. `npx tsc --noEmit -p .`: clean. `npm run lint`: clean. `npm run build`:
+succeeds (pre-existing chunk-size warning only). `git diff --check`: clean.
+
+### Remaining governance blockers
+
+1. **HS Grade 10 / 12-vs-11 envelope conflict (new, this phase)**: the live
+   product-owner correction (g10=2) conflicts with the canonical, structurally-
+   embedded HS tab ramp (g10=0). Requires explicit resolution: either the tab
+   ramp is superseded and the governed 11-FTE envelope is separately raised to
+   12, or the 2026-07-30 statement is confirmed misrecorded. Not resolved here —
+   both values are disclosed, neither is silently discarded.
+2. Counselor activation year — unsourced (RC2.4 Gate 6, unchanged).
+3. Specialist FTE/activation threshold — unsourced, contradictory (RC2.4 Gate 6,
+   unchanged).
+4. D-R5, D-R6/F03, F06, corporate allocation/consolidated cost — unchanged.
+5. **Live-UI disclosure gap (new, this phase)**: the
+   `unreconciled_grade_envelope` diagnostic reaches the DRE Scenario Workbook
+   export but not the live `PayrollProjectionTab.tsx` UI, which surfaces no
+   diagnostics today. Not a regression; flagged for explicit direction on
+   whether a live-UI disclosure is required before RC2.5.
+6. **`activationYearSource` citation staleness (found this phase, pre-existing,
+   outside g8/g10/g11 scope)**: cites `GRADE_CONFIG` (teaching.ts, package-
+   agnostic, g9=2034/g10=2035/g11=2036/g12=2037), but production activation is
+   package-specific and differs (see Gate 2/3's table). A caveat was added;
+   the underlying mismatch was not corrected — not in this phase's scope.
+
+### Recommendation (as of the UNRECONCILED finding, superseded below)
+
+MS Grade 8 correction is confirmed correct and unchanged. HS Grade 10 is now
+recorded at its true product-owner value (2, not 0) without fabricating a
+compensating change elsewhere, and the resulting 1-FTE conflict with the
+canonical HS tab model is disclosed via a new runtime diagnostic and in
+documentation, not concealed. RC2.5 should not begin until a human with
+authority over both the live correction and the canonical tab model resolves
+which governs. No commit or push was made in this phase — proposed changes are
+in the working tree only, pending review.
+
+**V10-RC2.4A HIGH SCHOOL EDUCATOR ALLOCATION RECONCILIATION (interim): MS Grade
+8 PASS; HS Grade 10 PASS (value corrected, not fabricated); HS 12-vs-11
+envelope BLOCKED.** RC2.5: HOLD pending resolution of the Grade 10 /
+canonical-envelope conflict.
+
+### Resolution (2026-07-30, addendum — product-owner governance decision)
+
+The UNRECONCILED finding above and its interim recommendation are superseded
+by this section, not rewritten — they remain the historical record of the
+investigation. No further production change was made until the product owner
+explicitly selected a disposition, per this phase's own directive:
+
+- **Option A** (raise the envelope to 12) vs. **Option B** (preserve the
+  11-FTE envelope, keep G10=2, reduce exactly one of G9/G11/G12 by 1 —
+  the specific grade not chosen by this codebase).
+
+**Product owner selected Option B.** On a follow-up question offering the
+specific reduction (G9→3, G11→2, or G12→2), **the product owner selected
+G12→2**.
+
+**Final governed HS ramp: `{g9:4, g10:2, g11:3, g12:2}`, sum 11** — matching
+the validated 10 core + 1 flexible = 11 HS envelope exactly. G9/G11 unchanged
+throughout (never disputed). G10=2 and G12=2 are both direct, explicit
+product-owner decisions dated 2026-07-30, recorded as such — neither is
+claimed to be canonical-model- or HighSchoolTab-sourced.
+
+**Implementation**: `payrollAdapter.ts`'s `HS_FTE_BY_GRADE` set to
+`{g9:4,g10:2,g11:3,g12:2}`; the `unreconciled_grade_envelope` diagnostic
+mechanism retained as a dormant safety net (fires again only if a future edit
+breaks the sum=11 invariant) with its message generalized rather than
+hardcoded to today's specific narrative. `orgDesignPayrollActivation.ts`'s
+three HS citations updated to the resolved values and provenance;
+`needsReview` flipped back to `false`. `msHsStaffingReadiness.ts`/
+`secondaryEducatorCapacityModel.ts` (canonical reference models) **not
+touched** — their own g10=0/g12=3 reference ramp remains, unchanged,
+explicitly comparison-only, as it has been throughout this phase.
+
+**Validation**: full 34/34 sweep re-run, identical pass/fail pattern to every
+prior run in this phase. `validate:v10-rc2-2-gate3` still ALL CHECKS PASSED,
+role-row count unchanged (10,362 — the FTE moved between two grades that
+already both carried nonzero-FTE rows). `validate:v10-x1` still 39/39 pass.
+Direct `buildPayrollAdapterInput()` invocation confirms 0
+`unreconciled_grade_envelope` diagnostics fire for either package (dormant, as
+intended). `docs/audits/rio-resilience/phase-v10-rc2-gate8-coverage-
+matrix.json` regenerated (payroll/EBITDA shift again — net HS FTE at maturity
+returns to 11, matching the original RC2.4 baseline, but the reallocated FTE
+now activates earlier via G10 rather than later via G12, so cumulative
+20-year cost differs from both the original baseline and the intermediate
+12-FTE state). `tsc --noEmit`, `npm run build`, `git diff --check`: clean.
+
+Full evidence: `docs/audits/rio-resilience/
+phase-v10-rc2-4a-hs-educator-allocation-reconciliation.md`, "Resolution"
+addendum.
+
+**V10-RC2.4A HIGH SCHOOL EDUCATOR ALLOCATION RECONCILIATION: FINAL — MS Grade
+8 PASS; HS Grade 10 PASS; HS 12-vs-11 envelope PASS (resolved by explicit
+product-owner disposition: Option B, G12 reduced 3→2).** Remaining, unrelated
+blockers: counselor activation year, specialist FTE/threshold, D-R5/D-R6/F03/
+F06/corporate allocation, the live-UI diagnostic-surfacing gap (dormant now,
+still unfixed), and the `activationYearSource` citation staleness. RC2.5:
+still on hold for commit — no commit or push has been made in this phase;
+proposed changes remain in the working tree pending explicit instruction to
+commit.

@@ -91,3 +91,19 @@ No supported combination lacks evidence; Gate 2's stop condition does **not** fi
   2026-07-30.
 - **Counselor activation year**: deferred, no located source for either value.
 - **Specialist FTE/threshold**: deferred, contradictory evidence, not reconciled.
+
+## V10-RC2.4A correction (2026-07-30, added after this document's original content)
+
+Row 7 above and this Gate 6 summary's "HS educator g10: corrected" line are
+**superseded**. The row's claim that `g11: 3→4` was part of the same live
+"self-reconciled" correction as `g10` is not supported by any evidence beyond
+this document's own prose. The actual product-owner correction was
+**Grade 10 = 2 FTE**, not the `g10:0, g11:4` reassignment this document and the
+RC2.4 commit recorded. RC2.4A (`docs/audits/rio-resilience/
+phase-v10-rc2-4a-hs-educator-allocation-reconciliation.md`) corrects the code to
+`HS_FTE_BY_GRADE: {g9:4, g10:2, g11:3, g12:3}` (sum 12) and discloses — rather
+than silently resolves — the resulting conflict with the canonical HS tab ramp
+(`g10=0`, sum 11). This document's original content is preserved above,
+unmodified, as the historical record of what RC2.4 claimed; it should be read
+together with the RC2.4A correction, not in place of it. MS educator g8 (`3→2`)
+is unaffected by this correction and remains valid.

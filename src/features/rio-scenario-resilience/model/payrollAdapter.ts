@@ -129,14 +129,52 @@ const EXTENSION_ROLE_COST: Record<
   },
 };
 
-// Approved v1 fixed FTE counts (Phase 8C, Luciana 2026-06-03; corrected by
-// Luciana 2026-07-30 during V10-RC2.4 Gate 6). MS: g6=3,g7=4,g8=2, sum=9,
-// matching the validated MS envelope (8 core + 1 flexible = 9). HS: g9=4,
-// g10=0,g11=4,g12=3, sum=11, matching the validated HS envelope (10 core +
-// 1 flexible = 11) — g10's FTE moved to g11 (4 educators beginning in grade
-// 11, none incremental at grade 10) per Luciana's correction.
+// Approved v1 fixed FTE counts (Phase 8C, Luciana 2026-06-03).
+//
+// V10-RC2.4A correction (2026-07-30): RC2.4 previously recorded g10:0/g11:4
+// here as "corrected by Luciana," moving g10's FTE to g11 to force the sum
+// to 11. That reassignment was not approved and was reverted. This produced
+// a genuine, disclosed conflict — g10=2 (the direct product-owner
+// correction) vs. the canonical HIGH_SCHOOL_CANONICAL_FULL_MODEL/
+// HighSchoolTab.tsx ramp (g10=0) — summing to 12 against the validated
+// 11-FTE envelope. See docs/audits/rio-resilience/
+// phase-v10-rc2-4a-hs-educator-allocation-reconciliation.md for that
+// investigation.
+//
+// V10-RC2.4A governance decision (2026-07-30, product owner, explicit
+// selection between two offered dispositions): **Option B — preserve the
+// existing 11-FTE HS envelope, keep g10=2, reduce g12 by 1 (3→2)** to bring
+// the sum back to 11. This is a direct product-owner decision, not a
+// canonical-model derivation — msHsStaffingReadiness.ts's own reference ramp
+// still shows g10=0/g12=3 (comparison-only, not payroll-wired, intentionally
+// left unchanged) and now differs from the live table at both g10 and g12.
+// That is expected: this table has always been the live, product-owner-
+// governed source, distinct from the canonical reference. RESOLVED — no
+// longer an unreconciled blocker; the unreconciled_grade_envelope diagnostic
+// mechanism below is retained as a dormant safety net (it fires only if a
+// future edit breaks the sum=11 invariant again) but does not fire for
+// these values.
+//
+// MS: g6=3, g7=4, g8=2, sum=9 — matches the validated MS envelope (8 core +
+// 1 flexible = 9) and the canonical MIDDLE_SCHOOL_CANONICAL_FULL_MODEL in
+// msHsStaffingReadiness.ts. Not disputed.
+//
+// HS: g9=4, g10=2, g11=3, g12=2, sum=11 — matches the validated HS envelope
+// (10 core + 1 flexible = 11). g10=2: direct product-owner correction,
+// 2026-07-30. g12=2 (was 3): direct product-owner decision, 2026-07-30,
+// selected to absorb g10's incremental FTE and preserve the 11-FTE total —
+// not derived from any canonical source, not chosen by this codebase.
+// g9=4/g11=3 unchanged throughout (never disputed).
 const MS_FTE_BY_GRADE: Record<string, number> = { g6: 3, g7: 4, g8: 2 };
-const HS_FTE_BY_GRADE: Record<string, number> = { g9: 4, g10: 0, g11: 4, g12: 3 };
+const HS_FTE_BY_GRADE: Record<string, number> = { g9: 4, g10: 2, g11: 3, g12: 2 };
+
+// V10-RC2.4A: dormant safety net. If HS_FTE_BY_GRADE is ever edited such
+// that its sum no longer matches the validated 11-FTE HS envelope (10 core +
+// 1 flexible, msHsStaffingReadiness.ts's HIGH_SCHOOL_CANONICAL_FULL_MODEL),
+// an "unreconciled_grade_envelope" diagnostic fires again automatically —
+// see the emission below. Currently inactive (sum=11=envelope).
+const HS_GRADE_ATTRIBUTABLE_SUM = Object.values(HS_FTE_BY_GRADE).reduce((a, b) => a + b, 0);
+const HS_VALIDATED_ENVELOPE_TOTAL = 11;
 
 // Step function: resolves headcount for a given year from a progression array.
 function resolveHeadcount(
@@ -217,8 +255,9 @@ export function buildPayrollAdapterInput(
         roleName: "HS Educator Pool",
         message:
           "hs_pool is excluded_from_v1. HS staffing is covered by the per-grade FTE ramp " +
-          "(g9=4, g10=0, g11=4, g12=3, sum=11 — corrected by Luciana 2026-07-30, V10-RC2.4 Gate 6; " +
-          "g10's FTE moved to g11, matching the validated 10 core + 1 flexible = 11 HS envelope). " +
+          "(g9=4, g10=2, g11=3, g12=2, sum=11 — g10=2 and g12=2 are direct product-owner " +
+          "decisions supplied 2026-07-30, V10-RC2.4A, selected to preserve the validated " +
+          "11-FTE HS envelope; g9/g11 unchanged). " +
           "Using both simultaneously would double-count HS cost.",
       });
       continue;
@@ -482,10 +521,12 @@ export function buildPayrollAdapterInput(
   }
 
   // ── 4. MS/HS educators — fixed FTE per grade ────────────────────────────────
-  // MS: g6=3, g7=4, g8=2, sum=9 (8 core + 1 flexible envelope). HS: g9=4,
-  // g10=0, g11=4, g12=3, sum=11 (10 core + 1 flexible envelope). Approved v1,
-  // Phase 8C; corrected by Luciana 2026-07-30, V10-RC2.4 Gate 6 — see
-  // MS_FTE_BY_GRADE/HS_FTE_BY_GRADE.
+  // MS: g6=3, g7=4, g8=2, sum=9 (8 core + 1 flexible envelope) — not disputed.
+  // HS: g9=4, g10=2, g11=3, g12=2, sum=11 (10 core + 1 flexible envelope).
+  // g10=2 and g12=2 are direct product-owner decisions, 2026-07-30 (V10-
+  // RC2.4A), resolving what was an unreconciled g10-vs-envelope conflict —
+  // see MS_FTE_BY_GRADE/HS_FTE_BY_GRADE above and docs/audits/rio-resilience/
+  // phase-v10-rc2-4a-hs-educator-allocation-reconciliation.md.
   // Compensation: Master Educator (approved v1, Phase 8C).
   // Allocation: FOPAG_DIRETO.
   // Grade activation from OPENING_PACKAGE_ACTIVE_GRADE_BY_YEAR_RECORDS (Finance-validated).
@@ -556,6 +597,42 @@ export function buildPayrollAdapterInput(
             `(approved v1, Phase 8C). FOPAG_DIRETO. hs_pool excluded_from_v1.`,
         });
       }
+    }
+  }
+
+  // V10-RC2.4A dormant safety net: if HS_FTE_BY_GRADE is ever edited so its
+  // sum no longer matches HS_VALIDATED_ENVELOPE_TOTAL, disclose it for every
+  // year the mismatch actually affects cost (any year at least one HS grade
+  // is active) — not only once the full HS grade set is simultaneously
+  // active, since a partial-maturity mismatch is still an undisclosed cost
+  // if gated on full maturity alone. Currently inactive: HS_FTE_BY_GRADE
+  // sums to 11, matching the envelope (see comment above HS_FTE_BY_GRADE).
+  if (HS_GRADE_ATTRIBUTABLE_SUM !== HS_VALIDATED_ENVELOPE_TOTAL) {
+    for (const year of PROJECTION_YEARS) {
+      const activeHsGradeSum = Object.entries(HS_FTE_BY_GRADE).reduce(
+        (sum, [gradeId, fte]) => sum + (msHsActiveByYearGrade.get(`${year}:${gradeId}`) ? fte : 0),
+        0,
+      );
+      const anyHsGradeActive = Object.keys(HS_FTE_BY_GRADE).some(
+        (gradeId) => msHsActiveByYearGrade.get(`${year}:${gradeId}`) ?? false,
+      );
+      if (!anyHsGradeActive) continue;
+      diagnostics.push({
+        diagnosticType: "unreconciled_grade_envelope",
+        roleId: "hs_educator_grade_envelope",
+        roleName: "HS Educator (grade-attributable envelope)",
+        year,
+        message:
+          `HS grade-attributable FTE this year (${activeHsGradeSum}) — full-maturity sum ` +
+          `${HS_GRADE_ATTRIBUTABLE_SUM} (g9=${HS_FTE_BY_GRADE.g9}, g10=${HS_FTE_BY_GRADE.g10}, ` +
+          `g11=${HS_FTE_BY_GRADE.g11}, g12=${HS_FTE_BY_GRADE.g12}) does not match the validated HS ` +
+          `envelope (${HS_VALIDATED_ENVELOPE_TOTAL} = 10 core + 1 flexible, msHsStaffingReadiness.ts ` +
+          `HIGH_SCHOOL_CANONICAL_FULL_MODEL). HS_FTE_BY_GRADE was edited without a corresponding, ` +
+          `explicit product-owner-approved reconciliation of the HS envelope — see docs/audits/` +
+          `rio-resilience/phase-v10-rc2-4a-hs-educator-allocation-reconciliation.md for the last ` +
+          `resolved disposition. Not netted out; this year's HS payroll cost includes the ` +
+          `unreconciled sum in full.`,
+      });
     }
   }
 

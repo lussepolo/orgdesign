@@ -207,7 +207,8 @@ export type PayrollAdapterDiagnosticType =
   | "unsupported_org_design_option"
   | "alias_no_additional_cost"
   | "zero_fte_grade"
-  | "extension_not_active_in_option";
+  | "extension_not_active_in_option"
+  | "unreconciled_grade_envelope";
 
 export interface PayrollAdapterDiagnostic {
   diagnosticType: PayrollAdapterDiagnosticType;

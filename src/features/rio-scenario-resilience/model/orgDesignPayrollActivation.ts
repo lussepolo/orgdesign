@@ -44,9 +44,10 @@ export const ORG_DESIGN_PAYROLL_ACTIVATION: OrgDesignPayrollActivationDesign = {
     "Source: orgDesignStructure.ts baselineRoleSet='current_positions_in_system' (all three options identical) " +
     "and orgDesignLogic.md scenario activation comparison table (baseline roles marked Active across all columns). " +
     "hs_pool is excluded_from_v1 (Phase 8C): HS staffing is covered by the per-grade FTE ramp in " +
-    "PAYROLL_STAFFING_RULE_SOURCE_V1 (g9=4, g10=0, g11=4, g12=3, sum=11 — corrected by Luciana " +
-    "2026-07-30, V10-RC2.4 Gate 6; g10's FTE moved to g11, matching the validated 10 core + 1 " +
-    "flexible = 11 HS envelope). Using both simultaneously would double-count HS cost.",
+    "PAYROLL_STAFFING_RULE_SOURCE_V1 (g9=4, g10=2, g11=3, g12=2, sum=11 — g10=2 and g12=2 are " +
+    "direct product-owner decisions supplied 2026-07-30, V10-RC2.4A, resolving the prior " +
+    "unreconciled conflict and matching the validated 10 core + 1 flexible = 11 HS envelope). " +
+    "Using both simultaneously would double-count HS cost.",
   records: [
     // ── LEADERSHIP BASELINE (Layer B) ───────────────────────────────────────
     {
@@ -505,8 +506,9 @@ export const ORG_DESIGN_PAYROLL_ACTIVATION: OrgDesignPayrollActivationDesign = {
       calculationReady: false,
       sourceNotes:
         "EXCLUDED FROM V1 (Phase 8C, 2026-06-03). HS staffing is covered by the per-grade FTE ramp " +
-        "(g9=4, g10=0, g11=4, g12=3, sum=11 — corrected by Luciana 2026-07-30, V10-RC2.4 Gate 6; " +
-        "g10's FTE moved to g11) in PAYROLL_STAFFING_RULE_SOURCE_V1. " +
+        "(g9=4, g10=2, g11=3, g12=2, sum=11 — g10=2 and g12=2 are direct product-owner decisions " +
+        "supplied 2026-07-30, V10-RC2.4A, matching the validated 11-FTE HS envelope) in " +
+        "PAYROLL_STAFFING_RULE_SOURCE_V1. " +
         "Using hs_pool AND per-grade ramp simultaneously would double-count HS cost. " +
         "hs_pool must NOT be activated in any org design option for v1.",
     },
@@ -802,28 +804,47 @@ export const ORG_DESIGN_PAYROLL_ACTIVATION: OrgDesignPayrollActivationDesign = {
       activeIn: ALL,
       roleInclusionStatus: "active_all_options",
       headcountSource:
-        "PAYROLL_STAFFING_RULE_SOURCE_V1 per-grade FTE ramp: g9=4, g10=0, g11=4, g12=3, sum=11 " +
-        "(source_supported from HighSchoolTab + approved v1, Phase 8C; corrected by Luciana " +
-        "2026-07-30, V10-RC2.4 Gate 6 — g10's FTE moved to g11, matching the validated 10 core + " +
-        "1 flexible = 11 HS envelope; g10 remains shared-pool-only, no incremental cost). " +
+        "PAYROLL_STAFFING_RULE_SOURCE_V1 per-grade FTE ramp: g9=4, g10=2, g11=3, g12=2, sum=11. " +
+        "g9/g11 are source_supported from HighSchoolTab + approved v1, Phase 8C, and unchanged. " +
+        "g10=2 and g12=2 (was 3) are direct product-owner decisions supplied 2026-07-30 " +
+        "(V10-RC2.4A): g10=2 is the original correction; g12=2 was explicitly selected by the " +
+        "product owner (offered a choice between raising the envelope to 12 or reducing one of " +
+        "g9/g11/g12 to hold it at 11) to absorb g10's incremental FTE. Neither g10=2 nor g12=2 is " +
+        "HighSchoolTab-sourced: HighSchoolTab.tsx's canonical ramp has g10=0/g12=3. This is a " +
+        "resolved, direct product-owner reallocation, not a canonical-model derivation — see " +
+        "docs/audits/rio-resilience/phase-v10-rc2-4a-hs-educator-allocation-reconciliation.md. " +
+        "Sum=11 matches the validated 10 core + 1 flexible = 11 HS envelope. " +
         "hs_pool is EXCLUDED FROM V1 — do NOT double-count with this ramp.",
       costSource:
         "src/constants/teaching.ts EDUCATOR_LEVELS['master'] — grossMonthly=15247.55, " +
         "laborChargesMonthly=7395.06, benefitsMonthly=1159.83 (Master Educator, approved v1 Phase 8C)",
       allocationModelSource:
         "payrollFopagMappingDesign.ts FOPAG_DIRETO outputTerm: " +
-        "'teaching leads (HS g9/g11/g12)' — FOPAG_DIRETO confirmed. g10 = 0 FTE (shared pool, no " +
-        "incremental cost; corrected by Luciana 2026-07-30, V10-RC2.4 Gate 6 — its 2 FTE moved to g11).",
+        "'teaching leads (HS g9/g10/g11/g12)' — FOPAG_DIRETO confirmed. g10=2 FTE and g12=2 FTE " +
+        "(was 3), both direct product-owner decisions, 2026-07-30, V10-RC2.4A (see headcountSource " +
+        "above). g10 is no longer shared-pool/zero-cost as previously recorded.",
       activationYearSource:
-        "Per-grade activation: g9=2034, g10=2035, g11=2036, g12=2037 (from GRADE_CONFIG openYear in teaching.ts)",
+        "Per-grade activation: g9=2034, g10=2035, g11=2036, g12=2037 (from GRADE_CONFIG openYear in " +
+        "teaching.ts) — V10-RC2.4A note: GRADE_CONFIG is a single, package-agnostic reference table. " +
+        "The active/inactive status payrollAdapter.ts actually applies per grade/year/package (via " +
+        "COMBINED_ACTIVE_GRADE_RECORDS, Finance-validated) differs and is package-specific — e.g. for " +
+        "t1_g6 g9-g12 activate one year apart starting 2031, not from GRADE_CONFIG's fixed 2034-2037. " +
+        "This citation is accurate to GRADE_CONFIG but is not the schedule production payroll uses; " +
+        "not corrected here (pre-existing, outside this phase's g8/g10/g11 scope).",
       mappingStatus: "tab_logic_v1_ftes_resolved",
       needsReview: false,
       calculationReady: false,
       sourceNotes:
-        "FTE counts (per-grade ramp), compensation tier (Master Educator), and allocationModel (FOPAG_DIRETO) are resolved. " +
+        "Compensation tier (Master Educator), allocationModel (FOPAG_DIRETO), and FTE counts are " +
+        "resolved. g10=2/g12=2 are direct product-owner decisions, 2026-07-30, V10-RC2.4A — " +
+        "resolving a prior conflict between g10=2 and the validated 11-FTE HS envelope by " +
+        "explicit product-owner selection (reduce g12, not raise the envelope). See docs/audits/" +
+        "rio-resilience/phase-v10-rc2-4a-hs-educator-allocation-reconciliation.md for the full " +
+        "governance record. " +
         "Phase 13H: payroll adapter wiring IS implemented — see payrollAdapter.ts " +
         "section 4 (MS/HS educators — fixed FTE per grade), which uses HS_FTE_BY_GRADE and " +
-        "MASTER_EDUCATOR cost. " +
+        "MASTER_EDUCATOR cost; its unreconciled_grade_envelope diagnostic is a dormant safety net " +
+        "for this table's sum, not currently active. " +
         "hs_pool (4→8 HC from 2034 in SPECIALISTS_CONFIG) is EXCLUDED FROM V1 — do NOT use alongside per-grade ramp.",
     },
   ] as const,
