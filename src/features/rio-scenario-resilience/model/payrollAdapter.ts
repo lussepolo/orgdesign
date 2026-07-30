@@ -3,6 +3,7 @@ import { ORG_DESIGN_PAYROLL_ACTIVATION } from "./orgDesignPayrollActivation";
 import { calculateSectionCountsForScenario } from "./sectionCountEngine";
 import { COMBINED_ACTIVE_GRADE_RECORDS } from "./matureStateCarryForwardSourceData";
 import { SIMULATOR_PROJECTION_YEARS } from "./simulatorProjectionHorizonContract";
+import { HIGH_SCHOOL_CANONICAL_FULL_MODEL } from "./msHsStaffingReadiness";
 import type {
   OccupancyScenarioId,
   OpeningPackageId,
@@ -288,12 +289,19 @@ export const MS_FTE_BY_GRADE: Record<string, number> = { g6: 3, g7: 4, g8: 2 };
 export const HS_FTE_BY_GRADE: Record<string, number> = { g9: 4, g10: 3, g11: 2, g12: 2 };
 
 // V10-RC2.4A: dormant safety net. If HS_FTE_BY_GRADE is ever edited such
-// that its sum no longer matches the validated 11-FTE HS envelope (10 core +
-// 1 flexible, msHsStaffingReadiness.ts's HIGH_SCHOOL_CANONICAL_FULL_MODEL),
+// that its sum no longer matches the validated HS envelope (10 core + 1
+// flexible, msHsStaffingReadiness.ts's HIGH_SCHOOL_CANONICAL_FULL_MODEL),
 // an "unreconciled_grade_envelope" diagnostic fires again automatically —
 // see the emission below. Currently inactive (sum=11=envelope).
+// Corrected 2026-07-30: HS_VALIDATED_ENVELOPE_TOTAL was a hardcoded literal
+// (11), not actually read from HIGH_SCHOOL_CANONICAL_FULL_MODEL despite the
+// comment above (and the diagnostic message below) claiming it — the exact
+// "manually kept in sync, currently correct by coincidence" pattern that
+// caused the Counselor and HS_FTE_BY_GRADE defects earlier this session.
+// Now computed directly from the canonical model so it cannot silently
+// drift from it.
 const HS_GRADE_ATTRIBUTABLE_SUM = Object.values(HS_FTE_BY_GRADE).reduce((a, b) => a + b, 0);
-const HS_VALIDATED_ENVELOPE_TOTAL = 11;
+const HS_VALIDATED_ENVELOPE_TOTAL = HIGH_SCHOOL_CANONICAL_FULL_MODEL.fullModelTotalEducators;
 
 // Step function: resolves headcount for a given year from a progression array.
 function resolveHeadcount(

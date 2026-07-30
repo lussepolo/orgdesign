@@ -8426,3 +8426,102 @@ refactor ever stops tagging nodes (asserts `comparisons >= 900`).
 clean.
 
 Not committed or pushed, per the standing instruction.
+
+### Fifth pass (2026-07-30, continued session): codebase-wide audit and cleanup of the same defect classes
+
+The fourth-pass parity gate (gate9) prompted a broader question: are there
+other instances of the same defect classes (Layer-1/Layer-2 numeric
+duplication, live UI bypassing the payroll engine, stale citation strings,
+manually-maintained counts, orphaned exclusion logic) elsewhere in the
+repo? An audit fork (research-only, no edits) checked exhaustively:
+
+- **Layer-1/Layer-2 drift**: all 32 records in `payrollRoleCostSourceData.ts`
+  compared field-by-field (`grossMonthly`/`laborChargesMonthly`/
+  `benefitsMonthly`/`headcountProgression`/`sourceRoleLabel`) against
+  `leadership.ts`/`teaching.ts`. **Zero further drift found** — confirmed
+  fully closed by this session's earlier corrections.
+- **Live UI bypassing the engine**: two more instances found reading
+  `LEADERSHIP_CONFIG`/`BACKOFFICE_CONFIG`/`SPECIALISTS_CONFIG` directly
+  (`StaffingTab.tsx`/`useStaffingLogic.ts`; `src/lib/payroll/domain.ts` +
+  `presenters.ts`/`exportXlsx.ts`) — both confirmed dead/unmounted code, not
+  reachable from any live route (the app's own code explicitly documents
+  the former as "legacy, unmounted since V10-X2T... do not re-add without a
+  separate phase explicitly re-approving it"; the latter has zero live
+  importers, corroborated by `orgDesignExportWorkbookBuilder.ts`'s own
+  comment). No action taken — not a live bug.
+- **Stale citation strings and a manually-maintained count, found and
+  fixed** (same low-risk documentation-only class as this session's earlier
+  citation fixes):
+  - `orgDesignPayrollActivation.ts`: a `sourceNotes` line still said "26
+    baseline + 13 extension = 39 total records" (missed when
+    `baselineRoleCount` was corrected 26→25 in the hs_pool-deletion pass) —
+    corrected to "25 + 13 = 38" (verified via direct count:
+    `grep -c "orgDesignOptionScope:"` = 38). Two more lines still described
+    `hs_pool` as "EXCLUDED FROM V1" rather than deleted — corrected to say
+    it no longer exists.
+  - **A third, previously-untouched file** independently repeating the same
+    stale count: `inputReadinessRegistry.ts` (two lines) said "26 cost-ready
+    role records (8 Leadership + 12 Backoffice + 6 Specialists)" — this
+    predates even this session's work and was now doubly wrong. Corrected
+    to "25 (9 Leadership + 12 Backoffice + 4 Specialists)."
+- **An orphaned diagnostic type, found and removed** (same class as
+  `"excluded_role"`, removed earlier this session, but this one predates
+  it): `PayrollAdapterDiagnosticType`'s `"inactive_grade"` member had zero
+  usages in `payrollAdapter.ts`/`fopagEngine.ts` — confirmed by checking
+  every one of the 11 diagnostic-type members individually (all others had
+  ≥1 usage). A coincidental same-string match in `sectionCountEngine.ts`
+  (`formulaBasis: "inactive_grade"`) was checked and ruled out — that field
+  is typed as plain `string`, unrelated to `PayrollAdapterDiagnosticType`.
+  Removed from `payrollAdapterContract.ts`.
+- **Two "currently correct but structurally fragile" totals, converted to
+  computed values** — the same "manually kept in sync, correct only by
+  coincidence" pattern that caused the Counselor and HS_FTE_BY_GRADE
+  defects, found before they became bugs rather than after:
+  - `payrollAdapter.ts`'s `HS_VALIDATED_ENVELOPE_TOTAL = 11` was a
+    hardcoded literal despite its own comment and diagnostic message
+    claiming it came from `msHsStaffingReadiness.ts`'s
+    `HIGH_SCHOOL_CANONICAL_FULL_MODEL` — it never actually imported that
+    constant. Now imports it directly:
+    `HIGH_SCHOOL_CANONICAL_FULL_MODEL.fullModelTotalEducators`. Confirmed
+    no circular import risk first (`msHsStaffingReadiness.ts` only imports
+    `secondaryEducatorCapacityModel.ts`, not `payrollAdapter.ts`).
+  - `secondaryEducatorCapacityModel.ts`'s `combined.{middleSchoolEducators,
+    highSchoolEducators, coreEducators, flexibleEducators, combinedPool}`
+    (9/11/18/2/20) were hardcoded literals even though the same object
+    literal already contains the `middleSchool`/`highSchool`
+    `SecondaryDivisionCapacity` values they should derive from. Now computed
+    directly from sibling fields (`middleSchool.totalEducators`,
+    `middleSchool.coreEducators + highSchool.coreEducators`, etc.) — no
+    cross-file import needed, avoiding any circularity. Downstream literal
+    types that pinned these exact numbers (`msHsStaffingReadinessContract.ts`'s
+    `combinedSecondaryCoreEducators: 18`/`combinedSecondaryFlexibleEducators:
+    2`/`combinedSecondaryEducatorPool: 20`) were widened from literal types
+    to `number`, since they now carry a genuinely computed value rather than
+    a pinned one.
+
+**Validation:** `npx tsc --noEmit` clean (required widening the three
+downstream literal-typed fields above after the first computed-value change
+surfaced a type error, confirming the literal-pin dependency chain was
+real); `npm run validate:phase15h2` 30/30 pass — the computed
+`combined_core_educators`/`combined_flexible_educators`/`combined_pool`
+values matched the old hardcoded ones exactly (18/2/20), confirming this
+was genuinely "correct but fragile," not a hidden bug; `npm run
+validate:v10-rc2-5-gate7` 52/52 pass; `npm run validate:v10-rc2-5-gate9`
+3/3 pass (1,368 comparisons); `npm run validate:v10-p1` clean; `npm run
+validate:phase15n` 11/11 pass; `npm run validate:v10-x2t` 109/110 pass
+(same single pre-existing failure throughout this session); `npx tsx
+scripts/validate-phase15s1.ts` fails on an unrelated, pre-existing issue —
+the script hardcodes a retired `openingPackageId: "t1_g3"` fixture that
+`calculateDre()`'s input validation no longer accepts; confirmed this file
+was never touched by any pass this session (`git diff --stat` empty) and
+the failure is unrelated to the changes here; `npm run
+validate:v10-rc2-gate8` regenerated with **zero diff** — confirming the
+computed `HS_VALIDATED_ENVELOPE_TOTAL` is bit-for-bit identical to the old
+hardcoded value, i.e. this fix changed structure, not behavior; `npm run
+build` clean; `git diff --check` clean.
+
+Files changed this pass: `inputReadinessRegistry.ts`,
+`msHsStaffingReadinessContract.ts`, `orgDesignPayrollActivation.ts`,
+`payrollAdapter.ts`, `payrollAdapterContract.ts`,
+`secondaryEducatorCapacityModel.ts`. Not committed or pushed, per the
+standing instruction.

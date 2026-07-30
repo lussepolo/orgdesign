@@ -821,7 +821,8 @@ export const ORG_DESIGN_PAYROLL_ACTIVATION: OrgDesignPayrollActivationDesign = {
         "docs/audits/rio-resilience/phase-v10-rc2-4a-hs-educator-allocation-reconciliation.md for " +
         "the V10-RC2.4A history this correction supersedes. " +
         "Sum=11 matches the validated 10 core + 1 flexible = 11 HS envelope. " +
-        "hs_pool is EXCLUDED FROM V1 — do NOT double-count with this ramp.",
+        "hs_pool no longer exists (deleted from SPECIALISTS_CONFIG, 2026-07-30, " +
+        "not merely excluded) — do NOT double-count with this ramp.",
       costSource:
         "src/constants/teaching.ts EDUCATOR_LEVELS['master'] — grossMonthly=15247.55, " +
         "laborChargesMonthly=7395.06, benefitsMonthly=1159.83 (Master Educator, approved v1 Phase 8C)",
@@ -852,7 +853,8 @@ export const ORG_DESIGN_PAYROLL_ACTIVATION: OrgDesignPayrollActivationDesign = {
         "section 4 (MS/HS educators — fixed FTE per grade), which uses HS_FTE_BY_GRADE and " +
         "MASTER_EDUCATOR cost; its unreconciled_grade_envelope diagnostic is a dormant safety net " +
         "for this table's sum, not currently active. " +
-        "hs_pool (4→8 HC from 2034 in SPECIALISTS_CONFIG) is EXCLUDED FROM V1 — do NOT use alongside per-grade ramp.",
+        "hs_pool (formerly 4→8 HC from 2034) no longer exists — deleted from " +
+        "SPECIALISTS_CONFIG, 2026-07-30, not merely excluded.",
     },
   ] as const,
   remainingBlockers: [
@@ -881,7 +883,9 @@ export const ORG_DESIGN_PAYROLL_ACTIVATION: OrgDesignPayrollActivationDesign = {
     "language_acquisition_coach (FOLHA_DIRETA), personalized_learning_associate_educator (FOPAG_DIRETO), " +
     "security_coordinator (FOLHA_DIRETA), curriculum_and_assessment_designer (FOLHA_DIRETA, leadership). " +
     "payrollRoleId assigned using extension role id for all 6 new roles. " +
-    "26 baseline non-teaching roles + 13 extension roles = 39 total records. " +
+    "25 baseline non-teaching roles + 13 extension roles = 38 total records " +
+    "(corrected 2026-07-30: was 26+13=39 before hs_pool was deleted as dead " +
+    "config — see baselineRoleCount above for the same correction). " +
     "Phase 13H (2026-06-09): the per-record calculationReady=false and top-level " +
     "activationStatus=designed_not_implemented/fopagCalculationReady=false fields above are retained " +
     "as the Phase 8G design-snapshot values (pinned by the contract's literal types) and are SUPERSEDED " +

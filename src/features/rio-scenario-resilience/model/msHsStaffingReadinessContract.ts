@@ -78,9 +78,13 @@ export interface MsHsStaffingReadinessSummary {
   highSchoolFullModelCoreEducators: 10;
   highSchoolFullModelFlexibleEducators: 1;
   highSchoolFullModelTotalEducators: 11;
-  combinedSecondaryCoreEducators: 18;
-  combinedSecondaryFlexibleEducators: 2;
-  combinedSecondaryEducatorPool: 20;
+  // Widened from literal types to number, 2026-07-30: these three now come
+  // from SECONDARY_EDUCATOR_CAPACITY_MODEL.combined, which is itself
+  // computed (not hardcoded) as of the same date — see
+  // secondaryEducatorCapacityModel.ts.
+  combinedSecondaryCoreEducators: number;
+  combinedSecondaryFlexibleEducators: number;
+  combinedSecondaryEducatorPool: number;
   boardReadinessStatus: "conditional";
   records: readonly MsHsStaffingReadinessRecord[];
   notes: readonly string[];

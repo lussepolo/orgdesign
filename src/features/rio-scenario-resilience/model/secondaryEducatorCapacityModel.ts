@@ -148,12 +148,19 @@ export interface SecondaryEducatorCapacityModel {
   loadPolicy: SecondaryEducatorLoadPolicy;
   middleSchool: SecondaryDivisionCapacity;
   highSchool: SecondaryDivisionCapacity;
+  // Corrected 2026-07-30: middleSchoolEducators/highSchoolEducators/
+  // coreEducators/flexibleEducators/combinedPool were hardcoded literals,
+  // not actually computed from middleSchool/highSchool above despite
+  // agreeing with them — the same "manually kept in sync, currently
+  // correct by coincidence" pattern that caused the Counselor and
+  // HS_FTE_BY_GRADE defects elsewhere this session. Widened from literal
+  // types to number since they are now genuinely computed, not pinned.
   combined: {
-    middleSchoolEducators: 9;
-    highSchoolEducators: 11;
-    coreEducators: 18;
-    flexibleEducators: 2;
-    combinedPool: 20;
+    middleSchoolEducators: number;
+    highSchoolEducators: number;
+    coreEducators: number;
+    flexibleEducators: number;
+    combinedPool: number;
     planningMidpoint: 27;
     approvedRange: "26-28";
     totalRawLearnerSectionBlocks: 560;
@@ -671,11 +678,11 @@ export const SECONDARY_EDUCATOR_CAPACITY_MODEL: SecondaryEducatorCapacityModel =
   middleSchool,
   highSchool,
   combined: {
-    middleSchoolEducators: 9,
-    highSchoolEducators: 11,
-    coreEducators: 18,
-    flexibleEducators: 2,
-    combinedPool: 20,
+    middleSchoolEducators: middleSchool.totalEducators,
+    highSchoolEducators: highSchool.totalEducators,
+    coreEducators: middleSchool.coreEducators + highSchool.coreEducators,
+    flexibleEducators: middleSchool.flexibleEducators + highSchool.flexibleEducators,
+    combinedPool: middleSchool.totalEducators + highSchool.totalEducators,
     planningMidpoint: 27,
     approvedRange: "26-28",
     totalRawLearnerSectionBlocks: 560,
