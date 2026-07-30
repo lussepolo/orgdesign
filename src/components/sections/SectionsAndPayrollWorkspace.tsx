@@ -7,6 +7,8 @@ import PayrollProjectionTab from "./PayrollProjectionTab";
 import PayrollExportMatrixTab from "./PayrollExportMatrixTab";
 import type { ActiveOpeningPackageId, OccupancyScenarioId } from "../../features/rio-scenario-resilience/model/openingPackageOccupancySourceDataContract";
 import type { TuitionScenarioId } from "../../features/rio-scenario-resilience/model/revenueInputs";
+import type { DreWorkingScenarioOrgDesignOptionId } from "../../features/rio-scenario-resilience/model/dreWorkingScenarioContract";
+import type { UseEducatorTierSelectionResult } from "../../hooks/useEducatorTierSelection";
 
 type PayrollSubviewId = "sections-staffing-simulation" | "governed-payroll-exports";
 
@@ -22,6 +24,11 @@ interface SectionsAndPayrollWorkspaceProps {
   readonly onOccupancyScenarioIdChange: (id: OccupancyScenarioId) => void;
   readonly tuitionScenarioId: TuitionScenarioId;
   readonly onTuitionScenarioIdChange: (id: TuitionScenarioId) => void;
+  // V10-RC2.5 Gate 2/Tranche A: shared with Org Design, forwarded to
+  // PayrollProjectionTab — no tab-local duplication.
+  readonly orgDesignOptionId: DreWorkingScenarioOrgDesignOptionId;
+  readonly onOrgDesignOptionIdChange: (id: DreWorkingScenarioOrgDesignOptionId) => void;
+  readonly educatorTierSelection: UseEducatorTierSelectionResult;
 }
 
 // V10-X2T: "Turmas, Equipe Pedagógica e Folha de Pagamento" primary
@@ -37,6 +44,9 @@ export default function SectionsAndPayrollWorkspace({
   onOccupancyScenarioIdChange,
   tuitionScenarioId,
   onTuitionScenarioIdChange,
+  orgDesignOptionId,
+  onOrgDesignOptionIdChange,
+  educatorTierSelection,
 }: SectionsAndPayrollWorkspaceProps) {
   const { t } = useLocale();
   const [activeSubview, setActiveSubview] = useState<PayrollSubviewId>("sections-staffing-simulation");
@@ -80,6 +90,9 @@ export default function SectionsAndPayrollWorkspace({
           onOccupancyScenarioIdChange={onOccupancyScenarioIdChange}
           tuitionScenarioId={tuitionScenarioId}
           onTuitionScenarioIdChange={onTuitionScenarioIdChange}
+          orgDesignOptionId={orgDesignOptionId}
+          onOrgDesignOptionIdChange={onOrgDesignOptionIdChange}
+          educatorTierSelection={educatorTierSelection}
         />
       ) : (
         <PayrollExportMatrixTab />

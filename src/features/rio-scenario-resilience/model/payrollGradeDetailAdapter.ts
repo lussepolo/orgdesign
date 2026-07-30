@@ -47,6 +47,13 @@ export type PayrollGradeDetailEducatorAttribution = "grade_level_governed" | "di
 export interface PayrollGradeDetailRow {
   gradeId: string;
   gradeLabel: string;
+  // V10-RC2.5 Gate 3/Tranche B: the short, lowercase grade identifier
+  // (e.g. "t1", "pk3", "g4", "g6") that payrollAdapter.ts's Educator-tier
+  // resolution keys on — the SAME id computed internally below for the
+  // section-count lookup, exposed here so the shared Grade Staffing Table UI
+  // can read/write tier selections without re-deriving or guessing this
+  // mapping a second time.
+  shortGradeId: string;
   division: "Early Years" | "Lower School" | "Middle School";
   educatorAttribution: PayrollGradeDetailEducatorAttribution;
   // null only when educatorAttribution === "division_level_only" (unknown at
@@ -144,6 +151,7 @@ function buildEyLsGradeRows(
     return {
       gradeId: row.gradeId,
       gradeLabel: row.gradeLabel,
+      shortGradeId,
       division: row.division,
       educatorAttribution: "grade_level_governed",
       educators: row.educators,
@@ -186,6 +194,7 @@ function buildGrade6Row(
   return {
     gradeId: "MS Grade 6",
     gradeLabel: gradeDisplayName("g6"),
+    shortGradeId: "g6",
     division: "Middle School",
     educatorAttribution: "division_level_only",
     educators: null,

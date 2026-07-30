@@ -48,7 +48,7 @@ const BLOCKING_ADAPTER_DIAGNOSTIC_TYPES = new Set<PayrollAdapterDiagnosticType>(
 ]);
 
 export function calculateFopag(input: FopagEngineInput): FopagEngineOutput {
-  const { openingPackageId, occupancyScenarioId, orgDesignOptionId } = input;
+  const { openingPackageId, occupancyScenarioId, orgDesignOptionId, educatorTierByGrade } = input;
   const canonicalOccupancyScenarioId = assertOccupancyScenarioId(occupancyScenarioId);
   assertSupportedDreEnrollmentCapacityLeverInput({
     openingPackageId: openingPackageId as OpeningPackageId,
@@ -61,6 +61,7 @@ export function calculateFopag(input: FopagEngineInput): FopagEngineOutput {
     openingPackageId,
     occupancyScenarioId: canonicalOccupancyScenarioId,
     orgDesignOptionId,
+    educatorTierByGrade,
   });
 
   const engineDiagnostics: FopagEngineDiagnostic[] = [];
@@ -222,6 +223,7 @@ export function calculateFopag(input: FopagEngineInput): FopagEngineOutput {
       grossLaborAnnualAfterGrowth,
       benefitsAnnualAfterGrowth,
       totalAnnualPayrollAfterGrowth,
+      educatorTierId: rec.educatorTierId,
       isAuditRow,
       diagnostics: rec.diagnostics,
       sourceNotes: rec.sourceNotes,

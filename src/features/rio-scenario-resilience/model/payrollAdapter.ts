@@ -8,7 +8,10 @@ import type {
   OpeningPackageId,
 } from "./openingPackageOccupancySourceDataContract";
 import { GRADE_DIVISION_MAP } from "./revenueInputs";
+import { DEFAULT_EDUCATOR_TIER_ID } from "./payrollAdapterContract";
 import type {
+  EducatorTierId,
+  EducatorTierSelectionByGrade,
   PayrollAdapterBuildInput,
   PayrollAdapterBuildOutput,
   PayrollAdapterCostSourceId,
@@ -39,6 +42,104 @@ const MASTER_EDUCATOR = {
   costSourceNote:
     "src/constants/teaching.ts EDUCATOR_LEVELS['master'] — approved v1 MS/HS teaching tier (Phase 8C, Luciana 2026-06-03).",
 };
+
+// V10-RC2.5 Gate 2/Tranche A originally exposed only "master"/"associate"
+// here, reasoning that specialist/inspirational/distinguished had no
+// governed PayrollAdapterCostSourceId mapping. Reversed by explicit
+// product-owner instruction during Gate 3/Tranche C (Luciana, 2026-07-30):
+// all five EDUCATOR_LEVELS tiers in src/constants/teaching.ts carry complete
+// Finance-provided grossMonthly/laborChargesMonthly/benefitsMonthly figures
+// with identical structure/provenance to master/associate — the gap was
+// only this adapter's costSourceId taxonomy, not missing compensation data.
+// All five are now governed and selectable for EY/LS/MS/HS grade-level
+// staffing.
+const EDUCATOR_TIER_COST_TABLE: Record<
+  EducatorTierId,
+  {
+    grossMonthly: number;
+    laborChargesMonthly: number;
+    benefitsMonthly: number;
+    allocationModel: "FOPAG_DIRETO";
+    costSourceId: PayrollAdapterCostSourceId;
+    costSourceNote: string;
+  }
+> = {
+  master: MASTER_EDUCATOR,
+  associate: {
+    grossMonthly: 7763.46,
+    laborChargesMonthly: 3765.28,
+    benefitsMonthly: 1128.1,
+    allocationModel: "FOPAG_DIRETO",
+    costSourceId: "educator_level_associate",
+    costSourceNote:
+      "src/constants/teaching.ts EDUCATOR_LEVELS['associate'] — Finance-validated (Luciana 2026-06-03). " +
+      "V10-RC2.5: exposed as a selectable Educator tier for EY/LS/MS/HS grade-level staffing.",
+  },
+  specialist: {
+    grossMonthly: 10229.37,
+    laborChargesMonthly: 4961.24,
+    benefitsMonthly: 1138.56,
+    allocationModel: "FOPAG_DIRETO",
+    costSourceId: "educator_level_specialist",
+    costSourceNote:
+      "src/constants/teaching.ts EDUCATOR_LEVELS['specialist'] — Finance-validated (Luciana 2026-06-03). " +
+      "V10-RC2.5 Gate 3/Tranche C: exposed as a selectable Educator tier by explicit product-owner instruction.",
+  },
+  inspirational: {
+    grossMonthly: 17768.85,
+    laborChargesMonthly: 8617.89,
+    benefitsMonthly: 1216.37,
+    allocationModel: "FOPAG_DIRETO",
+    costSourceId: "educator_level_inspirational",
+    costSourceNote:
+      "src/constants/teaching.ts EDUCATOR_LEVELS['inspirational'] — Finance-validated (Luciana 2026-06-03). " +
+      "V10-RC2.5 Gate 3/Tranche C: exposed as a selectable Educator tier by explicit product-owner instruction.",
+  },
+  distinguished: {
+    grossMonthly: 19577.98,
+    laborChargesMonthly: 9495.32,
+    benefitsMonthly: 1224.05,
+    allocationModel: "FOPAG_DIRETO",
+    costSourceId: "educator_level_distinguished",
+    costSourceNote:
+      "src/constants/teaching.ts EDUCATOR_LEVELS['distinguished'] — Finance-validated (Luciana 2026-06-03). " +
+      "V10-RC2.5 Gate 3/Tranche C: exposed as a selectable Educator tier by explicit product-owner instruction.",
+  },
+};
+
+// Resolves the Educator tier to apply for one grade's teaching-lead/educator
+// record. Absence of a selection for this grade (map omitted entirely, or
+// the grade simply not present in it) resolves to the documented governed
+// default ("master") — this is the pre-RC2.5, byte-identical behavior, not a
+// silently-invented "first available tier" choice (there is no ordering to
+// silently pick from; the default is fixed and named). An explicit but
+// invalid tier ID is rejected (not applied) and reported via a diagnostic;
+// the record still resolves to "master" so calculation is never blocked.
+function resolveEducatorTier(
+  gradeId: string,
+  selections: EducatorTierSelectionByGrade | undefined,
+  diagnostics: PayrollAdapterDiagnostic[],
+  contextRoleId: string,
+  contextRoleName: string,
+): { tierId: EducatorTierId; cost: (typeof EDUCATOR_TIER_COST_TABLE)[EducatorTierId] } {
+  const requested = selections?.[gradeId];
+  if (requested === undefined) {
+    return { tierId: DEFAULT_EDUCATOR_TIER_ID, cost: EDUCATOR_TIER_COST_TABLE[DEFAULT_EDUCATOR_TIER_ID] };
+  }
+  if (requested in EDUCATOR_TIER_COST_TABLE) {
+    return { tierId: requested, cost: EDUCATOR_TIER_COST_TABLE[requested] };
+  }
+  diagnostics.push({
+    diagnosticType: "invalid_educator_tier_selection",
+    roleId: contextRoleId,
+    roleName: contextRoleName,
+    message:
+      `Invalid Educator tier selection "${String(requested)}" for grade "${gradeId}". ` +
+      `Valid tiers: ${Object.keys(EDUCATOR_TIER_COST_TABLE).join(", ")}. Rejected — not applied. ` +
+      `Falling back to the governed default ("${DEFAULT_EDUCATOR_TIER_ID}"), not a silently-chosen alternative.`,
+  });
+  return { tierId: DEFAULT_EDUCATOR_TIER_ID, cost: EDUCATOR_TIER_COST_TABLE[DEFAULT_EDUCATOR_TIER_ID] };
+}
 
 const LEARNING_ASSISTANT = {
   grossMonthly: 4595.88,
@@ -165,8 +266,15 @@ const EXTENSION_ROLE_COST: Record<
 // selected to absorb g10's incremental FTE and preserve the 11-FTE total —
 // not derived from any canonical source, not chosen by this codebase.
 // g9=4/g11=3 unchanged throughout (never disputed).
-const MS_FTE_BY_GRADE: Record<string, number> = { g6: 3, g7: 4, g8: 2 };
-const HS_FTE_BY_GRADE: Record<string, number> = { g9: 4, g10: 2, g11: 3, g12: 2 };
+// V10-RC2.5 Gate 3/Tranche B: exported so the shared Grade Staffing Table UI
+// can fan out a single division-level Educator tier selection to every grade
+// in the division's governed fixed-FTE table, without hardcoding a second
+// copy of these grade lists. MS/HS remain division-level in the UI (no
+// per-grade rows) — see Gate 3 scope note in GradeStaffingTable.tsx — but the
+// tier itself is still stored per grade internally, matching how this
+// adapter already resolves it.
+export const MS_FTE_BY_GRADE: Record<string, number> = { g6: 3, g7: 4, g8: 2 };
+export const HS_FTE_BY_GRADE: Record<string, number> = { g9: 4, g10: 2, g11: 3, g12: 2 };
 
 // V10-RC2.4A: dormant safety net. If HS_FTE_BY_GRADE is ever edited such
 // that its sum no longer matches the validated 11-FTE HS envelope (10 core +
@@ -210,7 +318,7 @@ function baselineCostSourceId(family: string): PayrollAdapterCostSourceId {
 export function buildPayrollAdapterInput(
   input: PayrollAdapterBuildInput,
 ): PayrollAdapterBuildOutput {
-  const { openingPackageId, occupancyScenarioId, orgDesignOptionId } = input;
+  const { openingPackageId, occupancyScenarioId, orgDesignOptionId, educatorTierByGrade } = input;
   const records: PayrollAdapterRecord[] = [];
   const diagnostics: PayrollAdapterDiagnostic[] = [];
 
@@ -290,6 +398,7 @@ export function buildPayrollAdapterInput(
         grossMonthly: rec.rawGrossMonthlyBRL,
         laborChargesMonthly: rec.rawLaborChargesMonthlyBRL,
         benefitsMonthly: rec.rawBenefitsMonthlyBRL,
+        educatorTierId: null,
         active,
         calculationReady: false,
         diagnostics: [],
@@ -378,6 +487,7 @@ export function buildPayrollAdapterInput(
           grossMonthly: cost.grossMonthly,
           laborChargesMonthly: cost.laborChargesMonthly,
           benefitsMonthly: cost.benefitsMonthly,
+          educatorTierId: null,
           active,
           calculationReady: false,
           diagnostics: [],
@@ -410,6 +520,20 @@ export function buildPayrollAdapterInput(
     });
   }
 
+  // V10-RC2.5: memoize tier resolution per (division, gradeId) so an invalid
+  // selection produces exactly one diagnostic, not one per projection year —
+  // sectionOutput.records has one entry per (division, gradeId, year), and
+  // tier selection is not keyed by year.
+  const eyLsTierCache = new Map<string, ReturnType<typeof resolveEducatorTier>>();
+  function resolveEyLsTeachingLeadTier(division: string, gradeId: string, roleId: string, roleName: string) {
+    const cacheKey = `${division}:${gradeId}`;
+    const cached = eyLsTierCache.get(cacheKey);
+    if (cached) return cached;
+    const resolved = resolveEducatorTier(gradeId, educatorTierByGrade, diagnostics, roleId, roleName);
+    eyLsTierCache.set(cacheKey, resolved);
+    return resolved;
+  }
+
   for (const sec of sectionOutput.records) {
     if (sec.division !== "ey" && sec.division !== "ls") continue;
 
@@ -430,15 +554,25 @@ export function buildPayrollAdapterInput(
 
     const divLabel = sec.division === "ey" ? "EY" : "LS";
 
-    // Teaching lead — Master Educator tier (approved v1, Phase 8H.1, Luciana 2026-06-03).
+    // Teaching lead — Educator tier selectable (V10-RC2.5); defaults to
+    // Master Educator (approved v1, Phase 8H.1, Luciana 2026-06-03) when no
+    // selection is supplied, byte-identical to pre-RC2.5 behavior.
+    const teachingLeadRoleId = `${sec.division}_teaching_lead_${sec.gradeId}`;
+    const teachingLeadRoleName = `${divLabel} Teaching Lead (${sec.gradeId})`;
+    const teachingLeadTier = resolveEyLsTeachingLeadTier(
+      sec.division,
+      sec.gradeId,
+      teachingLeadRoleId,
+      teachingLeadRoleName,
+    );
     records.push({
       openingPackageId,
       occupancyScenarioId,
       orgDesignOptionId,
       year: sec.year,
-      roleId: `${sec.division}_teaching_lead_${sec.gradeId}`,
+      roleId: teachingLeadRoleId,
       payrollRoleId: null,
-      roleName: `${divLabel} Teaching Lead (${sec.gradeId})`,
+      roleName: teachingLeadRoleName,
       roleSourceType: sec.division === "ey" ? "ey_teaching_lead" : "ls_teaching_lead",
       allocationModel: "FOPAG_DIRETO",
       headcountOrFte: sec.sectionCount,
@@ -447,20 +581,25 @@ export function buildPayrollAdapterInput(
         `sectionCountEngine: sectionCount=${sec.sectionCount} (rawSections=${sec.rawSections}, ` +
         `capped at 2). 1 teaching lead per section. Enrollment=${sec.enrollment}, ` +
         `studentsPerClass=${sec.studentsPerClass}.`,
-      costSourceId: MASTER_EDUCATOR.costSourceId,
+      costSourceId: teachingLeadTier.cost.costSourceId,
       costSourceNote:
-        "src/constants/teaching.ts EDUCATOR_LEVELS['master'] — approved v1 EY/LS teaching lead tier " +
-        "(Phase 8H.1, Luciana 2026-06-03). EY teaching leads: Master Educator. LS teaching leads: Master Educator. " +
-        "Confirmed independently of MS/HS tier assumption (Phase 8C). Do not infer from MS/HS records.",
-      grossMonthly: MASTER_EDUCATOR.grossMonthly,
-      laborChargesMonthly: MASTER_EDUCATOR.laborChargesMonthly,
-      benefitsMonthly: MASTER_EDUCATOR.benefitsMonthly,
+        teachingLeadTier.tierId === "master"
+          ? "src/constants/teaching.ts EDUCATOR_LEVELS['master'] — approved v1 EY/LS teaching lead tier " +
+            "(Phase 8H.1, Luciana 2026-06-03), governed default. EY teaching leads: Master Educator. LS teaching " +
+            "leads: Master Educator. Confirmed independently of MS/HS tier assumption (Phase 8C). Do not infer " +
+            "from MS/HS records."
+          : teachingLeadTier.cost.costSourceNote + " Selected via V10-RC2.5 Educator tier selection for this grade.",
+      grossMonthly: teachingLeadTier.cost.grossMonthly,
+      laborChargesMonthly: teachingLeadTier.cost.laborChargesMonthly,
+      benefitsMonthly: teachingLeadTier.cost.benefitsMonthly,
+      educatorTierId: teachingLeadTier.tierId,
       active: true,
       calculationReady: false,
       diagnostics: [],
       sourceNotes:
         "EY/LS per-section teaching lead. Approved v1 staffing rule (Phase 8C). " +
-        "sectionCountEngine (Phase 8E). Master Educator tier approved v1 (Phase 8H.1, Luciana 2026-06-03). FOPAG_DIRETO.",
+        "sectionCountEngine (Phase 8E). Educator tier selectable (V10-RC2.5); default Master Educator " +
+        "(Phase 8H.1, Luciana 2026-06-03). FOPAG_DIRETO.",
     });
 
     // Learning assistant (EY and LS)
@@ -484,6 +623,11 @@ export function buildPayrollAdapterInput(
       grossMonthly: LEARNING_ASSISTANT.grossMonthly,
       laborChargesMonthly: LEARNING_ASSISTANT.laborChargesMonthly,
       benefitsMonthly: LEARNING_ASSISTANT.benefitsMonthly,
+      // V10-RC2.5: Assistant has exactly one governed compensation tier
+      // (LEARNING_ASSISTANT_DETAIL) — no multi-tier structure exists in
+      // source data. Not Educator-tier-selectable; educatorTierId is null
+      // here by design, not by omission. See Gate 5 "NOT SOURCE-AVAILABLE."
+      educatorTierId: null,
       active: true,
       calculationReady: false,
       diagnostics: [],
@@ -511,6 +655,9 @@ export function buildPayrollAdapterInput(
         grossMonthly: LEARNING_MONITOR.grossMonthly,
         laborChargesMonthly: LEARNING_MONITOR.laborChargesMonthly,
         benefitsMonthly: LEARNING_MONITOR.benefitsMonthly,
+        // V10-RC2.5: Monitor has no tier concept at all (single fixed
+        // governed compensation) — not selectable, per directive.
+        educatorTierId: null,
         active: true,
         calculationReady: false,
         diagnostics: [],
@@ -549,6 +696,20 @@ export function buildPayrollAdapterInput(
 
   for (const [div, fteMap, roleSourceType] of msHsGrades) {
     for (const [gradeId, fte] of Object.entries(fteMap)) {
+      // V10-RC2.5: Educator tier resolved once per grade (tier selection is
+      // not keyed by year — see payrollAdapterContract.ts). Resolved outside
+      // the year loop so an invalid-selection diagnostic fires once per
+      // grade, not once per projection year.
+      const msHsRoleId = `${div}_educator_${gradeId}`;
+      const msHsRoleName = `${div.toUpperCase()} Educator (${gradeId.toUpperCase()})`;
+      const msHsTier = resolveEducatorTier(
+        gradeId,
+        educatorTierByGrade,
+        diagnostics,
+        msHsRoleId,
+        msHsRoleName,
+      );
+
       for (const year of PROJECTION_YEARS) {
         const active = msHsActiveByYearGrade.get(`${year}:${gradeId}`) ?? false;
         const recordDiagnostics: string[] = [];
@@ -559,8 +720,8 @@ export function buildPayrollAdapterInput(
           );
           diagnostics.push({
             diagnosticType: "zero_fte_grade",
-            roleId: `${div}_educator_${gradeId}`,
-            roleName: `${div.toUpperCase()} Educator (${gradeId.toUpperCase()})`,
+            roleId: msHsRoleId,
+            roleName: msHsRoleName,
             year,
             message:
               `Grade ${gradeId} is active in year ${year} but FTE=0. ` +
@@ -573,28 +734,33 @@ export function buildPayrollAdapterInput(
           occupancyScenarioId,
           orgDesignOptionId,
           year,
-          roleId: `${div}_educator_${gradeId}`,
+          roleId: msHsRoleId,
           payrollRoleId: null,
-          roleName: `${div.toUpperCase()} Educator (${gradeId.toUpperCase()})`,
+          roleName: msHsRoleName,
           roleSourceType,
-          allocationModel: MASTER_EDUCATOR.allocationModel,
+          allocationModel: msHsTier.cost.allocationModel,
           headcountOrFte: active ? fte : 0,
           headcountSourceType: "fixed_fte_per_grade",
           headcountSourceNote:
             `PAYROLL_STAFFING_RULE_SOURCE_V1 ${div}-${gradeId}-teaching-lead: ` +
             `fixed FTE=${fte} (approved v1, Phase 8C, Luciana 2026-06-03). ` +
             `Grade activation: OPENING_PACKAGE_ACTIVE_GRADE_BY_YEAR_RECORDS package=${openingPackageId}.`,
-          costSourceId: MASTER_EDUCATOR.costSourceId,
-          costSourceNote: MASTER_EDUCATOR.costSourceNote,
-          grossMonthly: MASTER_EDUCATOR.grossMonthly,
-          laborChargesMonthly: MASTER_EDUCATOR.laborChargesMonthly,
-          benefitsMonthly: MASTER_EDUCATOR.benefitsMonthly,
+          costSourceId: msHsTier.cost.costSourceId,
+          costSourceNote:
+            msHsTier.tierId === "master"
+              ? MASTER_EDUCATOR.costSourceNote + " Governed default."
+              : msHsTier.cost.costSourceNote + " Selected via V10-RC2.5 Educator tier selection for this grade.",
+          grossMonthly: msHsTier.cost.grossMonthly,
+          laborChargesMonthly: msHsTier.cost.laborChargesMonthly,
+          benefitsMonthly: msHsTier.cost.benefitsMonthly,
+          educatorTierId: msHsTier.tierId,
           active,
           calculationReady: false,
           diagnostics: recordDiagnostics,
           sourceNotes:
-            `${div.toUpperCase()} per-grade fixed FTE staffing. Master Educator tier ` +
-            `(approved v1, Phase 8C). FOPAG_DIRETO. hs_pool excluded_from_v1.`,
+            `${div.toUpperCase()} per-grade fixed FTE staffing. Educator tier selectable ` +
+            `(V10-RC2.5); default Master Educator (approved v1, Phase 8C). FOPAG_DIRETO. ` +
+            `hs_pool excluded_from_v1.`,
         });
       }
     }

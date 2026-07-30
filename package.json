@@ -59,6 +59,7 @@
     "validate:v10-rc2-3-gate6a": "tsx scripts/validate-v10-rc2-3-gate6a-per-grade-data.ts",
     "validate:v10-rc2-4-gate3": "tsx scripts/validate-v10-rc2-4-gate3-turma-defect-proof.ts",
     "validate:v10-rc2-4-gate7": "tsx scripts/validate-v10-rc2-4-gate7-source-fidelity.ts",
+    "validate:v10-rc2-5-gate7": "tsx scripts/validate-v10-rc2-5-gate7-shared-tier-workflow.ts",
     "qa:v10-e1": "tsx tests/v10e1/v10-e1.run.ts"
   },
   "dependencies": {

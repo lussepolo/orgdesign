@@ -35,6 +35,15 @@ import {
 import { APP_VERSION_LABEL } from "../src/config/appMetadata";
 import type { TabId } from "../src/App";
 import { OCCUPANCY_SCENARIO_IDS } from "../src/features/rio-scenario-resilience/model/openingPackageOccupancySourceDataContract";
+import {
+  buildRoleYearDetails,
+  buildPayrollExportDetailedWorkbook,
+} from "../src/features/rio-scenario-resilience/model/payrollExportWorkbookBuilder";
+import { buildPayrollExportScenarioResult } from "../src/features/rio-scenario-resilience/model/payrollExportScenarioAdapter";
+import { PAYROLL_EXPORT_MATRIX } from "../src/features/rio-scenario-resilience/model/payrollExportMatrixContract";
+import { buildOrgDesignExportWorkbook } from "../src/features/rio-scenario-resilience/model/orgDesignExportWorkbookBuilder";
+import { calculateFopag } from "../src/features/rio-scenario-resilience/model/fopagEngine";
+import * as XLSX from "xlsx";
 
 type Check = { id: string; pass: boolean; detail: string };
 const checks: Check[] = [];
@@ -442,14 +451,34 @@ for (const path of ENTRY_STATE_PROTECTED_FILES) {
 
 // Governed V10-X1 export-package files must be byte-identical to the
 // committed baseline (filenames and sheet names are frozen this phase).
+//
+// GOVERNANCE EXCEPTION (product-owner decision, 2026-07-30, V10-RC2.5 ONLY):
+// this byte-identity freeze is retired for exactly these three files:
+//   - payrollExportWorkbookBuilder.ts
+//   - payrollExportSummaryWorkbookBuilder.ts
+//   - payrollExportManifest.ts
+// The sole authorized change is buildRoleYearDetails()'s parameter shape
+// (from the fixed-matrix PayrollExportScenarioResult wrapper to
+// `readonly FopagCalculatedRecord[]` directly) plus the mechanical one-line
+// call-site updates in these three files that follow from it. No other
+// modification to these files is authorized by this exception, and no
+// broader export modification (any other governed export file, any other
+// phase) is authorized by it either. Byte-identity is replaced, not merely
+// removed, by the permanent semantic/runtime invariants in Section R below
+// — per the product owner's explicit instruction not to weaken protection.
+// The remaining three files below stay fully byte-frozen with no exception.
 const V10_X1_COMMIT = "1cab3312b50e52005ab5d22c109646e94650da4e";
 const GOVERNED_EXPORT_FILES = [
   "src/features/rio-scenario-resilience/model/payrollExportMatrixContract.ts",
+  "src/features/rio-scenario-resilience/model/payrollExportZip.ts",
+  "src/features/rio-scenario-resilience/model/payrollExportScenarioAdapter.ts",
+];
+// Retired from byte-identity by the V10-RC2.5 exception above — covered
+// instead by Section R's permanent semantic invariants.
+const RC2_5_EXCEPTION_FILES = [
   "src/features/rio-scenario-resilience/model/payrollExportWorkbookBuilder.ts",
   "src/features/rio-scenario-resilience/model/payrollExportSummaryWorkbookBuilder.ts",
   "src/features/rio-scenario-resilience/model/payrollExportManifest.ts",
-  "src/features/rio-scenario-resilience/model/payrollExportZip.ts",
-  "src/features/rio-scenario-resilience/model/payrollExportScenarioAdapter.ts",
 ];
 for (const path of GOVERNED_EXPORT_FILES) {
   const committedHash = execSync(`git rev-parse ${V10_X1_COMMIT}:${path}`, { cwd: ROOT }).toString().trim();
@@ -702,11 +731,29 @@ check(
 );
 
 // Q11. Governed workbook filenames/sheet names unchanged — re-asserted.
-check(
-  "q11_governed_export_files_unchanged_runtime",
-  GOVERNED_EXPORT_FILES.every((p) => checks.some((c) => c.id === `governed_export_file_unchanged__${p}` && c.pass)),
-  "all 6 governed payroll export model files must match V10-X1 committed blob",
-);
+// V10-RC2.5: this aggregate now requires BOTH the 3 remaining byte-frozen
+// files AND (in place of the 3 retired byte checks) every Section R
+// permanent semantic/runtime invariant to pass — evaluated after Section R
+// below so the referenced check IDs already exist in `checks`. Kept under
+// the original "q11" id for continuity with prior-phase reports; the
+// underlying content of what it aggregates has changed by explicit
+// product-owner authorization (see Section R's governance note).
+function q11GovernedExportFilesUnchangedRuntime(): void {
+  check(
+    "q11_governed_export_files_unchanged_runtime",
+    GOVERNED_EXPORT_FILES.every((p) => checks.some((c) => c.id === `governed_export_file_unchanged__${p}` && c.pass)) &&
+      ["r1_build_role_year_details_single_implementation",
+       "r2_production_call_sites_use_shared_implementation",
+       "r3_role_year_annual_components_reconcile_to_total",
+       "r4_payroll_export_matrix_tab_unchanged",
+       "r5_fixed_matrix_adapter_no_tier_reference",
+       "r6_fixed_matrix_sheets_no_educator_tier_column",
+       "r8_overlapping_payroll_orgdesign_records_reconcile",
+       "r9_exception_files_diff_bounded_to_authorized_refactor",
+      ].every((id) => checks.some((c) => c.id === id && c.pass)),
+    "3 remaining governed export files byte-identical AND every Section R permanent invariant (replacing the retired byte checks on the 3 V10-RC2.5 exception files) passes",
+  );
+}
 
 // Q12. Active occupancy scenario IDs unchanged (conservador/base/otimista only).
 check(
@@ -797,6 +844,219 @@ check(
     !allRegisteredIds.some((id) => /dashboard|painel-executivo|learning-assistant|senior-learning/i.test(String(id))),
   "registry must not contain staffing, Dashboard, or Senior Learning Assistant entries this phase",
 );
+
+// ── Section R: V10-RC2.5 — permanent semantic/runtime invariants replacing
+// the retired byte-identity freeze on the 3 exception files (see the
+// governance note at GOVERNED_EXPORT_FILES above). These check ONLY the
+// exact authorized change (buildRoleYearDetails' parameter shape) and its
+// direct consequences — general export correctness (12-scenario matrix,
+// sheet names/counts, ZIP/manifest, DRE bridge, escalation-rate invariance)
+// is already covered end-to-end by validate:v10-x1
+// (scripts/validate-v10-x1-payroll-export-matrix.ts), which passes
+// unchanged under this refactor and is not re-derived here.
+const R_EPS = 0.01; // same reconciliation precision policy as
+// scripts/validate-v10-x1-payroll-export-matrix.ts's EPS and
+// scripts/validate-v10-rc2-5-gate7-shared-tier-workflow.ts's
+// RECONCILIATION_TOLERANCE.
+
+// R1. buildRoleYearDetails has exactly one implementation in the codebase
+// (no duplicate role/year payroll calculation was introduced alongside it).
+const buildRoleYearDetailsDefGrep = (() => {
+  try {
+    return execSync(`grep -rn "export function buildRoleYearDetails" src`, { cwd: ROOT }).toString().trim();
+  } catch {
+    return "";
+  }
+})();
+const buildRoleYearDetailsDefLines = buildRoleYearDetailsDefGrep === "" ? [] : buildRoleYearDetailsDefGrep.split("\n");
+check(
+  "r1_build_role_year_details_single_implementation",
+  buildRoleYearDetailsDefLines.length === 1 &&
+    buildRoleYearDetailsDefLines[0].includes("src/features/rio-scenario-resilience/model/payrollExportWorkbookBuilder.ts"),
+  `definitions=${JSON.stringify(buildRoleYearDetailsDefLines)}`,
+);
+
+// R2. Every production call site imports the single shared implementation
+// (rather than reimplementing the role/year escalation logic locally).
+const BUILD_ROLE_YEAR_DETAILS_PRODUCTION_CALL_SITES = [
+  "src/features/rio-scenario-resilience/model/payrollExportSummaryWorkbookBuilder.ts",
+  "src/features/rio-scenario-resilience/model/payrollExportManifest.ts",
+  "src/features/rio-scenario-resilience/model/orgDesignExportWorkbookBuilder.ts",
+];
+const IMPORT_SHARED_BUILD_ROLE_YEAR_DETAILS_RE =
+  /import\s*\{[^}]*\bbuildRoleYearDetails\b[^}]*\}\s*from\s*["']\.\/payrollExportWorkbookBuilder["']/;
+const callSitesMissingSharedImport = BUILD_ROLE_YEAR_DETAILS_PRODUCTION_CALL_SITES.filter(
+  (p) => !IMPORT_SHARED_BUILD_ROLE_YEAR_DETAILS_RE.test(src(p)),
+);
+const payrollExportWorkbookBuilderSrc = src("src/features/rio-scenario-resilience/model/payrollExportWorkbookBuilder.ts");
+check(
+  "r2_production_call_sites_use_shared_implementation",
+  callSitesMissingSharedImport.length === 0 &&
+    /export function buildRoleYearDetails\(/.test(payrollExportWorkbookBuilderSrc),
+  callSitesMissingSharedImport.length === 0
+    ? "all production call sites import buildRoleYearDetails from ./payrollExportWorkbookBuilder"
+    : `missing shared import: ${JSON.stringify(callSitesMissingSharedImport)}`,
+);
+
+// R3. Runtime: RoleYearDetail's annualSalary + annualEncargos + annualBenefits
+// reconciles to totalAnnualRolePayroll under the existing precision policy,
+// for a real scenario's FopagCalculatedRecords built through the actual
+// engine (not fabricated data). Also confirms (via the same built workbook)
+// that no "Educator Tier" column exists in the frozen Payroll Detail header
+// row — a runtime/workbook assertion, not a source-text check alone.
+const R_SAMPLE_MATRIX_RECORD = PAYROLL_EXPORT_MATRIX[0]!;
+const rSampleScenarioResult = buildPayrollExportScenarioResult(R_SAMPLE_MATRIX_RECORD);
+const rSampleDetails = buildRoleYearDetails(rSampleScenarioResult.fopagOutput.records);
+const componentReconciliationMismatches = rSampleDetails.filter(
+  (d) => Math.abs(d.annualSalary + d.annualEncargos + d.annualBenefits - d.totalAnnualRolePayroll) > R_EPS,
+);
+check(
+  "r3_role_year_annual_components_reconcile_to_total",
+  rSampleDetails.length > 0 && componentReconciliationMismatches.length === 0,
+  componentReconciliationMismatches.length === 0
+    ? `n=${rSampleDetails.length} rows, all reconcile within ${R_EPS}`
+    : `mismatches: ${JSON.stringify(componentReconciliationMismatches.slice(0, 3).map((d) => `${d.roleId}/${d.year}`))}`,
+);
+
+const R_META = {
+  applicationCommitHash: "v10-x2t-validator",
+  generationTimestampIso: new Date().toISOString(),
+  exportGeneratorVersion: "v10-x2t-validator",
+  validationStatus: "validating",
+};
+const rSampleWorkbook = buildPayrollExportDetailedWorkbook(rSampleScenarioResult, R_META);
+const rPayrollDetailSheet = rSampleWorkbook.Sheets["Payroll Detail"];
+const rPayrollDetailHeaderRow: unknown[] = rPayrollDetailSheet
+  ? ((XLSX.utils.sheet_to_json(rPayrollDetailSheet, { header: 1 }) as unknown[][])[1] ?? [])
+  : [];
+check(
+  "r6_fixed_matrix_sheets_no_educator_tier_column",
+  !rPayrollDetailHeaderRow.some((cell) => String(cell) === "Educator Tier"),
+  `Payroll Detail header row: ${JSON.stringify(rPayrollDetailHeaderRow)}`,
+);
+
+// R4. PayrollExportMatrixTab.tsx remains unchanged (permanent no-drift check
+// — not previously covered by any existing ENTRY_STATE_PROTECTED_FILES or
+// GOVERNED_EXPORT_FILES entry).
+const PAYROLL_EXPORT_MATRIX_TAB_PATH = "src/components/sections/PayrollExportMatrixTab.tsx";
+let payrollExportMatrixTabHeadHash = "";
+try {
+  payrollExportMatrixTabHeadHash = execSync(`git rev-parse HEAD:${PAYROLL_EXPORT_MATRIX_TAB_PATH}`, { cwd: ROOT }).toString().trim();
+} catch {
+  payrollExportMatrixTabHeadHash = "";
+}
+const payrollExportMatrixTabWorkingHash = gitHashObject(PAYROLL_EXPORT_MATRIX_TAB_PATH);
+check(
+  "r4_payroll_export_matrix_tab_unchanged",
+  payrollExportMatrixTabHeadHash !== "" && payrollExportMatrixTabHeadHash === payrollExportMatrixTabWorkingHash,
+  payrollExportMatrixTabHeadHash === payrollExportMatrixTabWorkingHash
+    ? "matches HEAD blob"
+    : `HEAD=${payrollExportMatrixTabHeadHash} working=${payrollExportMatrixTabWorkingHash}`,
+);
+
+// R5. The fixed-matrix export path (payrollExportScenarioAdapter.ts, still
+// fully byte-frozen) never references educatorTierByGrade at all — the
+// fixed-matrix export is structurally incapable of reflecting a live
+// Educator-tier selection, independent of anything else in this phase.
+const payrollExportScenarioAdapterSrc = src("src/features/rio-scenario-resilience/model/payrollExportScenarioAdapter.ts");
+check(
+  "r5_fixed_matrix_adapter_no_tier_reference",
+  !payrollExportScenarioAdapterSrc.includes("educatorTierByGrade"),
+  "payrollExportScenarioAdapter.ts (byte-frozen) contains no educatorTierByGrade reference",
+);
+
+// R8. Overlapping Payroll (fixed-matrix) and Org Design export records
+// reconcile: build FopagCalculatedRecords through the fixed-matrix adapter
+// path and, independently, through the exact call path the new Org Design
+// export uses (calculateFopag with an equivalent scenario + no tier
+// overrides, so every grade resolves to the same governed "master" default)
+// — the resulting RoleYearDetail rows must match role-for-role, year-for-year.
+const orgDesignEquivalentFopagOutput = calculateFopag({
+  openingPackageId: R_SAMPLE_MATRIX_RECORD.openingPackageId,
+  occupancyScenarioId: R_SAMPLE_MATRIX_RECORD.occupancyScenarioId,
+  orgDesignOptionId: R_SAMPLE_MATRIX_RECORD.orgDesignOptionId,
+  educatorTierByGrade: {},
+});
+const orgDesignEquivalentDetails = buildRoleYearDetails(orgDesignEquivalentFopagOutput.records);
+const detailKey = (d: { roleId: string; year: number }) => `${d.roleId}__${d.year}`;
+const fixedMatrixDetailsByKey = new Map(rSampleDetails.map((d) => [detailKey(d), d]));
+const orgDesignDetailsByKey = new Map(orgDesignEquivalentDetails.map((d) => [detailKey(d), d]));
+let r8Ok = fixedMatrixDetailsByKey.size > 0 && fixedMatrixDetailsByKey.size === orgDesignDetailsByKey.size;
+let r8Detail = `n=${fixedMatrixDetailsByKey.size}`;
+if (r8Ok) {
+  outer: for (const [key, fixed] of fixedMatrixDetailsByKey) {
+    const orgDesign = orgDesignDetailsByKey.get(key);
+    if (!orgDesign) {
+      r8Ok = false;
+      r8Detail = `key missing from Org Design output: ${key}`;
+      break;
+    }
+    const fieldsToCompare: (keyof typeof fixed)[] = [
+      "annualSalary",
+      "annualEncargos",
+      "annualBenefits",
+      "totalAnnualRolePayroll",
+      "activeHc",
+    ];
+    for (const field of fieldsToCompare) {
+      if (Math.abs(Number(fixed[field]) - Number(orgDesign[field])) > R_EPS) {
+        r8Ok = false;
+        r8Detail = `${key}.${String(field)}: fixed-matrix=${fixed[field]} orgDesign=${orgDesign[field]}`;
+        break outer;
+      }
+    }
+  }
+}
+check("r8_overlapping_payroll_orgdesign_records_reconcile", r8Ok, r8Detail);
+
+// R9. The V10-RC2.5 exception (3 files) has a diff, against the frozen
+// V10-X1 committed baseline, bounded to exactly the authorized
+// buildRoleYearDetails parameter-shape refactor and its direct call-site
+// consequences — replacing byte-identity with a precise "bounded diff"
+// invariant rather than merely removing protection. Any future change to
+// these 3 files beyond this exact authorized diff will fail this check.
+const EXCEPTION_FILE_ALLOWED_DIFF_LINES: Record<string, readonly string[]> = {
+  "src/features/rio-scenario-resilience/model/payrollExportManifest.ts": [
+    "-    const details = buildRoleYearDetails(sr);",
+    "+    const details = buildRoleYearDetails(sr.fopagOutput.records);",
+  ],
+  "src/features/rio-scenario-resilience/model/payrollExportSummaryWorkbookBuilder.ts": [
+    "-    const details = buildRoleYearDetails(scenarioResult);",
+    "+    const details = buildRoleYearDetails(scenarioResult.fopagOutput.records);",
+  ],
+  "src/features/rio-scenario-resilience/model/payrollExportWorkbookBuilder.ts": [
+    "+// V10-RC2.5 Gate 3/Tranche C: takes FOPAG records directly (not the fixed-",
+    "+// matrix PayrollExportScenarioResult wrapper) — the only field this function",
+    "+// ever used from that wrapper was fopagOutput.records, so this also lets the",
+    "+// live Org Design export (orgDesignExportWorkbookBuilder.ts, no",
+    "+// PayrollExportMatrixRecord involved) reuse the identical role/year",
+    "+// escalation logic rather than re-deriving it.",
+    "-  scenarioResult: PayrollExportScenarioResult,",
+    "+  fopagRecords: readonly FopagCalculatedRecord[],",
+    "-  const sorted = [...fillMissingYearRecords(scenarioResult.fopagOutput.records)].sort(",
+    "+  const sorted = [...fillMissingYearRecords(fopagRecords)].sort(",
+    "-  const details = buildRoleYearDetails(scenarioResult);",
+    "+  const details = buildRoleYearDetails(scenarioResult.fopagOutput.records);",
+  ],
+};
+let r9Ok = true;
+let r9Detail = "ok";
+for (const path of RC2_5_EXCEPTION_FILES) {
+  const diffOut = execSync(`git diff ${V10_X1_COMMIT} -- ${path}`, { cwd: ROOT }).toString();
+  const changedLines = diffOut
+    .split("\n")
+    .filter((l) => (l.startsWith("+") || l.startsWith("-")) && !l.startsWith("+++") && !l.startsWith("---"));
+  const allowed = EXCEPTION_FILE_ALLOWED_DIFF_LINES[path] ?? [];
+  const disallowed = changedLines.filter((l) => !allowed.includes(l));
+  if (disallowed.length > 0) {
+    r9Ok = false;
+    r9Detail = `${path}: unauthorized diff line(s) beyond the buildRoleYearDetails refactor: ${JSON.stringify(disallowed)}`;
+    break;
+  }
+}
+check("r9_exception_files_diff_bounded_to_authorized_refactor", r9Ok, r9Detail);
+
+q11GovernedExportFilesUnchangedRuntime();
 
 // ── Output ───────────────────────────────────────────────────────────────
 

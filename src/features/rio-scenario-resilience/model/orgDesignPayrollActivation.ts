@@ -147,14 +147,19 @@ export const ORG_DESIGN_PAYROLL_ACTIVATION: OrgDesignPayrollActivationDesign = {
       roleName: "Counselor",
       activeIn: ALL,
       roleInclusionStatus: "active_all_options",
-      headcountSource: `${LEADERSHIP_HC_SOURCE} — hc([[2028, 3], [2031, 4]])`,
+      headcountSource: `${LEADERSHIP_HC_SOURCE} — hc([[2028, 2], [2032, 3]])`,
       costSource: LEADERSHIP_COST_SOURCE,
       allocationModelSource: LEADERSHIP_ALLOC_SOURCE,
       activationYearSource: "LEADERSHIP_CONFIG.activeFrom = 2028",
       mappingStatus: "source_resolved_maps_existing_role",
       needsReview: false,
       calculationReady: false,
-      sourceNotes: "HC 3 from 2028, ramps to 4 at 2031 when MS opens. Covers EY/LS/MS counseling per ramp.",
+      // Headcount ramp corrected to {2028: 2, 2032: 3}: direct, live, in-session
+      // product-owner correction (Luciana, 2026-07-30), resolving the RC2.4
+      // Gate 6 deferred blocker ("Counselor activation year" in
+      // IMPLEMENTATION.md). Not derived from "MS opens" (MS activates 2031,
+      // not 2032) -- a direct headcount-value/year decision, not re-sourced logic.
+      sourceNotes: "HC 2 from 2028, ramps to 3 at 2032 (direct product-owner correction, 2026-07-30). Covers EY/LS/MS counseling per ramp.",
     },
     {
       orgDesignOptionScope: "all_options",

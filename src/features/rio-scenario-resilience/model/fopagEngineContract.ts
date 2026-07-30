@@ -1,4 +1,6 @@
 import type {
+  EducatorTierId,
+  EducatorTierSelectionByGrade,
   PayrollAdapterDiagnosticType,
   PayrollAdapterRecordSourceType,
 } from "./payrollAdapterContract";
@@ -78,6 +80,12 @@ export interface FopagCalculatedRecord {
   grossLaborAnnualAfterGrowth: number;  // (salaryMonthly + laborChargesMonthly) × 13 × hc, after growth
   benefitsAnnualAfterGrowth: number;    // benefitsMonthly × 12 × hc, after growth
   totalAnnualPayrollAfterGrowth: number; // grossLabor + benefits after growth
+  // V10-RC2.5 Gate 3/Tranche C: pass-through of PayrollAdapterRecord.educatorTierId
+  // (Tranche A) — the Educator tier actually applied to this record. Non-optional:
+  // the adapter always sets it (a real tier ID for Educator-selectable roles, null
+  // for every other role type), so an optional field here would hide a propagation
+  // bug behind `undefined` rather than surfacing it as a type error.
+  educatorTierId: EducatorTierId | null;
   // isAuditRow: true when headcountOrFte=0 or active=false. Included for audit
   // completeness but excluded from FOPAG_DIRETO / FOLHA_DIRETA / BENEFITS totals.
   isAuditRow: boolean;
@@ -116,6 +124,10 @@ export interface FopagEngineInput {
   openingPackageId: string;
   occupancyScenarioId: string;
   orgDesignOptionId: string;
+  // V10-RC2.5 Gate 2/Tranche A: optional, forwarded verbatim to
+  // buildPayrollAdapterInput(). Omitted => byte-identical pre-RC2.5 behavior
+  // (Master Educator everywhere). See payrollAdapterContract.ts.
+  educatorTierByGrade?: EducatorTierSelectionByGrade;
 }
 
 export interface FopagEngineOutput {

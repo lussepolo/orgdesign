@@ -224,10 +224,16 @@ export const PAYROLL_ROLE_COST_SOURCE_DATA: PayrollRoleCostSourceDataContract =
         gradeBandApplicability: null,
         yearApplicability: 2028,
         scenarioApplicability: null,
-        fteOrHeadcountSourceValue: "3 from 2028; 4 from 2031",
+        // Headcount ramp corrected to {2028: 2, 2032: 3}: direct, live,
+        // in-session product-owner correction (Luciana, 2026-07-30),
+        // resolving the RC2.4 Gate 6 deferred blocker ("Counselor activation
+        // year" in IMPLEMENTATION.md). This record cites src/constants/
+        // leadership.ts LEADERSHIP_CONFIG as its source (below) — kept in
+        // sync with that file's own counselor row, not a second source.
+        fteOrHeadcountSourceValue: "2 from 2028; 3 from 2032",
         headcountProgression: [
-          [2028, 3],
-          [2031, 4],
+          [2028, 2],
+          [2032, 3],
         ],
         rawGrossMonthlyBRL: 16923.84,
         rawLaborChargesMonthlyBRL: 8208.06,
@@ -245,7 +251,7 @@ export const PAYROLL_ROLE_COST_SOURCE_DATA: PayrollRoleCostSourceDataContract =
         sourceSheetOrTab: "LEADERSHIP_CONFIG",
         sourceRowOrCellRef: "LEADERSHIP_CONFIG[5]",
         sourceNotes:
-          "Campus-wide counseling. Headcount ramp: 3 from 2028, 4 from 2031. Finance review should confirm whether headcount ramp is still current.",
+          "Campus-wide counseling. Headcount ramp: 2 from 2028, 3 from 2032 (corrected from 3-from-2028/4-from-2031 by direct product-owner instruction, 2026-07-30 — see IMPLEMENTATION.md V10-RC2.5).",
         needsFinanceReview: false,
         calculationReady: false,
       },

@@ -46,8 +46,14 @@ check(
   /buildOrgDesignHcTable\(\{\s*openingPackageId,\s*occupancyScenarioId,\s*orgDesignOptionId,\s*year:/.test(payrollSrc),
 );
 check(
+  // V10-RC2.5 Gate 2/Tranche A: orgDesignOptionId is now a shared-contract
+  // prop (lifted to App.tsx, same as openingPackageId/occupancyScenarioId),
+  // so ExecutiveOrgDesignTab.tsx passes it through as an ES2015 shorthand
+  // property (`orgDesignOptionId,`) rather than a mapped expression
+  // (`orgDesignOptionId: ORG_DESIGN_OPTION_MAP[scenario],`) — accept either
+  // form; both are the same argument shape this check exists to verify.
   "ExecutiveOrgDesignTab.tsx calls buildOrgDesignHcTable with {openingPackageId, occupancyScenarioId, orgDesignOptionId, year}",
-  /buildOrgDesignHcTable\(\{\s*openingPackageId,\s*occupancyScenarioId,\s*orgDesignOptionId:[^,]+,\s*year,?\s*\}\)/.test(orgDesignSrc),
+  /buildOrgDesignHcTable\(\{\s*openingPackageId,\s*occupancyScenarioId,\s*orgDesignOptionId(?::[^,]+)?,\s*year,?\s*\}\)/.test(orgDesignSrc),
 );
 check(
   "Payroll's engine inputs come from its own props/local state, not a fabricated default",

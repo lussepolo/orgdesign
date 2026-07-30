@@ -185,6 +185,9 @@ export type PayrollAdapterCostSourceId =
   | "specialist_config"
   | "educator_level_master"
   | "educator_level_associate"
+  | "educator_level_specialist"
+  | "educator_level_inspirational"
+  | "educator_level_distinguished"
   | "learning_monitor_detail"
   | "learning_assistant_detail"
   | "baseline_alias_no_cost"
@@ -208,7 +211,48 @@ export type PayrollAdapterDiagnosticType =
   | "alias_no_additional_cost"
   | "zero_fte_grade"
   | "extension_not_active_in_option"
-  | "unreconciled_grade_envelope";
+  | "unreconciled_grade_envelope"
+  | "invalid_educator_tier_selection";
+
+// V10-RC2.5 Gate 2/Tranche A originally restricted this to "master" and
+// "associate" only, reasoning that no PayrollAdapterCostSourceId mapping
+// existed yet for "specialist"/"inspirational"/"distinguished". Reversed by
+// explicit product-owner instruction during Gate 3/Tranche C (Luciana,
+// 2026-07-30): all five EDUCATOR_LEVELS tiers in src/constants/teaching.ts
+// carry complete, Finance-provided grossMonthly/laborChargesMonthly/
+// benefitsMonthly figures (same structure and provenance as master/
+// associate) — the missing piece was only this adapter-layer costSourceId
+// taxonomy, not missing compensation data. All five are now governed and
+// selectable. See EDUCATOR_TIER_COST_TABLE in payrollAdapter.ts.
+export type EducatorTierId = "master" | "associate" | "specialist" | "inspirational" | "distinguished";
+
+// V10-RC2.5 Gate 3/Tranche B: single source for the canonical tier-ID list
+// and default, so payrollAdapter.ts's resolution logic, the App-level
+// selection hook, and the shared Grade Staffing Table UI cannot drift from
+// each other (each previously would have duplicated this literal set).
+// Order matches EDUCATOR_LEVELS in src/constants/teaching.ts (ascending
+// seniority/cost).
+export const EDUCATOR_TIER_IDS: readonly EducatorTierId[] = [
+  "associate",
+  "specialist",
+  "master",
+  "inspirational",
+  "distinguished",
+];
+// Unchanged by the Gate 3/Tranche C tier expansion: "master" remains the
+// governed default a grade resolves to when no explicit selection exists —
+// changing the default would break byte-identical pre-RC2.5 behavior for
+// every validator that omits educatorTierByGrade entirely.
+export const DEFAULT_EDUCATOR_TIER_ID: EducatorTierId = "master";
+
+// Selection map: normalized (lowercase) gradeId -> selected Educator tier.
+// Scenario/grade/role-family identity (openingPackageId, occupancyScenarioId,
+// orgDesignOptionId, grade, roleFamily) is owned by the caller (the shared
+// App-level selection state) — this map only carries the grade axis, since
+// package/captação/org-design-scenario are already fixed by the enclosing
+// buildPayrollAdapterInput() call, and role family is implicitly "educator"
+// (Assistant/Monitor have no selectable tier — see V10-RC2.5 directive).
+export type EducatorTierSelectionByGrade = Partial<Record<string, EducatorTierId>>;
 
 export interface PayrollAdapterDiagnostic {
   diagnosticType: PayrollAdapterDiagnosticType;
@@ -236,6 +280,12 @@ export interface PayrollAdapterRecord {
   grossMonthly: number | null;
   laborChargesMonthly: number | null;
   benefitsMonthly: number | null;
+  // V10-RC2.5: the Educator tier actually applied to this record, for
+  // roleSourceTypes where Educator tier selection is governed (ey/ls
+  // teaching_lead, ms/hs_teaching_lead). null for every other role type
+  // (baseline, extension, learning_assistant, learning_monitor) — those are
+  // not Educator-tier-selectable records.
+  educatorTierId: EducatorTierId | null;
   active: boolean;
   // Phase 13H (2026-06-09): legacy adapter metadata, fixed to `false`, not consumed by
   // fopagEngine.ts or any other caller. Not the FOPAG readiness source — see
@@ -250,6 +300,17 @@ export interface PayrollAdapterBuildInput {
   openingPackageId: string;
   occupancyScenarioId: string;
   orgDesignOptionId: string;
+  // V10-RC2.5 Gate 2/Tranche A: optional. When omitted (every pre-RC2.5 call
+  // site, all 34 pre-existing validators), every Educator-tier-selectable
+  // record uses "master" — byte-identical to pre-RC2.5 behavior. When
+  // provided, selects the Educator tier per grade; a grade absent from the
+  // map also defaults to "master" (the documented, governed v1 default, not
+  // a silently-invented choice). An invalid tier ID for a grade present in
+  // the map is rejected (not applied) and produces an
+  // "invalid_educator_tier_selection" diagnostic; the record still falls
+  // back to "master" so downstream calculation is never blocked by a bad
+  // selection.
+  educatorTierByGrade?: EducatorTierSelectionByGrade;
 }
 
 export type PayrollAdapterBuildStatus =

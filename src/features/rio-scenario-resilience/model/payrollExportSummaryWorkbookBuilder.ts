@@ -35,7 +35,7 @@ export function buildPayrollExportSummaryWorkbook(
 
   for (const scenarioResult of scenarioResults) {
     const { record } = scenarioResult;
-    const details = buildRoleYearDetails(scenarioResult);
+    const details = buildRoleYearDetails(scenarioResult.fopagOutput.records);
 
     const row: (string | number)[] = [
       record.matrixScenarioId,

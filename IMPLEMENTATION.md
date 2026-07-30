@@ -7252,3 +7252,858 @@ still unfixed), and the `activationYearSource` citation staleness. RC2.5:
 still on hold for commit — no commit or push has been made in this phase;
 proposed changes remain in the working tree pending explicit instruction to
 commit.
+
+## Phase V10-RC2.5 — Shared Org Design/Payroll Grade Staffing, Compensation-Tier Workflow, Financial Propagation and Formula-Bearing Export (2026-07-30)
+
+### Entry Gate (Gate 0)
+
+Starting state confirmed: branch `main`, HEAD = `origin/main` = `44697b0`
+("Reconcile governed High School educator ramp"), 0/0 ahead/behind, clean
+working tree. Governed HS ramp `{g9:4, g10:2, g11:3, g12:2}`=11 preserved
+throughout this phase, never reinterpreted.
+
+### Gate 1 — trace and scope decision
+
+24 items traced across opening-package/captação/org-design selection, year
+playback, per-grade staffing, compensation, FOPAG/DRE, and existing export
+paths (3 parallel Explore agents + direct file reads). Findings: `orgDesignOptionId`
+was genuinely duplicated as two independent `useState` calls in
+`ExecutiveOrgDesignTab.tsx` and `PayrollProjectionTab.tsx`, both resetting on
+tab navigation; of the 5 `EDUCATOR_LEVELS` compensation tiers
+(`src/constants/teaching.ts`), only Master and Associate had a governed
+`PayrollAdapterCostSourceId` mapping at the time; Assistant has exactly one
+governed compensation record (no tier concept at all). These findings shaped
+the binding scope decisions issued in response (below).
+
+**Binding scope decisions (product owner, before Tranche A began):** lift
+`openingPackageId`, `occupancyScenarioId`, `orgDesignOptionId`, and an
+Educator tier-selection map to `App.tsx` (extending the existing
+`dreSelections` lifted-state pattern — no Context, no new store); keep
+`year` tab-local (the "false dependency" rationale applies only to `year`);
+scope Educator tier selection to Master/Associate initially (later reversed,
+see Gate 3/Tranche C below); treat Assistant as fixed/read-only; four ordered
+tranches (A: shared contract, B: both UI views, C: exports, D: validation);
+proceed continuously without interim approval; do not commit or push.
+
+### Tranche A — shared contract + financial path
+
+- `payrollAdapterContract.ts`: added `EducatorTierId`, `EducatorTierSelectionByGrade`,
+  `educatorTierId` field on `PayrollAdapterRecord`, `educatorTierByGrade`
+  optional input on `PayrollAdapterBuildInput`, `invalid_educator_tier_selection`
+  diagnostic type.
+- `payrollAdapter.ts`: `EDUCATOR_TIER_COST_TABLE`, `resolveEducatorTier()`
+  (defaults to governed `"master"`, rejects invalid IDs with a diagnostic
+  rather than silently substituting), memoized per-grade resolution for
+  EY/LS teaching leads (fixed a 20×-per-year duplicate-diagnostic bug caught
+  during Tranche A's own numeric proof).
+- `fopagEngineContract.ts`/`fopagEngine.ts`, `dreEngineContract.ts`/`dreEngine.ts`:
+  optional `educatorTierByGrade` threaded through, byte-identical output when
+  omitted (verified against all 34 pre-existing validators).
+- `src/hooks/useEducatorTierSelection.ts` (new): shared selection controller,
+  instantiated once in `App.tsx`, passed to both tabs.
+- Numeric proof: Master↔Associate changes cost, never headcount; FOPAG/DRE
+  reconcile; full 34-script sweep byte-identical to the `44697b0` baseline
+  except one intentional regex fix (`validate-v10-rc2-2-gate3-payroll-parity.ts`,
+  updated to accept the new ES2015-shorthand prop-passing form
+  `orgDesignOptionId,` alongside the old mapped-expression form — same
+  argument shape, not a weakened check).
+
+### Tranche B — shared grade-level staffing UI
+
+New shared component `src/components/common/GradeStaffingTable.tsx`, rendered
+identically from both `ExecutiveOrgDesignTab.tsx` and `PayrollProjectionTab.tsx`
+with the same scenario props and the same `educatorTierSelection` instance.
+
+**Scope decision, recorded in `docs/audits/rio-resilience/phase-v10-rc2-5-gate3-tranche-b-scope.md`:**
+Early Years/Lower School render one row per grade with an individual Educator
+tier selector; Grade 6 stays `division_level_only` (unchanged from RC2.3
+Gate 5/RC2.4 Gate 1 evidence-matrix item 4); Middle School/High School render
+as division-level aggregate cards (not per-grade rows — `buildOrgDesignHcTable()`
+deliberately aggregates them, and three prior phases preserved that
+aggregation), each with one Educator tier control that fans out to every
+grade in that division's governed fixed-FTE table; Assistant renders as a
+fixed, read-only badge, never a selector.
+
+`payrollGradeDetailAdapter.ts` extended with `shortGradeId` (exposing the
+tier-resolution key the adapter already computed internally, so the UI never
+re-derives or guesses the EY/LS→short-grade-ID mapping a second time).
+`useEducatorTierSelection.ts` extended with `setEducatorTiersForGrades`
+(division-level preset fan-out) and `clearEducatorTierSelectionsForScenario`
+(scenario-wide reset, scanning every explicit selection under the scenario
+prefix regardless of which projection year was active when it was made —
+fixes a reset-semantics bug caught during Tranche D review, where an
+earlier year-scoped key list could miss selections made under a different
+year's active-grade set and leave them stale after "Reset Defaults").
+
+Verified live in Chrome (both locales): a tier change from either tab is
+immediately visible from the other; `orgDesignOptionId` changes stay synced;
+Grade 6 stays Middle School; HS ramp stays `{4,2,3,2}`=11; "Reset Defaults"
+correctly clears back to Master. Full 34-script sweep: one additional
+mechanical validator fix required (`validate-v10-rc2-2-gate1-blocker-register.ts`'s
+"PayrollProjectionTab.tsx discloses F06" check updated to also read
+`GradeStaffingTable.tsx`, since the disclosure moved into the new shared
+component the tab now delegates to — the disclosure itself is unchanged and
+still live).
+
+### Tranche C — exports
+
+**Payroll export (live path) extended:** `computeOrgDesignPayrollVariants()`
+(`dreScenarioWorkbook.ts`) now threads `educatorTierByGrade` to all three
+org-design variants — previously only the currently-selected variant
+reflected a live tier choice, the other two silently defaulted to Master.
+"Educator Tier" columns added to the `Payroll Detail - {Minimum,Balanced,Premium}`
+and `FOPAG Headcount Plan` sheets, sourced from a new `educatorTierId` field
+added to `FopagCalculatedRecord` (plain pass-through from
+`PayrollAdapterRecord.educatorTierId`).
+
+**New Org Design export:** `orgDesignExportWorkbookBuilder.ts` (none existed
+before this phase), triggered from `ExecutiveOrgDesignTab.tsx`'s header. Six
+sheets — Scenario Configuration, Grade Staffing, Role Payroll Detail, FOPAG
+Payroll Projection, FOPAG-DRE Reconciliation, Diagnostics — following the
+exact `{t,v,f}` formula-cell / `SUMIF` / cross-sheet-reference convention
+`payrollExportWorkbookBuilder.ts` already established. No compensation logic
+reimplemented; every number sourced from `calculateFopag()`/`calculateDre()`.
+`buildRoleYearDetails()` refactored to accept `readonly FopagCalculatedRecord[]`
+directly instead of the fixed-matrix `PayrollExportScenarioResult` wrapper
+(it never used any other field of that wrapper), so the new export reuses
+the identical salary/encargos/benefits escalation logic; all three
+pre-existing call sites plus the matrix validator script updated to pass
+`.fopagOutput.records` explicitly.
+
+**Explicitly out of scope, by architecture, not oversight:** the fixed-matrix
+Payroll export (`payrollExportWorkbookBuilder.ts`, `PayrollExportMatrixTab.tsx`)
+was left unmodified. It has no props and builds all 12 workbooks from a
+hardcoded matrix — it cannot see live tier selections because it is not a
+live-state surface. Adding an "Educator Tier" column there that always reads
+"Master" would misrepresent an unmade selection as a real one.
+
+### Mid-phase governance reversal — all five Educator tiers
+
+During Tranche C, explicit product-owner instruction (2026-07-30): "we must
+have all the tiers for educator salaries: associate, specialist, master,
+inspirational, distinguished." Verified `src/constants/teaching.ts`'s
+`EDUCATOR_LEVELS` array: all five tiers carry complete, identically-structured
+`grossMonthly`/`laborChargesMonthly`/`benefitsMonthly`/`totalCost` figures —
+the earlier Gate 1 restriction to Master/Associate was an adapter-layer
+`costSourceId` taxonomy gap, not missing compensation data.
+
+`EducatorTierId` widened to all five tiers; `EDUCATOR_TIER_IDS` and
+`EDUCATOR_TIER_COST_TABLE` extended with `specialist`/`inspirational`/
+`distinguished` (three new `PayrollAdapterCostSourceId` values,
+`educator_level_specialist`/`educator_level_inspirational`/`educator_level_distinguished`,
+distinct from the pre-existing baseline-role `specialist_config`). Two
+hardcoded binary ternaries (`dreScenarioWorkbook.ts`'s and
+`orgDesignExportWorkbookBuilder.ts`'s tier-display-label functions — both
+originally `tier === "master" ? "Master" : "Associate"`, which would have
+silently mislabeled specialist/inspirational/distinguished as "Associate")
+found and fixed to a proper five-entry lookup table before this shipped;
+caught by re-typechecking after widening the union (TypeScript's exhaustiveness
+check on `GradeStaffingTable.tsx`'s `TIER_LABEL_KEYS` record surfaced the
+three missing i18n-key mappings directly). The governed default remains
+`"master"` — unchanged, to preserve byte-identical pre-RC2.5 behavior for
+every caller that omits `educatorTierByGrade`. Verified end-to-end (all five
+tiers resolve independently, cost differs, headcount unchanged, no
+`invalid_educator_tier_selection` diagnostics, Org Design export discloses
+the real tier name) and confirmed live in the browser (5-option `<select>`
+renders in both tabs, both locales, no layout overflow from the 10 new
+division-preset buttons).
+
+`docs/audits/rio-resilience/phase-v10-rc2-5-gate3-tranche-b-scope.md` carries
+a superseding notice recording this reversal; every other Tranche B/C scope
+decision (Grade 6 division-level-only, MS/HS division-level aggregation,
+Assistant fixed single tier) is unchanged.
+
+### Gate 7 — Exact Acceptance Assertions
+
+`scripts/validate-v10-rc2-5-gate7-shared-tier-workflow.ts` (new,
+`npm run validate:v10-rc2-5-gate7`): 35 numbered assertions. Assertions
+20/22/25/26 test Assistant's fixed, read-only classification (amended from
+the original spec, which referenced a non-existent Assistant selector);
+19/21/23/24/27 test the real Educator tier selectors, bidirectional sync,
+and diagnostic correctness — written against all five tiers, since no
+Educator tier is excluded as of the reversal above. Four assertions target
+paths the numeric proofs above hadn't yet exercised: all five tiers change
+cost without changing headcount (30/31); FOPAG/DRE reconcile under a
+non-default tier across all three org-design options — the
+`computeOrgDesignPayrollVariants` fan-out path (32); an invalid tier ID
+produces exactly one diagnostic, not one per year (27); an unresolved
+selection resolves to the *named* default `"master"`, not
+`EDUCATOR_TIER_IDS[0]` (`"associate"` — now a materially different value
+than before the tier expansion, so a first-eligible-element bug would be
+visible here where it was previously masked) (28). **35/35 PASS.**
+
+### Regression
+
+Full 34-pre-existing-script sweep: **identical to the `44697b0` baseline**
+(same pass/fail pattern as every prior sweep in this phase). The new 35th
+script (`validate:v10-rc2-5-gate7`) reported separately: 35/35 assertions
+pass. `tsc --noEmit`: clean throughout every tranche. `npm run build`: clean
+throughout every tranche (one pre-existing chunk-size warning, unrelated to
+this phase).
+
+### Browser QA (PT and EN, live Chrome automation)
+
+One flow per locale: Org Design → set a non-default Educator tier on one
+grade (Specialist in EN, verified via the same live app) → click "Export Org
+Design (.xlsx)" → switch to Payroll → confirm the same tier is shown there →
+click "Download .xlsx" → check console. Repeated in PT with the
+division-preset button row (5 tiers × 2 divisions = 10 buttons + Reset)
+specifically checked for overflow at PT string lengths — wraps cleanly via
+`flex-wrap`, no layout break. Zero console errors across both passes.
+
+### Files changed this phase
+
+New: `src/components/common/GradeStaffingTable.tsx`,
+`src/hooks/useEducatorTierSelection.ts`,
+`src/features/rio-scenario-resilience/model/orgDesignExportWorkbookBuilder.ts`,
+`scripts/validate-v10-rc2-5-gate7-shared-tier-workflow.ts`,
+`docs/audits/rio-resilience/phase-v10-rc2-5-gate3-tranche-b-scope.md`.
+
+Modified (financial engine / shared contract): `payrollAdapterContract.ts`,
+`payrollAdapter.ts`, `fopagEngineContract.ts`, `fopagEngine.ts`,
+`dreEngineContract.ts`, `dreEngine.ts`, `payrollGradeDetailAdapter.ts`.
+
+Modified (UI/shared state): `App.tsx`, `ExecutiveOrgDesignTab.tsx`,
+`PayrollProjectionTab.tsx`, `SectionsAndPayrollWorkspace.tsx`,
+`src/components/common/index.ts`.
+
+Modified (exports): `dreScenarioWorkbook.ts`, `payrollExportWorkbookBuilder.ts`
+(signature refactor only — `buildRoleYearDetails` now takes
+`readonly FopagCalculatedRecord[]`), `payrollExportSummaryWorkbookBuilder.ts`,
+`payrollExportManifest.ts` (both: one-line call-site update for the
+refactor above, not a logic change).
+
+Modified (i18n): `en-US.ts`, `pt-BR.ts` (new tier/export/sync-note keys;
+`payrollHowToUseIntro` corrected — previously described only opening
+package/captação/tuition as shared/synced and Org Design version as merely
+"also pickable here," which understated scope once `orgDesignOptionId` and
+Educator tier selections became genuinely shared in Tranche A).
+
+Modified (validators — mechanical adaptations to intentional refactors, not
+weakened tests): `validate-v10-rc2-2-gate1-blocker-register.ts` (F06
+disclosure check now also reads `GradeStaffingTable.tsx`, since the
+disclosure moved there); `validate-v10-rc2-2-gate3-payroll-parity.ts` (regex
+now accepts both the pre-Tranche-A mapped-expression and the new
+ES2015-shorthand prop-passing form — same argument shape); `validate-v10-x1-payroll-export-matrix.ts`
+(two call sites updated for the `buildRoleYearDetails` signature refactor).
+
+### Final classification
+
+- Shared state boundary (Tranche A): **PASS** — no duplicated
+  `orgDesignOptionId`/tier-selection state; `year` correctly remains
+  tab-local.
+- Educator tier selectors, bidirectional sync: **PASS** — real selectors
+  (not fabricated), immediate cross-tab sync, verified live in both locales.
+- Educator tier scope: **all five `EDUCATOR_LEVELS` tiers governed and
+  selectable** (Associate, Specialist, Master, Inspirational, Distinguished)
+  — reversed from the original Gate 1 Master/Associate-only restriction by
+  explicit product-owner instruction; no Educator tier is excluded.
+- Assistant classification parity: **PASS** — fixed, read-only, identical
+  across both tabs; never rendered as a selector; never reported as an
+  unresolved tier selection.
+- MS/HS grade-level rows: **scope-limited to division level**, per RC2.3
+  Gate 5/RC2.4 Gate 1 evidence-matrix item 4 — not a defect; recorded in the
+  Tranche B/C scope doc.
+- FOPAG/DRE reconciliation under live tier selection: **PASS**, across all
+  five tiers and all three org-design options.
+- Formula-bearing exports from both tabs: **PASS** — new Org Design export
+  (6 sheets) and extended live Payroll export, both formula-bearing
+  (`{t,v,f}`/`SUMIF`/cross-sheet references), unique Excel-legal sheet
+  names, verified by XLSX round-trip.
+- Regression: **34/34 pre-existing validators identical to the `44697b0`
+  baseline; new 35-assertion validator 35/35 PASS.**
+
+### Addendum — Counselor headcount ramp resolved (2026-07-30, out-of-band correction)
+
+During Tranche D review, the product owner flagged the counselor headcount
+ramp live in-session, resolving the RC2.4 Gate 6 deferred blocker
+("Counselor activation year" — see above, "current code produces 2031"
+vs. "user verbally stated 2032," left unresolved for lack of a workbook
+citation for either value).
+
+**Two duplicated, independently-hardcoded copies of the counselor headcount
+progression existed** — `src/constants/leadership.ts`'s `LEADERSHIP_CONFIG`
+(the canonical source `orgDesignPayrollActivation.ts` cites) and
+`payrollRoleCostSourceData.ts`'s own `headcountProgression` array (the one
+`payrollAdapter.ts` actually reads via `PAYROLL_ROLE_COST_SOURCE_DATA` —
+confirmed by tracing `resolveHeadcount(rec.headcountProgression, ...)`).
+Editing only `leadership.ts` left the live FOPAG calculation unchanged
+(verified: still produced HC=4 at 2031 after the first edit) — the second
+copy, despite citing `leadership.ts` as its own source, had independently
+drifted. Both updated together, plus `orgDesignPayrollActivation.ts`'s
+descriptive citation and the stale `payrollNoteFolha`/`payrollFormulaFolha`
+i18n display string (which read "Counselors (1→4)" — itself already wrong
+against the pre-correction code's actual 3→4 ramp, not merely stale from
+this fix).
+
+**Final governed counselor ramp: `{2028: 2, 2032: 3}`** (direct product-owner
+correction, live in-session, 2026-07-30) — superseding both the RC2.4-era
+code value (`{2028: 3, 2031: 4}`) and the RC2.4-recorded verbal statement
+(2032 step year only, headcount values unspecified at the time). Verified:
+`calculateFopag()` output now shows HC=2 for 2028-2031, HC=3 from 2032
+onward. Full 34-script regression sweep re-run: identical to the `44697b0`
+baseline. `validate:v10-rc2-5-gate7`: 35/35 (unaffected — no assertion in
+that script references the Counselor role). `tsc --noEmit`/`npm run build`:
+clean.
+
+Files changed: `src/constants/leadership.ts`, `payrollRoleCostSourceData.ts`,
+`orgDesignPayrollActivation.ts`, `en-US.ts`, `pt-BR.ts`.
+
+### Remaining blockers (unchanged in kind from prior phases — out of RC2.5 scope)
+
+Specialist FTE/threshold (the non-teaching `specialist_config` baseline-role
+threshold — unrelated to the Educator `specialist` tier added this phase),
+D-R5, D-R6, F03, F06 (MS/HS grade-level staffing reconciliation — still
+open; this phase's MS/HS division-level scope decision does not resolve
+F06, it preserves the prior disposition), corporate allocation, the stale
+`activationYearSource` citation, and the dormant live-UI diagnostic-surfacing
+gap. Counselor activation year is now resolved (see addendum above).
+
+### Note on working-tree inventory (2026-07-30)
+
+`docs/audits/rio-resilience/phase-v10-rc2-gate8-coverage-matrix.json` shows a
+full-file rewrite in `git diff --stat` (1800/1800 lines) after this session's
+validation sweeps. This is **not** hand-edited RC2.5 work — the file is
+mechanically `writeFileSync`-regenerated in full by
+`validate-v10-rc2-gate8-coverage-matrix.ts` every time that script runs, and
+that script ran repeatedly during both this session's and the prior session's
+regression sweeps. Confirmed the current on-disk value reflects the **final**
+`{2028:2, 2032:3}` Counselor ramp (`payrollTotalPayroll: 15417535.41`,
+matching the corrected, lower figure — not an intermediate value from the
+superseded `{2028:3, 2032:4}` edit).
+
+Separately: several files present in this session's opening `git status`
+snapshot (`phase-v10-rc2-1-gate6-staffing-table.json`,
+`phase-v10-rc2-3-gate9-turma-and-staffing-source-discrepancies.md`,
+`validate-v10-e2.ts`,
+`validate-v10-rc2-3-gate6-scenario-and-grade6-coverage.ts`,
+`governedCaptacaoCapacitySourceData.ts`, `sectionCountEngine.ts`, and three
+untracked files) do not appear in the current `git status --short`. Verified
+via `git show --stat c268857` and `git show --stat 44697b0`: these are
+exactly the files committed by `c268857 Correct governed section ramp-up and
+staffing parity` and `44697b0 Reconcile governed High School educator ramp`
+— two commits that landed earlier in this same extended session, before the
+work resumed in this pass. `HEAD` and `origin/main` are both `44697b0`
+throughout this pass (confirmed at both start and end). No reset, no data
+loss — the opening snapshot simply predates those two commits.
+
+### Closure remediation (2026-07-30, continued session)
+
+A prior closure-review pass in this same session classified `validate:v10-x2t`
+as a pre-existing, RC2.5-unrelated legacy failure, based on comparing RC2.5's
+`git diff --name-status` output against the validator's target file list (none
+of the 9 previously-flagged-failing scripts appeared in that diff). **That
+classification was wrong for `validate:v10-x2t` specifically**, and is
+corrected here. The flaw: comparing source-file diffs is not the same as
+executing the validator against a true, isolated `44697b0` baseline — exactly
+the gap the product owner's closure-review instruction anticipated.
+
+**Correction method.** `git worktree add --detach /tmp/rc25-baseline-worktree
+44697b0` (with its own `npm install`) was used to obtain a truly isolated,
+non-destructive baseline execution environment, distinct from the dirty
+working tree. All 9 previously-flagged scripts were re-run in both trees.
+
+**Result: 7 of 9 are genuine NO NEW REGRESSION** — `phase15f` (179/185 both
+trees), `phase15i2-packet` (24/25 both), `phase15j3` (7/20 both), `phase15l`
+(15/18 both), `phase15l2` (17/27 both), `phase15m` (13/20 both),
+`v10-rc2-3-gate2` (identical 3-failure signature, byte-identical detail
+output both trees) — all confirmed by diffing full stdout, not just the
+pass/fail count.
+
+**`validate:phase15o` is non-deterministic, not a regression.** Three runs on
+the current working tree gave 13/23, then 14/23, then 13/23 pass; two runs on
+the isolated baseline worktree both gave 14/23. Two consecutive same-tree runs
+disagreeing with each other is itself proof of a flaky check, independent of
+whether RC2.5 changed anything. Classified **UNVERIFIED** — do not read either
+number as a regression or as a clean pass.
+
+**`validate:v10-x2t` has two independent causes, not one, and must be split:**
+
+1. `no_drift__src/components/dreSimulator/dreScenarioWorkbook.ts` — this check
+   passes if the file matches either a hardcoded dirty-entry-state hash *or*
+   `git rev-parse HEAD:<path>` (the committed blob). Since RC2.5 is
+   deliberately uncommitted, `HEAD:<path>` is still the pre-RC2.5 file, which
+   cannot match RC2.5's legitimately modified working-tree content. This is
+   an **artifact of uncommitted state**, not a code defect — it resolves
+   automatically once RC2.5 is committed, with no validator edit required.
+2. Three `governed_export_file_unchanged__*` checks (for
+   `payrollExportWorkbookBuilder.ts`, `payrollExportSummaryWorkbookBuilder.ts`,
+   `payrollExportManifest.ts`) plus the `q11` aggregate — these pin against a
+   **fixed historical commit** (`1cab3312b50e52005ab5d22c109646e94650da4e`)
+   with no override mechanism, unlike the dirty-hash check above. RC2.5's
+   `buildRoleYearDetails()` signature refactor (needed so the new Org Design
+   export could reuse the same escalation logic instead of duplicating it)
+   legitimately touches all three files. **This is REGRESSION DETECTED,
+   caused by RC2.5, and does not resolve on commit.** It was not weakened or
+   edited to force a pass — the freeze this check enforces was installed by
+   an earlier phase (V10-X2T) for that phase's own governance reasons, and
+   releasing three files from it is a product-owner-level decision, not one
+   to make unilaterally inside a closure review. **This is the concrete,
+   smallest remaining item blocking commit.** Resolution requires an explicit
+   product-owner decision: either (a) release these three files from
+   `GOVERNED_EXPORT_FILES` in `validate-v10-x2t-workspace-architecture-i18n.ts`
+   with a recorded rationale, or (b) revert the `buildRoleYearDetails`
+   signature change and have the Org Design export duplicate the escalation
+   logic instead.
+3. `q5_zero_unresolved_visible_strings_app_wide` — reachable candidate count
+   went from 2784 (baseline) to 2797 (current), fully reconciled: +5 in
+   `dreScenarioWorkbook.ts` (the new "Educator Tier" column headers/labels),
+   +8 in the new `GradeStaffingTable.tsx` (the `DIVISION_LABEL_KEYS` lookup
+   object's string keys and 4 `"—"` placeholder-dash literals — internal
+   lookup keys and a single-glyph fallback, not unwrapped rendered UI text;
+   the same category of literal already present and tolerated in every other
+   file counted at baseline, e.g. `PAYROLL_DIV_COLORS`-style Records keyed by
+   division name). This check fails at both baseline (2784, non-zero) and
+   current (2797, non-zero) — same check, same failure category, no new kind
+   of gap. Classified **NO NEW REGRESSION RELATIVE TO 44697b0 in kind**; the
+   count increase is explained and does not represent unlocalized user-facing
+   text. No `t()`-wrapping was applied to the lookup keys, since doing so
+   would not change what is actually rendered and would be cosmetic
+   validator-chasing, not a real fix.
+
+### Counselor permanent regression coverage added (Section 3 remediation)
+
+`scripts/validate-v10-rc2-5-gate7-shared-tier-workflow.ts` did not reference
+the Counselor role at all (confirmed by grep prior to this change) — a
+confirmed, uncontroversial gap, independent of the `v10-x2t` freeze conflict
+above. Extended from 35 to **42 assertions** (36-42 new), all exercising live
+runtime consumers, not source-string or snapshot matching:
+
+- **36**: `LEADERSHIP_CONFIG` and `PAYROLL_ROLE_COST_SOURCE_DATA` resolve to
+  the identical expanded headcount ramp for 2028-2037 (citation source stays
+  in sync with the file `payrollAdapter.ts` actually reads).
+- **37**: `payrollRoleCostSourceData.ts`'s `headcountProgression` is exactly
+  `[[2028,2],[2032,3]]` — no obsolete ramp value survives.
+- **38**: `calculateFopag()`'s resolved `headcountOrFte` for the Counselor
+  role is exactly `[2,2,2,2,3,3,3,3,3,3]` across years 2028-2037 (engine
+  output, not the source table).
+- **39**: exactly one `roleId === "counselor"` record exists per year,
+  2028-2037 — direct proof against double-counting, since `fopagEngine.ts`
+  sums `grossLaborAnnualAfterGrowth`/`benefitsAnnualAfterGrowth`
+  unconditionally per record into `yearTotals`.
+- **40**: every Counselor record is `allocationModel: "FOLHA_DIRETA"`,
+  consistent across all tested years.
+- **41**: `dreEngine.ts` invokes `calculateFopag()` exactly once (source
+  assertion ruling out a duplicate-computation double-apply path).
+- **42**: the Org Design export's Role Payroll Detail sheet discloses HC=2 at
+  year 2031 and HC=3 at year 2032 for the Counselor role — the corrected
+  ramp propagates to the formula-bearing export, not just the engine.
+
+Repo-wide grep for the obsolete ramp patterns (`2031, 4`, `[2028, 3]`) across
+`src/` returned zero matches. A third site, `executiveOrgDesignModel.ts`'s
+`ms-counselor` org-chart node, reads the ramp dynamically via
+`getIncrementalExistingRoleHeadcount("counselor", ...)` → `LEADERSHIP_CONFIG`
+at runtime (not a fourth hardcoded copy) — confirmed by source trace, so no
+remediation was needed there. `validate:v10-rc2-5-gate7`: **42/42 PASS**.
+`tsc --noEmit`: clean. `npm run build`: clean. `git diff --check`: clean.
+
+Requirement provenance for the `{2028:2, 2032:3}` values themselves: confirmed
+by product-owner conversation history (2026-07-30 live session); not
+independently present in repository history inspected here — the RC2.4 Gate 6
+record in this document documents only the 2032 step year, not the headcount
+values.
+
+### Calibration note on the "Final classification" table above
+
+The "Assistant classification parity: PASS" line above is accurate for what
+it actually tests — assertions 20/22/25/26/29 verify UI parity (both tabs
+show the same fixed badge, neither renders a selector, absence of selection
+is never misreported as unresolved). It does **not** cover export-to-export
+parity — there is no assertion that the Org Design export and the live
+Payroll export disclose the identical Assistant classification string
+side-by-side. That specific check was not added this pass. Treat Assistant
+parity as **PASS at the UI/engine layer, NOT INDEPENDENTLY VERIFIED at the
+export-to-export layer** — narrower than the blanket PASS above suggests.
+
+Similarly, no browser QA (PT or EN) was performed in this closure-remediation
+pass. The "Browser QA (PT and EN, live Chrome automation)" section above
+reflects earlier-phase testing, not the specific untested flow list from the
+closure-review instruction (5-tier bidirectional sync, scenario/year
+isolation, cross-year Reset Defaults, live Counselor=2/2031 and
+Counselor=3/2032 visual confirmation). Classify that flow list as **NOT
+PERFORMED THIS PASS** — prior QA and source inspection do not substitute.
+
+### Sections deferred (Assistant-parity export formatting, full bilingual QA matrix)
+
+Given the `v10-x2t` `governed_export_file_unchanged__*` freeze conflict above
+forces a HOLD regardless of further polish, the remaining closure-instruction
+items — restrained deterministic export formatting (Section 5) and the full
+untested bilingual browser-QA flow matrix (Section 6) — were **not attempted
+in this pass**. Investing further diff into export formatting or running a
+multi-hour QA matrix against a candidate that cannot be recommended for commit
+until the freeze conflict is resolved would risk producing work that is
+partially reverted depending on which way that decision goes. This is a
+deviation from the literal instruction sequence, made explicitly and reported
+here rather than silently — flag if the product owner wants these done now
+regardless of the pending HOLD.
+
+### Recommendation
+
+**HOLD — do not commit.** No commit and no push occurred during this phase.
+All Tranche A-D work plus this closure remediation remains in the working
+tree; the stash (`stash@{0}`) and origin/main are both confirmed unchanged at
+`44697b0`, ahead/behind 0/0, nothing staged.
+
+The blocking item is narrow and specific: `validate:v10-x2t`'s
+`governed_export_file_unchanged__*` checks (3 files + `q11` aggregate) conflict
+with RC2.5's authorized `buildRoleYearDetails()` refactor and require an
+explicit product-owner decision (release the freeze on those 3 files, or
+revert the refactor) before this phase can be committed. Everything else
+inspected this session — the 5-tier Educator governance, Counselor
+remediation (now with permanent regression coverage), Assistant fixed-tier
+parity as previously verified, FOPAG/DRE reconciliation, and the 7 other
+legacy validators — is either PASS or NO NEW REGRESSION RELATIVE TO 44697b0.
+
+### Freeze resolution and full closure (2026-07-30, continued session)
+
+**Product-owner decision received:** Option A authorized. The byte-identity
+freeze in `validate-v10-x2t-workspace-architecture-i18n.ts`'s
+`GOVERNED_EXPORT_FILES` is retired for exactly three files —
+`payrollExportWorkbookBuilder.ts`, `payrollExportSummaryWorkbookBuilder.ts`,
+`payrollExportManifest.ts` — replaced by permanent semantic/runtime
+invariants, not merely removed. The three other governed files
+(`payrollExportMatrixContract.ts`, `payrollExportZip.ts`,
+`payrollExportScenarioAdapter.ts`) remain fully byte-frozen, unchanged.
+
+#### Validator changes (Section R, `validate-v10-x2t-workspace-architecture-i18n.ts`)
+
+An inline governance comment documents the exact scope of the exception
+(the three files, the authorized change, the "no broader modification"
+constraint) directly above the shrunk `GOVERNED_EXPORT_FILES` array. Eight new
+checks (IDs `r1_build_role_year_details_single_implementation` through
+`r9_exception_files_diff_bounded_to_authorized_refactor`, skipping `r7` — it
+was folded into `r2` rather than added separately) replace the three retired
+byte checks:
+
+- **r1/r2** — `buildRoleYearDetails` has exactly one implementation in `src/`
+  (grep-verified), and every production call site
+  (`payrollExportSummaryWorkbookBuilder.ts`, `payrollExportManifest.ts`,
+  `orgDesignExportWorkbookBuilder.ts`, plus the definition site itself)
+  imports it from that single shared module — no duplicate role/year payroll
+  calculation exists anywhere.
+- **r3** — runtime: builds a real `RoleYearDetail[]` via `calculateFopag()` +
+  `buildRoleYearDetails()` for the first fixed-matrix scenario and asserts
+  `annualSalary + annualEncargos + annualBenefits` reconciles to
+  `totalAnnualRolePayroll` within 0.01 (the same precision policy as
+  `validate-v10-x1-payroll-export-matrix.ts`'s `EPS` and
+  `validate-v10-rc2-5-gate7-shared-tier-workflow.ts`'s
+  `RECONCILIATION_TOLERANCE`) for all 1,240 rows.
+- **r4** — permanent no-drift check for `PayrollExportMatrixTab.tsx`
+  (git-hash vs. `HEAD`), a file with no prior drift check at all.
+- **r5** — source-level: `payrollExportScenarioAdapter.ts` (still frozen)
+  contains no `educatorTierByGrade` reference — the fixed-matrix export is
+  structurally incapable of reflecting a live Educator-tier selection.
+- **r6** — runtime: builds the frozen `buildPayrollExportDetailedWorkbook()`
+  output and asserts its "Payroll Detail" header row contains no "Educator
+  Tier" cell.
+- **r8** — runtime cross-path reconciliation: `FopagCalculatedRecord[]` built
+  via the frozen `payrollExportScenarioAdapter.ts` path is compared,
+  role-for-role and year-for-year (`annualSalary`, `annualEncargos`,
+  `annualBenefits`, `totalAnnualRolePayroll`, `activeHc`), against
+  `calculateFopag()` called directly the way
+  `orgDesignExportWorkbookBuilder.ts` calls it (equivalent scenario, empty
+  `educatorTierByGrade`) — 1,240/1,240 rows match within 0.01.
+- **r9** — a "bounded diff" invariant: `git diff <V10_X1_COMMIT>` for each of
+  the three exception files is compared line-by-line against an exact
+  allowlist of the authorized change (the parameter-shape rename, its one
+  added comment block, and the mechanical call-site updates); any future
+  line beyond that allowlist fails this check. This is what makes the
+  exception "replace, don't merely remove" — not a one-time pass but a
+  permanent guard against further drift.
+
+`q11_governed_export_files_unchanged_runtime` (relocated after Section R so
+it can reference the new check IDs) now requires the 3 remaining byte
+checks **and** all of r1/r2/r3/r4/r5/r6/r8/r9 to pass — previously it only
+aggregated the 6 byte checks, 3 of which no longer exist. `q18`'s
+`PRIOR_PHASE_CHECK_COUNT_FLOOR` was deliberately left at 83, not raised: `q18`
+evaluates mid-run (before Section R's checks are pushed), so its snapshot of
+`checks.length` at that point is smaller than the final total — raising the
+floor there would be self-referentially fragile. The rewritten `q11` is the
+actual replacement-protection mechanism; `q18` still serves its original
+"don't shrink" purpose unmodified.
+
+Verified: `npx tsc --noEmit` clean, `npx tsx
+scripts/validate-v10-x2t-workspace-architecture-i18n.ts` runs
+108/110 pass (was 99/105 before this pass's edits) — total check count moved
+105→110 (-3 retired byte checks, +8 new Section R checks; r7 was folded into
+r2 rather than added separately). The 2 remaining failures are the same two
+pre-existing, explained items below (not new).
+
+#### Assistant classification / compensation-source parity (was: NOT
+INDEPENDENTLY VERIFIED at the export-to-export layer)
+
+`orgDesignExportWorkbookBuilder.ts`'s `tierDisplayLabel()` and
+`dreScenarioWorkbook.ts`'s `educatorTierDisplayLabel()` were each changed
+from a private to an **exported** function (both are small, self-contained,
+pre-existing lookup helpers — no other change) so
+`validate-v10-rc2-5-gate7-shared-tier-workflow.ts` can call both at runtime
+and assert byte-identical output across the full 6-value domain (5 tiers +
+`null`), rather than inferring equivalence from source text. The Org Design
+export's "Role Payroll Detail" sheet also gained two **appended** columns —
+"Role Source Type" and "Allocation Model" (`RPD_HEADER`/`RPD_COL` indices
+12/13; appended, not inserted, so every pre-existing index 0-11 and every
+SUMIF range keyed to them in `buildFopagPayrollProjectionSheet` is
+unaffected — re-verified by direct runtime comparison of the SUMIF sheet's
+cached values against `fppMetricYearTotal()` after the change, no mismatch)
+— the same raw `FopagCalculatedRecord.roleSourceType` /
+`.allocationModel` fields `dreScenarioWorkbook.ts`'s own "Payroll Detail"
+sheet already discloses for every role, Assistant included.
+
+Gate7 assertions 43-45: **43** calls both tier-display functions across all
+6 domain values and asserts identical output (runtime). **44** builds the
+Org Design export and asserts the Assistant role's row shows tier "—" and
+`Role Source Type`/`Allocation Model` matching the live `FopagCalculatedRecord`
+exactly (runtime, against the real engine output). **45** confirms
+`dreScenarioWorkbook.ts`'s source discloses the same two raw fields
+(paired with 43's runtime proof, not a standalone source-text claim).
+
+**Additionally verified via two independently downloaded, real workbooks**
+(one from each live export, produced during this pass's browser QA — see
+below): for `ls_learning_assistant_g1`/2028, both the live Payroll export's
+"Payroll Detail - Balanced" sheet and the Org Design export's "Role Payroll
+Detail" sheet show, cell-for-cell: Educator Tier `"—"`, Role Source Type
+`"ls_learning_assistant"`, Allocation Model `"FOPAG_DIRETO"` — an exact
+match, checked by parsing both actual `.xlsx` files with SheetJS, not by
+comparing source code.
+
+#### Export formatting / structural validation (was: deferred)
+
+Scoped to `orgDesignExportWorkbookBuilder.ts` only — the one export surface
+this phase created outright (per its own header comment, it "ESTABLISHES
+formatting explicitly rather than claiming to preserve a prior house
+style"). A repo-wide grep for `!cols`/`!freeze`/`!autofilter`/cell `.z`
+found no such convention anywhere else in the live or fixed-matrix export
+system, before or after this phase — retrofitting `dreScenarioWorkbook.ts`
+(a ~1700-line file with no prior formatting convention) for two newly added
+columns was judged a token gesture against a candidate already under HOLD,
+and was not done. This is a scoping decision, not an oversight.
+
+Added: `!cols` (column widths) and `!autofilter` (anchored to the header
+row, i.e. `A2:...`, never spanning the note row at row 1) on all 5 tabular
+sheets (Grade Staffing, Role Payroll Detail, FOPAG Payroll Projection,
+FOPAG-DRE Reconciliation, Diagnostics); `!cols` only (2 columns) on Scenario
+Configuration, which mixes a key-value block with a small sub-table and
+isn't a single autofilter-able grid. Currency number format (`z:
+"#,##0.00"`) applied to the true currency columns in Role Payroll Detail,
+FOPAG Payroll Projection (skipping its Headcount/FTE metric row), and
+FOPAG-DRE Reconciliation.
+
+**Frozen header panes are confirmed NOT implementable** on the installed
+`xlsx` (SheetJS) `0.18.5` community-edition build: `write_ws_xml_sheetviews`
+in `node_modules/xlsx/xlsx.js` only ever emits `workbookViewId`/`rightToLeft`
+— no pane/freeze XML is ever written. Verified empirically, twice: a raw
+probe (`sheet["!freeze"] = {...}` → `XLSX.write` → `XLSX.read`) shows the
+property does not survive the round-trip, and this exact probe is now gate7
+assertion 50 (passing — it asserts the documented absence, not a fake
+implementation). This is a named library-version limitation, not an omitted
+checklist item; implementing it would require a SheetJS upgrade/Pro
+license, out of scope for this pass.
+
+Gate7 assertions 46-49 (all runtime, against the real built workbook object
+and, for 49, a real `XLSX.write()`→`XLSX.read()` round-trip with
+`cellNF`/`cellStyles` read options — without which SheetJS's default read
+path silently drops both the number-format code and column-width metadata,
+confirmed empirically): **46** every formatted sheet's `!cols` length
+matches its header column count. **47** every formatted sheet's
+`!autofilter.ref` starts at row 2. **48** a sample currency cell in Role
+Payroll Detail carries `z === "#,##0.00"`. **49** sheet names, `!cols`,
+`!autofilter`, currency format, and the Total Annual Role Payroll formula's
+cached value all survive a real write→read cycle. Call this a **canonical-
+content round-trip verification** — never "bit-for-bit identical," since
+SheetJS writes a fresh creation timestamp into `docProps/core.xml` on every
+write regardless of content.
+
+Gate7 grew from 42 to **50 assertions, 50/50 PASS**. `npx tsc --noEmit`:
+clean throughout.
+
+#### Browser QA — Portuguese and English (was: NOT PERFORMED)
+
+Both locales exercised live against a local dev server (`npm run dev`,
+`localhost:3002`), authenticated via the documented dev password
+(`src/PasswordGate.tsx`'s inline comment), with console-error monitoring
+active throughout (zero errors/exceptions in either locale, across the
+entire flow list below).
+
+**5-tier bidirectional sync — 2 of 5 tiers exercised end-to-end in the
+browser** (Specialist in PT, Inspirational in EN); this is not a claim that
+all five were browser-verified — it isn't. All five appear in every grade's
+`<select>` (confirmed via the accessibility tree in both locales) and all
+five are proven correct and independent at the engine level by gate7
+30/31 (all 5 tiers change cost, never headcount, for the same grade). In
+both locales: setting a grade's tier on Organizational Design was
+immediately visible on Sections and Payroll (same shared
+`GradeStaffingTable.tsx` instance) and vice versa; Grade 6 stayed
+"Division level"/"Nível de divisão" with `—` placeholders throughout; the
+10 division-preset buttons + Reset (11 controls, MS ×5 + HS ×5 + Reset)
+rendered on one row with no overflow in both PT and EN wording.
+
+**Cross-year Reset Defaults (the specific bug this phase's Tranche B fixed —
+IMPLEMENTATION.md above, "a year-scoped key list could miss selections made
+under a different year's active-grade set"):** on Sections and Payroll
+(EN), set Grade 1 → Specialist at Detail Year 2028, switched to Detail Year
+2030, set Grade 3 → Distinguished, switched back to 2028, clicked "Reset
+Defaults" once. Result: Grade 1 (viewed at 2028) → Master **and** Grade 3
+(viewed at 2030) → Master — both cleared by the single reset, confirming
+the scenario-wide (not year-scoped) reset scan works as designed, live.
+
+**Scenario/year isolation:** with Grade 3 → Specialist set under Org Design
+Version "Balanced," switching to "Lean" showed Grade 3 revert to "Master" in
+the UI; switching back to "Balanced" restored "Specialist." Explicit tier
+selections are scenario-scoped (keyed by org design version, among other
+scenario dimensions) and correctly isolated/restored across scenario
+switches — not lost, not bled across scenarios.
+
+**Live Counselor ramp visual confirmation (Organizational Design, EN,
+Role-Level Headcount table):** year 2031 → Counselor HC = **2**; year 2032
+→ Counselor HC = **3**. Matches the corrected `{2028:2, 2032:3}` ramp and
+gate7 assertion 38's engine-level proof, now also confirmed by reading the
+live rendered table.
+
+**Both live exports downloaded and inspected as real files** (not just
+clicked): the Payroll export (`rio-dre-scenario_..._2026-07-30T18-27-57-518Z.xlsx`,
+12.3 MB, 28 sheets) discloses `ls_teaching_lead_g1` → tier "Specialist" in
+its "Payroll Detail - Balanced" sheet after the PT tier change; a second
+Payroll export downloaded in EN discloses `ls_teaching_lead_g2` → tier
+"Inspirational" after the EN tier change. The Org Design export
+(`org-design-export_..._2026-07-30 (2).xlsx`, 853 KB, 6 sheets) was
+independently verified for `!cols`/`!autofilter`/currency `z`/the new
+Role Source Type/Allocation Model columns, all present in the real
+downloaded file — not just in the in-memory object under test.
+
+One incidental note: mid-session, the Chrome extension briefly disconnected
+and the page reloaded, clearing in-memory (non-persisted) tier-selection
+state — expected behavior (selections are session-only React state, not
+persisted to `localStorage` or any backend), not a defect. The cross-year
+Reset Defaults and scenario-isolation tests above were run to completion
+after that reload, on a fresh page load.
+
+#### `phase15o` classification (was: UNVERIFIED)
+
+Ran 5 consecutive times on the current working tree and 5 consecutive times
+on the isolated baseline worktree (`44697b0`, its own `npm install`).
+**Fully deterministic in both trees across all 10 runs** — every current-tree
+run: 13/23 pass, identical 10-ID failing set; every baseline-tree run:
+14/23 pass, identical 9-ID failing set. The prior session's report of
+non-deterministic 13/14/13 pass counts across 3 same-tree runs **could not
+be reproduced** this pass (5 further runs, same tree, byte-identical
+results each time) — this pass's UNVERIFIED-superseding classification
+rests on that inability to reproduce the flakiness, not on any claim about
+what caused the earlier disagreement (a plausible mechanism exists, given
+the check reads live `git diff --name-only HEAD` output and the working
+tree may have been edited between runs in that session, but that is not
+proven from here and is not asserted).
+
+Failing-ID-set diff: baseline's 9 IDs are a strict subset of current's 10;
+the sole addition is `staffing_source_data_files_unchanged`. Its cause,
+traced to `scripts/validate-phase15o.ts:64`
+(`git diff --name-only HEAD`) matching `payrollAdapter.ts` in the deliberately
+uncommitted current tree: this is the same artifact class as
+`no_drift__src/components/dreSimulator/dreScenarioWorkbook.ts` in
+`validate:v10-x2t` — a check comparing live working-tree state against
+`HEAD`, in a tree that is intentionally still uncommitted. It resolves
+automatically on commit (post-commit, `git diff --name-only HEAD` is empty
+regardless of what the commit contains), requires no validator edit, and
+is not caused by any defect in RC2.5's `payrollAdapter.ts` change itself.
+
+**Classification: NO NEW REGRESSION RELATIVE TO 44697b0**, with the one
+addition named and explained as an uncommitted-state artifact rather than
+asserted as "materially equivalent" without qualification.
+
+#### Full closure validator/tooling sweep
+
+All 35 `validate:*` scripts (34 pre-existing + this phase's own gate7) run
+to completion on both the current working tree and the isolated `44697b0`
+baseline worktree. Exit-code comparison, script-by-script:
+
+| Result | Count | Scripts |
+|---|---|---|
+| Identical exit code, both trees | 33 | everything except the two below |
+| Exit-code difference | 1 | `validate:v10-rc2-5-gate7` — current=0 (50/50 pass), baseline=1 (`npm error Missing script` — the script doesn't exist at `44697b0`; not a regression, it's this phase's own new validator) |
+| Same exit code, differing pass/fail detail (both already covered above) | 2 | `validate:v10-x2t`, `validate:phase15o` |
+
+Of the 33 identical-exit-code scripts, the 7 previously flagged by the prior
+session's closure-remediation pass (`phase15f`, `phase15i2-packet`,
+`phase15j3`, `phase15l`, `phase15l2`, `phase15m`, `v10-rc2-3-gate2`) were
+re-diffed this pass at the pass/fail-count and (for `v10-rc2-3-gate2`) full
+failure-detail level — all 7 identical to the prior session's findings,
+still NO NEW REGRESSION RELATIVE TO 44697b0.
+
+Commands and results:
+- `npm run validate:v10-x2t` → exit 1, 108/110 pass. Failing: `q5_zero_unresolved_visible_strings_app_wide` (pre-existing, fails at baseline too, previously explained), `no_drift__src/components/dreSimulator/dreScenarioWorkbook.ts` (uncommitted-state artifact, resolves on commit).
+- `npm run validate:v10-x1` → exit 0, 39/39 pass.
+- `npm run validate:v10-rc2-5-gate7` → exit 0, 50/50 pass.
+- `npm run validate:phase15o` → exit 1, 13/23 pass (5 runs, identical) — see classification above.
+- Full 35-script sweep (`npm run validate:<name>` for every `validate:*` entry in `package.json`, both trees) — see table above.
+- `npx tsc --noEmit` → exit 0, clean.
+- `npm run lint` (`tsc --noEmit` alias) → exit 0, clean.
+- `npm run build` (`vite build`) → exit 0; 1,205 modules, same pre-existing >500kB chunk-size warning as every prior phase, unrelated to this phase.
+- `git diff --check` → exit 0, clean.
+
+#### Repository state at end of this pass
+
+`HEAD` = `origin/main` = `44697b0`, ahead/behind 0/0. Nothing staged.
+`stash@{0}` ("WIP rio-scenario-resilience supporting data") unchanged,
+untouched. Working tree: 28 modified files, 5 untracked files (unchanged
+from this phase's own inventory above, plus this pass's edits to
+`scripts/validate-v10-x2t-workspace-architecture-i18n.ts`,
+`scripts/validate-v10-rc2-5-gate7-shared-tier-workflow.ts`,
+`src/features/rio-scenario-resilience/model/orgDesignExportWorkbookBuilder.ts`,
+`src/components/dreSimulator/dreScenarioWorkbook.ts` (one `export` keyword
+added to an existing private helper), and this file). No commit, no push,
+no new branch. `docs/audits/rio-resilience/phase-v10-rc2-gate8-coverage-matrix.json`'s
+`payrollTotalPayroll` re-checked at `15417535.41` — unchanged from the prior
+session's cited value, confirming this pass's export-formatting/column
+changes did not move the underlying payroll calculation.
+
+#### Final classification
+
+- V10-X1 byte-identity freeze conflict: **RESOLVED** by explicit
+  product-owner authorization (Option A), implemented as bounded, permanent
+  semantic invariants (Section R, 8 checks) replacing — not removing — the
+  three retired byte checks. `q11` now gates on all of them.
+- Assistant classification/compensation-source parity, export-to-export:
+  **PASS**, verified by gate7 43-45 (runtime + source, combined) and by a
+  direct cell-for-cell comparison of two independently downloaded real
+  workbooks.
+- Export formatting/structural validation: **PASS** for
+  `orgDesignExportWorkbookBuilder.ts` (the sheets this phase created);
+  frozen panes named as a verified, out-of-scope library limitation, not
+  implemented.
+- Browser QA: **PASS**, with locale coverage split across the four flow
+  items in the prior session's list. Tier bidirectional sync (2/5 tiers
+  exercised live, all 5 present in the UI and proven at engine level) and
+  the Grade 6 division-level/preset-overflow/export-download flow were run
+  in **both PT and EN** — these are the locale-sensitive items (labels,
+  wording, control-row layout). Cross-year Reset Defaults, scenario/year
+  isolation, and the live Counselor 2031/2032 visual confirmation were run
+  in **EN only**; these three exercise locale-independent state logic
+  (reset-key scanning, scenario-prefix keying, engine headcount
+  resolution) with no PT-specific surface, so the EN run is treated as
+  sufficient evidence for the underlying behavior, but the PT run of the
+  same three flows was not separately performed. Zero console errors
+  throughout all sessions.
+- `phase15o`: **NO NEW REGRESSION RELATIVE TO 44697b0** (10 deterministic
+  runs, one explained uncommitted-state addition), superseding the prior
+  UNVERIFIED classification.
+- Full 35-script closure sweep: **33/35 scripts with identical exit code
+  across both trees; pass/fail counts additionally diffed for the 7
+  previously-flagged scripts and full failure detail compared for
+  `v10-rc2-3-gate2`; 2 explained (v10-x2t, phase15o); 1 is this phase's own
+  new script (N/A at baseline).** `tsc`, lint, build, `git diff --check`
+  all exit 0.
+
+### Recommendation
+
+**READY TO COMMIT**, per every condition in the product-owner's closure
+instruction: replacement semantic protections pass; export
+formatting/structural validation passes; Assistant export-to-export parity
+passes; the locale-sensitive browser flows pass in both PT and EN, and the
+three locale-independent flows pass in EN (see the qualified Browser QA
+line above — the PT run of those three specific flows was not separately
+performed, since they have no PT-specific surface); `phase15o` is no longer
+UNVERIFIED; all affected validators pass; TypeScript/lint/build/`git diff
+--check` all exit 0; the diff is bounded to the files listed above; nothing
+is staged; no unresolved blocker remains that was in this phase's scope.
+
+No commit and no push occurred during this pass, per instruction. RC2.6 was
+not begun.

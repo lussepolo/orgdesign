@@ -55,7 +55,7 @@ export function buildPayrollExportManifest(
   generationTimestampIso: string,
 ): PayrollExportManifest {
   const scenarios: PayrollExportManifestScenarioRecord[] = scenarioResults.map((sr) => {
-    const details = buildRoleYearDetails(sr);
+    const details = buildRoleYearDetails(sr.fopagOutput.records);
     const annualEnrollment = YEARS.map((y) => sr.dreOutput.byYear[y].numero_de_alunos);
     const annualHeadcountFte = YEARS.map((y) => fppMetricYearTotal(details, PD_COL.hc, y));
     const annualSalary = YEARS.map((y) => fppMetricYearTotal(details, PD_COL.annualSalary, y));

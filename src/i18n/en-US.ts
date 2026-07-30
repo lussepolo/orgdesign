@@ -290,6 +290,7 @@ export const EN_US: Record<TranslationKey, string> = {
   // ── ExecutiveOrgDesignTab (Organizational Design) ───────────────────────
   orgDesignHeaderTitle: "Executive Org Design",
   orgDesignHeaderSubtitle: "Full Rio organization tree by scenario and year.",
+  orgDesignExportButtonLabel: "Export Org Design (.xlsx)",
   orgDesignOpeningScenarioLabel: "Opening Scenario",
   orgDesignVersionLabel: "Org Design Version",
   orgDesignYearLabel: "Year",
@@ -505,7 +506,7 @@ export const EN_US: Record<TranslationKey, string> = {
   payrollHowToUseLabel: "How to use this page",
   payrollHowToUseHeadline: "Scenario → Classes → Educators → Cost → Payroll Coverage",
   payrollHowToUseIntro:
-    "Opening package, captação, and tuition are the shared scenario inputs — editable directly on this page, and synced with Executive Org Design / DRE Scenario Simulator wherever they're changed. Pick the Org Design version and the detail year here too. Instructional and non-instructional headcount come from the governed FOPAG/DRE engine; revenue and coverage are computed from that same engine, not Finance-certified.",
+    "Opening package, captação, tuition, Org Design version, and Educator tier selections are the shared scenario inputs — editable directly on this page, and synced with Executive Org Design / DRE Scenario Simulator wherever they're changed. The detail year stays local to this page. Instructional and non-instructional headcount come from the governed FOPAG/DRE engine; revenue and coverage are computed from that same engine, not Finance-certified.",
   payrollFopagIncludesLabel: "FOPAG Direto includes",
   payrollFopagIncludesList:
     "Lead educators · Assistants · Monitors · MS/HS FTE · Music · LED · HS Pool · Clerk · IT · Maintenance · Marketing · HR · Secretary",
@@ -522,7 +523,7 @@ export const EN_US: Record<TranslationKey, string> = {
   payrollNoteBeneficios: "VA/VR, meal allowance, transit voucher, life insurance. Toggle off with Without Benefits.",
   payrollFormulaFolha: "Salary × 13 · per role × headcount",
   payrollNoteFolha:
-    "FOLHA_DIRETA roles: HoS, EY Coordinator, Counselors (1→4), Ed Tech, Family Engagement, Inspirationeer, Nurse, Financial Analyst · Arts, Body & Movement, After School Educators.",
+    "FOLHA_DIRETA roles: HoS, EY Coordinator, Counselors (2→3), Ed Tech, Family Engagement, Inspirationeer, Nurse, Financial Analyst · Arts, Body & Movement, After School Educators.",
   payrollFormulaReceita: "Students × Tuition₂₀₂₈ × 1.08^(yr−2028)",
   payrollNoteReceita: "8% annual tuition growth compounded from the 2028 base rate.",
   payrollLabelFopagDireto: "FOPAG Direto",
@@ -597,6 +598,16 @@ export const EN_US: Record<TranslationKey, string> = {
   payrollLeadFteHeader: "Lead FTE",
   payrollSupportHeader: "Support",
   payrollTierHeader: "Tier",
+  payrollTierMasterLabel: "Master",
+  payrollTierAssociateLabel: "Associate",
+  payrollTierSpecialistLabel: "Specialist",
+  payrollTierInspirationalLabel: "Inspirational",
+  payrollTierDistinguishedLabel: "Distinguished",
+  payrollAssistantFixedTierBadgeLabel: "Fixed tier",
+  payrollAssistantFixedTierNote:
+    "Assistant compensation has exactly one governed tier — shown as fixed, not selectable. A second tier will appear here only once a governed cost source for it exists.",
+  payrollGradeStaffingSyncNoteFromOrgDesign: "Grade staffing and Educator tier selections shown here are shared with Payroll / Turmas e Folha — a change here is immediately visible there.",
+  payrollGradeStaffingSyncNoteFromPayroll: "Grade staffing and Educator tier selections shown here are shared with Executive Org Design — a change here is immediately visible there.",
   payrollPayrollHeader: "Payroll",
   payrollMethodologyTitle: "Methodology",
   payrollMethodologySubtitle: "How this projection is being calculated",

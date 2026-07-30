@@ -113,12 +113,24 @@ check("F06 blocks 0 active coverage cells (aggregate MS/HS payroll cost is still
 // msAggregateHeadcount/hsAggregateHeadcount (Middle School disclosed apart from
 // High School, since only Middle School's Grade 6 is now a governed, visible row) —
 // accept either the pre-V10-RC2.3 combined name or the current split names.
+//
+// V10-RC2.5 Gate 3/Tranche B: the grade-staffing table (and its F06 MS/HS
+// disclosure) was extracted out of PayrollProjectionTab.tsx into the shared
+// GradeStaffingTable.tsx component, so ExecutiveOrgDesignTab.tsx can render
+// the identical table — no duplicated disclosure/calculation logic between
+// the two tabs. Read both files and check the combined source, rather than
+// PayrollProjectionTab.tsx alone, so this check still proves the disclosure
+// is live and reachable from the Payroll tab (via its GradeStaffingTable
+// import/render), not that it lives in one specific file forever.
 const payrollTabSrc = readFileSync(join(ROOT, "src/components/sections/PayrollProjectionTab.tsx"), "utf8");
+const gradeStaffingTableSrc = readFileSync(join(ROOT, "src/components/common/GradeStaffingTable.tsx"), "utf8");
+const payrollTabAndDelegatesSrc = payrollTabSrc + gradeStaffingTableSrc;
 check(
   "live check: PayrollProjectionTab.tsx discloses F06 for MS/HS, does not extrapolate EY/LS rule",
-  payrollTabSrc.includes("payrollMsHsUnavailableLabel") &&
-    (payrollTabSrc.includes("msHsAggregateHeadcount") ||
-      (payrollTabSrc.includes("msAggregateHeadcount") && payrollTabSrc.includes("hsAggregateHeadcount"))),
+  payrollTabSrc.includes("GradeStaffingTable") &&
+    payrollTabAndDelegatesSrc.includes("payrollMsHsUnavailableLabel") &&
+    (payrollTabAndDelegatesSrc.includes("msHsAggregateHeadcount") ||
+      (payrollTabAndDelegatesSrc.includes("msAggregateHeadcount") && payrollTabAndDelegatesSrc.includes("hsAggregateHeadcount"))),
 );
 
 // ── Corporate allocation: never zero-substituted, never suppresses direct payroll ──

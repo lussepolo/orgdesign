@@ -57,6 +57,8 @@ import {
   type OccupancyScenarioId,
 } from "./features/rio-scenario-resilience/model/openingPackageOccupancySourceDataContract";
 import type { TuitionScenarioId } from "./features/rio-scenario-resilience/model/revenueInputs";
+import type { DreWorkingScenarioOrgDesignOptionId } from "./features/rio-scenario-resilience/model/dreWorkingScenarioContract";
+import { useEducatorTierSelection } from "./hooks/useEducatorTierSelection";
 import { useLocale } from "./i18n/useLocale";
 import type { Locale } from "./i18n/localeContract";
 import {
@@ -280,6 +282,26 @@ function AppShell() {
   // since ExecutiveOrgDesignTab never needed to change it.
   const handleTuitionScenarioIdChange = (id: TuitionScenarioId) =>
     setDreSelections({ ...dreSelections, tuitionScenarioId: id });
+  // V10-RC2.5 Gate 2/Tranche A: orgDesignOptionId was already part of
+  // DreScenarioSimulatorSelections but never threaded to ExecutiveOrgDesignTab/
+  // SectionsAndPayrollWorkspace — each held its own local, duplicated
+  // (and tab-switch-resetting) org-design-scenario state instead. This
+  // supersedes that duplication: orgDesignOptionId is now genuinely shared,
+  // same lift-to-AppShell pattern as openingPackageId/occupancyScenarioId/
+  // tuitionScenarioId above. Reverses the tab-local rationale documented at
+  // ExecutiveOrgDesignTab.tsx's prior comment — that rationale covered
+  // `year` (still intentionally tab-local; DRE iterates all years) but did
+  // not independently justify keeping orgDesignOptionId duplicated.
+  const handleOrgDesignOptionIdChange = (id: DreWorkingScenarioOrgDesignOptionId) =>
+    setDreSelections({ ...dreSelections, orgDesignOptionId: id });
+
+  // V10-RC2.5 Gate 2/Tranche A: shared Educator tier-selection state,
+  // instantiated once here (same pattern as dreSelections/
+  // capitalDecisionWorkspace), consumed by both ExecutiveOrgDesignTab and
+  // SectionsAndPayrollWorkspace so a tier change in either immediately
+  // reflects in the other. Assistant has no selectable tier (see Gate 5) and
+  // is intentionally not part of this hook.
+  const educatorTierSelection = useEducatorTierSelection();
 
   React.useEffect(() => {
     const hasSeenAbout = localStorage.getItem(APP_ABOUT_SEEN_STORAGE_KEY);
@@ -423,6 +445,10 @@ function AppShell() {
                 onOpeningPackageIdChange={handleOrgDesignOpeningPackageIdChange}
                 occupancyScenarioId={dreSelections.occupancyScenarioId}
                 onOccupancyScenarioIdChange={handleOrgDesignOccupancyScenarioIdChange}
+                orgDesignOptionId={dreSelections.orgDesignOptionId}
+                onOrgDesignOptionIdChange={handleOrgDesignOptionIdChange}
+                educatorTierSelection={educatorTierSelection}
+                tuitionScenarioId={dreSelections.tuitionScenarioId}
               />
             )}
             {activeTab === "hs" && <HighSchoolTab sections={hsSections} setSections={setHsSections} />}
@@ -434,6 +460,9 @@ function AppShell() {
                 onOccupancyScenarioIdChange={handleOrgDesignOccupancyScenarioIdChange}
                 tuitionScenarioId={dreSelections.tuitionScenarioId}
                 onTuitionScenarioIdChange={handleTuitionScenarioIdChange}
+                orgDesignOptionId={dreSelections.orgDesignOptionId}
+                onOrgDesignOptionIdChange={handleOrgDesignOptionIdChange}
+                educatorTierSelection={educatorTierSelection}
               />
             )}
             {activeTab === "viability" && <ViabilitySimulatorTab />}

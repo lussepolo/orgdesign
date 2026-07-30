@@ -35,6 +35,7 @@ import type {
   DreYearResult,
 } from "../../features/rio-scenario-resilience/model/dreEngineContract";
 import type { FopagEngineOutput } from "../../features/rio-scenario-resilience/model/fopagEngineContract";
+import type { EducatorTierId, EducatorTierSelectionByGrade } from "../../features/rio-scenario-resilience/model/payrollAdapterContract";
 import type { DreLineItemRecord } from "../../features/rio-scenario-resilience/model/dreLineItemMapContract";
 import type { OpeningPackageProjectionYear } from "../../features/rio-scenario-resilience/model/openingPackageOccupancySourceDataContract";
 import type { DreWorkingScenarioOrgDesignOptionId } from "../../features/rio-scenario-resilience/model/dreWorkingScenarioContract";
@@ -61,21 +62,35 @@ export interface ThreeVersionPayroll {
 
 // Phase 15R.1: compute three org design payroll variants, reusing the already-computed
 // dreOutput/fopagOutput for the currently selected option to avoid redundant calculation.
+//
+// V10-RC2.5 Gate 3/Tranche C: accepts the same optional educatorTierByGrade
+// map the caller's own dreOutput/fopagOutput were computed with, and applies
+// it to the other two (non-selected) org-design variants too. Without this,
+// a live Educator tier selection would only be reflected for whichever
+// org-design option happens to be currently selected, and the other two
+// comparison variants would silently fall back to "master" — an Educator
+// tier choice is a compensation decision independent of which org-design
+// option is being compared, so all three variants must share it. Omitted
+// (every pre-Tranche-C call site, including DreExportButton.tsx's DRE
+// Scenario Simulator export, which has no tier selection at all) =>
+// byte-identical prior behavior for all three variants.
 export function computeOrgDesignPayrollVariants(
   selections: DreScenarioSimulatorSelections,
   existingDreOutput: DreEngineOutput,
   existingFopagOutput: FopagEngineOutput,
+  educatorTierByGrade?: EducatorTierSelectionByGrade,
 ): ThreeVersionPayroll {
   function variantFor(orgDesignOptionId: DreWorkingScenarioOrgDesignOptionId): OrgDesignPayrollVariant {
     if (orgDesignOptionId === selections.orgDesignOptionId) {
       return { dreOutput: existingDreOutput, fopagOutput: existingFopagOutput };
     }
     return {
-      dreOutput: calculateDre({ ...selections, orgDesignOptionId }),
+      dreOutput: calculateDre({ ...selections, orgDesignOptionId, educatorTierByGrade }),
       fopagOutput: calculateFopag({
         openingPackageId: selections.openingPackageId,
         occupancyScenarioId: selections.occupancyScenarioId,
         orgDesignOptionId,
+        educatorTierByGrade,
       }),
     };
   }
@@ -1363,6 +1378,7 @@ function buildPayrollDetailSheet(fopagOut: FopagEngineOutput, optionLabel: strin
     "Role Source Type",
     "Allocation Model",
     "Headcount/FTE",
+    "Educator Tier",
     "FOPAG Direto",
     "Folha Direta",
     "Benefits",
@@ -1370,7 +1386,10 @@ function buildPayrollDetailSheet(fopagOut: FopagEngineOutput, optionLabel: strin
     "Is Audit Row",
     "Source Notes",
   ];
-  const noteRow = [`Payroll Detail — ${optionLabel} (role-level, source: fopagOutput.records)`];
+  const noteRow = [
+    `Payroll Detail — ${optionLabel} (role-level, source: fopagOutput.records). Educator Tier reflects ` +
+      'the shared Org Design / Payroll tier selection (V10-RC2.5); "—" marks roles with no selectable tier.',
+  ];
   const rows: (string | number | boolean)[][] = [noteRow, header];
 
   const sorted = [...fopagOut.records].sort(
@@ -1390,6 +1409,7 @@ function buildPayrollDetailSheet(fopagOut: FopagEngineOutput, optionLabel: strin
       rec.roleSourceType,
       rec.allocationModel,
       rec.headcountOrFte,
+      educatorTierDisplayLabel(rec.educatorTierId),
       fopagDireto,
       folhaDireta,
       benefits,
@@ -1498,6 +1518,28 @@ function buildDrePayrollBridgeSheet(tv: ThreeVersionPayroll): XLSX.WorkSheet {
 // ── Phase 15R.3: FOPAG full-scope tabs ───────────────────────────────────────
 
 // ── Sheet 20: FOPAG Headcount Plan ───────────────────────────────────────────
+// V10-RC2.5 Gate 3/Tranche C: display label for a resolved Educator tier —
+// "—" for roles with no selectable tier (educatorTierId is null on the
+// FopagCalculatedRecord for every role type except EY/LS/MS/HS teaching
+// leads/educators, per payrollAdapter.ts). Never invents a tier for a
+// non-selectable role.
+const EDUCATOR_TIER_DISPLAY_LABELS: Record<EducatorTierId, string> = {
+  associate: "Associate",
+  specialist: "Specialist",
+  master: "Master",
+  inspirational: "Inspirational",
+  distinguished: "Distinguished",
+};
+
+// Exported (V10-RC2.5 closure) so validate-v10-rc2-5-gate7-shared-tier-workflow.ts
+// can prove Assistant/tier-display parity against orgDesignExportWorkbookBuilder.ts's
+// tierDisplayLabel() by calling both functions at runtime, rather than a
+// source-text comparison of two similar-looking lookup tables.
+export function educatorTierDisplayLabel(educatorTierId: EducatorTierId | null): string {
+  if (educatorTierId === null) return "—";
+  return EDUCATOR_TIER_DISPLAY_LABELS[educatorTierId];
+}
+
 function buildFopagHeadcountPlanSheet(tv: ThreeVersionPayroll): XLSX.WorkSheet {
   const header = [
     "Org Design Option ID",
@@ -1508,13 +1550,16 @@ function buildFopagHeadcountPlanSheet(tv: ThreeVersionPayroll): XLSX.WorkSheet {
     "Role Source Type",
     "Classification",
     "Headcount / FTE",
+    "Educator Tier",
     "Allocation Model",
     "Payroll Inclusion Status",
     "Source Notes",
   ];
   const noteRow = [
     "FOPAG Headcount Plan — all model-backed payroll-driving roles across all three org design versions. " +
-      "Includes teaching and non-teaching roles. Division/Area is not available in fopagOutput.records.",
+      "Includes teaching and non-teaching roles. Division/Area is not available in fopagOutput.records. " +
+      "Educator Tier reflects the shared Org Design / Payroll tier selection (V10-RC2.5); \"—\" marks roles " +
+      "with no selectable Educator tier (non-teaching roles, Assistant, Monitor — see Grade Staffing Table).",
   ];
   const rows: (string | number)[][] = [noteRow, header];
 
@@ -1538,6 +1583,7 @@ function buildFopagHeadcountPlanSheet(tv: ThreeVersionPayroll): XLSX.WorkSheet {
         rec.roleSourceType,
         classifyFopagRole(rec.roleSourceType),
         rec.headcountOrFte,
+        educatorTierDisplayLabel(rec.educatorTierId),
         rec.allocationModel,
         rec.isAuditRow ? "audit-row-excluded" : "included",
         rec.sourceNotes,

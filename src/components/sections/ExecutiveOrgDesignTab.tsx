@@ -1,7 +1,12 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { BookOpen, CheckCircle2, GitBranch, Layers3 } from "lucide-react";
+import * as XLSX from "xlsx";
+import { BookOpen, CheckCircle2, Download, GitBranch, Layers3 } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { useLocale } from "../../i18n/useLocale";
+import {
+  buildOrgDesignExportWorkbook,
+  buildOrgDesignExportFilename,
+} from "../../features/rio-scenario-resilience/model/orgDesignExportWorkbookBuilder";
 import {
   buildExecutiveOrgDesignTree,
   EXECUTIVE_ORG_SCENARIOS,
@@ -12,6 +17,7 @@ import {
   type OrgTreeNodeVariant,
 } from "../../features/rio-scenario-resilience/model/executiveOrgDesignModel";
 import { openingGrades } from "../../features/rio-scenario-resilience/data/openingGrades";
+import GradeStaffingTable from "../common/GradeStaffingTable";
 import { buildOrgDesignHcTable, type OrgDesignHcTableRow } from "../../features/rio-scenario-resilience/model/orgDesignHcTableAdapter";
 import {
   ACTIVE_OPENING_PACKAGE_IDS,
@@ -20,6 +26,9 @@ import {
   type OccupancyScenarioId,
 } from "../../features/rio-scenario-resilience/model/openingPackageOccupancySourceDataContract";
 import type { TranslationKey } from "../../i18n/localeContract";
+import type { DreWorkingScenarioOrgDesignOptionId } from "../../features/rio-scenario-resilience/model/dreWorkingScenarioContract";
+import type { UseEducatorTierSelectionResult } from "../../hooks/useEducatorTierSelection";
+import type { TuitionScenarioId } from "../../features/rio-scenario-resilience/model/revenueInputs";
 
 const OCCUPANCY_SCENARIO_LABEL_KEYS: Record<OccupancyScenarioId, TranslationKey> = {
   conservador: "scenarioConservador",
@@ -40,10 +49,20 @@ const OPENING_SCENARIO_OPTIONS: readonly { id: ActiveOpeningPackageId; label: st
 
 type OpeningPackageId = ActiveOpeningPackageId;
 
-const ORG_DESIGN_OPTION_MAP: Record<ExecutiveOrgScenario, string> = {
+const ORG_DESIGN_OPTION_MAP: Record<ExecutiveOrgScenario, DreWorkingScenarioOrgDesignOptionId> = {
   minimum: "minimum_experience",
   balanced: "balanced_experience",
   premium: "premium_experience",
+};
+
+// V10-RC2.5 Gate 2/Tranche A: reverse of ORG_DESIGN_OPTION_MAP, needed now
+// that orgDesignOptionId is the shared-state canonical form (passed in as a
+// prop) and this component derives its own short ExecutiveOrgScenario form
+// from it, rather than owning the short form as local state.
+const EXECUTIVE_SCENARIO_FROM_ORG_DESIGN_OPTION: Record<DreWorkingScenarioOrgDesignOptionId, ExecutiveOrgScenario> = {
+  minimum_experience: "minimum",
+  balanced_experience: "balanced",
+  premium_experience: "premium",
 };
 
 const nodeVariantClasses: Record<OrgTreeNodeVariant, string> = {
@@ -252,15 +271,31 @@ function BalancedExplanationPanel() {
 // V10-RC2 Gate 3: openingPackageId and occupancyScenarioId are shared-contract
 // dimensions, lifted from App.tsx and controlled the same way DreScenarioSimulatorTab
 // receives its selections — not tab-local state that resets on navigation, and no
-// longer a hardcoded captação. org-design tier (scenario) and year remain Org
-// Design-local: year is a single-year view selector (DRE iterates all years — forcing
-// year into the shared contract would create a false dependency), and tier affects
-// only which organizational roles are active, not enrollment/sections.
+// longer a hardcoded captação.
+//
+// V10-RC2.5 Gate 2/Tranche A: orgDesignOptionId (the "tier" selector below,
+// previously local `scenario` state translated via ORG_DESIGN_OPTION_MAP) is
+// now ALSO shared-contract, same lift-to-AppShell pattern — supersedes the
+// prior note here that it "remains Org Design-local." `year` is the one
+// dimension that genuinely stays tab-local: it is a single-year view
+// selector, and DRE iterates all years, so forcing it into the shared
+// contract would create a false dependency. That rationale never applied to
+// orgDesignOptionId on its own.
 interface ExecutiveOrgDesignTabProps {
   readonly openingPackageId: OpeningPackageId;
   readonly onOpeningPackageIdChange: (id: OpeningPackageId) => void;
   readonly occupancyScenarioId: OccupancyScenarioId;
   readonly onOccupancyScenarioIdChange: (id: OccupancyScenarioId) => void;
+  readonly orgDesignOptionId: DreWorkingScenarioOrgDesignOptionId;
+  readonly onOrgDesignOptionIdChange: (id: DreWorkingScenarioOrgDesignOptionId) => void;
+  // V10-RC2.5 Gate 2/Tranche A: shared Educator tier-selection controller,
+  // same instance PayrollProjectionTab receives.
+  readonly educatorTierSelection: UseEducatorTierSelectionResult;
+  // V10-RC2.5 Gate 3/Tranche C: read-only — Org Design has no tuition
+  // control of its own (that stays Payroll's editable-here lever, per
+  // App.tsx's dreSelections), but the new Org Design export needs it to
+  // compute FOPAG/DRE reconciliation the same way Payroll's export does.
+  readonly tuitionScenarioId: TuitionScenarioId;
 }
 
 const ExecutiveOrgDesignTab = ({
@@ -268,9 +303,13 @@ const ExecutiveOrgDesignTab = ({
   onOpeningPackageIdChange,
   occupancyScenarioId,
   onOccupancyScenarioIdChange,
+  orgDesignOptionId,
+  onOrgDesignOptionIdChange,
+  educatorTierSelection,
+  tuitionScenarioId,
 }: ExecutiveOrgDesignTabProps) => {
   const { t } = useLocale();
-  const [scenario, setScenario] = useState<ExecutiveOrgScenario>("balanced");
+  const scenario = EXECUTIVE_SCENARIO_FROM_ORG_DESIGN_OPTION[orgDesignOptionId];
   const [year, setYear] = useState<ExecutiveOrgYear>(2028);
   const [isProgressionPlaying, setIsProgressionPlaying] = useState(false);
 
@@ -284,10 +323,10 @@ const ExecutiveOrgDesignTab = ({
       buildOrgDesignHcTable({
         openingPackageId,
         occupancyScenarioId,
-        orgDesignOptionId: ORG_DESIGN_OPTION_MAP[scenario],
+        orgDesignOptionId,
         year,
       }),
-    [openingPackageId, occupancyScenarioId, scenario, year],
+    [openingPackageId, occupancyScenarioId, orgDesignOptionId, year],
   );
 
   useEffect(() => {
@@ -319,6 +358,32 @@ const ExecutiveOrgDesignTab = ({
 
   const openingGradeLabel = openingGrades.find((g) => g.id === openingPackageId)?.label ?? openingPackageId;
 
+  // V10-RC2.5 Gate 3/Tranche C: no export existed for Org Design before this
+  // phase. Sourced entirely from calculateFopag()/calculateDre() via
+  // orgDesignExportWorkbookBuilder.ts — the same shared engines and the same
+  // live Educator tier selections the Grade Staffing Table above reads from,
+  // never a separate calculation.
+  const handleDownloadOrgDesignExport = () => {
+    const educatorTierByGrade = educatorTierSelection.getEducatorTierByGradeForScenario(
+      openingPackageId,
+      occupancyScenarioId,
+      orgDesignOptionId,
+    );
+    const exportInput = {
+      openingPackageId,
+      occupancyScenarioId,
+      orgDesignOptionId,
+      tuitionScenarioId,
+      educatorTierByGrade,
+    };
+    const wb = buildOrgDesignExportWorkbook(exportInput, {
+      applicationCommitHash: "dev",
+      generationTimestampIso: new Date().toISOString(),
+      exportGeneratorVersion: "v10-rc2.5-gate3",
+    });
+    XLSX.writeFile(wb, buildOrgDesignExportFilename(exportInput, new Date()));
+  };
+
   return (
     <div className="space-y-4">
       <style>
@@ -336,6 +401,14 @@ const ExecutiveOrgDesignTab = ({
             <h3 className="text-2xl font-bold tracking-tight text-slate-950">{t("orgDesignHeaderTitle")}</h3>
           </div>
           <p className="mt-1 text-sm font-semibold text-slate-500">{t("orgDesignHeaderSubtitle")}</p>
+          <button
+            type="button"
+            onClick={handleDownloadOrgDesignExport}
+            className="mt-2 inline-flex items-center gap-1.5 rounded-lg border border-indigo-200 bg-white px-2.5 py-1.5 text-[11px] font-bold text-indigo-700 transition-colors hover:bg-indigo-50"
+          >
+            <Download className="h-3.5 w-3.5" />
+            {t("orgDesignExportButtonLabel")}
+          </button>
         </div>
 
         <div className="flex flex-col gap-2 sm:flex-row">
@@ -373,7 +446,9 @@ const ExecutiveOrgDesignTab = ({
             <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{t("orgDesignVersionLabel")}</span>
             <select
               value={scenario}
-              onChange={(event) => setScenario(event.target.value as ExecutiveOrgScenario)}
+              onChange={(event) =>
+                onOrgDesignOptionIdChange(ORG_DESIGN_OPTION_MAP[event.target.value as ExecutiveOrgScenario])
+              }
               className="h-10 rounded-md border border-slate-300 bg-white px-3 text-sm font-bold text-slate-800 shadow-sm"
             >
               {EXECUTIVE_ORG_SCENARIOS.map((option) => (
@@ -531,10 +606,23 @@ const ExecutiveOrgDesignTab = ({
 
         <p className="text-[10px] font-semibold text-slate-400">
           {t("orgDesignFooterYear")} {year} · {t("orgDesignFooterOpeningScenario")} {openingPackageId} · {t("orgDesignFooterVersion")}{" "}
-          {ORG_DESIGN_OPTION_MAP[scenario]} · {t("orgDesignFooterOccupancy")} {occupancyScenarioId} ·{" "}
+          {orgDesignOptionId} · {t("orgDesignFooterOccupancy")} {occupancyScenarioId} ·{" "}
           {hcTableResult.rows.length} {t("orgDesignFooterActiveRoleRows")}
         </p>
       </section>
+
+      {/* V10-RC2.5 Gate 3/Tranche B: the ONE shared grade-level staffing
+          table, same component PayrollProjectionTab renders — same scenario
+          props, same educatorTierSelection instance, so a tier change made
+          here is immediately visible on the Payroll tab and vice versa. */}
+      <GradeStaffingTable
+        openingPackageId={openingPackageId}
+        occupancyScenarioId={occupancyScenarioId}
+        orgDesignOptionId={orgDesignOptionId}
+        year={year}
+        educatorTierSelection={educatorTierSelection}
+        syncNoteKey="payrollGradeStaffingSyncNoteFromOrgDesign"
+      />
     </div>
   );
 };

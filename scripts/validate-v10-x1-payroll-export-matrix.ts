@@ -158,7 +158,7 @@ const workbooks = scenarioResults.map((sr) => ({
 let roleVisibilityOk = true;
 let roleVisibilityDetail = "ok";
 for (const { sr } of workbooks) {
-  const details = buildRoleYearDetails(sr);
+  const details = buildRoleYearDetails(sr.fopagOutput.records);
   const roleIds = new Set(details.map((d) => d.roleId));
   for (const roleId of roleIds) {
     const roleDetails = details.filter((d) => d.roleId === roleId);
@@ -380,7 +380,7 @@ async function validateZipAndManifest(): Promise<void> {
   let manifestDetail = "ok";
   for (const scenario of manifest.scenarios) {
     const sr = scenarioResults.find((s) => s.record.matrixScenarioId === scenario.matrixScenarioId)!;
-    const details = buildRoleYearDetails(sr);
+    const details = buildRoleYearDetails(sr.fopagOutput.records);
     for (const year of Object.keys(scenario.annualPayroll).map(Number)) {
       const expected = fppMetricYearTotal(details, PD_COL.totalRolePayroll, year);
       if (Math.abs(scenario.annualPayroll[year] - expected) > EPS) {

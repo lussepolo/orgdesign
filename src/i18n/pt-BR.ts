@@ -289,6 +289,7 @@ export const PT_BR = {
   // ── ExecutiveOrgDesignTab (Desenho Organizacional) ──────────────────────
   orgDesignHeaderTitle: "Desenho Organizacional Executivo",
   orgDesignHeaderSubtitle: "Árvore organizacional completa do Rio por cenário e ano.",
+  orgDesignExportButtonLabel: "Exportar Desenho Organizacional (.xlsx)",
   orgDesignOpeningScenarioLabel: "Cenário de Abertura",
   orgDesignVersionLabel: "Versão do Desenho Organizacional",
   orgDesignYearLabel: "Ano",
@@ -504,7 +505,7 @@ export const PT_BR = {
   payrollHowToUseLabel: "Como usar esta página",
   payrollHowToUseHeadline: "Cenário → Turmas → Educadores → Custo → Cobertura de Folha",
   payrollHowToUseIntro:
-    "O pacote de abertura, a captação e a mensalidade são os inputs do cenário compartilhado — editáveis diretamente nesta página, e sincronizados com o Desenho Organizacional Executivo / Simulador de Cenário DRE onde quer que sejam alterados. Escolha também a versão de Desenho Organizacional e o ano de detalhe aqui. Efetivo docente e não-docente vêm do motor FOPAG/DRE governado; receita e cobertura são computadas a partir do mesmo motor, não certificadas pelo Financeiro.",
+    "O pacote de abertura, a captação, a mensalidade, a versão de Desenho Organizacional e as seleções de nível de Educador são os inputs do cenário compartilhado — editáveis diretamente nesta página, e sincronizados com o Desenho Organizacional Executivo / Simulador de Cenário DRE onde quer que sejam alterados. O ano de detalhe permanece local a esta página. Efetivo docente e não-docente vêm do motor FOPAG/DRE governado; receita e cobertura são computadas a partir do mesmo motor, não certificadas pelo Financeiro.",
   payrollFopagIncludesLabel: "FOPAG Direto inclui",
   payrollFopagIncludesList:
     "Educadores líderes · Assistentes · Monitores · FTE MS/HS · Música · LED · Pool HS · Secretaria · TI · Manutenção · Marketing · RH · Secretário(a)",
@@ -522,7 +523,7 @@ export const PT_BR = {
     "VA/VR, Alimentação, VT, seguro de vida. Desative com Sem Benefícios.",
   payrollFormulaFolha: "Salário × 13 · por função × quadro",
   payrollNoteFolha:
-    "Funções FOLHA_DIRETA: HoS, Coordenador(a) EY, Conselheiros (1→4), Ed Tech, Engajamento Familiar, Inspirationeer, Enfermeiro(a), Analista Financeiro · Educadores de Artes, Corpo e Movimento, Atividades Extracurriculares.",
+    "Funções FOLHA_DIRETA: HoS, Coordenador(a) EY, Conselheiros (2→3), Ed Tech, Engajamento Familiar, Inspirationeer, Enfermeiro(a), Analista Financeiro · Educadores de Artes, Corpo e Movimento, Atividades Extracurriculares.",
   payrollFormulaReceita: "Alunos × Mensalidade₂₀₂₈ × 1,08^(ano−2028)",
   payrollNoteReceita: "Crescimento anual de 8% na mensalidade, composto a partir da taxa-base de 2028.",
   payrollLabelFopagDireto: "FOPAG Direto",
@@ -597,6 +598,16 @@ export const PT_BR = {
   payrollLeadFteHeader: "FTE Líder",
   payrollSupportHeader: "Apoio",
   payrollTierHeader: "Nível",
+  payrollTierMasterLabel: "Master",
+  payrollTierAssociateLabel: "Associate",
+  payrollTierSpecialistLabel: "Specialist",
+  payrollTierInspirationalLabel: "Inspirational",
+  payrollTierDistinguishedLabel: "Distinguished",
+  payrollAssistantFixedTierBadgeLabel: "Nível fixo",
+  payrollAssistantFixedTierNote:
+    "A remuneração de Assistente tem exatamente um nível governado — exibido como fixo, não selecionável. Um segundo nível só aparecerá aqui quando existir uma fonte de custo governada para ele.",
+  payrollGradeStaffingSyncNoteFromOrgDesign: "O quadro por série e as seleções de nível de Educador exibidos aqui são compartilhados com Folha / Turmas e Folha de Pagamento — uma alteração aqui é imediatamente visível lá.",
+  payrollGradeStaffingSyncNoteFromPayroll: "O quadro por série e as seleções de nível de Educador exibidos aqui são compartilhados com o Desenho Organizacional Executivo — uma alteração aqui é imediatamente visível lá.",
   payrollPayrollHeader: "Folha",
   payrollMethodologyTitle: "Metodologia",
   payrollMethodologySubtitle: "Como esta projeção é calculada",

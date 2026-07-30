@@ -30,15 +30,15 @@
 
 import React, { useMemo, useState } from "react";
 import * as XLSX from "xlsx";
-import { Calculator, DollarSign, Download, GraduationCap, TrendingUp } from "lucide-react";
+import { Calculator, DollarSign, Download, TrendingUp } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { useLocale } from "../../i18n/useLocale";
 import { formatCurrencyBRL } from "../../i18n/formatters";
 import { Card } from "../common/Card";
+import GradeStaffingTable from "../common/GradeStaffingTable";
 import { calculateFopag } from "../../features/rio-scenario-resilience/model/fopagEngine";
 import { calculateDre } from "../../features/rio-scenario-resilience/model/dreEngine";
 import { buildOrgDesignHcTable } from "../../features/rio-scenario-resilience/model/orgDesignHcTableAdapter";
-import { buildPayrollGradeDetailRows } from "../../features/rio-scenario-resilience/model/payrollGradeDetailAdapter";
 import { GOVERNED_DIRECT_YEARS } from "../../features/rio-scenario-resilience/model/governedCaptacaoCapacitySourceData";
 import {
   ACTIVE_OPENING_PACKAGE_IDS,
@@ -63,6 +63,7 @@ import {
   type DreScenarioWorkbookViewModel,
 } from "../dreSimulator/dreScenarioWorkbook";
 import type { DreScenarioSimulatorSelections } from "../../hooks/useDreScenarioSimulator";
+import type { UseEducatorTierSelectionResult } from "../../hooks/useEducatorTierSelection";
 
 const PAYROLL_YEARS: readonly OpeningPackageDirectWorkbookYear[] = GOVERNED_DIRECT_YEARS;
 const PROJECTION_START_YEAR = PAYROLL_YEARS[0];
@@ -87,14 +88,6 @@ const ORG_DESIGN_LABEL_KEYS: Record<DreWorkingScenarioOrgDesignOptionId, "scenar
 const OPENING_PACKAGE_LABELS: Record<ActiveOpeningPackageId, string> = {
   t1_g4: "Scenario B / T1→G4",
   t1_g6: "Scenario D / T1→G6",
-};
-
-// V10-RC2.3 Gate 4A: grade-detail table division labels, reusing the existing
-// division-snapshot translation keys rather than a new duplicate set.
-const DIVISION_LABEL_KEYS: Record<"Early Years" | "Lower School" | "Middle School", "payrollDivEarlyYears" | "payrollDivLowerSchool" | "payrollDivMiddleSchool"> = {
-  "Early Years": "payrollDivEarlyYears",
-  "Lower School": "payrollDivLowerSchool",
-  "Middle School": "payrollDivMiddleSchool",
 };
 
 const PAYROLL_DIV_COLORS: Record<string, string> = {
@@ -126,6 +119,17 @@ interface PayrollProjectionTabProps {
   readonly onOccupancyScenarioIdChange: (id: OccupancyScenarioId) => void;
   readonly tuitionScenarioId: TuitionScenarioId;
   readonly onTuitionScenarioIdChange: (id: TuitionScenarioId) => void;
+  // V10-RC2.5 Gate 2/Tranche A: orgDesignOptionId is now shared with Org
+  // Design (App.tsx dreSelections), not tab-local — supersedes the prior
+  // "org-design tier remains tab-local" note at the top of this file (that
+  // rationale is preserved for `year` only, which stays a tab-local view
+  // selector; it never independently justified duplicating orgDesignOptionId).
+  readonly orgDesignOptionId: DreWorkingScenarioOrgDesignOptionId;
+  readonly onOrgDesignOptionIdChange: (id: DreWorkingScenarioOrgDesignOptionId) => void;
+  // V10-RC2.5 Gate 2/Tranche A: shared Educator tier-selection controller,
+  // same instance ExecutiveOrgDesignTab receives — a tier change made from
+  // either tab is immediately visible from the other.
+  readonly educatorTierSelection: UseEducatorTierSelectionResult;
 }
 
 const PayrollProjectionTab = ({
@@ -135,22 +139,37 @@ const PayrollProjectionTab = ({
   onOccupancyScenarioIdChange,
   tuitionScenarioId,
   onTuitionScenarioIdChange,
+  orgDesignOptionId,
+  onOrgDesignOptionIdChange,
+  educatorTierSelection,
 }: PayrollProjectionTabProps) => {
   const { t, locale } = useLocale();
-  const [orgDesignOptionId, setOrgDesignOptionId] = useState<DreWorkingScenarioOrgDesignOptionId>("balanced_experience");
   const [selectedYear, setSelectedYear] = useState<OpeningPackageDirectWorkbookYear>(2028);
   const [view, setView] = useState<"single" | "compare" | "matrix">("single");
   const [expandFolha, setExpandFolha] = useState(false);
   const [marginMode, setMarginMode] = useState<"FULLY_LOADED" | "WITHOUT_BENEFITS">("FULLY_LOADED");
   const withBenefits = marginMode === "FULLY_LOADED";
 
+  // V10-RC2.5 Gate 2/Tranche A: the current scenario's Educator tier
+  // selections, in the exact shape buildPayrollAdapterInput() (via FOPAG/
+  // DRE) expects. Re-derived whenever the scenario or any selection changes.
+  const educatorTierByGrade = useMemo(
+    () =>
+      educatorTierSelection.getEducatorTierByGradeForScenario(
+        openingPackageId,
+        occupancyScenarioId,
+        orgDesignOptionId,
+      ),
+    [educatorTierSelection, openingPackageId, occupancyScenarioId, orgDesignOptionId],
+  );
+
   const fopagOutput = useMemo(
-    () => calculateFopag({ openingPackageId, occupancyScenarioId, orgDesignOptionId }),
-    [openingPackageId, occupancyScenarioId, orgDesignOptionId],
+    () => calculateFopag({ openingPackageId, occupancyScenarioId, orgDesignOptionId, educatorTierByGrade }),
+    [openingPackageId, occupancyScenarioId, orgDesignOptionId, educatorTierByGrade],
   );
   const dreOutput = useMemo(
-    () => calculateDre({ openingPackageId, occupancyScenarioId, orgDesignOptionId, tuitionScenarioId }),
-    [openingPackageId, occupancyScenarioId, orgDesignOptionId, tuitionScenarioId],
+    () => calculateDre({ openingPackageId, occupancyScenarioId, orgDesignOptionId, tuitionScenarioId, educatorTierByGrade }),
+    [openingPackageId, occupancyScenarioId, orgDesignOptionId, tuitionScenarioId, educatorTierByGrade],
   );
 
   // ── Per-year aggregates, sourced entirely from calculateFopag()/calculateDre() ──
@@ -190,25 +209,6 @@ const PayrollProjectionTab = ({
     () => buildOrgDesignHcTable({ openingPackageId, occupancyScenarioId, orgDesignOptionId, year: selectedYear }),
     [openingPackageId, occupancyScenarioId, orgDesignOptionId, selectedYear],
   );
-  // V10-RC2.3 Gate 4: grade rows now include Grade 6 (Middle School) when
-  // openingPackageId === "t1_g6", sourced from governed grade-level
-  // capacity/enrollment records — never from the EY/LS section-count formula.
-  // See payrollGradeDetailAdapter.ts.
-  const gradeDetail = useMemo(
-    () => buildPayrollGradeDetailRows({ openingPackageId, occupancyScenarioId, orgDesignOptionId, year: selectedYear }),
-    [openingPackageId, occupancyScenarioId, orgDesignOptionId, selectedYear],
-  );
-  // Division-level MS/HS aggregate headcount from the engine's own fixed-FTE table —
-  // this is one of F06's three non-identical, unreconciled MS/HS staffing sources
-  // (V10-RC2 Gate 1), not settled grade-level truth, and NOT a Grade-6-specific
-  // allocation (V10-RC2.3 Gate 5) — shown as a separate division-level estimate,
-  // never merged into the EY/LS governed-figure table, never presented as reconciled.
-  const msAggregateHeadcount = hcTableResult.rows
-    .filter((r) => r.divisionArea === "Middle School")
-    .reduce((sum, r) => sum + r.headcountOrFte, 0);
-  const hsAggregateHeadcount = hcTableResult.rows
-    .filter((r) => r.divisionArea === "High School")
-    .reduce((sum, r) => sum + r.headcountOrFte, 0);
   const nonInstructionalRows = hcTableResult.rows.filter((r) => !INSTRUCTIONAL_DIVISIONS.has(r.divisionArea));
   const nonInstructionalByDivision = useMemo(() => {
     const byDiv = new Map<string, number>();
@@ -225,10 +225,23 @@ const PayrollProjectionTab = ({
       tuitionScenarioId,
       orgDesignOptionId,
     };
-    const threeVersionPayroll = computeOrgDesignPayrollVariants(selections, dreOutput, fopagOutput);
+    const threeVersionPayroll = computeOrgDesignPayrollVariants(selections, dreOutput, fopagOutput, educatorTierByGrade);
     const lastYear = PAYROLL_YEARS[PAYROLL_YEARS.length - 1];
     const orgDesignSensitivity = DRE_WORKING_SCENARIO_ORG_DESIGN_OPTION_IDS.map((id) => {
-      const out = id === orgDesignOptionId ? dreOutput : calculateDre({ openingPackageId, occupancyScenarioId, tuitionScenarioId, orgDesignOptionId: id });
+      const out =
+        id === orgDesignOptionId
+          ? dreOutput
+          : calculateDre({
+              openingPackageId,
+              occupancyScenarioId,
+              tuitionScenarioId,
+              orgDesignOptionId: id,
+              educatorTierByGrade: educatorTierSelection.getEducatorTierByGradeForScenario(
+                openingPackageId,
+                occupancyScenarioId,
+                id,
+              ),
+            });
       const lyr = out.byYear[lastYear];
       return {
         orgDesignOptionId: id,
@@ -361,7 +374,7 @@ const PayrollProjectionTab = ({
               {DRE_WORKING_SCENARIO_ORG_DESIGN_OPTION_IDS.map((id) => (
                 <button
                   key={id}
-                  onClick={() => setOrgDesignOptionId(id)}
+                  onClick={() => onOrgDesignOptionIdChange(id)}
                   className={cn(
                     "px-3 py-1.5 rounded-xl text-[11px] font-bold transition-all border",
                     orgDesignOptionId === id ? "bg-indigo-600 text-white border-transparent shadow-md" : "bg-white border-slate-200 text-slate-600 hover:border-slate-400",
@@ -526,82 +539,18 @@ const PayrollProjectionTab = ({
             </div>
           </div>
 
-          {/* GRADE BREAKDOWN — EY/LS governed, per-grade Alunos/Turmas from the same
-              section-derivation engine that drives staffing (V10-RC2.3 Gate 4A);
-              Grade 6 (t1_g6 only) shows governed sections/enrollment with educator
-              staffing scoped to division level */}
-          <Card title={t("payrollGradeBreakdownTitle").replace("{year}", String(selectedYear))} icon={GraduationCap} subtitle={`${t(OCCUPANCY_LABEL_KEYS[occupancyScenarioId])} · ${t(ORG_DESIGN_LABEL_KEYS[orgDesignOptionId])}`}>
-            <div className="overflow-x-auto rounded-2xl border border-slate-100">
-              <table className="w-full min-w-[1100px] border-collapse text-left">
-                <thead>
-                  <tr className="bg-slate-50">
-                    <th className="px-3 py-3 text-[9px] font-bold uppercase tracking-widest text-slate-500 border-b border-slate-200">{t("payrollGradeHeader")}</th>
-                    <th className="px-3 py-3 text-[9px] font-bold uppercase tracking-widest text-slate-500 border-b border-slate-200">{t("payrollDivisionHeader")}</th>
-                    <th className="px-3 py-3 text-[9px] font-bold uppercase tracking-widest text-slate-500 border-b border-slate-200 text-center">{t("payrollAlunosHeader")}</th>
-                    <th className="px-3 py-3 text-[9px] font-bold uppercase tracking-widest text-slate-500 border-b border-slate-200 text-center">{t("payrollTurmasHeader")}</th>
-                    <th className="px-3 py-3 text-[9px] font-bold uppercase tracking-widest text-slate-500 border-b border-slate-200 text-center">{t("payrollAlunosPorTurmaHeader")}</th>
-                    <th className="px-3 py-3 text-[9px] font-bold uppercase tracking-widest text-slate-500 border-b border-slate-200 text-center">{t("payrollEducadorLiderHeader")}</th>
-                    <th className="px-3 py-3 text-[9px] font-bold uppercase tracking-widest text-slate-500 border-b border-slate-200 text-center">{t("payrollAssistenteHeader")}</th>
-                    <th className="px-3 py-3 text-[9px] font-bold uppercase tracking-widest text-slate-500 border-b border-slate-200 text-center">{t("payrollMonitorHeader")}</th>
-                    <th className="px-3 py-3 text-[9px] font-bold uppercase tracking-widest text-slate-500 border-b border-slate-200 text-center">{t("payrollTotalFteHeader")}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {gradeDetail.map((row, index) => {
-                    const isDivisionLevelOnly = row.educatorAttribution === "division_level_only";
-                    return (
-                      <tr
-                        key={row.gradeId}
-                        className={cn(
-                          "border-b border-slate-100",
-                          isDivisionLevelOnly ? "bg-blue-50/50" : index % 2 === 0 ? "bg-white" : "bg-slate-50/50",
-                        )}
-                      >
-                        <td className="px-3 py-3"><div className="text-sm font-bold text-slate-900">{row.gradeLabel}</div></td>
-                        <td className="px-3 py-3 text-[11px] text-slate-500">{t(DIVISION_LABEL_KEYS[row.division])}</td>
-                        <td className="px-3 py-3 text-center text-xs font-bold text-slate-700">{row.enrollment ?? "—"}</td>
-                        <td className="px-3 py-3 text-center text-xs font-bold text-slate-700">{row.sections ?? "—"}</td>
-                        <td className="px-3 py-3 text-center text-xs text-slate-600">{row.alunosPorTurma ?? "—"}</td>
-                        <td className="px-3 py-3 text-center text-xs font-bold text-slate-700">
-                          {isDivisionLevelOnly ? (
-                            <span
-                              title={t("payrollGrade6EducatorFullNote")}
-                              className="inline-flex rounded-full bg-blue-100 px-2 py-0.5 text-[9px] font-bold text-blue-700"
-                            >
-                              {t("payrollGrade6EducatorBadgeLabel")}
-                            </span>
-                          ) : (
-                            row.educators
-                          )}
-                        </td>
-                        <td className="px-3 py-3 text-center text-xs font-bold text-slate-700">{isDivisionLevelOnly ? "—" : row.assistants}</td>
-                        <td className="px-3 py-3 text-center text-xs font-bold text-slate-700">{row.monitorApplicable ? row.monitors : "—"}</td>
-                        <td className="px-3 py-3 text-center text-xs font-black text-slate-900">
-                          {isDivisionLevelOnly ? "—" : row.totalHeadcount}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-            <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
-              <div className="text-[10px] font-black uppercase tracking-widest text-amber-700">{t("payrollMsHsUnavailableLabel")}</div>
-              <p className="text-[11px] text-amber-700 mt-1 leading-relaxed">{t("payrollMsHsUnavailableNote")}</p>
-              <div className="mt-2 grid grid-cols-2 gap-2">
-                <div className="rounded-lg bg-white border border-amber-100 px-3 py-2">
-                  <div className="text-[9px] font-bold uppercase text-amber-600">{t("payrollDivMiddleSchool")}</div>
-                  <div className="text-sm font-black text-slate-900">{msAggregateHeadcount}</div>
-                  <div className="text-[9px] text-amber-600">{t("payrollMsHsAggregateEstimateLabel")}</div>
-                </div>
-                <div className="rounded-lg bg-white border border-amber-100 px-3 py-2">
-                  <div className="text-[9px] font-bold uppercase text-amber-600">{t("payrollDivHighSchool")}</div>
-                  <div className="text-sm font-black text-slate-900">{hsAggregateHeadcount}</div>
-                  <div className="text-[9px] text-amber-600">{t("payrollMsHsAggregateEstimateLabel")}</div>
-                </div>
-              </div>
-            </div>
-          </Card>
+          {/* GRADE STAFFING — the ONE shared grade-level staffing table, same
+              component ExecutiveOrgDesignTab renders (V10-RC2.5 Gate 3/
+              Tranche B). Educator tier selectors here are the same shared
+              state; a change is immediately visible in Org Design. */}
+          <GradeStaffingTable
+            openingPackageId={openingPackageId}
+            occupancyScenarioId={occupancyScenarioId}
+            orgDesignOptionId={orgDesignOptionId}
+            year={selectedYear}
+            educatorTierSelection={educatorTierSelection}
+            syncNoteKey="payrollGradeStaffingSyncNoteFromPayroll"
+          />
         </div>
       )}
 
@@ -623,7 +572,19 @@ const PayrollProjectionTab = ({
                   <tr key={year} className={cn("border-b border-slate-100", yi % 2 === 0 ? "bg-white" : "bg-slate-50/40")}>
                     <td className="px-4 py-3 text-sm font-black text-slate-900">{year}</td>
                     {DRE_WORKING_SCENARIO_ORG_DESIGN_OPTION_IDS.map((id) => {
-                      const out = id === orgDesignOptionId ? fopagOutput : calculateFopag({ openingPackageId, occupancyScenarioId, orgDesignOptionId: id });
+                      const out =
+                        id === orgDesignOptionId
+                          ? fopagOutput
+                          : calculateFopag({
+                              openingPackageId,
+                              occupancyScenarioId,
+                              orgDesignOptionId: id,
+                              educatorTierByGrade: educatorTierSelection.getEducatorTierByGradeForScenario(
+                                openingPackageId,
+                                occupancyScenarioId,
+                                id,
+                              ),
+                            });
                       const yt = out.yearTotals.find((t) => t.year === year);
                       return (
                         <td key={id} className="px-3 py-3 text-right text-xs font-bold text-slate-800">{formatCurrencyBRL(yt?.totalPayroll ?? 0, locale)}</td>
@@ -663,8 +624,13 @@ const PayrollProjectionTab = ({
                     <div className="text-xs font-black uppercase tracking-widest text-slate-700">{t(OCCUPANCY_LABEL_KEYS[occ])}</div>
                   </div>
                   {DRE_WORKING_SCENARIO_ORG_DESIGN_OPTION_IDS.map((od) => {
-                    const fp = calculateFopag({ openingPackageId, occupancyScenarioId: occ, orgDesignOptionId: od });
-                    const dr = calculateDre({ openingPackageId, occupancyScenarioId: occ, orgDesignOptionId: od, tuitionScenarioId });
+                    const matrixTierByGrade = educatorTierSelection.getEducatorTierByGradeForScenario(
+                      openingPackageId,
+                      occ,
+                      od,
+                    );
+                    const fp = calculateFopag({ openingPackageId, occupancyScenarioId: occ, orgDesignOptionId: od, educatorTierByGrade: matrixTierByGrade });
+                    const dr = calculateDre({ openingPackageId, occupancyScenarioId: occ, orgDesignOptionId: od, tuitionScenarioId, educatorTierByGrade: matrixTierByGrade });
                     const yt = fp.yearTotals.find((t) => t.year === selectedYear);
                     const dy = dr.byYear[selectedYear];
                     const total = yt?.totalPayroll ?? 0;

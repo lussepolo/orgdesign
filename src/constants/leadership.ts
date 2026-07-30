@@ -119,7 +119,13 @@ export const LEADERSHIP_CONFIG: LeadershipRole[] = [
   role("ls_principal", "LS Coordinator", 19941.74, 9671.74, 1331.93, "FOLHA_DIRETA", 2028, hc([[2028, 1]]), "B"),
   role("ms_principal", "MS Coordinator", 19941.74, 9671.74, 1331.93, "FOLHA_DIRETA", 2031, hc([[2031, 1]]), "B"),
   role("hs_principal", "HS Coordinator", 19941.74, 9671.74, 1331.93, "FOLHA_DIRETA", 2034, hc([[2034, 1]]), "B"),
-  role("counselor", "Counselor", 16923.84, 8208.06, 1159.82, "FOLHA_DIRETA", 2028, hc([[2028, 3], [2031, 4]]), "B"),
+  // Counselor headcount ramp corrected to {2028: 2, 2032: 3} — direct, live,
+  // in-session product-owner correction (Luciana, 2026-07-30), resolving the
+  // RC2.4 Gate 6 deferred blocker ("Counselor activation year" in
+  // IMPLEMENTATION.md, which recorded a prior verbal statement of 2032 for
+  // the step year against the then-current code's 2031/HC-3-base/HC-4-step).
+  // Not workbook-sourced; a direct headcount-value authorization.
+  role("counselor", "Counselor", 16923.84, 8208.06, 1159.82, "FOLHA_DIRETA", 2028, hc([[2028, 2], [2032, 3]]), "B"),
   role("edtech", "Ed Tech Coordinator", 18493.59, 8969.39, 1173.58, "FOLHA_DIRETA", 2028, hc([[2028, 1]]), "B"),
   role("ops", "Ops Coordinator", 11340.0, 5499.9, 1143.26, "FOLHA_DIRETA", 2028, hc([[2028, 1]]), "B"),
 ];

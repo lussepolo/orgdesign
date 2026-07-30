@@ -25,12 +25,16 @@ import type {
   OpeningPackageProjectionYear,
 } from "./openingPackageOccupancySourceDataContract";
 import type { TuitionScenarioId } from "./revenueInputs";
+import type { EducatorTierSelectionByGrade } from "./payrollAdapterContract";
 
 export interface DreEngineInput {
   readonly openingPackageId: OpeningPackageId;
   readonly occupancyScenarioId: OccupancyScenarioId;
   readonly tuitionScenarioId: TuitionScenarioId;
   readonly orgDesignOptionId: string;
+  // V10-RC2.5 Gate 2/Tranche A: optional, forwarded to calculateFopag().
+  // Omitted => byte-identical pre-RC2.5 behavior.
+  readonly educatorTierByGrade?: EducatorTierSelectionByGrade;
 }
 
 export interface DreYearResult {

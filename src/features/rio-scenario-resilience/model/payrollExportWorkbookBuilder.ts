@@ -144,10 +144,16 @@ function fillMissingYearRecords(
   return filled;
 }
 
+// V10-RC2.5 Gate 3/Tranche C: takes FOPAG records directly (not the fixed-
+// matrix PayrollExportScenarioResult wrapper) — the only field this function
+// ever used from that wrapper was fopagOutput.records, so this also lets the
+// live Org Design export (orgDesignExportWorkbookBuilder.ts, no
+// PayrollExportMatrixRecord involved) reuse the identical role/year
+// escalation logic rather than re-deriving it.
 export function buildRoleYearDetails(
-  scenarioResult: PayrollExportScenarioResult,
+  fopagRecords: readonly FopagCalculatedRecord[],
 ): readonly RoleYearDetail[] {
-  const sorted = [...fillMissingYearRecords(scenarioResult.fopagOutput.records)].sort(
+  const sorted = [...fillMissingYearRecords(fopagRecords)].sort(
     (a, b) => a.year - b.year || a.roleId.localeCompare(b.roleId),
   );
 
@@ -634,7 +640,7 @@ export function buildPayrollExportDetailedWorkbook(
   scenarioResult: PayrollExportScenarioResult,
   meta: PayrollExportWorkbookMeta,
 ): XLSX.WorkBook {
-  const details = buildRoleYearDetails(scenarioResult);
+  const details = buildRoleYearDetails(scenarioResult.fopagOutput.records);
   const wb = XLSX.utils.book_new();
 
   XLSX.utils.book_append_sheet(wb, buildScenarioSummarySheet(scenarioResult, meta, details), "Scenario Summary");

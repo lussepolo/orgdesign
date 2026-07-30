@@ -83,6 +83,7 @@ export function calculateDre(input: DreEngineInput): DreEngineOutput {
     openingPackageId: input.openingPackageId,
     occupancyScenarioId: input.occupancyScenarioId,
     orgDesignOptionId: input.orgDesignOptionId,
+    educatorTierByGrade: input.educatorTierByGrade,
   });
 
   // FOPAG year-totals lookup (FopagYearTotals.year is number)
