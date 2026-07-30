@@ -9,8 +9,9 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { buildPayrollGradeDetailRows } from "../src/features/rio-scenario-resilience/model/payrollGradeDetailAdapter";
+import { deriveSectionCountFromEnrollment } from "../src/features/rio-scenario-resilience/model/sectionCountEngine";
 import {
-  GOVERNED_CAPACITY_BY_YEAR_AND_GRADE_RECORDS,
+  GOVERNED_STUDENTS_PER_CLASS,
   GOVERNED_T1_G6_ENROLLMENT_BY_YEAR_AND_GRADE_RECORDS,
   GOVERNED_DIRECT_YEARS,
 } from "../src/features/rio-scenario-resilience/model/governedCaptacaoCapacitySourceData";
@@ -157,6 +158,20 @@ for (const year of GOVERNED_DIRECT_YEARS) {
 // ── Grade 6: enrollment/sections equal the governed source, for every active
 // captação scenario and year; educators always null (never zero, never a
 // fabricated EY/LS-style figure). ───────────────────────────────────────────
+//
+// V10-RC2.4 Gate 8: expectedSections used to read GOVERNED_CAPACITY_BY_YEAR_
+// AND_GRADE_RECORDS.sections directly, which matched the adapter only
+// because both sides independently encoded the pre-fix "2 whenever active"
+// defect (see docs/audits/rio-resilience/phase-v10-rc2-3-gate9-*.md and
+// phase-v10-rc2-4-gate1-2-*.md). That record now correctly reports `null`
+// for Grade 6 (not dual-track — see governedCaptacaoCapacitySourceData.ts),
+// since sections are derived from enrollment, not read off a fixed record.
+// This expectation is corrected to the same workbook-verified formula the
+// adapter now uses — an expectation correction from stronger source
+// evidence, not a weakened check.
+const G6_STUDENTS_PER_CLASS = GOVERNED_STUDENTS_PER_CLASS.find(
+  (r) => r.normalizedGradeId === "G6",
+)?.studentsPerClass ?? null;
 let g6CellsChecked = 0;
 for (const occupancyScenarioId of OCCUPANCY_SCENARIO_IDS as readonly OccupancyScenarioId[]) {
   for (const year of GOVERNED_DIRECT_YEARS) {
@@ -166,9 +181,10 @@ for (const occupancyScenarioId of OCCUPANCY_SCENARIO_IDS as readonly OccupancySc
     const expectedEnrollment = GOVERNED_T1_G6_ENROLLMENT_BY_YEAR_AND_GRADE_RECORDS.find(
       (r) => r.normalizedGradeId === "G6" && r.scenarioId === occupancyScenarioId && r.year === year,
     )?.enrollment ?? null;
-    const expectedSections = GOVERNED_CAPACITY_BY_YEAR_AND_GRADE_RECORDS.find(
-      (r) => r.packageId === "t1_g6" && r.normalizedGradeId === "G6" && r.year === year,
-    )?.sections ?? null;
+    const expectedSections =
+      expectedEnrollment !== null && G6_STUDENTS_PER_CLASS !== null
+        ? deriveSectionCountFromEnrollment(expectedEnrollment, G6_STUDENTS_PER_CLASS)
+        : null;
     if (g6?.enrollment !== expectedEnrollment || g6?.sections !== expectedSections || g6?.educators !== null) {
       check(
         `Grade 6 governed parity ${occupancyScenarioId}/${year}`,

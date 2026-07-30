@@ -181,12 +181,30 @@ export const GOVERNED_AVAILABLE_CAPACITY_BY_YEAR: readonly AvailableCapacityByYe
     })),
   );
 
+// V10-RC2.4 Gate 4: `sections` here is NOT a general committed-sections floor.
+// Primary-source evidence (Concept Rio v10 workbook, sheet PnL, Turmas block,
+// rows 88-106 — see docs/audits/rio-resilience/
+// phase-v10-rc2-4-gate1-2-evidence-matrix-and-source-authority.md) proves
+// turma counts are workbook-driven by ROUNDUP(enrollment/studentsPerClass,0),
+// capped at 2 — NOT a flat "2 whenever active" rule. The one documented
+// exception is Toddlers 1/2: each splits into an Integral + Meio-período
+// track, independently rounded against the same capacity; both tracks stay
+// non-zero throughout the governed window, so their workbook-true turma
+// count is a structural constant of 2 whenever active — this is the only
+// grade pair where a fixed value is source-backed. Every other grade's
+// sections must be derived from governed per-scenario enrollment via
+// sectionCountEngine.ts's rawSections formula / deriveSectionCountFromEnrollment()
+// (payrollGradeDetailAdapter.ts for Grade 6) — so this function reports
+// `null` for them, not a guessed floor.
+const DUAL_TRACK_GRADE_IDS: readonly GovernedCapacityGradeId[] = ["T1", "T2"];
+
 function activeGradeCapacityRecords(packageId: "t1_g4" | "t1_g6"): CapacityByYearAndGradeRecord[] {
   const records: CapacityByYearAndGradeRecord[] = [];
   for (const [sourceGradeLabel, normalizedGradeId] of GRADE_LABELS) {
     for (const [index, year] of GOVERNED_DIRECT_YEARS.entries()) {
       const gradeIndex = GRADE_LABELS.findIndex(([, id]) => id === normalizedGradeId);
       const active = gradeIndex < activeGradeCount(packageId, index);
+      const isDualTrackGrade = DUAL_TRACK_GRADE_IDS.includes(normalizedGradeId);
       records.push({
         packageId,
         year,
@@ -194,11 +212,13 @@ function activeGradeCapacityRecords(packageId: "t1_g4" | "t1_g6"): CapacityByYea
         normalizedGradeId,
         gradeCapacity: active ? GRADE_CAPACITY_BY_GRADE[normalizedGradeId] : null,
         studentsPerClass: active ? STUDENTS_PER_CLASS_BY_GRADE[normalizedGradeId] : null,
-        sections: active ? 2 : null,
+        sections: active && isDualTrackGrade ? 2 : null,
         ...DIRECT_CAPACITY_METADATA,
-        notes: active
-          ? "Grade capacity from approved package-specific grade activation and grade-capacity table."
-          : "Grade not active in the approved package-specific grade activation schedule for this year.",
+        notes: !active
+          ? "Grade not active in the approved package-specific grade activation schedule for this year."
+          : isDualTrackGrade
+            ? "Structural 2 sections (Integral + Meio-período tracks), workbook-verified constant whenever active — PnL!rows 88-91/90-91, V10-RC2.4 Gate 2."
+            : "Not a fixed/committed section count — derive per-scenario sections from governed enrollment via the workbook-verified ROUNDUP(enrollment/studentsPerClass) formula, V10-RC2.4 Gate 4.",
       });
     }
   }

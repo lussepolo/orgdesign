@@ -197,6 +197,17 @@ for (const packageId of ACTIVE_PACKAGES) {
     }),
     "grade capacities sum to annual capacity",
   );
+  // V10-RC2.4 Gate 8: `sections === 2` for active G12 encoded the pre-fix
+  // "active ? 2 : null" defect (see docs/audits/rio-resilience/
+  // phase-v10-rc2-4-gate1-2-evidence-matrix-and-source-authority.md). G12
+  // is not a dual-track grade (Gate 2 §2.3), so it no longer receives a
+  // fixed/committed sections value — `null` is now correct: G12's turma
+  // count is not derived anywhere (G7-G12 are fixed-FTE MS/HS staffing,
+  // not section-driven — Gate 1 evidence matrix #4), so `null` correctly
+  // means "not computed," not "unavailable data." This is an expectation
+  // correction from stronger source evidence, not a weakened check —
+  // gradeCapacity/studentsPerClass (which ARE still committed, workbook-
+  // sourced constants) are unchanged.
   check(
     `${packageId}_grade12_activation_expected`,
     GOVERNED_DIRECT_YEARS.every((year) => {
@@ -205,7 +216,7 @@ for (const packageId of ACTIVE_PACKAGES) {
       );
       const shouldBeActive = packageId === "t1_g4" ? year >= 2036 : year >= 2034;
       return shouldBeActive
-        ? record?.gradeCapacity === 50 && record.studentsPerClass === 25 && record.sections === 2
+        ? record?.gradeCapacity === 50 && record.studentsPerClass === 25 && record.sections === null
         : record?.gradeCapacity === null && record.studentsPerClass === null && record.sections === null;
     }),
     packageId === "t1_g4" ? "G12 active from 2036" : "G12 active from 2034",

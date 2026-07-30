@@ -129,9 +129,14 @@ const EXTENSION_ROLE_COST: Record<
   },
 };
 
-// Approved v1 fixed FTE counts (Phase 8C, Luciana 2026-06-03).
-const MS_FTE_BY_GRADE: Record<string, number> = { g6: 3, g7: 4, g8: 3 };
-const HS_FTE_BY_GRADE: Record<string, number> = { g9: 4, g10: 0, g11: 3, g12: 3 };
+// Approved v1 fixed FTE counts (Phase 8C, Luciana 2026-06-03; corrected by
+// Luciana 2026-07-30 during V10-RC2.4 Gate 6). MS: g6=3,g7=4,g8=2, sum=9,
+// matching the validated MS envelope (8 core + 1 flexible = 9). HS: g9=4,
+// g10=0,g11=4,g12=3, sum=11, matching the validated HS envelope (10 core +
+// 1 flexible = 11) — g10's FTE moved to g11 (4 educators beginning in grade
+// 11, none incremental at grade 10) per Luciana's correction.
+const MS_FTE_BY_GRADE: Record<string, number> = { g6: 3, g7: 4, g8: 2 };
+const HS_FTE_BY_GRADE: Record<string, number> = { g9: 4, g10: 0, g11: 4, g12: 3 };
 
 // Step function: resolves headcount for a given year from a progression array.
 function resolveHeadcount(
@@ -212,7 +217,9 @@ export function buildPayrollAdapterInput(
         roleName: "HS Educator Pool",
         message:
           "hs_pool is excluded_from_v1. HS staffing is covered by the per-grade FTE ramp " +
-          "(g9=4, g10=0, g11=3, g12=3). Using both simultaneously would double-count HS cost.",
+          "(g9=4, g10=0, g11=4, g12=3, sum=11 — corrected by Luciana 2026-07-30, V10-RC2.4 Gate 6; " +
+          "g10's FTE moved to g11, matching the validated 10 core + 1 flexible = 11 HS envelope). " +
+          "Using both simultaneously would double-count HS cost.",
       });
       continue;
     }
@@ -475,7 +482,10 @@ export function buildPayrollAdapterInput(
   }
 
   // ── 4. MS/HS educators — fixed FTE per grade ────────────────────────────────
-  // MS: g6=3, g7=4, g8=3. HS: g9=4, g10=0, g11=3, g12=3 (approved v1, Phase 8C).
+  // MS: g6=3, g7=4, g8=2, sum=9 (8 core + 1 flexible envelope). HS: g9=4,
+  // g10=0, g11=4, g12=3, sum=11 (10 core + 1 flexible envelope). Approved v1,
+  // Phase 8C; corrected by Luciana 2026-07-30, V10-RC2.4 Gate 6 — see
+  // MS_FTE_BY_GRADE/HS_FTE_BY_GRADE.
   // Compensation: Master Educator (approved v1, Phase 8C).
   // Allocation: FOPAG_DIRETO.
   // Grade activation from OPENING_PACKAGE_ACTIVE_GRADE_BY_YEAR_RECORDS (Finance-validated).

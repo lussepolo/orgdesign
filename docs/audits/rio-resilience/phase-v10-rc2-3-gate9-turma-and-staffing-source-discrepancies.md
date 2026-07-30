@@ -1,9 +1,32 @@
 # V10-RC2.3 Gate 9 — Turma-count and staffing-formula source discrepancies (documented, not fixed this phase)
 
-**Status:** Open governance gap. Discovered during V10-RC2.3 (Turmas e Folha scenario
-control and Grade 6 coverage correction) browser QA. Explicit user decision
-(2026-07-30): document only; fix in a dedicated future phase. No governed source
-data, engine formula, or role constant was modified as a result of this finding.
+**Status:** RESOLVED IN PART — see "V10-RC2.4 dispositions" below, added
+2026-07-30. This document's original content (§1-§3) is preserved unmodified as
+the historical record of what was discovered during V10-RC2.3; it should be read
+together with the dispositions section, not in place of it.
+
+**Original status (V10-RC2.3):** Open governance gap. Discovered during V10-RC2.3
+(Turmas e Folha scenario control and Grade 6 coverage correction) browser QA.
+Explicit user decision (2026-07-30): document only; fix in a dedicated future
+phase. No governed source data, engine formula, or role constant was modified as a
+result of this finding.
+
+## V10-RC2.4 dispositions (2026-07-30)
+
+Full evidence: `docs/audits/rio-resilience/
+phase-v10-rc2-4-gate1-2-evidence-matrix-and-source-authority.md`; implementation
+record: `IMPLEMENTATION.md`, "Phase V10-RC2.4."
+
+| # | Issue (from §1/§2 below) | Disposition | Detail |
+|---|---|---|---|
+| 1 | Turma count forced to 2 for every active grade (`active ? 2 : null`) | **CORRECTED** | Replaced with the workbook-verified formula `min(ROUNDUP(enrollment/studentsPerClass,0), 2)`, proven against 150+ direct workbook comparisons plus live browser/export confirmation. T1/T2 confirmed correct-as-implemented (structural dual-track exception, not a defect). |
+| 1a | Per-scenario Turmas source "not yet found" | **CORRECTED — supersedes the original finding** | No separate per-scenario table exists or is needed: the formula is scenario-agnostic by construction and applies to each scenario's own already-governed enrollment. This resolves §1's "not yet independently verified" note; it does not remain open. |
+| 2a | Counselor activation year (3rd counselor: 2028+2, 2032+3rd) | **DEFERRED — source-governance gap** | Current code produces 2031, not 2032; neither value has a located workbook citation. Not changed. |
+| 2b | Middle School educator per-grade attribution (g6/g7/g8) | **CORRECTED, by direct product-owner authorization, not by the originally-described canonical-model flip** | The user directly corrected the *live* FOPAG-wired table (`payrollAdapter.ts` `MS_FTE_BY_GRADE`) in-session: `g8: 3 → 2` (was already `g6:3, g7:4`, unchanged), sum 9 = 8 core + 1 flexible. The separate, still-`payrollWiringApproved: false` canonical 8+1 model in `msHsStaffingReadiness.ts` was **not** flipped — this section's original speculation that the user's statement "may need to flip" that model's disposition did not occur and should not be read as resolved; it remains `not_wired`. |
+| 2b-HS | (Not originally itemized separately — surfaced during RC2.4 Gate 6 reconciliation) High School educator per-grade attribution (g9/g10/g11/g12) | **CORRECTED, by direct product-owner authorization** | `HS_FTE_BY_GRADE`: `g10: 0 → 0` (unchanged), `g11: 3 → 4` (was briefly corrected to `g10: 2` mid-session, then reconciled by the user against the validated 10-core+1-flexible envelope: `g9:4,g10:0,g11:4,g12:3`, sum 11). |
+| 2c | Specialist educators (Arts, Music, Body & Movement) FTE/threshold | **DEFERRED — rejected, contradictory evidence** | Three mutually inconsistent numbers remain unreconciled: current code (fixed 1→2 FTE at 2031), user's verbal statement (1 FTE 2028, scale at 20 turmas — which, per the now-corrected turma count, occurs in 2029, not 2031), and the workbook's `Org. Design` sheet rows 19-21 (0.5 FTE @ 8 turmas). Not changed. |
+
+## Original content (V10-RC2.3, preserved unmodified below)
 
 ## 1. Confirmed: committed-sections-always-2 contradicts the source workbook
 

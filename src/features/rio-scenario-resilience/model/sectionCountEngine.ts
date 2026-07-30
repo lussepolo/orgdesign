@@ -17,6 +17,20 @@ import { GRADE_DIVISION_MAP } from "./revenueInputs";
 
 const MAX_SECTIONS = 2 as const;
 
+// V10-RC2.4 Gate 4: the single governed turma-derivation formula, shared by
+// this engine (EY/LS) and payrollGradeDetailAdapter.ts (Grade 6 — the one
+// active Middle School grade with governed grade-level enrollment). Proven
+// against primary-source workbook evidence (150/150 deterministic checks);
+// see docs/audits/rio-resilience/
+// phase-v10-rc2-4-gate1-2-evidence-matrix-and-source-authority.md.
+export function deriveSectionCountFromEnrollment(
+  enrollment: number,
+  studentsPerClass: number,
+  maxSectionsPerGrade: number = MAX_SECTIONS,
+): number {
+  return Math.min(Math.ceil(enrollment / studentsPerClass), maxSectionsPerGrade);
+}
+
 export function calculateSectionCountsForScenario(
   input: SectionCountEngineInput,
 ): SectionCountEngineOutput {

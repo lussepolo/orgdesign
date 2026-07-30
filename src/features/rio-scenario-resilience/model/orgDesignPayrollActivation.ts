@@ -44,7 +44,9 @@ export const ORG_DESIGN_PAYROLL_ACTIVATION: OrgDesignPayrollActivationDesign = {
     "Source: orgDesignStructure.ts baselineRoleSet='current_positions_in_system' (all three options identical) " +
     "and orgDesignLogic.md scenario activation comparison table (baseline roles marked Active across all columns). " +
     "hs_pool is excluded_from_v1 (Phase 8C): HS staffing is covered by the per-grade FTE ramp in " +
-    "PAYROLL_STAFFING_RULE_SOURCE_V1 (g9=4, g10=0, g11=3, g12=3). Using both simultaneously would double-count HS cost.",
+    "PAYROLL_STAFFING_RULE_SOURCE_V1 (g9=4, g10=0, g11=4, g12=3, sum=11 — corrected by Luciana " +
+    "2026-07-30, V10-RC2.4 Gate 6; g10's FTE moved to g11, matching the validated 10 core + 1 " +
+    "flexible = 11 HS envelope). Using both simultaneously would double-count HS cost.",
   records: [
     // ── LEADERSHIP BASELINE (Layer B) ───────────────────────────────────────
     {
@@ -503,7 +505,8 @@ export const ORG_DESIGN_PAYROLL_ACTIVATION: OrgDesignPayrollActivationDesign = {
       calculationReady: false,
       sourceNotes:
         "EXCLUDED FROM V1 (Phase 8C, 2026-06-03). HS staffing is covered by the per-grade FTE ramp " +
-        "(g9=4, g10=0, g11=3, g12=3) in PAYROLL_STAFFING_RULE_SOURCE_V1. " +
+        "(g9=4, g10=0, g11=4, g12=3, sum=11 — corrected by Luciana 2026-07-30, V10-RC2.4 Gate 6; " +
+        "g10's FTE moved to g11) in PAYROLL_STAFFING_RULE_SOURCE_V1. " +
         "Using hs_pool AND per-grade ramp simultaneously would double-count HS cost. " +
         "hs_pool must NOT be activated in any org design option for v1.",
     },
@@ -767,8 +770,9 @@ export const ORG_DESIGN_PAYROLL_ACTIVATION: OrgDesignPayrollActivationDesign = {
       activeIn: ALL,
       roleInclusionStatus: "active_all_options",
       headcountSource:
-        "PAYROLL_STAFFING_RULE_SOURCE_V1 per-grade FTE counts: g6=3, g7=4, g8=3 " +
-        "(approved_v1_assumption + inferred_from_existing_payroll_code, Phase 8C). " +
+        "PAYROLL_STAFFING_RULE_SOURCE_V1 per-grade FTE counts: g6=3, g7=4, g8=2 " +
+        "(approved_v1_assumption + inferred_from_existing_payroll_code, Phase 8C; g8 corrected " +
+        "from 3 by Luciana 2026-07-30, V10-RC2.4 Gate 6). " +
         "MiddleSchoolTab provides instructional rationale only — not FTE authorization.",
       costSource:
         "src/constants/teaching.ts EDUCATOR_LEVELS['master'] — grossMonthly=15247.55, " +
@@ -798,15 +802,18 @@ export const ORG_DESIGN_PAYROLL_ACTIVATION: OrgDesignPayrollActivationDesign = {
       activeIn: ALL,
       roleInclusionStatus: "active_all_options",
       headcountSource:
-        "PAYROLL_STAFFING_RULE_SOURCE_V1 per-grade FTE ramp: g9=4, g10=0 (shared pool excluded), g11=3, g12=3 " +
-        "(source_supported from HighSchoolTab + approved v1, Phase 8C). " +
+        "PAYROLL_STAFFING_RULE_SOURCE_V1 per-grade FTE ramp: g9=4, g10=0, g11=4, g12=3, sum=11 " +
+        "(source_supported from HighSchoolTab + approved v1, Phase 8C; corrected by Luciana " +
+        "2026-07-30, V10-RC2.4 Gate 6 — g10's FTE moved to g11, matching the validated 10 core + " +
+        "1 flexible = 11 HS envelope; g10 remains shared-pool-only, no incremental cost). " +
         "hs_pool is EXCLUDED FROM V1 — do NOT double-count with this ramp.",
       costSource:
         "src/constants/teaching.ts EDUCATOR_LEVELS['master'] — grossMonthly=15247.55, " +
         "laborChargesMonthly=7395.06, benefitsMonthly=1159.83 (Master Educator, approved v1 Phase 8C)",
       allocationModelSource:
         "payrollFopagMappingDesign.ts FOPAG_DIRETO outputTerm: " +
-        "'teaching leads (HS g9/g11/g12)' — FOPAG_DIRETO confirmed. g10 = 0 FTE (shared pool, no incremental cost).",
+        "'teaching leads (HS g9/g11/g12)' — FOPAG_DIRETO confirmed. g10 = 0 FTE (shared pool, no " +
+        "incremental cost; corrected by Luciana 2026-07-30, V10-RC2.4 Gate 6 — its 2 FTE moved to g11).",
       activationYearSource:
         "Per-grade activation: g9=2034, g10=2035, g11=2036, g12=2037 (from GRADE_CONFIG openYear in teaching.ts)",
       mappingStatus: "tab_logic_v1_ftes_resolved",

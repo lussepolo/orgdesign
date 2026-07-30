@@ -30,9 +30,9 @@ import {
   gradeDisplayName,
   type OrgDesignHcTableRow,
 } from "./orgDesignHcTableAdapter";
-import { calculateSectionCountsForScenario } from "./sectionCountEngine";
+import { calculateSectionCountsForScenario, deriveSectionCountFromEnrollment } from "./sectionCountEngine";
 import {
-  GOVERNED_CAPACITY_BY_YEAR_AND_GRADE_RECORDS,
+  GOVERNED_STUDENTS_PER_CLASS,
   GOVERNED_T1_G6_ENROLLMENT_BY_YEAR_AND_GRADE_RECORDS,
 } from "./governedCaptacaoCapacitySourceData";
 import type {
@@ -162,19 +162,27 @@ function buildEyLsGradeRows(
 // in governedCaptacaoCapacitySourceData.ts starts at 11 active grades, T1..G6).
 // This function never derives learners from capacity, and never derives
 // grade-level capacity from the annual GOVERNED_AVAILABLE_CAPACITY_BY_YEAR total —
-// both values come directly from the grade-level governed records.
+// enrollment comes directly from the grade-level governed records, and (as of
+// V10-RC2.4 Gate 4) sections are derived from that same scenario-specific
+// enrollment via the workbook-verified deriveSectionCountFromEnrollment()
+// formula — the same formula sectionCountEngine.ts uses for EY/LS — rather
+// than a stale, scenario-independent capacity-record lookup. This is what
+// makes Grade 6's displayed turma count vary by captação scenario.
 function buildGrade6Row(
   occupancyScenarioId: OccupancyScenarioId,
   year: OpeningPackageDirectWorkbookYear,
 ): PayrollGradeDetailRow {
-  const capacityRecord = GOVERNED_CAPACITY_BY_YEAR_AND_GRADE_RECORDS.find(
-    (r) => r.packageId === "t1_g6" && r.normalizedGradeId === "G6" && r.year === year,
-  );
   const enrollmentRecord = GOVERNED_T1_G6_ENROLLMENT_BY_YEAR_AND_GRADE_RECORDS.find(
     (r) => r.normalizedGradeId === "G6" && r.scenarioId === occupancyScenarioId && r.year === year,
   );
-  const sections = capacityRecord?.sections ?? null;
+  const studentsPerClass = GOVERNED_STUDENTS_PER_CLASS.find(
+    (r) => r.normalizedGradeId === "G6",
+  )?.studentsPerClass ?? null;
   const enrollment = enrollmentRecord?.enrollment ?? null;
+  const sections =
+    enrollment !== null && studentsPerClass !== null
+      ? deriveSectionCountFromEnrollment(enrollment, studentsPerClass)
+      : null;
   return {
     gradeId: "MS Grade 6",
     gradeLabel: gradeDisplayName("g6"),

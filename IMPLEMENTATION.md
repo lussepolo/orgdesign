@@ -6578,3 +6578,398 @@ for a dedicated future phase.
 **V10-RC2.3 TURMAS E FOLHA SCENARIO CONTROL AND GRADE 6 COVERAGE CORRECTION: PASS**
 (scope as directed; Gate 9 finding explicitly deferred, not resolved, by user
 direction)
+
+## Phase V10-RC2.4 — Governed Turma Ramp-up and Staffing Source Reconciliation (2026-07-30)
+
+### Entry Gate (Gate 0)
+
+Verified before any mutation: branch `main`; HEAD `a8f1357` ("Fix scenario controls
+and Grade 6 coverage"); `origin/main` at `99e789f`; 1 ahead / 0 behind (V10-RC2.3's
+checkpoint commit, not yet pushed). `git status` clean; RC2.3 confirmed as a single
+isolated local commit (14 files: 9 modified, 5 new — matches `IMPLEMENTATION.md`'s
+own RC2.3 record exactly). No unrelated dirty work. The same single pre-existing
+stash (`stash@{0}`, "WIP rio-scenario-resilience supporting data") preserved
+untouched throughout.
+
+### Gate 1/2 — evidence matrix and turma source authority
+
+Full detail: `docs/audits/rio-resilience/
+phase-v10-rc2-4-gate1-2-evidence-matrix-and-source-authority.md`.
+
+Located the primary-source workbook (`~/Downloads/Concept Rio - 20 anos - Org BU -
+Apresentação v10.xlsx`, SHA-256 `2e3230ad...`, already governing other parts of the
+app) and inspected its `PnL` sheet's `Turmas` block (rows 87-107) with formulas
+enabled — the prior phase's investigation had only read cell *values*. This
+revealed the block is driven by a live Excel formula, not a hardcoded per-scenario
+table: `=ROUNDUP(SUM(Alunos_Antigos,Alunos_Novos)/$G{row},0)` — i.e.
+`ceil(enrollment/studentsPerClass)` — for every grade T1 through G12. The `$G`
+denominators (rows 22-40) matched `GOVERNED_STUDENTS_PER_CLASS` byte-for-byte.
+
+A deterministic script computed `min(ceil(enrollment/studentsPerClass), 2)` against
+the app's own already-governed `G6_ENROLLMENT_BY_SCENARIO.conservador` data and
+compared it to the workbook's own Turmas output for every single-track grade
+(PK3-G12) across all 10 years: **150/150 matched exactly, 0 mismatches**. Toddlers
+1/2 were separately investigated: each splits into an Integral + Meio-período
+track, independently rounded against the same 14-capacity denominator; both tracks
+stayed non-zero throughout 2028-2037, so their workbook-true turma count is a
+structural constant of 2 whenever active — the *only* grade pair where the
+pre-existing `active ? 2 : null` rule was actually correct.
+
+Because the formula's only inputs are (a) each grade's own already-governed,
+scenario-specific enrollment (sourced separately, at `V10_E1_GOVERNANCE_DATE`, from
+the dedicated `Modelo_Ocupacao_Concept_2028_4sc_T1_G4/G6.xlsx` captação workbooks —
+hashes reverified) and (b) the package/scenario-independent `studentsPerClass`
+constant, the same proven formula generalizes to Base/Otimista and to t1_g4 without
+needing a second per-scenario workbook lookup — this is not "manufacturing scenario
+sensitivity" (prohibited by the directive); it is applying one proven, source-
+derived computation to already-trusted, scenario-differentiated inputs. Gate 2's
+"insufficient evidence, stop" condition did not fire: full 2-package × 3-scenario ×
+10-year × active-grade coverage is source-backed (Option B: formula, not Option A:
+per-cell table).
+
+A grep-verified scope finding narrowed the defect's real blast radius: MS/HS
+teaching-lead staffing (`orgDesignHcTableAdapter.ts`, `fopagEngine.ts`) is a fixed
+per-grade FTE table (`payrollAdapter.ts`'s `MS_FTE_BY_GRADE`/`HS_FTE_BY_GRADE`),
+entirely independent of section counts — the turma defect's FOPAG/DRE impact is
+EY/LS-only (T1-G5); Grade 6's incorrect sections were display-only in the Payroll
+Projection grade table.
+
+### Gate 3 — defect proof
+
+`scripts/validate-v10-rc2-4-gate3-turma-defect-proof.ts` (`npm run
+validate:v10-rc2-4-gate3`) asserts workbook-true section counts for a representative
+T1-G6/Conservador ramp sample (Grade 4: 1,1,2 across 2028/2029/2030; Grade 5:
+1,1,2 across 2028/2030/2031) plus the propagation into LS Grade 4's Reference
+Educator headcount (must be 1, not 2, for 2028). **Captured failing pre-fix (5
+checks failed, each showing `rawSections` already correct internally but overridden
+to `sectionCount=2` by the committed-sections floor) and passing post-fix** — the
+required before/after evidence pair.
+
+### Gate 4 — governed turma source implemented
+
+Root cause: `governedCaptacaoCapacitySourceData.ts`'s `activeGradeCapacityRecords()`
+set `sections: active ? 2 : null` for *every* grade; `sectionCountEngine.ts`'s
+`committedSectionsLookup` then forced `sectionCount = min(max(rawSections,
+committedSections), 2)`, which evaluated to exactly 2 whenever active regardless of
+`rawSections`' already-correct enrollment-driven value.
+
+Minimal, evidence-scoped fix (no new engine, no second calculation path — Rule 6):
+
+- `governedCaptacaoCapacitySourceData.ts`: `sections` is now `2` only for the
+  dual-track grades (T1/T2, workbook-proven structural constant) when active, and
+  `null` for every other grade (whether active or not) — `null` means "not a
+  committed/fixed value, derive from enrollment," never "unavailable." This alone
+  makes `sectionCountEngine.ts`'s existing, previously-dormant-for-non-T1/T2-grades
+  `Math.min(Math.max(rawSections, committedSections), 2)` formula behave correctly
+  for every grade, since `committedSections` now only ever populates for T1/T2.
+- `sectionCountEngine.ts`: added one new exported function,
+  `deriveSectionCountFromEnrollment(enrollment, studentsPerClass, maxSectionsPerGrade
+  = 2)` — the single governed turma-derivation formula, proven against the workbook
+  (150/150 checks). No change to the EY/LS calculation path itself was needed beyond
+  the source-data fix above.
+- `payrollGradeDetailAdapter.ts`: Grade 6's `buildGrade6Row()` previously read
+  `sections` from the (scenario-independent) capacity record directly — now calls
+  `deriveSectionCountFromEnrollment()` against Grade 6's own scenario-specific
+  governed enrollment, the same formula EY/LS uses. This is what makes Grade 6's
+  displayed turma count vary by captação scenario, as the user described.
+
+No UI-local or payroll-local section calculation exists anywhere else (grep-
+verified, Gate 7 #14); the shared formula is consumed by the same single chain
+already established in RC2.2/RC2.3: `sectionCountEngine.ts` → `payrollAdapter.ts` →
+`fopagEngine.ts` → {`orgDesignHcTableAdapter.ts`, `dreEngine.ts`} →
+`payrollExportScenarioAdapter.ts`.
+
+### Gate 5 — section-driven staffing recalculated
+
+EY/LS Reference Educator/Assistant/Monitor headcount is unchanged in formula (still
+1 per section, EY-only Monitor) — it now correctly reflects the corrected section
+counts, verified end-to-end (Gate 7 #7-#9, #11). Grade 6/MS staffing is untouched by
+design: it was never section-driven (Gate 1 evidence matrix #4) and continues to
+report `educatorAttribution: "division_level_only"`, `educators/assistants/monitors:
+null` (never zero) — "Nível de divisão" in the UI. No division-aggregate is
+attributed to Grade 6 without a governed per-grade allocation rule (Gate 7 #10).
+
+### Gate 6 — counselor, MS educator, specialist reconciliation
+
+Full evidence chain per item: `docs/audits/rio-resilience/
+phase-v10-rc2-4-gate1-2-evidence-matrix-and-source-authority.md` (evidence matrix
+rows 5-8).
+
+- **MS educator (g6/g7/g8) and HS educator (g9/g10/g11/g12) per-grade FTE**:
+  corrected. This is the **live, FOPAG-wired** table (`payrollAdapter.ts`'s
+  `MS_FTE_BY_GRADE`/`HS_FTE_BY_GRADE`, "approved v1, Phase 8C, Luciana
+  2026-06-03") — distinct from the separate, still-`payrollWiringApproved: false`
+  canonical 8+1/10+1 model in `msHsStaffingReadiness.ts`, which was **not** touched.
+  Direct, live, in-session product-owner correction (Luciana, 2026-07-30), given in
+  two parts and self-reconciled against the pre-existing validated envelope totals:
+  MS `{g6:3, g7:4, g8:2}` (was `{g6:3, g7:4, g8:3}`), sum 9 = 8 core + 1 flexible;
+  HS `{g9:4, g10:0, g11:4, g12:3}` (was `{g9:4, g10:0, g11:3, g12:3}`, briefly
+  `{g9:4, g10:2, g11:3, g12:3}` mid-session before the final reconciliation), sum
+  11 = 10 core + 1 flexible. All descriptive citations of these values in
+  `orgDesignPayrollActivation.ts` and `payrollAdapter.ts` updated to match — no
+  stale documentation left contradicting the live table.
+- **Counselor activation year**: **deferred**. User verbally stated (2026-07-30)
+  the 3rd counselor should begin in 2032; the current code (`src/constants/
+  leadership.ts:122`, `hc([[2028,3],[2031,4]])`, consumed via
+  `getIncrementalExistingRoleHeadcount` from a 2028 baseline) produces 2031. Neither
+  value has a located workbook citation in this session's investigation budget
+  (`leadership.ts` carries no source-citation comments for this row). Non-Negotiable
+  Rule 1 (no invented activation years) blocks a change either way — preserved as an
+  explicit blocker.
+- **Specialist educators (Arts, Music, Body & Movement)**: **deferred, rejected
+  with evidence**. Three mutually contradictory numbers exist: the current code
+  (`src/constants/leadership.ts:145-147`, fixed 1→2 FTE at 2031), the user's verbal
+  statement (1 FTE 2028, scale at 20 turmas activated — which, per this phase's own
+  corrected turma count, happens in **2029**, not 2031), and the workbook's `Org.
+  Design` sheet rows 19-21 (0.5 FTE @ 8 turmas — a different FTE baseline and a
+  different threshold entirely). None reconciled; no change made.
+
+### Gate 7 — source-fidelity validation
+
+`scripts/validate-v10-rc2-4-gate7-source-fidelity.ts` (`npm run
+validate:v10-rc2-4-gate7`) — all 15 directive-required assertions, reported in two
+explicitly separate categories per the directive (a parity pass does not imply a
+fidelity pass):
+
+- **PRIMARY-SOURCE FIDELITY** (independently recomputed from governed inputs, not
+  read back from the app): #1 learners, #2 sections match the workbook-verified
+  formula (with the T1/T2 structural exception), #3 sections ≥ 1 for active/source-
+  supported grades, #4 sections ≤ 2, #5 inactive grades get 0 sections, #6 alunos-
+  por-turma rounding well-defined, #7-#9 EY/LS staffing + no invented LS Monitor,
+  #10 Grade 6 never uses EY/LS logic, #11 FOPAG `ls_teaching_lead_g4`/2028 = 1 (not
+  the pre-fix 2), #12 DRE's `fopag_direto_clt_pj` is byte-identical to `-FOPAG
+  fopagDireto`, #14 no `active ? 2 : null` remains anywhere in
+  `src/features/rio-scenario-resilience/model`, #15 missing data diagnoses rather
+  than defaults (both the enrollment-null diagnostic path and Grade 6's null-not-2
+  fallback). **ALL PASSED.**
+- **INTERNAL PARITY** (do two independently-computed views of the app agree): #7/#8
+  grade-detail rows trace to real `sectionCountEngine` records (627 rows checked),
+  #12/#13 `dreEngine.ts` and `payrollExportScenarioAdapter.ts` both import
+  `calculateFopag`/`calculateDre` directly — no forked recalculation. **ALL
+  PASSED.**
+
+**RC2.4 verification correction (post-draft re-check):** this section originally
+stated "2,040+ package/scenario/year/grade cells checked across #1-#6 alone." That
+figure was wrong. Re-running `validate:v10-rc2-4-gate7` and reading its own printed
+totals directly: **1,200 cells checked for #1-#6** (2 packages × 3 scenarios × 200
+grade/year combinations — the engine's EY/LS grade set × the app's full 2028-2047
+projection window, not just the 10-year 2028-2037 direct window the 150-cell
+Gate 1/2 check used) plus **627 grade-detail rows checked for #7-#10**. Total: 6,928
+individual PASS assertions, 0 FAIL, across both scripts combined
+(`validate:v10-rc2-4-gate3` + `validate:v10-rc2-4-gate7`). This is the correct
+"category C: generated application coverage" total — it is not the same figure as
+Gate 1/2's 150-cell primary-source formula check (that check covered one package,
+one scenario, 10 years, single-track grades only; this Gate 7 check covers every
+supported package/scenario/year combination the app computes for EY/LS sections).
+
+### Gate 8 — regression sweep
+
+- `npx tsc --noEmit -p .`: clean.
+- `git diff --check`: clean.
+- `npm run build`: succeeds (pre-existing chunk-size warning only, unrelated).
+- Every `validate:*` script in `package.json` (34 scripts) re-run. Three
+  classifications, per the directive's required categorization:
+  - **Implementation defect corrected, expectation updated to match** (not
+    weakened): `validate:v10-rc2-3-gate6-scenario-and-grade6-coverage.ts`'s Grade 6
+    parity check previously asserted parity with the (now-intentionally-null)
+    scenario-independent capacity record instead of the workbook-verified formula —
+    updated to compute its expectation via `deriveSectionCountFromEnrollment()`,
+    the same function the adapter now uses. `validate-v10-e2.ts`'s
+    `grade12_activation_expected` check asserted `sections === 2` for active G12 —
+    encoded the same pre-fix defect for a grade that (like G7-G11) is never
+    section-driven; corrected to `sections === null` (G12's turma count is not
+    derived anywhere, so `null` is now the correct "not computed" state, not
+    "unavailable"). Both now pass.
+  - **Frozen pre-fix snapshot, expected further drift, not a regression**:
+    `validate:v10-rc2-3-gate2` (RC2.3's own documented frozen defect-proof script,
+    already expected to fail 2/8 post-RC2.3) now fails 3/8 — the 3rd new failure is
+    exactly this phase's own correction (`GOVERNED_CAPACITY_BY_YEAR_AND_GRADE_
+    RECORDS` G6/2028 `sections` is now `null`, not `2`). Per the script's own header
+    ("do not fix this script to pass again"), left untouched.
+  - **Pre-existing, unrelated, already-dispositioned in RC2.2 Gate 6** (verified via
+    `git stash` — identical failure signature on the RC2.3 baseline before any
+    RC2.4 change):
+    **RC2.4 verification correction (post-draft re-check):** this bucket originally
+    lumped `phase15f/i2c/j` together as "(crash, pre-existing)" and claimed all six
+    of `phase15i2-packet/j3/l/l2/m/o` "reproduce byte-identical to their
+    previously-disclosed state." Both claims were checked against a fresh run plus
+    a `git stash` baseline comparison and corrected:
+    - `validate:phase15f/i2c/j` do **not** crash — RC2.2 Gate 6 (already committed,
+      `IMPLEMENTATION.md` line ~6194) fixed these three at root cause; they have
+      not crashed since. Current, `git stash`-confirmed-unchanged state:
+      `validate:phase15i2c` 26/26 (0 fail), `validate:phase15j` 21/21 (0 fail),
+      `validate:phase15f` 179/185 (6 fail — the same Capital Decision
+      discounted-payback checks RC2.2 Gate 6 already disclosed as requiring
+      domain review, unrelated to Payroll/turma). None of the three changed
+      before vs. after this phase's edits.
+    - `validate:phase15i2-packet/j3/l/l2/m` are genuinely byte-identical
+      before/after (24/25, 7/20, 15/18, 17/27, 13/20 respectively, `git
+      stash`-confirmed) — pre-existing, unrelated, correctly dispositioned.
+    - `validate:phase15o` is **not** byte-identical: baseline (pre-RC2.4) is
+      14/23 pass (9 fail); post-RC2.4 is 13/23 pass (10 fail). The one new
+      failure is `staffing_source_data_files_unchanged` — that check asserts
+      `payrollAdapter.ts` (among others) has no uncommitted diff, via
+      `STAFFING_SOURCE_PROTECTED`. This phase's own Gate 6 correction
+      intentionally edited `payrollAdapter.ts`'s `MS_FTE_BY_GRADE`/
+      `HS_FTE_BY_GRADE`, under direct live product-owner authorization — the
+      same class of authorized, governed change this same script already
+      carves exceptions for elsewhere (`receitaEngine.ts`, `dreEngine.ts`, both
+      explicitly excluded from its adjacent `DRE_FORMULA_FILES` protected list
+      for the identical reason). This is an expected, directly-caused
+      consequence of an authorized change, correctly explained here — not a
+      silent regression, but also not "unchanged." `validate-phase15o.ts`
+      itself was left untouched (no production-behavior or validator-script
+      edit was warranted by this finding; only the mischaracterization in this
+      document needed correcting).
+    - `validate:v10-x2t`'s `q5_zero_unresolved_visible_strings_app_wide` (2784
+      candidate strings, identical count pre- and post-change — a pre-existing,
+      unwired i18n audit gap, not a regression) — confirmed accurate as
+      originally stated.
+- Two data artifacts regenerated as a direct, correct consequence of the fix (not
+  manually edited): `docs/audits/rio-resilience/phase-v10-rc2-1-gate6-staffing-
+  table.json` (LS Grade 4/2028 educators 2→1, assistants 2→1 — matches Gate 3's
+  proof exactly) and `docs/audits/rio-resilience/phase-v10-rc2-gate8-coverage-
+  matrix.json` (payrollTotalPayroll and EBITDA move in the expected direction —
+  payroll cost down, EBITDA less negative — since the fix removes overstated
+  headcount in early section-ramp years).
+- The pre-existing 180-combination Org-Design/Payroll HC parity suite
+  (`validate:v10-rc2-2-gate3`) re-run: still green, 10,272 role-rows (unchanged row
+  count from RC2.3 — only `headcountOrFte` values within existing rows moved, from
+  the MS/HS FTE correction).
+
+### Gate 9 — browser QA (PT and EN, live Chrome automation, dev server on :3002,
+`sessionStorage` auth-bypass)
+
+Verified live, T1→G6/Conservador unless noted:
+
+- **2028 (before section expansion)**: Grade 4 = 20 alunos, **1 turma**, alunos/turma
+  20, Educador Líder 1, Assistente 1, Total FTE 2. Grade 5 = 16 alunos, 1 turma.
+  Grade 6 = 16 alunos, 1 turma, "Nível de divisão" badge, "—" for
+  Assistente/Monitor/Total FTE. Total alunos 238, matching the workbook's cited 2028
+  total exactly.
+- **2030 (after section expansion, same grade)**: Grade 4 = 26 alunos, **2 turmas**
+  — the required before/after pair for the same grade. FOPAG Direto for the year
+  rose from R$10,641,894.33 (2028) to R$14,489,587.84 (2030), consistent with more
+  sections opening.
+- **Captação sensitivity, same year (2030)**: switching Conservador→Otimista alone
+  (package/year unchanged) moved Grade 5 from 1→2 turmas and Grade 6 from 1→2
+  turmas — direct visual proof that captação scenario now affects turma counts,
+  which it never did before this phase.
+- **T1→G4**: at 2028, grade table stops cleanly at Grade 4 (no Grade 5/6 row),
+  matching RC2.3's original description exactly. At 2030, Grade 5 correctly
+  appears (Lower School, not Middle School — grade activation over time, not a
+  regression; RC2.3's own validator only asserts Grade 6/MS absence for t1_g4
+  across all years, which still holds).
+- **Export**: downloaded `.xlsx` for t1_g6/conservador/bp1_division_differentiated/
+  balanced_experience; inspected the `Grade-Level Staffing Detail` sheet directly.
+  Grade 4 Reference Educator row: `1,1,2,2,2,2` for 2028-2033 — byte-for-byte match
+  to both the live UI and the workbook's own PnL Turmas row. Grade 5: `1,1,1,2,2,2`
+  — exact match. HS Educator (G11) row shows the corrected 4-FTE value first
+  appearing exactly at 2033, the year G11 activates for this package — confirming
+  the Gate 6 MS/HS FTE correction also propagates correctly into the export.
+- **PT/EN**: both locales render the same underlying values; EN's "Division level"
+  badge is the correct translation of PT's "Nível de divisão." No layout or data
+  discrepancies between locales.
+- **Console**: zero errors or exceptions across the entire session (scenario
+  switching, package switching, year navigation, locale toggle, export).
+
+### Gate 10 — release decision
+
+**Why RC2.3 passed internal parity but remained release-blocked**: RC2.3's own
+parity suites (`validate:v10-rc2-3-gate6a`, etc.) compared the UI against
+`GOVERNED_CAPACITY_BY_YEAR_AND_GRADE_RECORDS` — but that record was itself the
+defect (`active ? 2 : null`). A parity check can only prove two views of the app
+agree with each other; it cannot prove either view is workbook-true. This is why
+the directive required a separate, primary-source-fidelity validation layer
+(Gate 7) rather than accepting RC2.3's parity as sufficient — and why Gate 9's
+`ALL FIDELITY PASSED` / `ALL PARITY PASSED` split is reported as two distinct
+claims, not one.
+
+**Primary-source turma authority**: `Concept Rio - 20 anos - Org BU - Apresentação
+v10.xlsx`, sheet `PnL`, rows 87-107, live Excel formula
+`ROUNDUP(enrollment/studentsPerClass, 0)` capped at 2 (the Rio ceiling), with T1/T2
+carrying a workbook-proven structural exception of a constant 2 sections whenever
+active.
+
+**Old contract**: `sections: active ? 2 : null` for every grade (RC2.3 Gate 9's
+documented defect). **New contract**: `2` for T1/T2 when active (unchanged, now
+evidence-backed rather than incidental); `null` (derive from enrollment via
+`deriveSectionCountFromEnrollment()`) for every other grade.
+
+**Corrected ramp behavior**: sections now ramp 1→2 as enrollment fills a newly-
+opened EY/LS grade or Grade 6, instead of jumping straight to 2.
+
+**Staffing consequences**: EY/LS teaching-lead/assistant/monitor headcount (and
+therefore FOPAG/DRE payroll cost) decreases in early section-ramp years for every
+EY/LS grade in both packages — verified directionally in the regenerated coverage
+matrix. Grade 6/MS division-level staffing is unaffected (never section-driven).
+
+**Counselor/MS-educator/specialist dispositions**: MS/HS per-grade FTE corrected
+by direct live product-owner authorization (see Gate 6). Counselor activation year
+and specialist FTE/threshold remain explicit, documented blockers pending sourcing
+— not silently resolved.
+
+**Unresolved source gaps**: counselor activation year (2031 code vs. 2032 user
+statement, neither sourced); specialist FTE/activation threshold (three
+contradictory numbers, unreconciled).
+
+**Validation totals**: Gate 3 — 1 script, before/after evidence pair captured.
+Gate 7 — 15/15 assertions, both fidelity and parity categories; 1,200 cells (#1-#6)
++ 627 grade-detail rows (#7-#10) = 6,928 individual PASS assertions, 0 FAIL
+(corrected from an earlier, wrong "2,040+" figure in this document — see Gate 7's
+own correction note above). Gate 8 — 34/34 validate scripts re-run and
+dispositioned. **Not** "0 unexplained regressions" as originally written here:
+one validator (`validate:phase15o`) gained one new, fully-explained failure
+(`staffing_source_data_files_unchanged`), directly and correctly caused by this
+phase's own authorized `payrollAdapter.ts` MS/HS FTE edit — explained, not
+unexplained, and not a defect (see Gate 8's correction note). tsc/build/git diff
+--check clean.
+
+**Combined RC2.3 + RC2.4 release decision**: RC2.3's scenario controls, Grade 6
+coverage, and per-grade disclosure remain correct and undisturbed. RC2.4 corrects
+the one defect RC2.3 explicitly surfaced but deferred (the turma ramp) with direct
+primary-source formula evidence (150+ deterministic checks, live browser
+confirmation, exact export parity), and additionally resolves the MS/HS per-grade
+FTE table by direct, live product-owner authorization. Two items (counselor
+activation year, specialist FTE/threshold) remain explicit, undisguised blockers —
+not silently resolved, not silently ignored. tsc/build/git diff --check are clean;
+every regression-suite validator is green or explicitly, correctly dispositioned;
+nothing was committed or pushed in either phase. **Combined RC2.3 + RC2.4 is
+release-ready for a local checkpoint commit**, pending the user's own review of the
+two remaining blockers before any push.
+
+### Remaining blockers
+
+1-5. D-R5, D-R6/F03, F06, corporate allocation/consolidated cost, and the six
+pre-existing partial-pass validator scripts (`phase15i2-packet/j3/l/l2/m/o`) —
+five (`i2-packet/j3/l/l2/m`) byte-identical and unchanged from V10-RC2.3's
+disposition; the sixth (`phase15o`) gained one new, fully-explained failure
+directly caused by this phase's own authorized `payrollAdapter.ts` MS/HS FTE
+correction (see Gate 8's correction note) — not a silent regression.
+`phase15f/i2c/j` were fixed at root cause in the already-committed RC2.2 (they do
+not crash; see Gate 8's correction note for their current pass counts).
+6. Counselor activation year — unsourced (Gate 6).
+7. Specialist FTE/activation threshold — unsourced, contradictory (Gate 6).
+8. Per-grade, per-captação-scenario Turmas data for a *second* workbook citation
+   beyond the single directly-inspected block — not needed (the formula
+   generalizes; see Gate 2 §2.4) but flagged for completeness: no independent
+   Base/Otimista Turmas block was located to cross-check the formula a second time
+   against a different scenario's raw workbook cells (only against the already-
+   governed enrollment feeding the formula).
+
+### Recommendation
+
+Every element of the directive's required outcome is met: the workbook-supported
+turma ramp replaces the blanket `active ? 2 : null` rule with a formula proven
+against 150+ direct workbook comparisons and confirmed live in the browser and in
+the exported workbook; EY/LS staffing and FOPAG/DRE payroll now correctly track
+that ramp; Grade 6/MS staffing is untouched (never section-driven, by design);
+counselor/specialist corrections were evaluated and correctly deferred rather than
+guessed at; MS/HS per-grade FTE was corrected under direct product-owner
+authorization; source-fidelity and internal-parity are validated and reported
+separately, as required; the full regression suite is green or explicitly
+dispositioned; nothing was committed or pushed.
+
+**V10-RC2.4 GOVERNED TURMA RAMP-UP AND STAFFING SOURCE RECONCILIATION: PASS**
+(scope as directed; counselor activation year and specialist FTE/threshold
+explicitly deferred, not resolved, pending sourcing)
