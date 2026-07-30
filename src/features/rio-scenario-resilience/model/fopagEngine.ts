@@ -236,8 +236,10 @@ export function calculateFopag(input: FopagEngineInput): FopagEngineOutput {
   // BENEFITS = sum benefitsAnnualAfterGrowth for all active records.
   // TOTAL_PAYROLL = FOPAG_DIRETO + FOLHA_DIRETA + BENEFITS.
   // Audit rows (headcountOrFte=0 / inactive) are counted but not added to totals.
-  // hs_pool and alias roles are not present in calculatedRecords — the adapter
-  // already excludes hs_pool (excluded_from_v1) and emits no cost record for aliases.
+  // Alias roles are not present in calculatedRecords — the adapter emits no
+  // cost record for them. hs_pool was previously excluded here too; it was
+  // deleted from the source entirely, 2026-07-30 (direct product-owner
+  // cleanup), so there is no longer a role to exclude.
 
   const yearTotals: FopagYearTotals[] = PROJECTION_YEARS.map((year) => {
     const yearRecords = calculatedRecords.filter((r) => r.year === year);
@@ -336,7 +338,7 @@ export function calculateFopag(input: FopagEngineInput): FopagEngineOutput {
       "FOLHA_DIRETA = sum grossLaborAnnualAfterGrowth for FOLHA_DIRETA records. " +
       "BENEFITS = sum benefitsAnnualAfterGrowth for all active records. " +
       "TOTAL_PAYROLL = FOPAG_DIRETO + FOLHA_DIRETA + BENEFITS. " +
-      "hs_pool excluded_from_v1 (not present in adapter records — adapter excludes it). " +
+      "hs_pool deleted from the source entirely, 2026-07-30 (not present in adapter records). " +
       "Alias roles not double-counted (adapter emits alias_no_additional_cost, no cost record produced). " +
       "sectionOverflow diagnostics propagated as non-blocking. " +
       "FOPAG/Receita ratio: NOT calculated. EBITDA, CAPEX, OPEX, Service Contracts, NPV, payback, Tier: NOT implemented. " +

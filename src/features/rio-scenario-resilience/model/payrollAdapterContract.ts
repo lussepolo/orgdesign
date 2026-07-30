@@ -204,7 +204,6 @@ export type PayrollAdapterDiagnosticType =
   | "missing_cost_source"
   | "missing_headcount_source"
   | "missing_allocation_model"
-  | "excluded_role"
   | "section_overflow"
   | "inactive_grade"
   | "unsupported_org_design_option"

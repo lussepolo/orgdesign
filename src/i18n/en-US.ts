@@ -523,7 +523,7 @@ export const EN_US: Record<TranslationKey, string> = {
   payrollNoteBeneficios: "VA/VR, meal allowance, transit voucher, life insurance. Toggle off with Without Benefits.",
   payrollFormulaFolha: "Salary × 13 · per role × headcount",
   payrollNoteFolha:
-    "FOLHA_DIRETA roles: HoS, EY Coordinator, Counselors (2→3), Ed Tech, Family Engagement, Inspirationeer, Nurse, Financial Analyst · Arts, Body & Movement, After School Educators.",
+    "FOLHA_DIRETA roles: HoS, EY Coordinator, Counselors (2→4), Ed Tech, Family Engagement, Inspirationeer, Nurse, Financial Analyst · Arts, Body & Movement, After School Educators.",
   payrollFormulaReceita: "Students × Tuition₂₀₂₈ × 1.08^(yr−2028)",
   payrollNoteReceita: "8% annual tuition growth compounded from the 2028 base rate.",
   payrollLabelFopagDireto: "FOPAG Direto",

@@ -161,9 +161,10 @@ const ALL_ROLES: { id: string; grossMonthly: number; laborChargesMonthly: number
 ];
 
 // "2028 payroll" only applies to roles already active in 2028 — roles activating later
-// (e.g. ms_principal 2031, hs_principal 2034, finance_assistant 2031, hs_pool 2034) had
-// no 2028 payroll under either the old or new formula, so there is nothing to preserve
-// for them at year 2028 (their escalation is checked separately below).
+// (e.g. ms_principal 2031, hs_principal 2034, finance_assistant 2031) had no 2028
+// payroll under either the old or new formula, so there is nothing to preserve for
+// them at year 2028 (their escalation is checked separately below). hs_pool (used to
+// be another example here) was deleted from SPECIALISTS_CONFIG, 2026-07-30.
 const rolesActiveIn2028 = ALL_ROLES.filter((r) => r.activeFrom <= 2028);
 let base2028PreservedCount = 0;
 let encargosFormulaHoldsCount = 0;

@@ -37,17 +37,24 @@ export const ORG_DESIGN_PAYROLL_ACTIVATION: OrgDesignPayrollActivationDesign = {
   activationStatus: "designed_not_implemented",
   fopagCalculationReady: false,
   approvedAt: "2026-06-03",
-  baselineRoleCount: 26,
+  // baselineRoleCount corrected 26→25, 2026-07-30 (direct product-owner
+  // cleanup): hs_pool deleted entirely (was excluded_from_v1 dead config,
+  // now removed rather than merely excluded) — no other baseline role was
+  // added or removed. after_school's move from Specialists to Leadership
+  // (same day) does not change this total, only its family classification.
+  baselineRoleCount: 25,
   extensionRoleCount: 13,
   baselineActivationRule:
-    "All 25 non-excluded baseline non-teaching roles are active in all three org design options. " +
+    "All 25 baseline non-teaching roles are active in all three org design options " +
+    "(no excluded baseline role remains — hs_pool, formerly excluded_from_v1, was deleted " +
+    "2026-07-30 rather than merely excluded). " +
     "Source: orgDesignStructure.ts baselineRoleSet='current_positions_in_system' (all three options identical) " +
     "and orgDesignLogic.md scenario activation comparison table (baseline roles marked Active across all columns). " +
-    "hs_pool is excluded_from_v1 (Phase 8C): HS staffing is covered by the per-grade FTE ramp in " +
-    "PAYROLL_STAFFING_RULE_SOURCE_V1 (g9=4, g10=2, g11=3, g12=2, sum=11 — g10=2 and g12=2 are " +
-    "direct product-owner decisions supplied 2026-07-30, V10-RC2.4A, resolving the prior " +
-    "unreconciled conflict and matching the validated 10 core + 1 flexible = 11 HS envelope). " +
-    "Using both simultaneously would double-count HS cost.",
+    "HS staffing is covered by the per-grade FTE ramp in " +
+    "PAYROLL_STAFFING_RULE_SOURCE_V1 (g9=4, g10=3, g11=2, g12=2, sum=11 — cumulative 4→7→9→11 " +
+    "as grades open; direct product-owner correction, 2026-07-30, superseding the prior " +
+    "g10=2/g11=3 split from V10-RC2.4A; matches the validated 10 core + 1 flexible = 11 HS " +
+    "envelope). Using both simultaneously would double-count HS cost.",
   records: [
     // ── LEADERSHIP BASELINE (Layer B) ───────────────────────────────────────
     {
@@ -147,19 +154,23 @@ export const ORG_DESIGN_PAYROLL_ACTIVATION: OrgDesignPayrollActivationDesign = {
       roleName: "Counselor",
       activeIn: ALL,
       roleInclusionStatus: "active_all_options",
-      headcountSource: `${LEADERSHIP_HC_SOURCE} — hc([[2028, 2], [2032, 3]])`,
+      headcountSource: `${LEADERSHIP_HC_SOURCE} — hc([[2028, 2], [2032, 3], [2033, 4]])`,
       costSource: LEADERSHIP_COST_SOURCE,
       allocationModelSource: LEADERSHIP_ALLOC_SOURCE,
       activationYearSource: "LEADERSHIP_CONFIG.activeFrom = 2028",
       mappingStatus: "source_resolved_maps_existing_role",
       needsReview: false,
       calculationReady: false,
-      // Headcount ramp corrected to {2028: 2, 2032: 3}: direct, live, in-session
-      // product-owner correction (Luciana, 2026-07-30), resolving the RC2.4
-      // Gate 6 deferred blocker ("Counselor activation year" in
-      // IMPLEMENTATION.md). Not derived from "MS opens" (MS activates 2031,
-      // not 2032) -- a direct headcount-value/year decision, not re-sourced logic.
-      sourceNotes: "HC 2 from 2028, ramps to 3 at 2032 (direct product-owner correction, 2026-07-30). Covers EY/LS/MS counseling per ramp.",
+      // Headcount ramp corrected to {2028: 2, 2032: 3, 2033: 4}: direct,
+      // live, in-session product-owner correction (Luciana, 2026-07-30),
+      // superseding the {2028: 2, 2032: 3} value from the same day's prior
+      // correction. Not derived from "MS opens" (MS activates 2031, not
+      // 2032/2033) -- a direct headcount-value/year decision, not re-sourced
+      // logic. The fourth Counselor's specific division/title attribution is
+      // not established by any source in this repository; carried only as
+      // governed aggregate headcount — see IMPLEMENTATION.md for the
+      // unresolved-governance-question note.
+      sourceNotes: "HC 2 from 2028, ramps to 3 at 2032, ramps to 4 at 2033 (direct product-owner correction, 2026-07-30). Covers EY/LS/MS counseling per ramp; the fourth Counselor's specific divisional assignment is an unresolved governance question, not inferred here.",
     },
     {
       orgDesignOptionScope: "all_options",
@@ -194,6 +205,30 @@ export const ORG_DESIGN_PAYROLL_ACTIVATION: OrgDesignPayrollActivationDesign = {
       needsReview: false,
       calculationReady: false,
       sourceNotes: "Operations lead. HC=1 from 2028.",
+    },
+    {
+      orgDesignOptionScope: "all_options",
+      roleSourceType: "baseline_role",
+      sourceRoleId: "after_school",
+      payrollRoleId: "after_school",
+      roleName: "After School Coordinator",
+      activeIn: ALL,
+      roleInclusionStatus: "active_all_options",
+      headcountSource: `${LEADERSHIP_HC_SOURCE} — hc([[2028, 1]])`,
+      costSource: LEADERSHIP_COST_SOURCE,
+      allocationModelSource: "LEADERSHIP_CONFIG.allocationModel = FOPAG_DIRETO (unchanged from prior Specialists classification)",
+      activationYearSource: "LEADERSHIP_CONFIG.activeFrom = 2028",
+      mappingStatus: "source_resolved_maps_existing_role",
+      needsReview: false,
+      calculationReady: false,
+      sourceNotes:
+        "Direct product-owner correction, 2026-07-30 (two-part): (1) roleName corrected " +
+        "from the stale \"After School Educator\" to \"After School Coordinator\"; (2) moved " +
+        "from Specialists (Layer D) to Leadership (Layer B) — After School Coordinator is in " +
+        "the Leadership role family, not Specialists. allocationModel (FOPAG_DIRETO) is " +
+        "unchanged. The after_school_coordinator extension role below is a distinct " +
+        "org-design classification concept (see its own record) and is unaffected by either " +
+        "correction.",
     },
     // ── BACKOFFICE BASELINE (Layer C) ────────────────────────────────────────
     {
@@ -405,25 +440,8 @@ export const ORG_DESIGN_PAYROLL_ACTIVATION: OrgDesignPayrollActivationDesign = {
       sourceNotes: "",
     },
     // ── SPECIALISTS BASELINE (Layer D) ───────────────────────────────────────
-    {
-      orgDesignOptionScope: "all_options",
-      roleSourceType: "baseline_role",
-      sourceRoleId: "after_school",
-      payrollRoleId: "after_school",
-      roleName: "After School Educator",
-      activeIn: ALL,
-      roleInclusionStatus: "active_all_options",
-      headcountSource: `${SPECIALISTS_HC_SOURCE} — hc([[2028, 1]])`,
-      costSource: SPECIALISTS_COST_SOURCE,
-      allocationModelSource: "SPECIALISTS_CONFIG.allocationModel = FOPAG_DIRETO",
-      activationYearSource: "SPECIALISTS_CONFIG.activeFrom = 2028",
-      mappingStatus: "source_resolved_maps_existing_role",
-      needsReview: false,
-      calculationReady: false,
-      sourceNotes:
-        "after_school_coordinator extension role is a classification override for this role. " +
-        "Display label is After School Coordinator; payroll role and headcount unchanged.",
-    },
+    // after_school moved to the Leadership section above, 2026-07-30 —
+    // direct product-owner correction (role family, not just label).
     {
       orgDesignOptionScope: "all_options",
       roleSourceType: "baseline_role",
@@ -494,29 +512,12 @@ export const ORG_DESIGN_PAYROLL_ACTIVATION: OrgDesignPayrollActivationDesign = {
         "Salary R$15,992.88 (~5% above Master Educator). HC ramps 1→2→3→4 over 2028–2037. " +
         "Do not alias to Master Educator unless source confirms no existing role record.",
     },
-    {
-      orgDesignOptionScope: "excluded_from_v1",
-      roleSourceType: "baseline_role",
-      sourceRoleId: "hs_pool",
-      payrollRoleId: "hs_pool",
-      roleName: "HS Educator Pool",
-      activeIn: EXCLUDED,
-      roleInclusionStatus: "excluded_from_v1",
-      headcountSource: `${SPECIALISTS_HC_SOURCE} — hc([[2034, 4], [2036, 8]]) — EXCLUDED`,
-      costSource: SPECIALISTS_COST_SOURCE,
-      allocationModelSource: "SPECIALISTS_CONFIG.allocationModel = FOLHA_DIRETA — EXCLUDED",
-      activationYearSource: "SPECIALISTS_CONFIG.activeFrom = 2034 — EXCLUDED",
-      mappingStatus: "excluded_from_v1",
-      needsReview: false,
-      calculationReady: false,
-      sourceNotes:
-        "EXCLUDED FROM V1 (Phase 8C, 2026-06-03). HS staffing is covered by the per-grade FTE ramp " +
-        "(g9=4, g10=2, g11=3, g12=2, sum=11 — g10=2 and g12=2 are direct product-owner decisions " +
-        "supplied 2026-07-30, V10-RC2.4A, matching the validated 11-FTE HS envelope) in " +
-        "PAYROLL_STAFFING_RULE_SOURCE_V1. " +
-        "Using hs_pool AND per-grade ramp simultaneously would double-count HS cost. " +
-        "hs_pool must NOT be activated in any org design option for v1.",
-    },
+    // hs_pool deleted, 2026-07-30 (direct product-owner cleanup): this
+    // record was already excluded_from_v1 (Phase 8C) — HS staffing is
+    // covered by the per-grade FTE ramp (g9=4, g10=3, g11=2, g12=2, sum=11,
+    // cumulative 4→7→9→11) in PAYROLL_STAFFING_RULE_SOURCE_V1. Removed as
+    // dead config now that the exclusion has been confirmed permanent — see
+    // leadership.ts SPECIALISTS_CONFIG for the corresponding source deletion.
     // ── EXTENSION ROLES: uses_existing_payroll_logic ─────────────────────────
     {
       orgDesignOptionScope: "all_options",
@@ -809,15 +810,16 @@ export const ORG_DESIGN_PAYROLL_ACTIVATION: OrgDesignPayrollActivationDesign = {
       activeIn: ALL,
       roleInclusionStatus: "active_all_options",
       headcountSource:
-        "PAYROLL_STAFFING_RULE_SOURCE_V1 per-grade FTE ramp: g9=4, g10=2, g11=3, g12=2, sum=11. " +
-        "g9/g11 are source_supported from HighSchoolTab + approved v1, Phase 8C, and unchanged. " +
-        "g10=2 and g12=2 (was 3) are direct product-owner decisions supplied 2026-07-30 " +
-        "(V10-RC2.4A): g10=2 is the original correction; g12=2 was explicitly selected by the " +
-        "product owner (offered a choice between raising the envelope to 12 or reducing one of " +
-        "g9/g11/g12 to hold it at 11) to absorb g10's incremental FTE. Neither g10=2 nor g12=2 is " +
-        "HighSchoolTab-sourced: HighSchoolTab.tsx's canonical ramp has g10=0/g12=3. This is a " +
-        "resolved, direct product-owner reallocation, not a canonical-model derivation — see " +
-        "docs/audits/rio-resilience/phase-v10-rc2-4a-hs-educator-allocation-reconciliation.md. " +
+        "PAYROLL_STAFFING_RULE_SOURCE_V1 per-grade FTE ramp: g9=4, g10=3, g11=2, g12=2, sum=11 " +
+        "(cumulative 4→7→9→11 as g9/g10/g11/g12 open in sequence). " +
+        "g9/g12 are unchanged throughout. g10 and g11 are a direct, live product-owner correction " +
+        "supplied 2026-07-30, superseding the g10=2/g11=3 split from V10-RC2.4A (same day, " +
+        "earlier in the session) — same total (11), only g10 and g11 swapped. Neither value is " +
+        "HighSchoolTab-sourced: HighSchoolTab.tsx's canonical ramp has g10=0/g11=3/g12=3 " +
+        "(comparison-only, not payroll-wired, intentionally left unchanged) — this is a resolved, " +
+        "direct product-owner reallocation, not a canonical-model derivation — see " +
+        "docs/audits/rio-resilience/phase-v10-rc2-4a-hs-educator-allocation-reconciliation.md for " +
+        "the V10-RC2.4A history this correction supersedes. " +
         "Sum=11 matches the validated 10 core + 1 flexible = 11 HS envelope. " +
         "hs_pool is EXCLUDED FROM V1 — do NOT double-count with this ramp.",
       costSource:
@@ -825,9 +827,9 @@ export const ORG_DESIGN_PAYROLL_ACTIVATION: OrgDesignPayrollActivationDesign = {
         "laborChargesMonthly=7395.06, benefitsMonthly=1159.83 (Master Educator, approved v1 Phase 8C)",
       allocationModelSource:
         "payrollFopagMappingDesign.ts FOPAG_DIRETO outputTerm: " +
-        "'teaching leads (HS g9/g10/g11/g12)' — FOPAG_DIRETO confirmed. g10=2 FTE and g12=2 FTE " +
-        "(was 3), both direct product-owner decisions, 2026-07-30, V10-RC2.4A (see headcountSource " +
-        "above). g10 is no longer shared-pool/zero-cost as previously recorded.",
+        "'teaching leads (HS g9/g10/g11/g12)' — FOPAG_DIRETO confirmed. g10=3 FTE and g11=2 FTE " +
+        "(swapped from g10=2/g11=3), direct product-owner correction, 2026-07-30 (see " +
+        "headcountSource above).",
       activationYearSource:
         "Per-grade activation: g9=2034, g10=2035, g11=2036, g12=2037 (from GRADE_CONFIG openYear in " +
         "teaching.ts) — V10-RC2.4A note: GRADE_CONFIG is a single, package-agnostic reference table. " +
@@ -841,11 +843,11 @@ export const ORG_DESIGN_PAYROLL_ACTIVATION: OrgDesignPayrollActivationDesign = {
       calculationReady: false,
       sourceNotes:
         "Compensation tier (Master Educator), allocationModel (FOPAG_DIRETO), and FTE counts are " +
-        "resolved. g10=2/g12=2 are direct product-owner decisions, 2026-07-30, V10-RC2.4A — " +
-        "resolving a prior conflict between g10=2 and the validated 11-FTE HS envelope by " +
-        "explicit product-owner selection (reduce g12, not raise the envelope). See docs/audits/" +
-        "rio-resilience/phase-v10-rc2-4a-hs-educator-allocation-reconciliation.md for the full " +
-        "governance record. " +
+        "resolved. g10=3/g11=2 are a direct product-owner correction, 2026-07-30, superseding the " +
+        "g10=2/g11=3 split from V10-RC2.4A earlier the same session — same total (11), only g10 " +
+        "and g11 swapped. See docs/audits/rio-resilience/" +
+        "phase-v10-rc2-4a-hs-educator-allocation-reconciliation.md for the superseded governance " +
+        "record. " +
         "Phase 13H: payroll adapter wiring IS implemented — see payrollAdapter.ts " +
         "section 4 (MS/HS educators — fixed FTE per grade), which uses HS_FTE_BY_GRADE and " +
         "MASTER_EDUCATOR cost; its unreconciled_grade_envelope diagnostic is a dormant safety net " +

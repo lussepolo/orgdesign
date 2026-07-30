@@ -256,16 +256,27 @@ const EXTENSION_ROLE_COST: Record<
 // future edit breaks the sum=11 invariant again) but does not fire for
 // these values.
 //
-// MS: g6=3, g7=4, g8=2, sum=9 — matches the validated MS envelope (8 core +
-// 1 flexible = 9) and the canonical MIDDLE_SCHOOL_CANONICAL_FULL_MODEL in
-// msHsStaffingReadiness.ts. Not disputed.
+// SUPERSEDED (2026-07-30, later same day): the g10=2/g12=2 split above was
+// itself corrected — see the HS line below for the current g10=3/g11=2
+// values. Left unedited above as an accurate record of what was true
+// earlier in the session; the sum=11 invariant and its dormant safety net
+// are unaffected by this later correction.
 //
-// HS: g9=4, g10=2, g11=3, g12=2, sum=11 — matches the validated HS envelope
-// (10 core + 1 flexible = 11). g10=2: direct product-owner correction,
-// 2026-07-30. g12=2 (was 3): direct product-owner decision, 2026-07-30,
-// selected to absorb g10's incremental FTE and preserve the 11-FTE total —
-// not derived from any canonical source, not chosen by this codebase.
-// g9=4/g11=3 unchanged throughout (never disputed).
+// MS: g6=3, g7=4, g8=2, sum=9 — cumulative 3→7→9 as g6/g7/g8 open in
+// sequence. Matches the validated MS envelope (8 core + 1 flexible = 9) and
+// the canonical MIDDLE_SCHOOL_CANONICAL_FULL_MODEL in
+// msHsStaffingReadiness.ts. Confirmed correct as-is, 2026-07-30 (direct
+// product-owner confirmation, same session as the HS correction below) —
+// not disputed, not changed.
+//
+// HS: g9=4, g10=3, g11=2, g12=2, sum=11 — cumulative 4→7→9→11 as g9/g10/
+// g11/g12 open in sequence: direct, live product-owner correction,
+// 2026-07-30, superseding the prior g10=2/g11=3 split (cumulative
+// 4→6→9→11) from V10-RC2.4A. Same total (11, matching the validated 10
+// core + 1 flexible envelope) and same g9=4/g12=2 — only g10 and g11 are
+// swapped. Not derived from any canonical source, not chosen by this
+// codebase — a direct headcount-value authorization, same pattern as the
+// Counselor ramp correction in src/constants/leadership.ts.
 // V10-RC2.5 Gate 3/Tranche B: exported so the shared Grade Staffing Table UI
 // can fan out a single division-level Educator tier selection to every grade
 // in the division's governed fixed-FTE table, without hardcoding a second
@@ -274,7 +285,7 @@ const EXTENSION_ROLE_COST: Record<
 // tier itself is still stored per grade internally, matching how this
 // adapter already resolves it.
 export const MS_FTE_BY_GRADE: Record<string, number> = { g6: 3, g7: 4, g8: 2 };
-export const HS_FTE_BY_GRADE: Record<string, number> = { g9: 4, g10: 2, g11: 3, g12: 2 };
+export const HS_FTE_BY_GRADE: Record<string, number> = { g9: 4, g10: 3, g11: 2, g12: 2 };
 
 // V10-RC2.4A: dormant safety net. If HS_FTE_BY_GRADE is ever edited such
 // that its sum no longer matches the validated 11-FTE HS envelope (10 core +
@@ -350,26 +361,15 @@ export function buildPayrollAdapterInput(
   // ── 1. Baseline non-teaching roles ──────────────────────────────────────────
   // Source: PAYROLL_ROLE_COST_SOURCE_DATA records for Leadership, Backoffice, Specialists.
   // Excludes TeachingTier and TeachingSupport (handled in sections 3–4).
-  // hs_pool is excluded_from_v1 — HS covered by per-grade FTE ramp (section 4).
+  // hs_pool deleted, 2026-07-30 (direct product-owner cleanup): the record no
+  // longer exists in PAYROLL_ROLE_COST_SOURCE_DATA, so the explicit skip that
+  // used to live here (excluded_from_v1) is gone too — there is nothing left
+  // to exclude. HS staffing is covered entirely by the per-grade FTE ramp
+  // (section 4).
   const BASELINE_FAMILIES = new Set(["Leadership", "Backoffice", "Specialists"]);
 
   for (const rec of PAYROLL_ROLE_COST_SOURCE_DATA.records) {
     if (!BASELINE_FAMILIES.has(rec.roleFamily)) continue;
-
-    if (rec.normalizedRoleId === "hs_pool") {
-      diagnostics.push({
-        diagnosticType: "excluded_role",
-        roleId: "hs_pool",
-        roleName: "HS Educator Pool",
-        message:
-          "hs_pool is excluded_from_v1. HS staffing is covered by the per-grade FTE ramp " +
-          "(g9=4, g10=2, g11=3, g12=2, sum=11 — g10=2 and g12=2 are direct product-owner " +
-          "decisions supplied 2026-07-30, V10-RC2.4A, selected to preserve the validated " +
-          "11-FTE HS envelope; g9/g11 unchanged). " +
-          "Using both simultaneously would double-count HS cost.",
-      });
-      continue;
-    }
 
     const roleSourceType = baselineRoleSourceType(rec.roleFamily);
     const costSourceId = baselineCostSourceId(rec.roleFamily);
@@ -668,12 +668,12 @@ export function buildPayrollAdapterInput(
   }
 
   // ── 4. MS/HS educators — fixed FTE per grade ────────────────────────────────
-  // MS: g6=3, g7=4, g8=2, sum=9 (8 core + 1 flexible envelope) — not disputed.
-  // HS: g9=4, g10=2, g11=3, g12=2, sum=11 (10 core + 1 flexible envelope).
-  // g10=2 and g12=2 are direct product-owner decisions, 2026-07-30 (V10-
-  // RC2.4A), resolving what was an unreconciled g10-vs-envelope conflict —
-  // see MS_FTE_BY_GRADE/HS_FTE_BY_GRADE above and docs/audits/rio-resilience/
-  // phase-v10-rc2-4a-hs-educator-allocation-reconciliation.md.
+  // MS: g6=3, g7=4, g8=2, sum=9 — cumulative 3→7→9 (8 core + 1 flexible
+  // envelope) — confirmed correct as-is, 2026-07-30.
+  // HS: g9=4, g10=3, g11=2, g12=2, sum=11 — cumulative 4→7→9→11 (10 core +
+  // 1 flexible envelope). Direct product-owner correction, 2026-07-30,
+  // superseding the prior g10=2/g11=3 split (V10-RC2.4A) — see
+  // MS_FTE_BY_GRADE/HS_FTE_BY_GRADE above for the full history.
   // Compensation: Master Educator (approved v1, Phase 8C).
   // Allocation: FOPAG_DIRETO.
   // Grade activation from OPENING_PACKAGE_ACTIVE_GRADE_BY_YEAR_RECORDS (Finance-validated).

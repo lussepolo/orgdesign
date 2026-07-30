@@ -119,15 +119,26 @@ export const LEADERSHIP_CONFIG: LeadershipRole[] = [
   role("ls_principal", "LS Coordinator", 19941.74, 9671.74, 1331.93, "FOLHA_DIRETA", 2028, hc([[2028, 1]]), "B"),
   role("ms_principal", "MS Coordinator", 19941.74, 9671.74, 1331.93, "FOLHA_DIRETA", 2031, hc([[2031, 1]]), "B"),
   role("hs_principal", "HS Coordinator", 19941.74, 9671.74, 1331.93, "FOLHA_DIRETA", 2034, hc([[2034, 1]]), "B"),
-  // Counselor headcount ramp corrected to {2028: 2, 2032: 3} — direct, live,
-  // in-session product-owner correction (Luciana, 2026-07-30), resolving the
-  // RC2.4 Gate 6 deferred blocker ("Counselor activation year" in
-  // IMPLEMENTATION.md, which recorded a prior verbal statement of 2032 for
-  // the step year against the then-current code's 2031/HC-3-base/HC-4-step).
-  // Not workbook-sourced; a direct headcount-value authorization.
-  role("counselor", "Counselor", 16923.84, 8208.06, 1159.82, "FOLHA_DIRETA", 2028, hc([[2028, 2], [2032, 3]]), "B"),
+  // Counselor headcount ramp corrected to {2028: 2, 2032: 3, 2033: 4} —
+  // direct, live, in-session product-owner correction (Luciana, 2026-07-30),
+  // superseding the {2028: 2, 2032: 3} value from the prior correction the
+  // same day. A fourth Counselor becomes active in 2033. The specific
+  // division/title attribution of the fourth Counselor is not established by
+  // any source in this repository (LEADERSHIP_CONFIG has never split
+  // Counselor headcount by division — see payrollRoleCostSourceData.ts's
+  // sourceNotes "Covers EY/LS/MS counseling per ramp" for the pre-existing
+  // aggregate framing) and is not invented here; it is carried only as the
+  // governed aggregate headcount, with the allocation flagged as an
+  // unresolved governance question in IMPLEMENTATION.md. Not workbook-sourced;
+  // a direct headcount-value authorization.
+  role("counselor", "Counselor", 16923.84, 8208.06, 1159.82, "FOLHA_DIRETA", 2028, hc([[2028, 2], [2032, 3], [2033, 4]]), "B"),
   role("edtech", "Ed Tech Coordinator", 18493.59, 8969.39, 1173.58, "FOLHA_DIRETA", 2028, hc([[2028, 1]]), "B"),
   role("ops", "Ops Coordinator", 11340.0, 5499.9, 1143.26, "FOLHA_DIRETA", 2028, hc([[2028, 1]]), "B"),
+  // Moved from SPECIALISTS_CONFIG (Layer D) to LEADERSHIP_CONFIG (Layer B):
+  // direct product-owner correction, 2026-07-30 — After School Coordinator is
+  // in the Leadership role family, not Specialists. allocationModel
+  // (FOPAG_DIRETO) is unchanged; only role-family/layer classification moved.
+  role("after_school", "After School Coordinator", 15247.55, 7395.06, 1159.83, "FOPAG_DIRETO", 2028, hc([[2028, 1]]), "B"),
 ];
 
 export const BACKOFFICE_CONFIG: BackofficeRole[] = [
@@ -147,7 +158,7 @@ export const BACKOFFICE_CONFIG: BackofficeRole[] = [
 
 export const SPECIALISTS_CONFIG: SpecialistRole[] = [
   // ── SHARED SPECIALISTS (campus-wide, active from 2028) ───────────────
-  role("after_school", "After School Coordinator",    15247.55, 7395.06, 1159.83, "FOPAG_DIRETO", 2028, hc([[2028, 1]]),          "D", "shared specialist"),
+  // after_school moved to LEADERSHIP_CONFIG (Layer B), 2026-07-30 — see there.
   role("arts",         "Arts Educator",             15247.55, 7395.06, 1159.83, "FOPAG_DIRETO", 2028, hc([[2028, 1], [2031, 2]]), "D", "shared specialist"),
   role("body",         "Body & Movement Educator",  15247.55, 7395.06, 1159.83, "FOPAG_DIRETO", 2028, hc([[2028, 1], [2031, 2]]), "D", "shared specialist"),
   role("music",        "Music Educator",            15247.55, 7395.06, 1159.83, "FOPAG_DIRETO", 2028, hc([[2028, 1], [2031, 2]]), "D", "shared specialist"),
@@ -155,10 +166,11 @@ export const SPECIALISTS_CONFIG: SpecialistRole[] = [
   // Classified as specialist (counted in Especialistas group).
   // Salary R$15,992.88 follows spreadsheet — ~5% above Master Educator rate.
   role("led",          "Learning Exp Designer",     15992.88, 7756.55, 1162.98, "FOLHA_DIRETA", 2028, hc([[2028, 1], [2031, 2], [2034, 3], [2037, 4]]), "D", "shared specialist"),
-  // ── HIGH SCHOOL EDUCATOR POOL ─────────────────────────────────────────
-  // 4 Master Educators hired when Grade 9 opens (2034).
-  // 4 more hired when Grade 11 opens (2036) → pool of 8.
-  // These 8 cover all HS grades (9–12). No per-grade allocation.
-  // Grade 10 (opens 2035) and Grade 12 (opens 2037) have zero incremental cost.
-  role("hs_pool",      "HS Educator Pool",          15247.55, 7395.06, 1159.83, "FOLHA_DIRETA", 2034, hc([[2034, 4], [2036, 8]]), "D", "hs pool"),
+  // hs_pool deleted, 2026-07-30 (direct product-owner cleanup): this role was
+  // already excluded from every live calculation (payrollAdapter.ts skipped
+  // it explicitly, excluded_from_v1, Phase 8C) — superseded by the per-grade
+  // HS_FTE_BY_GRADE ramp. It cost nothing while present; removed as dead
+  // config now that the exclusion has been confirmed permanent, not a
+  // temporary gap. See payrollAdapter.ts HS_FTE_BY_GRADE for the live HS
+  // staffing model.
 ];

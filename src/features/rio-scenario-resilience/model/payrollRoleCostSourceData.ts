@@ -25,9 +25,9 @@ export const PAYROLL_ROLE_COST_SOURCE_DATA: PayrollRoleCostSourceDataContract =
       "1.06 per year compound from 2028 (ANNUAL_ADJUSTMENT in src/constants/index.ts); applied in projection utilities, not stored in raw cost records",
     extractionBoundaries: {
       included: [
-        "Role-level records from LEADERSHIP_CONFIG (Leadership layer B): 8 roles",
+        "Role-level records from LEADERSHIP_CONFIG (Leadership layer B): 9 roles",
         "Role-level records from BACKOFFICE_CONFIG (Backoffice layer C): 12 roles",
-        "Role-level records from SPECIALISTS_CONFIG (Specialists layer D): 6 roles",
+        "Role-level records from SPECIALISTS_CONFIG (Specialists layer D): 4 roles",
         "Teaching tier compensation inputs from EDUCATOR_LEVELS (TeachingTier): 5 inputs",
         "Teaching support inputs from LEARNING_ASSISTANT_DETAIL and LEARNING_MONITOR_DETAIL (TeachingSupport): 2 inputs",
       ],
@@ -38,13 +38,13 @@ export const PAYROLL_ROLE_COST_SOURCE_DATA: PayrollRoleCostSourceDataContract =
       ],
     },
     sourceCategoryTotals: {
-      leadershipRolesLayerB: 8,
+      leadershipRolesLayerB: 9,
       backofficeRolesLayerC: 12,
-      specialistRolesLayerD: 6,
+      specialistRolesLayerD: 4,
       teachingTierInputs: 5,
       teachingSupportInputs: 2,
       displayOnlyExcluded: 4,
-      totalRecords: 33,
+      totalRecords: 32,
     },
     records: [
       // ── LEADERSHIP (Layer B) ─────────────────────────────────────────────
@@ -224,16 +224,22 @@ export const PAYROLL_ROLE_COST_SOURCE_DATA: PayrollRoleCostSourceDataContract =
         gradeBandApplicability: null,
         yearApplicability: 2028,
         scenarioApplicability: null,
-        // Headcount ramp corrected to {2028: 2, 2032: 3}: direct, live,
-        // in-session product-owner correction (Luciana, 2026-07-30),
-        // resolving the RC2.4 Gate 6 deferred blocker ("Counselor activation
-        // year" in IMPLEMENTATION.md). This record cites src/constants/
-        // leadership.ts LEADERSHIP_CONFIG as its source (below) — kept in
-        // sync with that file's own counselor row, not a second source.
-        fteOrHeadcountSourceValue: "2 from 2028; 3 from 2032",
+        // Headcount ramp corrected to {2028: 2, 2032: 3, 2033: 4}: direct,
+        // live, in-session product-owner correction (Luciana, 2026-07-30),
+        // superseding the {2028: 2, 2032: 3} value from the same day's prior
+        // correction. A fourth Counselor becomes active in 2033. This record
+        // cites src/constants/leadership.ts LEADERSHIP_CONFIG as its source
+        // (below) — kept in sync with that file's own counselor row, not a
+        // second source. `division: null` above is unchanged and intentional:
+        // this data model has never split Counselor headcount by division,
+        // and the fourth Counselor's division/title attribution is not
+        // established by any source in this repository — see
+        // IMPLEMENTATION.md for the unresolved-governance-question note.
+        fteOrHeadcountSourceValue: "2 from 2028; 3 from 2032; 4 from 2033",
         headcountProgression: [
           [2028, 2],
           [2032, 3],
+          [2033, 4],
         ],
         rawGrossMonthlyBRL: 16923.84,
         rawLaborChargesMonthlyBRL: 8208.06,
@@ -251,7 +257,7 @@ export const PAYROLL_ROLE_COST_SOURCE_DATA: PayrollRoleCostSourceDataContract =
         sourceSheetOrTab: "LEADERSHIP_CONFIG",
         sourceRowOrCellRef: "LEADERSHIP_CONFIG[5]",
         sourceNotes:
-          "Campus-wide counseling. Headcount ramp: 2 from 2028, 3 from 2032 (corrected from 3-from-2028/4-from-2031 by direct product-owner instruction, 2026-07-30 — see IMPLEMENTATION.md V10-RC2.5).",
+          "Campus-wide counseling. Headcount ramp: 2 from 2028, 3 from 2032, 4 from 2033 (corrected twice by direct product-owner instruction, 2026-07-30, from an original 3-from-2028/4-from-2031 — see IMPLEMENTATION.md V10-RC2.5). Fourth Counselor's division/title attribution is not established by any source in this repository; carried as governed aggregate headcount only — see IMPLEMENTATION.md for the unresolved-governance-question note.",
         needsFinanceReview: false,
         calculationReady: false,
       },
@@ -318,6 +324,50 @@ export const PAYROLL_ROLE_COST_SOURCE_DATA: PayrollRoleCostSourceDataContract =
         sourceRowOrCellRef: "LEADERSHIP_CONFIG[7]",
         sourceNotes:
           "Operations/facilities coordination. Campus-wide. Abbreviated label in source.",
+        needsFinanceReview: false,
+        calculationReady: false,
+      },
+      {
+        // Direct product-owner correction, 2026-07-30: moved from Specialists
+        // (Layer D) to Leadership (Layer B) — After School Coordinator is in
+        // the Leadership role family, not Specialists. sourceRoleLabel was
+        // separately corrected the same day from the stale "After School
+        // Educator" to "After School Coordinator" (matches leadership.ts
+        // LEADERSHIP_CONFIG's actual role label). This field feeds the live
+        // FopagCalculatedRecord.roleName (payrollAdapter.ts: `roleName:
+        // rec.sourceRoleLabel`) and roleSourceType (via roleFamily ->
+        // baselineRoleSourceType()) — both corrections change live output.
+        // allocationModel (FOPAG_DIRETO) is unchanged; only role-family/layer
+        // classification moved, not the allocation model.
+        sourceRoleLabel: "After School Coordinator",
+        normalizedRoleId: "after_school",
+        roleFamily: "Leadership",
+        layer: "B",
+        regime: null,
+        division: null,
+        areaOrFunction: "Leadership",
+        gradeBandApplicability: null,
+        yearApplicability: 2028,
+        scenarioApplicability: null,
+        fteOrHeadcountSourceValue: "1 from 2028",
+        headcountProgression: [[2028, 1]],
+        rawGrossMonthlyBRL: 15247.55,
+        rawLaborChargesMonthlyBRL: 7395.06,
+        rawBenefitsMonthlyBRL: 1159.83,
+        monthlySalaryBRL: 15247.55,
+        monthlyTotalCostBRL: null,
+        annualSalaryBRL: null,
+        annualTotalCostBRL: null,
+        costBasis: "gross_monthly_salary_only",
+        includesBenefitsOrCharges: false,
+        allocationCategory: "FOPAG_DIRETO",
+        benefitsOrChargesNotes:
+          "Three separate monthly components in source. See rawGrossMonthlyBRL, rawLaborChargesMonthlyBRL, rawBenefitsMonthlyBRL.",
+        sourceFile: "src/constants/leadership.ts",
+        sourceSheetOrTab: "LEADERSHIP_CONFIG",
+        sourceRowOrCellRef: "LEADERSHIP_CONFIG[8]",
+        sourceNotes:
+          "Campus-wide after-school program coordination. FOPAG_DIRETO (unchanged from prior Specialists classification). Salary matches Master Educator gross rate.",
         needsFinanceReview: false,
         calculationReady: false,
       },
@@ -720,39 +770,8 @@ export const PAYROLL_ROLE_COST_SOURCE_DATA: PayrollRoleCostSourceDataContract =
         calculationReady: false,
       },
       // ── SPECIALISTS (Layer D) ─────────────────────────────────────────────
-      {
-        sourceRoleLabel: "After School Educator",
-        normalizedRoleId: "after_school",
-        roleFamily: "Specialists",
-        layer: "D",
-        regime: "shared specialist",
-        division: null,
-        areaOrFunction: "Specialists",
-        gradeBandApplicability: null,
-        yearApplicability: 2028,
-        scenarioApplicability: null,
-        fteOrHeadcountSourceValue: "1 from 2028",
-        headcountProgression: [[2028, 1]],
-        rawGrossMonthlyBRL: 15247.55,
-        rawLaborChargesMonthlyBRL: 7395.06,
-        rawBenefitsMonthlyBRL: 1159.83,
-        monthlySalaryBRL: 15247.55,
-        monthlyTotalCostBRL: null,
-        annualSalaryBRL: null,
-        annualTotalCostBRL: null,
-        costBasis: "gross_monthly_salary_only",
-        includesBenefitsOrCharges: false,
-        allocationCategory: "FOPAG_DIRETO",
-        benefitsOrChargesNotes:
-          "Three separate monthly components in source. See rawGrossMonthlyBRL, rawLaborChargesMonthlyBRL, rawBenefitsMonthlyBRL.",
-        sourceFile: "src/constants/leadership.ts",
-        sourceSheetOrTab: "SPECIALISTS_CONFIG",
-        sourceRowOrCellRef: "SPECIALISTS_CONFIG[0]",
-        sourceNotes:
-          "Shared specialist (campus-wide after-school program). FOPAG_DIRETO. Salary matches Master Educator gross rate.",
-        needsFinanceReview: false,
-        calculationReady: false,
-      },
+      // after_school moved to the Leadership section above, 2026-07-30 —
+      // direct product-owner correction (role family, not just label).
       {
         sourceRoleLabel: "Arts Educator",
         normalizedRoleId: "arts",
@@ -783,7 +802,7 @@ export const PAYROLL_ROLE_COST_SOURCE_DATA: PayrollRoleCostSourceDataContract =
           "Three separate monthly components in source. See rawGrossMonthlyBRL, rawLaborChargesMonthlyBRL, rawBenefitsMonthlyBRL.",
         sourceFile: "src/constants/leadership.ts",
         sourceSheetOrTab: "SPECIALISTS_CONFIG",
-        sourceRowOrCellRef: "SPECIALISTS_CONFIG[1]",
+        sourceRowOrCellRef: "SPECIALISTS_CONFIG[0]",
         sourceNotes:
           "Shared specialist. Headcount ramp: 1 from 2028, 2 from 2031. Salary matches Master Educator gross rate.",
         needsFinanceReview: false,
@@ -819,7 +838,7 @@ export const PAYROLL_ROLE_COST_SOURCE_DATA: PayrollRoleCostSourceDataContract =
           "Three separate monthly components in source. See rawGrossMonthlyBRL, rawLaborChargesMonthlyBRL, rawBenefitsMonthlyBRL.",
         sourceFile: "src/constants/leadership.ts",
         sourceSheetOrTab: "SPECIALISTS_CONFIG",
-        sourceRowOrCellRef: "SPECIALISTS_CONFIG[2]",
+        sourceRowOrCellRef: "SPECIALISTS_CONFIG[1]",
         sourceNotes:
           "Shared specialist. Headcount ramp: 1 from 2028, 2 from 2031. Salary matches Master Educator gross rate.",
         needsFinanceReview: false,
@@ -855,7 +874,7 @@ export const PAYROLL_ROLE_COST_SOURCE_DATA: PayrollRoleCostSourceDataContract =
           "Three separate monthly components in source. See rawGrossMonthlyBRL, rawLaborChargesMonthlyBRL, rawBenefitsMonthlyBRL.",
         sourceFile: "src/constants/leadership.ts",
         sourceSheetOrTab: "SPECIALISTS_CONFIG",
-        sourceRowOrCellRef: "SPECIALISTS_CONFIG[3]",
+        sourceRowOrCellRef: "SPECIALISTS_CONFIG[2]",
         sourceNotes:
           "Shared specialist. Headcount ramp: 1 from 2028, 2 from 2031. Salary matches Master Educator gross rate.",
         needsFinanceReview: false,
@@ -894,48 +913,18 @@ export const PAYROLL_ROLE_COST_SOURCE_DATA: PayrollRoleCostSourceDataContract =
           "Three separate monthly components in source. See rawGrossMonthlyBRL, rawLaborChargesMonthlyBRL, rawBenefitsMonthlyBRL.",
         sourceFile: "src/constants/leadership.ts",
         sourceSheetOrTab: "SPECIALISTS_CONFIG",
-        sourceRowOrCellRef: "SPECIALISTS_CONFIG[4]",
+        sourceRowOrCellRef: "SPECIALISTS_CONFIG[3]",
         sourceNotes:
           "Learning Experience Designer (abbreviated in source). Shared specialist. Headcount grows with each division opening (2028→1, 2031→2, 2034→3, 2037→4). Salary ~5% above Master Educator rate per audit.",
         needsFinanceReview: false,
         calculationReady: false,
       },
-      {
-        sourceRoleLabel: "HS Educator Pool",
-        normalizedRoleId: "hs_pool",
-        roleFamily: "Specialists",
-        layer: "D",
-        regime: "hs pool",
-        division: "High School",
-        areaOrFunction: "Specialists",
-        gradeBandApplicability: ["g9", "g10", "g11", "g12"],
-        yearApplicability: 2034,
-        scenarioApplicability: null,
-        fteOrHeadcountSourceValue: "4 from 2034; 8 from 2036",
-        headcountProgression: [
-          [2034, 4],
-          [2036, 8],
-        ],
-        rawGrossMonthlyBRL: 15247.55,
-        rawLaborChargesMonthlyBRL: 7395.06,
-        rawBenefitsMonthlyBRL: 1159.83,
-        monthlySalaryBRL: 15247.55,
-        monthlyTotalCostBRL: null,
-        annualSalaryBRL: null,
-        annualTotalCostBRL: null,
-        costBasis: "gross_monthly_salary_only",
-        includesBenefitsOrCharges: false,
-        allocationCategory: "FOLHA_DIRETA",
-        benefitsOrChargesNotes:
-          "Three separate monthly components in source. See rawGrossMonthlyBRL, rawLaborChargesMonthlyBRL, rawBenefitsMonthlyBRL.",
-        sourceFile: "src/constants/leadership.ts",
-        sourceSheetOrTab: "SPECIALISTS_CONFIG",
-        sourceRowOrCellRef: "SPECIALISTS_CONFIG[5]",
-        sourceNotes:
-          "Pool of 4 Master Educators hired when g9 opens (2034); 4 more added at 2036 → pool of 8. Covers all HS grades (g9–g12). g10 and g12 have zero incremental cost (shared pool). Source label is a pool designation, not a person title. Salary matches Master Educator gross rate.",
-        needsFinanceReview: false,
-        calculationReady: false,
-      },
+      // hs_pool deleted, 2026-07-30 (direct product-owner cleanup): this
+      // record was already excluded from every live calculation
+      // (payrollAdapter.ts skipped normalizedRoleId "hs_pool" explicitly,
+      // excluded_from_v1, Phase 8C) — superseded by the per-grade
+      // HS_FTE_BY_GRADE ramp. Removed as dead config; see leadership.ts
+      // SPECIALISTS_CONFIG for the corresponding source deletion.
       // ── TEACHING TIERS — compensation inputs, not standalone role records ──
       {
         sourceRoleLabel: "Associate Educator",

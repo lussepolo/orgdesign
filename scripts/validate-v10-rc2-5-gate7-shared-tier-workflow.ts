@@ -2,7 +2,7 @@
 // Payroll grade-staffing, Educator compensation-tier workflow, financial
 // propagation, and formula-bearing export phase.
 //
-// 50 numbered assertions. Assertions 20/22/25/26 were amended by the
+// 52 numbered assertions. Assertions 20/22/25/26 were amended by the
 // binding Tranche B/C scope decisions (see docs/audits/rio-resilience/
 // phase-v10-rc2-5-gate3-tranche-b-scope.md) to test Assistant's fixed,
 // read-only classification rather than a non-existent Assistant selector.
@@ -13,18 +13,19 @@
 // governed and selectable — no Educator tier is excluded. Assertions that
 // name tier IDs are written against all five.
 //
-// Assertions 36-42 (added V10-RC2.5 closure remediation, 2026-07-30) cover
-// the Counselor headcount defect: the RC2.4 Gate 6 deferred blocker was
-// still open when RC2.5 began, and no permanent, engine-level regression
-// coverage existed for it (grep for "counselor" across scripts/*.ts
-// returned zero matches at closure-review time). These assertions exercise
-// the live calculateFopag()/calculateDre()/buildOrgDesignExportWorkbook()
-// consumers directly — not source-string or snapshot matching — against the
-// corrected ramp: HC=2 from 2028, HC=3 from 2032. Requirement provenance:
-// confirmed by product-owner conversation history; not independently
-// present in repository history inspected here (the RC2.4 Gate 6 record in
-// IMPLEMENTATION.md documents only the 2032 step year, not the {2028:2,
-// 2032:3} headcount values).
+// Assertions 36-42 (added V10-RC2.5 closure remediation, 2026-07-30, ramp
+// re-corrected same day) cover the Counselor headcount defect: the RC2.4
+// Gate 6 deferred blocker was still open when RC2.5 began, and no permanent,
+// engine-level regression coverage existed for it (grep for "counselor"
+// across scripts/*.ts returned zero matches at closure-review time). These
+// assertions exercise the live calculateFopag()/calculateDre()/
+// buildOrgDesignExportWorkbook() consumers directly — not source-string or
+// snapshot matching — against the twice-corrected ramp: HC=2 from 2028,
+// HC=3 from 2032, HC=4 from 2033. Requirement provenance: confirmed by
+// product-owner conversation history; not independently present in
+// repository history inspected here. The fourth Counselor's division/title
+// is not established by any source in this repository and is not asserted
+// here — only the governed aggregate headcount is tested.
 //
 // Assertions 43-50 (added V10-RC2.5 closure remediation, 2026-07-30) cover
 // two previously-deferred closure requirements: (1) Assistant classification
@@ -41,6 +42,21 @@
 // round-trip on the installed SheetJS 0.18.5 (community) build and are
 // therefore not implemented — a documented library-version limitation
 // (assertion 50), not an omitted checklist item.
+//
+// Assertions 51-52 (added 2026-07-30, same pass as three product-owner
+// corrections reviewed live in this session): after MS_FTE_BY_GRADE/
+// HS_FTE_BY_GRADE were "corrected" across multiple sessions with different
+// per-grade values each time, these assertions lock in the CUMULATIVE
+// headcount sequence the product owner actually states and checks (HS:
+// [4,7,9,11] as g9/g10/g11/g12 open; MS: [3,7,9] as g6/g7/g8 open),
+// computed from the live constants rather than only asserting the
+// per-grade breakdown (assertions 13-14). Same pass: HS_FTE_BY_GRADE
+// corrected to {g9:4, g10:3, g11:2, g12:2} (swapping the prior g10:2/g11:3
+// split); After School Coordinator's sourceRoleLabel corrected from the
+// stale "After School Educator" and moved from Specialists to Leadership
+// role family (leadership.ts, payrollRoleCostSourceData.ts,
+// orgDesignPayrollActivation.ts); hs_pool deleted entirely (was already
+// excluded from calculation, now removed as dead config).
 //
 // This validator performs NO independent calculation. Every value comes
 // from calculateFopag()/calculateDre()/buildOrgDesignHcTable()/
@@ -122,7 +138,7 @@ const g6Row = gradeDetail.find((r) => r.shortGradeId === "g6");
 check(11, "Grade 6 row exists and remains division_level_only (Middle School)", g6Row?.educatorAttribution === "division_level_only" && g6Row?.division === "Middle School");
 check(12, "Grade 6 row has null per-grade educators/assistants/monitors (never a fabricated zero)", g6Row?.educators === null && g6Row?.assistants === null);
 
-check(13, "HS_FTE_BY_GRADE remains {g9:4, g10:2, g11:3, g12:2}, sum=11", HS_FTE_BY_GRADE.g9 === 4 && HS_FTE_BY_GRADE.g10 === 2 && HS_FTE_BY_GRADE.g11 === 3 && HS_FTE_BY_GRADE.g12 === 2, JSON.stringify(HS_FTE_BY_GRADE));
+check(13, "HS_FTE_BY_GRADE is {g9:4, g10:3, g11:2, g12:2}, sum=11 (corrected 2026-07-30, superseding the prior g10:2/g11:3 split)", HS_FTE_BY_GRADE.g9 === 4 && HS_FTE_BY_GRADE.g10 === 3 && HS_FTE_BY_GRADE.g11 === 2 && HS_FTE_BY_GRADE.g12 === 2, JSON.stringify(HS_FTE_BY_GRADE));
 check(14, "MS_FTE_BY_GRADE remains {g6:3, g7:4, g8:2}, sum=9", MS_FTE_BY_GRADE.g6 === 3 && MS_FTE_BY_GRADE.g7 === 4 && MS_FTE_BY_GRADE.g8 === 2, JSON.stringify(MS_FTE_BY_GRADE));
 
 const eyLsRows = gradeDetail.filter((r) => r.educatorAttribution === "grade_level_governed");
@@ -257,14 +273,19 @@ check(
 );
 
 // ── 36-42: Counselor headcount defect remediation — permanent, engine-level ───
-// Ramp: HC=2 from 2028, HC=3 from 2032 (2026-07-30 product-owner correction).
-// Traces leadership.ts -> payrollRoleCostSourceData.ts -> payrollAdapter.ts ->
-// FOPAG -> DRE -> Org Design export, exercising the same live consumers the
-// application uses (not grep/snapshot matching).
+// Ramp: HC=2 from 2028, HC=3 from 2032, HC=4 from 2033 (2026-07-30
+// product-owner correction, re-corrected same day to add the 2033 step — a
+// fourth Counselor becomes active that year). Traces leadership.ts ->
+// payrollRoleCostSourceData.ts -> payrollAdapter.ts -> FOPAG -> DRE -> Org
+// Design export, exercising the same live consumers the application uses
+// (not grep/snapshot matching). The fourth Counselor's division/title is not
+// established by any source in this repository and is not asserted here —
+// only the governed aggregate headcount is tested (see IMPLEMENTATION.md for
+// the unresolved-governance-question note).
 
 const COUNSELOR_YEARS = [2028, 2029, 2030, 2031, 2032, 2033, 2034, 2035, 2036, 2037] as const;
 const COUNSELOR_EXPECTED_HC: Record<number, number> = Object.fromEntries(
-  COUNSELOR_YEARS.map((y) => [y, y < 2032 ? 2 : 3]),
+  COUNSELOR_YEARS.map((y) => [y, y < 2032 ? 2 : y < 2033 ? 3 : 4]),
 );
 
 const counselorLeadershipRole = LEADERSHIP_CONFIG.find((r) => r.id === "counselor");
@@ -290,8 +311,8 @@ check(
 );
 check(
   37,
-  "Counselor headcountProgression is exactly [[2028,2],[2032,3]] in payrollRoleCostSourceData.ts — no obsolete ramp value survives in the file payrollAdapter.ts actually consumes",
-  JSON.stringify(counselorSourceRecord?.headcountProgression) === JSON.stringify([[2028, 2], [2032, 3]]),
+  "Counselor headcountProgression is exactly [[2028,2],[2032,3],[2033,4]] in payrollRoleCostSourceData.ts — no obsolete ramp value (including the once-current {2028:2, 2032:3} without the 2033 step) survives in the file payrollAdapter.ts actually consumes",
+  JSON.stringify(counselorSourceRecord?.headcountProgression) === JSON.stringify([[2028, 2], [2032, 3], [2033, 4]]),
   JSON.stringify(counselorSourceRecord?.headcountProgression),
 );
 
@@ -306,7 +327,7 @@ const counselorRecordsByYear = COUNSELOR_YEARS.map((year) => ({
 }));
 check(
   38,
-  "calculateFopag() resolves the live Counselor headcount to exactly [2,2,2,2,3,3,3,3,3,3] for years 2028-2037 (engine output, not the source table)",
+  "calculateFopag() resolves the live Counselor headcount to exactly [2,2,2,2,3,4,4,4,4,4] for years 2028-2037 (engine output, not the source table)",
   counselorRecordsByYear.every(({ year, records }) => records[0]?.headcountOrFte === COUNSELOR_EXPECTED_HC[year]),
   JSON.stringify(counselorRecordsByYear.map(({ year, records }) => [year, records[0]?.headcountOrFte])),
 );
@@ -347,13 +368,27 @@ const counselorRpdHeader = (counselorRpdAoa[1] ?? []) as string[];
 const counselorYearCol = counselorRpdHeader.indexOf("Year");
 const counselorRoleIdCol = counselorRpdHeader.indexOf("Role ID");
 const counselorHcCol = counselorRpdHeader.indexOf("Active Headcount/FTE");
-const counselorRow2031 = counselorRpdAoa.slice(2).find((r) => r[counselorRoleIdCol] === "counselor" && r[counselorYearCol] === 2031);
-const counselorRow2032 = counselorRpdAoa.slice(2).find((r) => r[counselorRoleIdCol] === "counselor" && r[counselorYearCol] === 2032);
+// Required regression years per the 2026-07-30 product-owner correction:
+// 2028 HC=2, 2031 HC=2, 2032 HC=3, 2033 HC=4, 2037 HC=4.
+const COUNSELOR_REGRESSION_YEARS: readonly [number, number][] = [
+  [2028, 2],
+  [2031, 2],
+  [2032, 3],
+  [2033, 4],
+  [2037, 4],
+];
+const counselorRegressionRows = COUNSELOR_REGRESSION_YEARS.map(([year, expectedHc]) => ({
+  year,
+  expectedHc,
+  actualHc: counselorRpdAoa
+    .slice(2)
+    .find((r) => r[counselorRoleIdCol] === "counselor" && r[counselorYearCol] === year)?.[counselorHcCol],
+}));
 check(
   42,
-  "Org Design export's Role Payroll Detail sheet discloses HC=2 for Counselor at year 2031 and HC=3 at year 2032 — the corrected ramp propagates to the formula-bearing export, not just the engine",
-  counselorRow2031?.[counselorHcCol] === 2 && counselorRow2032?.[counselorHcCol] === 3,
-  JSON.stringify({ row2031: counselorRow2031?.[counselorHcCol], row2032: counselorRow2032?.[counselorHcCol] }),
+  "Org Design export's Role Payroll Detail sheet discloses the corrected Counselor ramp (HC=2 at 2028/2031, HC=3 at 2032, HC=4 at 2033/2037) — the twice-corrected ramp propagates to the formula-bearing export, not just the engine",
+  counselorRegressionRows.every((r) => r.actualHc === r.expectedHc),
+  JSON.stringify(counselorRegressionRows),
 );
 
 // ── 43-45: Assistant classification / compensation-source disclosure parity
@@ -499,12 +534,42 @@ check(
   "!freeze does not survive a write/read round-trip on this xlsx package version — frozen panes are not implementable without a library upgrade",
 );
 
+// ── 51-52: MS/HS cumulative-headcount invariant (added 2026-07-30, same
+// pass as the HS g10/g11 correction) — the per-grade FTE values in
+// MS_FTE_BY_GRADE/HS_FTE_BY_GRADE have been "corrected" multiple times
+// across sessions with different final values each time. What the product
+// owner actually states and checks is the CUMULATIVE sequence as grades
+// open in order, not the per-grade breakdown — so assert that sequence
+// directly, computed from the live constants, rather than only the
+// per-grade values (assertions 13-14 above).
+function cumulativeSequence(fteByGrade: Record<string, number>, gradesInOrder: readonly string[]): number[] {
+  let running = 0;
+  return gradesInOrder.map((g) => {
+    running += fteByGrade[g] ?? 0;
+    return running;
+  });
+}
+const hsCumulative = cumulativeSequence(HS_FTE_BY_GRADE, ["g9", "g10", "g11", "g12"]);
+check(
+  51,
+  "HS cumulative headcount as g9/g10/g11/g12 open in sequence is exactly [4,7,9,11] (direct product-owner statement, 2026-07-30)",
+  JSON.stringify(hsCumulative) === JSON.stringify([4, 7, 9, 11]),
+  JSON.stringify(hsCumulative),
+);
+const msCumulative = cumulativeSequence(MS_FTE_BY_GRADE, ["g6", "g7", "g8"]);
+check(
+  52,
+  "MS cumulative headcount as g6/g7/g8 open in sequence is exactly [3,7,9] (confirmed correct as-is, 2026-07-30)",
+  JSON.stringify(msCumulative) === JSON.stringify([3, 7, 9]),
+  JSON.stringify(msCumulative),
+);
+
 console.log(
   failures === 0
-    ? `\nALL CHECKS PASSED (${checksRun}/50 assertions)`
+    ? `\nALL CHECKS PASSED (${checksRun}/52 assertions)`
     : `\n${failures} CHECK(S) FAILED out of ${checksRun}`,
 );
-if (checksRun !== 50) {
-  console.log(`\nWARNING: expected exactly 50 assertions, ran ${checksRun}.`);
+if (checksRun !== 52) {
+  console.log(`\nWARNING: expected exactly 52 assertions, ran ${checksRun}.`);
 }
-process.exit(failures === 0 && checksRun === 50 ? 0 : 1);
+process.exit(failures === 0 && checksRun === 52 ? 0 : 1);

@@ -523,7 +523,7 @@ export const PT_BR = {
     "VA/VR, Alimentação, VT, seguro de vida. Desative com Sem Benefícios.",
   payrollFormulaFolha: "Salário × 13 · por função × quadro",
   payrollNoteFolha:
-    "Funções FOLHA_DIRETA: HoS, Coordenador(a) EY, Conselheiros (2→3), Ed Tech, Engajamento Familiar, Inspirationeer, Enfermeiro(a), Analista Financeiro · Educadores de Artes, Corpo e Movimento, Atividades Extracurriculares.",
+    "Funções FOLHA_DIRETA: HoS, Coordenador(a) EY, Conselheiros (2→4), Ed Tech, Engajamento Familiar, Inspirationeer, Enfermeiro(a), Analista Financeiro · Educadores de Artes, Corpo e Movimento, Atividades Extracurriculares.",
   payrollFormulaReceita: "Alunos × Mensalidade₂₀₂₈ × 1,08^(ano−2028)",
   payrollNoteReceita: "Crescimento anual de 8% na mensalidade, composto a partir da taxa-base de 2028.",
   payrollLabelFopagDireto: "FOPAG Direto",

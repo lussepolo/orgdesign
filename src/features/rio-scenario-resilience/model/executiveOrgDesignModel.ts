@@ -42,6 +42,19 @@ export interface OrgTreeNode {
   headcountSourceLabel?: string;
   headcountBasisNote?: string;
   packageBasisNote?: string;
+  // Set only by getExistingRoleHeadcount() — the LEADERSHIP_CONFIG/
+  // BACKOFFICE_CONFIG/SPECIALISTS_CONFIG roleId this node's headcountValue
+  // was read from. Added 2026-07-30 so a validator can walk the tree and
+  // compare every existing-role node against calculateFopag()'s live output
+  // for the same roleId/year, without maintaining a second, hand-copied
+  // list of which tree nodes map to which payroll role — exactly the
+  // parallel-list pattern that caused this session's Counselor and After
+  // School drift bugs. Deliberately NOT set on the Counselor increment
+  // nodes (ms-counselor, counselor-unresolved-allocation) or the hardcoded
+  // EY/LS/HS Counselor nodes — those represent a derived increment or an
+  // intentionally payroll-independent value, not a direct role.headcount[year]
+  // read, so a naive equality check against them would be wrong.
+  payrollRoleId?: string;
 }
 
 export interface ExecutiveOrgScenarioOption {
@@ -95,7 +108,9 @@ const scenarioPostureById: Record<ExecutiveOrgScenario, string> = {
   premium: "Academic Coherence Model",
 };
 
-const orgDesignScenarioOptionById = {
+// Exported so a validator can map ExecutiveOrgScenario -> orgDesignOptionId
+// without hardcoding a second copy of this 3-entry mapping.
+export const ORG_DESIGN_SCENARIO_OPTION_BY_ID = {
   minimum: "minimum_experience",
   balanced: "balanced_experience",
   premium: "premium_experience",
@@ -160,15 +175,15 @@ function formatGrades(grades: readonly string[]) {
 function getExistingRoleHeadcount(
   roleId: string,
   year: ExecutiveOrgYear,
-): Pick<OrgTreeNode, "headcountValue" | "headcountStatus" | "headcountSourceLabel"> {
+): Pick<OrgTreeNode, "headcountValue" | "headcountStatus" | "headcountSourceLabel" | "payrollRoleId"> {
   const role = getExistingRole(roleId);
 
   if (!role) return pendingHeadcount("Existing role mapping unresolved");
 
-  return sourceBackedHeadcount(
-    role.headcount[year] ?? 0,
-    existingPayrollRoleSourceLabel,
-  );
+  return {
+    ...sourceBackedHeadcount(role.headcount[year] ?? 0, existingPayrollRoleSourceLabel),
+    payrollRoleId: roleId,
+  };
 }
 
 function shouldRenderExistingRoleForYear(roleId: string, year: ExecutiveOrgYear) {
@@ -189,7 +204,7 @@ function getFixedExtensionHeadcount(
   year: ExecutiveOrgYear,
 ): Pick<OrgTreeNode, "headcountValue" | "headcountStatus" | "headcountSourceLabel"> {
   const role = orgDesignScenarioExtensionRoles.find((candidate) => candidate.id === roleId);
-  const scenarioOption = orgDesignScenarioOptionById[scenario];
+  const scenarioOption = ORG_DESIGN_SCENARIO_OPTION_BY_ID[scenario];
 
   if (!role || !role.activeIn.includes(scenarioOption)) {
     return notApplicableHeadcount();
@@ -233,20 +248,43 @@ function getHighSchoolHeadcount(
   return sourceBackedHeadcount(summary.totalServingEducators, readinessLayerSourceLabel);
 }
 
-function getIncrementalExistingRoleHeadcount(
-  roleId: string,
+// V10-RC2.5 Counselor ramp correction (2026-07-30): the aggregate Counselor
+// headcount ramp gained a second step (HC 4 from 2033) beyond the single
+// increment this node has always represented (HC 3 from 2032 — the "3rd
+// counselor," historically attributed to "MS Counselor" specifically; see
+// IMPLEMENTATION.md's RC2.4 Gate 6 record). Only that first, already-
+// established unit of increase above the 2028 baseline is captured here —
+// capped at 1 — so a further ramp step is never silently folded into an
+// MS attribution no source establishes. See
+// getUnresolvedCounselorIncrementHeadcount below, which surfaces any
+// remainder explicitly instead.
+function getEstablishedCounselorIncrementHeadcount(
   baselineYear: ExecutiveOrgYear,
   year: ExecutiveOrgYear,
   sourceLabel: string,
 ): Pick<OrgTreeNode, "headcountValue" | "headcountStatus" | "headcountSourceLabel"> {
-  const role = getExistingRole(roleId);
-
+  const role = getExistingRole("counselor");
   if (!role) return pendingHeadcount("Existing role mapping unresolved");
+  const totalIncrement = Math.max(0, (role.headcount[year] ?? 0) - (role.headcount[baselineYear] ?? 0));
+  return sourceBackedHeadcount(Math.min(totalIncrement, 1), sourceLabel);
+}
 
-  return sourceBackedHeadcount(
-    Math.max(0, (role.headcount[year] ?? 0) - (role.headcount[baselineYear] ?? 0)),
-    sourceLabel,
-  );
+// V10-RC2.5 Counselor ramp correction (2026-07-30): the portion of the
+// aggregate Counselor ramp beyond the single MS-attributed increment above.
+// Per direct product-owner instruction, the fourth Counselor's division/
+// title is not inferred solely from the aggregate ramp — repository
+// evidence establishes only the first incremental Counselor as MS-
+// attributed, so whatever remains (currently the fourth Counselor, active
+// from 2033) is returned as a known headcount value with an explicitly
+// unresolved allocation, not assigned to EY/LS/MS/HS.
+function getUnresolvedCounselorIncrementHeadcount(
+  baselineYear: ExecutiveOrgYear,
+  year: ExecutiveOrgYear,
+): number {
+  const role = getExistingRole("counselor");
+  if (!role) return 0;
+  const totalIncrement = Math.max(0, (role.headcount[year] ?? 0) - (role.headcount[baselineYear] ?? 0));
+  return Math.max(0, totalIncrement - 1);
 }
 
 function isMiddleSchoolActive(year: ExecutiveOrgYear) {
@@ -599,14 +637,28 @@ function buildAcademicDivisionsBranch(year: ExecutiveOrgYear): OrgTreeNode {
         id: "ms-counselor",
         label: "MS Counselor",
         variant: "yearBased",
-        ...getIncrementalExistingRoleHeadcount(
-          "counselor",
+        ...getEstablishedCounselorIncrementHeadcount(
           2028,
           year,
           "Existing counselor progression",
         ),
       },
     );
+
+    const unresolvedCounselorIncrement = getUnresolvedCounselorIncrementHeadcount(2028, year);
+    if (unresolvedCounselorIncrement > 0) {
+      children.push({
+        id: "counselor-unresolved-allocation",
+        label: "Counselor (allocation pending)",
+        badge: "Unresolved governance question",
+        note: "Governed aggregate Counselor headcount increased beyond the MS-attributed increment above; no source in this repository establishes which division or title this additional headcount belongs to.",
+        variant: "yearBased",
+        ...sourceBackedHeadcount(
+          unresolvedCounselorIncrement,
+          "Existing counselor progression — division/title not source-established",
+        ),
+      });
+    }
   }
 
   if (isHighSchoolActive(year)) {
