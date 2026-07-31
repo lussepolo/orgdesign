@@ -492,11 +492,14 @@ export const EN_US: Record<TranslationKey, string> = {
   // ── EarlyYearsTab (Early Years) ──────────────────────────────────────────
   earlyYearsFrameworkTitle: "Early Years Pedagogical Framework",
   earlyYearsFrameworkIntro:
-    "Our Early Years program is built on the Reggio Emilia philosophy, emphasizing the \"hundred languages of children.\" We prioritize bilingual immersion from Toddlers 1, ensuring a natural acquisition of English and Portuguese through play and exploration.",
+    "In Early Years, the Project Design Journey begins as Reggio-inspired Explorers inquiry: children observe, form hypotheses, experiment, and make their thinking visible. Environment, relationships, and pedagogical documentation work together to build belonging, agency, and curiosity from Toddlers 1 onward.",
   earlyYearsSocialEmotionalTitle: "Social-Emotional",
   earlyYearsSocialEmotionalBody: "Focus on self-regulation, empathy, and community building through collaborative play.",
   earlyYearsBilingualImmersionTitle: "Bilingual Immersion",
   earlyYearsBilingualImmersionBody: "Natural language acquisition through daily routines and inquiry-based projects.",
+  earlyYearsNarrativeTitle: "The experience we are designing",
+  earlyYearsNarrativeBody:
+    "The proposition is not only to prepare children for the next stage. It is to create a coherent first school experience where play, inquiry, communication, and care belong to the same process. That is why the classroom model combines a reference educator, an assistant, and a monitor: adult capacity protects close observation, small groups, documentation, and continuity with families.",
   earlyYearsClassroomPackageTitle: "Classroom Package",
   earlyYearsReferenceEducatorLabel: "Reference Educator",
   earlyYearsOneLeadBadge: "1 Lead",

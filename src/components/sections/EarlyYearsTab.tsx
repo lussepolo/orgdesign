@@ -95,6 +95,14 @@ const EarlyYearsTab = () => {
                 <p className="text-[10px] text-slate-500 leading-relaxed">{t("earlyYearsBilingualImmersionBody")}</p>
               </div>
             </div>
+            <div className="mt-5 border-t border-slate-100 pt-5">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                {t("earlyYearsNarrativeTitle")}
+              </p>
+              <p className="mt-2 max-w-3xl text-sm font-semibold leading-6 text-slate-700">
+                {t("earlyYearsNarrativeBody")}
+              </p>
+            </div>
           </div>
         </Card>
         <Card title={t("earlyYearsClassroomPackageTitle")} icon={Users}>

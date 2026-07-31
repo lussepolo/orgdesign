@@ -491,11 +491,14 @@ export const PT_BR = {
   // ── EarlyYearsTab (Educação Infantil) ───────────────────────────────────
   earlyYearsFrameworkTitle: "Estrutura Pedagógica da Educação Infantil",
   earlyYearsFrameworkIntro:
-    "Nosso programa de Educação Infantil é construído sobre a filosofia Reggio Emilia, enfatizando as \"cem linguagens da criança\". Priorizamos a imersão bilíngue desde os Toddlers 1, garantindo uma aquisição natural de inglês e português por meio de brincadeiras e exploração.",
+    "Na Educação Infantil, a Project Design Journey começa como uma investigação Explorers inspirada em Reggio Emilia: a criança observa, formula hipóteses, experimenta e torna seu pensamento visível. O ambiente, as relações e a documentação pedagógica trabalham juntos para construir pertencimento, autonomia e curiosidade desde os Toddlers 1.",
   earlyYearsSocialEmotionalTitle: "Socioemocional",
   earlyYearsSocialEmotionalBody: "Foco em autorregulação, empatia e construção de comunidade por meio de brincadeiras colaborativas.",
   earlyYearsBilingualImmersionTitle: "Imersão Bilíngue",
   earlyYearsBilingualImmersionBody: "Aquisição natural de idioma por meio de rotinas diárias e projetos baseados em investigação.",
+  earlyYearsNarrativeTitle: "A experiência que estamos desenhando",
+  earlyYearsNarrativeBody:
+    "A proposta não é apenas preparar a criança para a próxima etapa. É criar uma primeira experiência escolar coerente, em que brincar, investigar, comunicar e cuidar fazem parte do mesmo processo. Por isso, o modelo de sala de aula combina um educador de referência, um assistente e um monitor: a capacidade adulta sustenta observação próxima, pequenos grupos, documentação e continuidade com as famílias.",
   earlyYearsClassroomPackageTitle: "Pacote de Sala de Aula",
   earlyYearsReferenceEducatorLabel: "Educador de Referência",
   earlyYearsOneLeadBadge: "1 Titular",
