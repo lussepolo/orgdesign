@@ -29,6 +29,9 @@ export const PT_BR = {
   navGroupPeople: "Pessoas",
   navGroupAnalysis: "Análises",
   navSupportingToggleLabel: "Mais seções",
+  navScenarioBarLabel: "Cenário DRE",
+  navScenarioBarSnapshotLabel: "Snapshot da planilha",
+  navScenarioBarNoLiveConnection: "sem conexão live",
 
   // ── Cover ──────────────────────────────────────────────────────────────
   coverEyebrow: "Rio de Janeiro Campus",
@@ -198,13 +201,25 @@ export const PT_BR = {
   // ── Workspace: DRE Operacional ──────────────────────────────────────────
   wsDreShortLabel: "DRE Operacional",
   wsDreTitle: "DRE Operacional",
-  wsDrePurpose: "Cenário operacional governado: matrícula, FOPAG, Folha Direta, receita, despesas e EBITDA.",
-  wsDreDecision: "Se o cenário operacional é financeiramente viável.",
-  wsDreInputs: "Pacote de abertura, cenário de ocupação, cenário de mensalidade e opção de desenho organizacional.",
-  wsDreImpact: "Fonte única de verdade para os resultados operacionais do cenário selecionado.",
-  wsDreResult: "Resultado operacional (DRE) do cenário.",
+  wsDrePurpose: "Projeção operacional de DRE por cenário: matrícula, receita, folha, despesas e EBITDA.",
+  wsDreDecision: "Se a operação projetada sustenta margem e escala antes da análise de capital.",
+  wsDreInputs: "Pacote de abertura, captação, mensalidade e desenho organizacional.",
+  wsDreImpact: "Base técnica para análise financeira; pendente de fechamento Financeiro e aprovação formal.",
+  wsDreResult: "DRE operacional do cenário selecionado.",
   wsDreReadingOrderNote:
-    "Ordem de leitura executiva: 1. FOPAG Direto · 2. Folha Direta · 3. Receita Operacional Líquida · 4. EBITDA.",
+    "Leitura executiva: Receita Operacional Líquida · Folha Direta/FOPAG · Margem de Contribuição · EBITDA.",
+
+  // ── Workspace: Margem de Contribuição % ────────────────────────────────
+  wsContributionMarginShortLabel: "Dashboard Simulator",
+  wsContributionMarginTitle: "Overview Dashboard",
+  wsContributionMarginPurpose:
+    "Leitura visual da margem de contribuição por cenário DRE: alunos, turmas, receitas, despesas, headcount e FOPAG.",
+  wsContributionMarginDecision:
+    "Se o cenário DRE selecionado gera margem suficiente para sustentar FOPAG e custos diretos.",
+  wsContributionMarginInputs:
+    "Cenário DRE compartilhado: pacote de abertura, captação, mensalidade e desenho organizacional.",
+  wsContributionMarginImpact: "Consome calculateDre() e calculateFopag(); não cria premissas financeiras novas.",
+  wsContributionMarginResult: "Dashboard de margem de contribuição, FOPAG e DRE tabular.",
 
   // ── Workspace: Decisão de Capital ───────────────────────────────────────
   wsCapitalShortLabel: "Decisão de Capital",
@@ -214,6 +229,100 @@ export const PT_BR = {
   wsCapitalInputs: "Cenário operacional herdado da DRE e premissas de CAPEX.",
   wsCapitalImpact: "Avalia um cenário operacional de propriedade da DRE; não recria premissas de matrícula ou folha.",
   wsCapitalResult: "Métricas de decisão de investimento de capital.",
+
+
+  // ── Audited DRE governance/export additions ───────────────────────────
+  dreBoardExportTextHeading: "RESUMO DO CENÁRIO — PARA REVISÃO",
+  dreBoardExportTextInputs: "ENTRADAS DO CENÁRIO",
+  dreBoardExportTextOpeningPackage: "Pacote de abertura",
+  dreBoardExportTextOccupancy: "Captação",
+  dreBoardExportTextTuitionScenario: "Cenário de mensalidade",
+  dreBoardExportTextOrgDesign: "Desenho organizacional",
+  dreBoardExportTextOutputs: "SAÍDAS DO CENÁRIO (Camada Operacional da DRE)",
+  dreBoardExportTextLearners2028: "Alunos 2028",
+  dreBoardExportTextFirstEbitdaPositiveYear: "Primeiro ano com EBITDA positivo",
+  dreBoardExportTextEbitda2028: "EBITDA 2028",
+  dreBoardExportTextEbitda2032: "EBITDA 2032",
+  dreBoardExportTextEbitda2037: "EBITDA 2037",
+  dreBoardExportTextGovernance: "STATUS DE GOVERNANÇA",
+  dreBoardExportTextCanCalculate: "Pode calcular",
+  dreBoardExportTextCanSimulate: "Pode simular",
+  dreBoardExportTextCanCompare: "Pode comparar cenários ativos",
+  dreBoardExportTextFinanceSourceConfirmed: "Fonte Financeira confirmada",
+  dreBoardExportTextBoardRatified: "Ratificado pelo board",
+  dreBoardExportTextYes: "sim",
+  dreBoardExportTextNotYet: "ainda não",
+  dreBoardExportTextNotWithinHorizon: "Fora do horizonte",
+  dreBoardExportTextNoticeHeading: "IMPORTANTE — AVISO DE STATUS PROVISÓRIO",
+  dreBoardExportTextCalculatedNotice: "Este cenário é calculado tecnicamente pela camada operacional DRE/FOPAG.",
+  dreBoardExportTextNotCertifiedNotice: "Ele NÃO é certificação Financeira e NÃO foi ratificado pelo board.",
+  dreBoardExportTextEbitdaBoundaryNotice:
+    "EBITDA é resultado operacional; não é fluxo de caixa, CAPEX, VPL ou payback de investimento.",
+  dreBoardExportTextMaterialLimitations: "Limitações materiais ativas ({n}), não bloqueantes de cálculo:",
+  dreBoardExportTextUseLimitNotice:
+    "Use apenas para comparação e análise de trade-offs; não interpretar como aprovado, final ou ratificado.",
+  dreBoardExportTextWarningCount: "Contagem de limitações ativas",
+  dreBoardExportTextGenerated: "Gerado em",
+
+  // ── DreEbitdaChart ───────────────────────────────────────────────────
+  dreScenarioContextBannerBadgeSourceBoundary: "Fonte mista v10/v7 governada",
+  dreExecInterpMaterialLimitationsTitle: "Limitações materiais — não bloqueiam a simulação",
+  dreGovSummaryStatusActiveGovernance: "Governança ativa",
+  dreGovSummaryStatusFinanceApproval: "Aprovação Financeira pendente",
+  dreGovSummaryStatusScopeExclusion: "Exclusão de escopo",
+  dreGovSummaryStatusCapabilityUnavailable: "Capacidade indisponível",
+  dreGovSummaryStatusResolvedHistorical: "Resolvido / histórico",
+  dreGovSummaryStatusRetiredHistorical: "Retirado / histórico",
+  dreGovSummaryMethodologyMeta:
+    "Classes: {classes} · Financeiro: {finance} · Board: {board} · Responsável: {owner}",
+  dreGovSummaryHistoricalTitle: "Itens históricos ou retirados",
+  dreGovItemTitleFallback: "Item de governança",
+  dreGovItemBodyFallback: "Ver o registro de governança para a evidência detalhada.",
+  dreGovItemBoardFallback: "Limitação de governança ativa sem bloqueio de cálculo.",
+  dreGovItemBoardDescontoMetodo: "O método de desconto permanece sujeito à reverificação Financeira.",
+  dreGovItemBoardTuitionProvenance:
+    "A origem das mensalidades é mista por opção e ainda não certificada para aprovação de planejamento.",
+  dreGovItemBoardTuitionApproval: "A aprovação Financeira ou xlsx assinado de mensalidades ainda não foi registrada.",
+  dreGovItemBoardDiscountApproval:
+    "A tabela de desconto tem evidência na v10, mas a assinatura Financeira ainda não foi registrada.",
+  dreGovItemBoardMsHsBoundary:
+    "O efetivo MS/HS está disponível como estimativa agregada, não como detalhamento por série ratificado.",
+  dreGovItemBoardMsHsReconciliation:
+    "Financeiro e Acadêmico ainda precisam reconciliar fontes MS/HS não idênticas.",
+  dreGovItemBoardCorporateAllocation:
+    "Alocação corporativa de folha e custo consolidado de pessoas estão indisponíveis; folha direta do campus não é suprimida.",
+  dreGovItemTitleDescontoMetodo: "Desconto Método — reverificação da dedução derivada",
+  dreGovItemBodyDescontoMetodo:
+    "D-R5: desconto_metodo é derivado, não extração anual direta; precisa de reverificação Financeira. Receita e DRE continuam calculando.",
+  dreGovItemTitleTuitionProvenance: "Mensalidade — proveniência por opção",
+  dreGovItemBodyTuitionProvenance:
+    "D-R6/F03: BP1-BP3 vêm de transcrição de screenshot; RJ4/RJ5 vêm da equivalência BP v8(2) ≡ v8(3) por decisão do product owner.",
+  dreGovItemTitleTuitionApproval: "Mensalidade — aprovação Financeira",
+  dreGovItemBodyTuitionApproval:
+    "F03: valores de mensalidade calculam, mas aprovação Financeira ou xlsx assinado ainda não foi registrado.",
+  dreGovItemTitleDiscountApproval: "Desconto médio — evidência v10 e aprovação",
+  dreGovItemBodyDiscountApproval:
+    "F04: tabela baseada na v10 PnL row 224 por decisão do product owner; assinatura Financeira ainda não registrada.",
+  dreGovItemTitleMsHsBoundary: "MS/HS — limite de efetivo por série",
+  dreGovItemBodyMsHsBoundary:
+    "F06: FOPAG calcula custos MS/HS por tabela FTE fixa, mas o detalhamento por série permanece indisponível como fonte ratificada.",
+  dreGovItemTitleMsHsReconciliation: "MS/HS — reconciliação de fontes",
+  dreGovItemBodyMsHsReconciliation:
+    "F06: HS Option B está implementada como g9=4, g10=2, g11=3, g12=2; a reconciliação Financeiro+Acadêmico das fontes não idênticas permanece pendente.",
+  dreGovItemTitleCorporateAllocation: "Alocação corporativa — capacidade indisponível",
+  dreGovItemBodyCorporateAllocation:
+    "CORPORATE-ALLOCATION: não existe adaptador de alocação corporativa de folha. Linhas fixas corporativas da DRE não são custo consolidado de pessoas.",
+  dreGovItemTitleF01Historical: "F01 — Outras Receitas reajuste",
+  dreGovItemBodyF01Historical:
+    "Histórico: a lacuna de fórmula foi resolvida; calculateDre aplica Reajuste Despesas v10 row 11 em Outras Receitas.",
+  dreGovItemTitleF05Historical: "F05 — baseline t1_g3 retirado",
+  dreGovItemBodyF05Historical:
+    "Histórico: t1_g3/base 228 vs workbook não é caveat ativo; t1_g3 está retirado e bloqueia zero células ativas.",
+  dreGovItemTitleF02Resolved: "F02 — base da fórmula Descontos Método",
+  dreGovItemBodyF02Resolved:
+    "Resolvido na Fase 15I.2C; motor usa receitas_com_ensino_regular como base.",
+
+  // ── DreLeverPanel (DRE Operacional) ─────────────────────────────────────
 
   // ── AboutModal ───────────────────────────────────────────────────────────
   aboutModalTitle: "Rio Strategic Org Design",
@@ -706,7 +815,7 @@ export const PT_BR = {
   dreScenarioContextBannerTuitionSuffix: "mensalidade",
   dreScenarioContextBannerOrgDesignSuffix: "desenho organizacional",
   dreScenarioContextBannerBadgeOperatingLayer: "Camada operacional da DRE",
-  dreScenarioContextBannerBadgeV8Source: "Fonte v8 PnL/DRE",
+  dreScenarioContextBannerBadgeV8Source: "Snapshot de fonte da DRE",
   dreScenarioContextBannerBadgeServiceContracts: "Contratos de Serviço como linhas de custo da DRE",
   dreScenarioContextBannerBadgeCapex: "CAPEX na Decisão de Capital",
   dreScenarioContextBannerAnalysisYearLabel: "Ano de Análise",
@@ -729,7 +838,7 @@ export const PT_BR = {
   dreExecInterpTitle: "Interpretação Executiva do Simulador",
   dreExecInterpSubtitle: "Apoio à decisão, não recomendação",
   dreExecInterpSimAvailableLabel: "Simulação disponível",
-  dreExecInterpSimAvailableBody: "Todas as 108 combinações calculam",
+  dreExecInterpSimAvailableBody: "As combinações ativas de cenário calculam",
   dreExecInterpFinanceClosurePendingLabel: "Fechamento de fonte financeira pendente",
   dreExecInterpFinanceClosurePendingBody: "{n} itens de premissa em aberto — não bloqueia a simulação",
   dreExecInterpBoardPendingLabel: "Ratificação do conselho pendente",
@@ -833,7 +942,7 @@ export const PT_BR = {
   dreGovSummaryDescOutrasReceitas: "Fonte/índice de Outras Receitas C9 pendente",
   dreGovSummaryDescTuitionProvenance: "XLSX de mensalidade assinado pendente",
   dreGovSummaryDescDiscountProvenance: "Referência assinada da tabela de desconto pendente",
-  dreGovSummaryDescEnrollmentParity: "Mapeamento de cenário 228 vs 246 pendente",
+  dreGovSummaryDescEnrollmentParity: "Baseline t1_g3 retirado mantido apenas como histórico",
   dreGovSummaryDescCapacitySync: "Titularidade da reconciliação de folha/capacidade pendente",
   dreGovSummaryStatusProvisional: "Fonte provisória",
   dreGovSummaryStatusReconciliation: "Reconciliação necessária",
@@ -887,7 +996,8 @@ export const PT_BR = {
   dreScopeBoundarySourceGovernanceHeader: "Governança de Fonte",
   dreScopeBoundarySourceGovernanceBody:
     "O simulador separa o escopo de cálculo da autoridade de fonte. Linhas da DRE, linhas de folha e Contratos de Serviço devem permanecer vinculados às suas fontes governantes.",
-  dreScopeBoundarySrcItem1: "A planilha v8 PnL/DRE é a fonte da verdade para os valores em nível de linha da DRE.",
+  dreScopeBoundarySrcItem1:
+    "Autoridade de fonte mista: linhas dependentes de Reajuste Despesas usam v10 PnL row 11; linhas históricas fora desse conjunto permanecem na tabela forense definida.",
   dreScopeBoundarySrcItem2: "Contratos de Serviço são linhas de custo da DRE categorizadas, não uma camada separada do simulador.",
   dreScopeBoundarySrcItem3: "Folha de Pagamento e Benefícios são gerados pelo motor de FOPAG/folha.",
   dreScopeBoundarySrcItem4: "Valores mais antigos de screenshot/extrato de Contratos de Serviço são apenas para auditoria / substituídos.",

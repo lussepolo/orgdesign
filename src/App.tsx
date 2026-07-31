@@ -23,6 +23,7 @@ import {
   DollarSign,
   GitBranch,
   PieChart,
+  Percent,
   Target,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
@@ -45,8 +46,10 @@ import HighSchoolTab from "./components/sections/HighSchoolTab";
 import LoadTab from "./components/sections/LoadTab";
 import AboutModal from "./components/sections/AboutModal";
 import DreScenarioSimulatorTab from "./components/sections/DreScenarioSimulatorTab";
+import ContributionMarginTab from "./components/sections/ContributionMarginTab";
 import SectionsAndPayrollWorkspace from "./components/sections/SectionsAndPayrollWorkspace";
 import WorkspaceContextBanner from "./components/common/WorkspaceContextBanner";
+import { TUITION_LABELS } from "./components/dreSimulator/dreLeverLabels";
 import { RioScenarioResiliencePreview } from "./features/rio-scenario-resilience/RioScenarioResiliencePreview";
 import { useCapitalDecisionWorkspace } from "./features/rio-scenario-resilience/hooks/useCapitalDecisionWorkspace";
 import { DRE_DEFAULT_SELECTIONS } from "./hooks/useDreScenarioSimulator";
@@ -69,6 +72,7 @@ import {
   type WorkspaceGroup,
 } from "./config/workspaceRegistry";
 import { APP_VERSION_LABEL, APP_ABOUT_SEEN_STORAGE_KEY } from "./config/appMetadata";
+import { DRE_WORKSHEET_SYNC_METADATA } from "./config/worksheetSyncMetadata";
 
 // --- Types ---
 // "staffing" is retained only so the legacy, unmounted StaffingTab.tsx
@@ -76,7 +80,7 @@ import { APP_VERSION_LABEL, APP_ABOUT_SEEN_STORAGE_KEY } from "./config/appMetad
 // type-check. It is not a member of WORKSPACE_REGISTRY and has no live
 // route. Do not re-add a render branch or nav entry for it without a
 // separate phase explicitly re-approving it.
-export type TabId = "cover" | "staffing" | "offer-scenarios" | "executive-org-design" | "hr" | "early-years" | "lower-school" | "ms" | "hs" | "load" | "payroll" | "viability" | "dre-scenario-simulator" | "capital-decision";
+export type TabId = "cover" | "staffing" | "offer-scenarios" | "executive-org-design" | "hr" | "early-years" | "lower-school" | "ms" | "hs" | "load" | "payroll" | "viability" | "dre-scenario-simulator" | "contribution-margin" | "capital-decision";
 
 const WORKSPACE_ICONS: Record<TabId, React.ElementType> = {
   cover: LayoutDashboard,
@@ -92,6 +96,7 @@ const WORKSPACE_ICONS: Record<TabId, React.ElementType> = {
   payroll: DollarSign,
   viability: Target,
   "dre-scenario-simulator": PieChart,
+  "contribution-margin": Percent,
   "capital-decision": Scale,
 };
 
@@ -101,6 +106,23 @@ const SUPPORTING_GROUP_LABEL_KEYS: Record<WorkspaceGroup, "navGroupAcademic" | "
   academic: "navGroupAcademic",
   people: "navGroupPeople",
   analysis: "navGroupAnalysis",
+};
+
+const SCENARIO_OCCUPANCY_LABEL_KEYS: Record<OccupancyScenarioId, "scenarioConservador" | "scenarioBase" | "scenarioOtimista"> = {
+  conservador: "scenarioConservador",
+  base: "scenarioBase",
+  otimista: "scenarioOtimista",
+};
+
+const SCENARIO_ORG_DESIGN_LABEL_KEYS: Record<DreWorkingScenarioOrgDesignOptionId, "scenarioMinimumExperience" | "scenarioBalancedExperience" | "scenarioPremiumExperience"> = {
+  minimum_experience: "scenarioMinimumExperience",
+  balanced_experience: "scenarioBalancedExperience",
+  premium_experience: "scenarioPremiumExperience",
+};
+
+const SCENARIO_OPENING_PACKAGE_LABELS: Record<ActiveOpeningPackageId, string> = {
+  t1_g4: "T1-G4",
+  t1_g6: "T1-G6",
 };
 
 // --- Components ---
@@ -127,14 +149,14 @@ const TabButton = ({ active, onClick, label, icon: Icon }: { active: boolean, on
     onClick={onClick}
     aria-current={active ? "page" : undefined}
     className={cn(
-      "flex min-h-10 shrink-0 items-center gap-2 rounded-xl px-3 py-2 text-[11px] font-semibold transition-all duration-200 whitespace-nowrap sm:text-xs md:px-4 md:text-sm",
+      "flex h-9 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg px-2.5 text-[10px] font-bold transition-all duration-200 lg:text-[11px] xl:px-3",
       "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2",
       active
         ? "bg-slate-900 text-white shadow-md"
         : "text-slate-500 hover:bg-slate-100 hover:text-slate-900"
     )}
   >
-    <Icon className={cn("h-3.5 w-3.5 md:h-4 md:w-4", active ? "text-white" : "text-slate-400")} />
+    <Icon className={cn("h-3.5 w-3.5", active ? "text-white" : "text-slate-400")} />
     {label}
   </button>
 );
@@ -247,7 +269,7 @@ const CoverTab = ({ onStart }: { onStart: () => void }) => {
 };
 
 function AppShell() {
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
   const [activeTab, setActiveTab] = useState<TabId>("cover");
   const [showAboutModal, setShowAboutModal] = useState(false);
   const [msSections, setMsSections] = useState(2);
@@ -314,25 +336,36 @@ function AppShell() {
   const isPrimaryWorkspace = PRIMARY_WORKSPACE_ORDER.includes(activeTab);
   const activeWorkspace = activeTab !== "cover" && activeTab !== "staffing" ? getWorkspace(activeTab) : null;
   const returnPathTo = activeWorkspace?.returnPathTo;
+  const scenarioSnapshotDate = new Intl.DateTimeFormat(locale, {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(new Date(`${DRE_WORKSHEET_SYNC_METADATA.lastSyncedDate}T00:00:00.000Z`));
+  const activeScenarioPills = [
+    SCENARIO_OPENING_PACKAGE_LABELS[orgDesignOpeningPackageId],
+    t(SCENARIO_OCCUPANCY_LABEL_KEYS[dreSelections.occupancyScenarioId]),
+    TUITION_LABELS[dreSelections.tuitionScenarioId] ?? dreSelections.tuitionScenarioId,
+    t(SCENARIO_ORG_DESIGN_LABEL_KEYS[dreSelections.orgDesignOptionId]),
+  ];
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 md:py-3 flex flex-col gap-3">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-3 w-full md:w-auto">
+      <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur">
+        <div className="mx-auto flex max-w-[1600px] flex-col gap-2 px-4 py-2 md:px-6">
+          <div className="flex min-h-[48px] items-center gap-3">
+            <div className="flex min-w-0 items-center gap-3">
               <div className="h-10 w-10 bg-slate-900 rounded-xl flex items-center justify-center shrink-0"><GraduationCap className="h-6 w-6 text-white" /></div>
-              <div>
+              <div className="hidden min-w-0 xl:block">
                 <h1 className="font-bold text-slate-900 tracking-tight leading-none text-sm md:text-base">{t("appName")}</h1>
                 <p className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">{t("appTagline")}</p>
               </div>
-              <div className="ml-auto md:hidden flex items-center gap-2">
-                {activeTab !== "cover" && (<button onClick={() => setActiveTab("cover")} className="p-2 bg-slate-100 rounded-lg text-slate-600 hover:bg-slate-200 transition-colors" title={t("returnToCoverTitle")}><Home className="h-4 w-4" /></button>)}
-                <Badge variant="success">{APP_VERSION_LABEL}</Badge>
-              </div>
             </div>
 
-            <nav aria-label={t("navPrimaryAriaLabel")} className="flex w-full items-center gap-2 overflow-x-auto rounded-2xl bg-slate-100 p-1 no-scrollbar md:w-auto md:max-w-[640px] lg:max-w-none">
+            <nav
+              aria-label={t("navPrimaryAriaLabel")}
+              className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto rounded-xl bg-slate-100 p-1"
+            >
               {PRIMARY_WORKSPACE_ORDER.map((id) => {
                 const workspace = getWorkspace(id);
                 const Icon = WORKSPACE_ICONS[id];
@@ -348,37 +381,45 @@ function AppShell() {
               })}
             </nav>
 
-            <div className="flex items-center gap-2 md:gap-4">
+            <div className="ml-auto flex shrink-0 items-center gap-2">
               <LanguageSelector />
-              <button onClick={() => setShowAboutModal(true)} className="flex items-center gap-2 px-3 md:px-4 py-2 text-[10px] md:text-xs font-bold text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 rounded-xl transition-all border border-indigo-200 shadow-sm">
+              <button onClick={() => setShowAboutModal(true)} className="flex items-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-3 py-2 text-[10px] font-bold text-indigo-600 shadow-sm transition-all hover:bg-indigo-100 hover:text-indigo-900 md:text-xs">
                 <Info className="h-3.5 w-3.5 md:h-4 md:w-4" />
-                <span className="hidden sm:inline">{t("aboutButtonLabel")}</span>
+                <span className="hidden lg:inline">{t("aboutButtonLabel")}</span>
                 <span className="sm:hidden">{t("aboutButtonLabelShort")}</span>
               </button>
-              <div className="flex items-center gap-2 md:gap-4">
-                {activeTab !== "cover" && (
-                  <button onClick={() => setActiveTab("cover")} className="flex items-center gap-2 px-3 md:px-4 py-2 text-[10px] md:text-xs font-bold text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 rounded-xl transition-all border border-slate-200 shadow-sm">
-                    <Home className="h-3.5 w-3.5 md:h-4 md:w-4" />
-                    <span className="hidden sm:inline">{t("returnToCoverLabel")}</span>
-                    <span className="sm:hidden">{t("returnToCoverLabelShort")}</span>
-                  </button>
-                )}
-                <div className="hidden sm:block"><Badge variant="success">{APP_VERSION_LABEL}</Badge></div>
-              </div>
+              <div className="hidden md:block"><Badge variant="success">{APP_VERSION_LABEL}</Badge></div>
             </div>
           </div>
 
           <div className="flex flex-col gap-2">
-            <button
-              type="button"
-              onClick={() => setSupportingNavOpen((v) => !v)}
-              aria-expanded={supportingNavOpen}
-              aria-controls="supporting-navigation-panel"
-              className="mx-auto flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:text-slate-700 md:mx-0"
-            >
-              <ChevronDown className={cn("h-3.5 w-3.5 transition-transform", supportingNavOpen && "rotate-180")} />
-              {t("navSupportingToggleLabel")}
-            </button>
+            <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+              <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1.5 rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 text-[10px] font-bold text-slate-600">
+                <Database className="h-3.5 w-3.5 text-slate-400" />
+                <span className="uppercase tracking-widest text-slate-400">{t("navScenarioBarLabel")}</span>
+                {activeScenarioPills.map((label) => (
+                  <span key={label} className="rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-black text-slate-700">
+                    {label}
+                  </span>
+                ))}
+                <span className="ml-0 rounded-full border border-emerald-100 bg-emerald-50 px-2 py-0.5 text-[10px] font-black text-emerald-700 md:ml-1">
+                  {t("navScenarioBarSnapshotLabel")}: {scenarioSnapshotDate}
+                </span>
+                <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400">
+                  {t("navScenarioBarNoLiveConnection")}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSupportingNavOpen((v) => !v)}
+                aria-expanded={supportingNavOpen}
+                aria-controls="supporting-navigation-panel"
+                className="flex shrink-0 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-slate-500 shadow-sm transition-colors hover:border-slate-300 hover:text-slate-800"
+              >
+                <ChevronDown className={cn("h-3.5 w-3.5 transition-transform", supportingNavOpen && "rotate-180")} />
+                {t("navSupportingToggleLabel")}
+              </button>
+            </div>
             {supportingNavOpen && (
               <nav id="supporting-navigation-panel" aria-label={t("navSupportingAriaLabel")} className="flex flex-col gap-3 rounded-2xl border border-slate-100 bg-white p-3 md:p-4">
                 {SUPPORTING_GROUPS.map((group) => {
@@ -472,6 +513,12 @@ function AppShell() {
                 onSelectionsChange={setDreSelections}
                 onSendToCapitalDecision={capitalDecisionWorkspace.importFromDre}
                 onNavigateToCapitalDecision={() => setActiveTab("capital-decision")}
+              />
+            )}
+            {activeTab === "contribution-margin" && (
+              <ContributionMarginTab
+                selections={dreSelections}
+                onSelectionsChange={setDreSelections}
               />
             )}
             {activeTab === "capital-decision" && (

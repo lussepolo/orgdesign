@@ -5,7 +5,7 @@
 // (from ReceitaEngineScenarioKey) plus orgDesignOptionId (from FopagEngineInput).
 //
 // DreYearResult holds all DRE line values for a single projection year:
-//   • drivers: numero_de_alunos (adapter-derived), numero_de_turmas (null — no source),
+//   • drivers: numero_de_alunos (adapter-derived), numero_de_turmas (PnL row 222 driver),
 //     ticket_servico (formula-derived, null-guarded against zero enrollment)
 //   • revenue block through receita_operacional_liquida
 //   • direct_costs through total_custo_direto
@@ -43,8 +43,11 @@ export interface DreYearResult {
   // ── drivers ────────────────────────────────────────────────────────────────
   // numero_de_alunos: sum of contractedLearners from receitaEngine grainRecords (adapter).
   readonly numero_de_alunos: number;
-  // numero_de_turmas: no source data available — unsupported.
-  readonly numero_de_turmas: null;
+  // numero_de_turmas: scenario-derived PnL row 222 equivalent.
+  // Formula: sum workbook-style grade turmas; T1/T2 use the documented Integral
+  // + Meio-periodo split, other grades use ceil(enrollment/studentsPerClass)
+  // capped at 2 via dreTurmaDriver.ts.
+  readonly numero_de_turmas: number;
   // ticket_servico: formula-derived (receitas_com_ensino_regular / alunos / 12).
   // null when numero_de_alunos === 0 (zero-division guard).
   readonly ticket_servico: number | null;

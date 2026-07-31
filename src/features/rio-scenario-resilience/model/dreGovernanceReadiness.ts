@@ -12,6 +12,15 @@
 // These states are orthogonal and must not be collapsed to a single Boolean.
 // The engine calculates deterministically regardless of governance state.
 
+import {
+  DRE_ENROLLMENT_LEVER_ACTIVE_OPENING_PACKAGE_IDS,
+  DRE_ENROLLMENT_LEVER_OCCUPANCY_SCENARIO_IDS,
+} from "./dreEnrollmentCapacityLeverContract";
+import {
+  DRE_WORKING_SCENARIO_ORG_DESIGN_OPTION_IDS,
+  DRE_WORKING_SCENARIO_TUITION_SCENARIO_IDS,
+} from "./dreWorkingScenarioContract";
+
 // ── Type definitions ──────────────────────────────────────────────────────────
 
 export type DreEngineReadinessStatus = "engineering_ready" | "not_ready";
@@ -34,18 +43,52 @@ export type DrePayrollCapacityAlignmentStatus =
   | "aligned"
   | "reconciliation_required";
 
+export type DreGovernanceItemClassification =
+  | "calculation_readiness"
+  | "source_provenance"
+  | "formula_fidelity"
+  | "finance_approval"
+  | "board_ratification"
+  | "scenario_source_coverage"
+  | "reconciliation"
+  | "scope_exclusion"
+  | "capability_unavailable"
+  | "historical_retired";
+
+export type DreGovernanceDisplayStatus =
+  | "active_governance_item"
+  | "finance_approval_pending"
+  | "reconciliation_required"
+  | "scope_exclusion"
+  | "capability_unavailable"
+  | "resolved_historical"
+  | "retired_historical";
+
 export interface DreFinanceSourceOpenItem {
   readonly key: string;
+  readonly internalIds: readonly string[];
   readonly label: string;
+  readonly boardSummary: string;
   readonly status: DreFinanceSourceReadinessStatus;
+  readonly displayStatus: DreGovernanceDisplayStatus;
+  readonly classifications: readonly DreGovernanceItemClassification[];
   readonly currentEngineBehavior: string;
   readonly sourceProvenance: string;
-  readonly requiredOwner: "Finance" | "Finance + Board" | "Finance + Academic" | "Board";
+  readonly financeApprovalStatus: "not_required" | "pending" | "not_recorded" | "confirmed";
+  readonly boardRatificationStatus: "not_required" | "blocks_ratification" | "historical_only";
+  readonly requiredOwner:
+    | "Finance"
+    | "Finance + Board"
+    | "Finance + Academic"
+    | "Product Owner"
+    | "Engineering"
+    | "Board";
   /** Engine calculation continues regardless of this item's open status. */
   readonly blocksEngineCalculation: false;
-  /** This item must be resolved before board ratification is valid. */
-  readonly blocksBoardRatification: true;
+  /** True only for active items that must be resolved before board ratification is valid. */
+  readonly blocksBoardRatification: boolean;
   readonly calculationContinues: true;
+  readonly active: boolean;
 }
 
 export interface DreGovernanceReadinessState {
@@ -57,83 +100,233 @@ export interface DreGovernanceReadinessState {
   readonly payrollFopagModelStatus: DrePayrollFopagModelStatus;
   readonly payrollCapacityAlignmentStatus: DrePayrollCapacityAlignmentStatus;
   readonly openItems: readonly DreFinanceSourceOpenItem[];
+  readonly activeItems: readonly DreFinanceSourceOpenItem[];
+  readonly historicalItems: readonly DreFinanceSourceOpenItem[];
 }
 
-// ── Open Finance-source items ─────────────────────────────────────────────────
-//
-// All six items share blocksEngineCalculation:false / blocksBoardRatification:true.
-// The engine discloses each via notes in the Raw Engine Output (dreScenarioWorkbook.ts)
-// and via the outrasReceitasReajusteNote / descontosMetodoFormulaNote fields.
+// ── Active governed DRE lever coverage ────────────────────────────────────────
 
-// F02 (descontos_metodo_formula_base) resolved in Phase 15I.2C:
-// Engine corrected to use receitas_com_ensino_regular as base (workbook C230 = −C$13 × C225).
-// F02 is no longer a Finance formula question and is removed from open items.
-// 5 open items remain (F01, F03, F04, F05, F06).
-const OPEN_ITEMS: readonly DreFinanceSourceOpenItem[] = [
+export const DRE_ACTIVE_LEVER_COUNTS = {
+  openingPackages: DRE_ENROLLMENT_LEVER_ACTIVE_OPENING_PACKAGE_IDS.length,
+  captacaoScenarios: DRE_ENROLLMENT_LEVER_OCCUPANCY_SCENARIO_IDS.length,
+  tuitionScenarios: DRE_WORKING_SCENARIO_TUITION_SCENARIO_IDS.length,
+  orgDesignOptions: DRE_WORKING_SCENARIO_ORG_DESIGN_OPTION_IDS.length,
+} as const;
+
+export const DRE_ACTIVE_COMBINATION_COUNT =
+  DRE_ACTIVE_LEVER_COUNTS.openingPackages *
+  DRE_ACTIVE_LEVER_COUNTS.captacaoScenarios *
+  DRE_ACTIVE_LEVER_COUNTS.tuitionScenarios *
+  DRE_ACTIVE_LEVER_COUNTS.orgDesignOptions;
+
+// ── Current active governance display items ───────────────────────────────────
+//
+// These items are decision disclosures, not calculation blockers. The DRE/FOPAG
+// runtime still calculates every active supported combination.
+
+export const DRE_ACTIVE_GOVERNANCE_ITEMS: readonly DreFinanceSourceOpenItem[] = [
   {
-    key: "outras_receitas_reajuste",
-    label: "Outras Receitas — reajuste_despesas index name and signed source reference",
-    status: "provisional_source",
+    key: "desconto_metodo_reverification",
+    internalIds: ["D-R5"],
+    label: "Desconto Metodo — re-verification of back-derived deduction",
+    boardSummary: "Discount-method precision remains subject to Finance re-verification.",
+    status: "pending_finance_confirmation",
+    displayStatus: "active_governance_item",
+    classifications: ["formula_fidelity", "source_provenance", "finance_approval"],
     currentEngineBehavior:
-      "Adjustment term omitted; Outras Receitas computed as basePerLearnerRatio × numero_de_alunos without an annual reajuste factor. Engine output discloses this via outrasReceitasReajusteNote. Formula mechanics confirmed from PnL workbook (C233 = ($Y233/$Y$221)*(1+C$9)*C$221). Direct row-9 extraction not available in committed source files (Branch B — Phase 15I.2C).",
+      "Receita/DRE calculations continue. The desconto_metodo driver is back-derived and remains computed-uncertified until Finance re-verifies the row against the governing workbook.",
     sourceProvenance:
-      "Formula structure: PnL workbook row 233 (confirmed Phase 12I/12K). Direct row-9 (reajuste_despesas) extraction: not available. Branch B determination: Phase 15I.2C.",
+      "docs/audits/rio-resilience/phase-v10-rc2-2-gate1-blocker-register.json D-R5; dreRevenueDriverSourceData.ts driverId desconto_metodo.",
+    financeApprovalStatus: "pending",
+    boardRatificationStatus: "blocks_ratification",
     requiredOwner: "Finance",
     blocksEngineCalculation: false,
     blocksBoardRatification: true,
     calculationContinues: true,
+    active: true,
   },
   {
-    key: "tuition_source_provenance",
-    label: "Tuition base rates — source provenance",
+    key: "tuition_source_provenance_by_option",
+    internalIds: ["D-R6", "F03"],
+    label: "Tuition source provenance by tuition option",
+    boardSummary: "Tuition source provenance is mixed across options and remains uncertified for planning approval.",
     status: "provisional_source",
+    displayStatus: "active_governance_item",
+    classifications: ["source_provenance", "scenario_source_coverage"],
     currentEngineBehavior:
-      "Transcribed tuition values used for all tuition calculations. BP1 2028: EY R$91,390 / LS R$111,670 / MS R$122,419 / HS R$141,469.",
+      "All active tuition options calculate. BP1-BP3 are screenshot-transcribed; RJ4/RJ5 are product-owner sourced from BP v8(2) equivalent to v8(3).",
     sourceProvenance:
-      "screenshot_transcription_based (tuitionSourceData.ts, 2026-06-02); not a Finance-signed xlsx workbook",
+      "tuitionSourceData.ts sourceEvidenceOrigin=screenshot_transcription_based for BP1-BP3; Phase 15Q comments record RJ4/RJ5 as BP v8(2) equivalent to v8(3) per product owner.",
+    financeApprovalStatus: "pending",
+    boardRatificationStatus: "blocks_ratification",
     requiredOwner: "Finance",
     blocksEngineCalculation: false,
     blocksBoardRatification: true,
     calculationContinues: true,
+    active: true,
   },
   {
-    key: "discount_schedule_provenance",
-    label: "Discount schedule — formal sign-off",
-    status: "provisional_source",
+    key: "tuition_finance_signoff",
+    internalIds: ["F03"],
+    label: "Tuition Finance approval / signed workbook",
+    boardSummary: "Finance approval or signed workbook for tuition values is not yet recorded.",
+    status: "pending_finance_confirmation",
+    displayStatus: "finance_approval_pending",
+    classifications: ["finance_approval", "board_ratification"],
     currentEngineBehavior:
-      "Documented schedule used: 20% (2028–2030), 17% (2031), 15% (2032–2033), 12.5% terminal (2034+).",
+      "Tuition values are used by the Receita engine as computed inputs; absence of Finance sign-off does not suppress calculation.",
     sourceProvenance:
-      "Verbal/documented source: Head of Finance (discountScheduleSourceData.ts); not a Finance-signed workbook",
+      "docs/finance/dre-finance-confirmation-register.json F03; blocker register D-R6/F03.",
+    financeApprovalStatus: "not_recorded",
+    boardRatificationStatus: "blocks_ratification",
     requiredOwner: "Finance",
     blocksEngineCalculation: false,
     blocksBoardRatification: true,
     calculationContinues: true,
+    active: true,
   },
   {
-    key: "enrollment_baseline_parity",
-    label: "2028 enrollment baseline — engine vs PnL workbook scenario mapping",
+    key: "discount_schedule_finance_signoff",
+    internalIds: ["F04"],
+    label: "Average discount schedule Finance approval",
+    status: "provisional_source",
+    boardSummary: "Average discount schedule has v10 workbook evidence, but Finance sign-off is not yet recorded.",
+    displayStatus: "finance_approval_pending",
+    classifications: ["source_provenance", "finance_approval"],
+    currentEngineBehavior:
+      "The average discount schedule is governed by v10 PnL row 224, with explicit 2028-2035 rates and a 12.5% terminal rate from 2036 onward.",
+    sourceProvenance:
+      "discountScheduleSourceData.ts and v10AverageDiscountSourceData.ts; Phase V10-F1B project-owner decision, not Finance-signed.",
+    financeApprovalStatus: "not_recorded",
+    boardRatificationStatus: "blocks_ratification",
+    requiredOwner: "Finance",
+    blocksEngineCalculation: false,
+    blocksBoardRatification: true,
+    calculationContinues: true,
+    active: true,
+  },
+  {
+    key: "ms_hs_grade_level_staffing_boundary",
+    internalIds: ["F06"],
+    label: "MS/HS grade-level staffing unavailable",
+    boardSummary: "MS/HS staffing is available as an aggregate engine estimate, not as ratified per-grade staffing.",
     status: "reconciliation_required",
+    displayStatus: "capability_unavailable",
+    classifications: ["capability_unavailable", "reconciliation", "scenario_source_coverage"],
     currentEngineBehavior:
-      "Canonical engine produces 228 learners in 2028 (t1_g3 / base). PnL workbook baseline: approximately 246 learners. The difference reflects a different scenario configuration; the engine is self-consistent. Scenario mapping to workbook baseline is not yet established.",
+      "FOPAG computes MS/HS payroll from the current fixed-FTE table; the UI must not represent that table as governed per-grade staffing.",
     sourceProvenance:
-      "Engine: openingPackageOccupancySourceData.ts (t1_g3 / base); Workbook: PNL_FORMULA_PARITY_SOURCE_DATA (~246 learners, Phase 13B)",
-    requiredOwner: "Finance + Board",
-    blocksEngineCalculation: false,
-    blocksBoardRatification: true,
-    calculationContinues: true,
-  },
-  {
-    key: "instructional_capacity_payroll_sync",
-    label: "Instructional-capacity / FOPAG payroll synchronization",
-    status: "reconciliation_required",
-    currentEngineBehavior:
-      "Phase 15H.2 established the instructional-capacity planning model: MS 9 educators, HS 11 educators, combined 20. The FOPAG payroll adapter uses separate current assumptions. Synchronization is a dedicated future reconciliation phase (Phase 15H.3, currently deferred). Finance and Academic must jointly confirm the deferral scope and the HC definition that drives both models.",
-    sourceProvenance:
-      "Instructional model: secondaryEducatorCapacityModel.ts (Phase 15H.2); Payroll: fopagEngine.ts + orgDesignPayrollActivation.ts",
+      "blocker register F06; payrollAdapter.ts MS_FTE_BY_GRADE and HS_FTE_BY_GRADE; PayrollProjectionTab displays MS/HS as division-level only.",
+    financeApprovalStatus: "pending",
+    boardRatificationStatus: "blocks_ratification",
     requiredOwner: "Finance + Academic",
     blocksEngineCalculation: false,
     blocksBoardRatification: true,
     calculationContinues: true,
+    active: true,
+  },
+  {
+    key: "ms_hs_staffing_source_reconciliation",
+    internalIds: ["F06"],
+    label: "MS/HS staffing source reconciliation",
+    status: "reconciliation_required",
+    boardSummary: "Finance and Academic still need to reconcile non-identical MS/HS staffing source records.",
+    displayStatus: "active_governance_item",
+    classifications: ["reconciliation", "source_provenance", "finance_approval"],
+    currentEngineBehavior:
+      "Shared FOPAG and DRE payroll parity are implemented. HS Option B is encoded as g9=4, g10=2, g11=3, g12=2, sum=11; remaining limitation is source reconciliation, not FOPAG implementation.",
+    sourceProvenance:
+      "payrollAdapter.ts; docs/audits/rio-resilience/phase-v10-rc2-2-gate1-blocker-register.json F06; IMPLEMENTATION.md RC2.4A Option B record.",
+    financeApprovalStatus: "pending",
+    boardRatificationStatus: "blocks_ratification",
+    requiredOwner: "Finance + Academic",
+    blocksEngineCalculation: false,
+    blocksBoardRatification: true,
+    calculationContinues: true,
+    active: true,
+  },
+  {
+    key: "corporate_allocation_unavailable",
+    internalIds: ["CORPORATE-ALLOCATION"],
+    label: "Payroll-side corporate allocation unavailable",
+    boardSummary: "Payroll-side corporate allocation and consolidated people cost are unavailable; direct campus payroll is not suppressed.",
+    status: "reconciliation_required",
+    displayStatus: "capability_unavailable",
+    classifications: ["capability_unavailable", "scope_exclusion"],
+    currentEngineBehavior:
+      "DRE contains Finance-provided corporate fixed-cost lines where present, but no adapter allocates corporate/shared people cost onto payroll. Direct campus payroll remains available.",
+    sourceProvenance:
+      "blocker register CORPORATE-ALLOCATION; dreLineItemMap.ts corporate fixed cost lines are not a payroll allocation adapter.",
+    financeApprovalStatus: "not_required",
+    boardRatificationStatus: "not_required",
+    requiredOwner: "Engineering",
+    blocksEngineCalculation: false,
+    blocksBoardRatification: false,
+    calculationContinues: true,
+    active: true,
+  },
+];
+
+export const DRE_HISTORICAL_GOVERNANCE_ITEMS: readonly DreFinanceSourceOpenItem[] = [
+  {
+    key: "outras_receitas_reajuste_formula_gap",
+    internalIds: ["F01", "D-R7"],
+    label: "Outras Receitas reajuste formula gap",
+    boardSummary: "Historical formula gap resolved; v10 row-11 adjustment is implemented.",
+    status: "confirmed",
+    displayStatus: "resolved_historical",
+    classifications: ["formula_fidelity", "historical_retired"],
+    currentEngineBehavior:
+      "Outras Receitas applies the v10 Reajuste Despesas growth factor in calculateDre(). This is no longer an active formula gap.",
+    sourceProvenance:
+      "dreEngine.ts resolveReajusteDespesasGrowthFactor(year); reajusteDespesasGrowth.ts v10 PnL row 11; Phase V10-F2.2/D-R7.",
+    financeApprovalStatus: "not_required",
+    boardRatificationStatus: "historical_only",
+    requiredOwner: "Product Owner",
+    blocksEngineCalculation: false,
+    blocksBoardRatification: false,
+    calculationContinues: true,
+    active: false,
+  },
+  {
+    key: "enrollment_baseline_parity_retired",
+    internalIds: ["F05"],
+    label: "Retired t1_g3 enrollment baseline parity",
+    boardSummary: "Historical t1_g3/base 228 vs workbook baseline issue; absent from active DRE caveats.",
+    status: "reconciliation_required",
+    displayStatus: "retired_historical",
+    classifications: ["historical_retired", "scenario_source_coverage"],
+    currentEngineBehavior:
+      "Active DRE coverage uses t1_g4 and t1_g6 only. t1_g3/base is rejected by calculateDre() and blocks zero active coverage cells.",
+    sourceProvenance:
+      "blocker register F05 retired_decision; dreGovernanceReadinessValidation canonical fixture 2028 enrollment 258.",
+    financeApprovalStatus: "not_required",
+    boardRatificationStatus: "historical_only",
+    requiredOwner: "Finance + Board",
+    blocksEngineCalculation: false,
+    blocksBoardRatification: false,
+    calculationContinues: true,
+    active: false,
+  },
+  {
+    key: "descontos_metodo_formula_base_resolved",
+    internalIds: ["F02"],
+    label: "Descontos Metodo formula-base relationship",
+    boardSummary: "Resolved engineering item; engine uses receitas_com_ensino_regular as formula base.",
+    status: "confirmed",
+    displayStatus: "resolved_historical",
+    classifications: ["formula_fidelity", "historical_retired"],
+    currentEngineBehavior:
+      "Engine uses receitas_com_ensino_regular as the base for Descontos Metodo de Assinatura.",
+    sourceProvenance:
+      "Phase 15I.2C; dreEngine output notes and existing formula validators.",
+    financeApprovalStatus: "not_required",
+    boardRatificationStatus: "historical_only",
+    requiredOwner: "Engineering",
+    blocksEngineCalculation: false,
+    blocksBoardRatification: false,
+    calculationContinues: true,
+    active: false,
   },
 ];
 
@@ -147,7 +340,9 @@ export const DRE_GOVERNANCE_READINESS: DreGovernanceReadinessState = {
   instructionalCapacityStatus: "established",
   payrollFopagModelStatus: "implemented",
   payrollCapacityAlignmentStatus: "reconciliation_required",
-  openItems: OPEN_ITEMS,
+  openItems: DRE_ACTIVE_GOVERNANCE_ITEMS,
+  activeItems: DRE_ACTIVE_GOVERNANCE_ITEMS,
+  historicalItems: DRE_HISTORICAL_GOVERNANCE_ITEMS,
 };
 
 // ── Derived Boolean helpers ───────────────────────────────────────────────────

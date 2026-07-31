@@ -6,16 +6,10 @@ import type { OpeningPackageProjectionYear } from "../../features/rio-scenario-r
 import type { ImportFromDreResult } from "../../features/rio-scenario-resilience/state/capitalDecisionWorkspace";
 import DreScenarioContextBanner from "../dreSimulator/DreScenarioContextBanner";
 import DreLeverPanel from "../dreSimulator/DreLeverPanel";
-import DreSummaryCards from "../dreSimulator/DreSummaryCards";
 import DreAnnualTable from "../dreSimulator/DreAnnualTable";
-import DreEbitdaChart from "../dreSimulator/DreEbitdaChart";
-import DreScopeBoundaryPanel from "../dreSimulator/DreScopeBoundaryPanel";
-import OrgDesignPanel from "../dreSimulator/OrgDesignPanel";
-import OrgDesignSensitivityPanel from "../dreSimulator/OrgDesignSensitivityPanel";
 import DreExportButton from "../dreSimulator/DreExportButton";
-import DreGovernanceSummaryPanel from "../dreSimulator/DreGovernanceSummaryPanel";
-import DreBoardReadableExport from "../dreSimulator/DreBoardReadableExport";
-import DreExecutiveInterpretationPanel from "../dreSimulator/DreExecutiveInterpretationPanel";
+import DreIncomeStatementDashboard from "../dreSimulator/DreIncomeStatementDashboard";
+import WorksheetSyncStamp from "../common/WorksheetSyncStamp";
 import { useLocale } from "../../i18n/useLocale";
 
 interface DreScenarioSimulatorTabProps {
@@ -61,9 +55,10 @@ export default function DreScenarioSimulatorTab({
     <div className="space-y-6 md:space-y-8">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-start">
         <div className="flex-1">
-          <DreScenarioContextBanner selections={selections} dreOutput={dreOutput} year={year} />
+          <DreScenarioContextBanner selections={selections} year={year} />
         </div>
         <div className="flex flex-col items-end gap-1 lg:pt-1">
+          <WorksheetSyncStamp />
           <DreExportButton
             selections={selections}
             defaultSelections={defaultSelections}
@@ -78,6 +73,8 @@ export default function DreScenarioSimulatorTab({
           </p>
         </div>
       </div>
+
+      <DreIncomeStatementDashboard dreOutput={dreOutput} year={year} onYearChange={setYear} />
 
       <DreLeverPanel
         selections={selections}
@@ -105,28 +102,7 @@ export default function DreScenarioSimulatorTab({
         </div>
       </div>
 
-      <DreSummaryCards dreOutput={dreOutput} year={year} onYearChange={setYear} />
-
-      <DreEbitdaChart dreOutput={dreOutput} />
-
-      <DreExecutiveInterpretationPanel />
-
-      <DreScopeBoundaryPanel />
-
-      <OrgDesignPanel
-        orgDesignOptionId={selections.orgDesignOptionId}
-        fopagOutput={fopagOutput}
-        payrollReconciliation={payrollReconciliation}
-        orgDesignSensitivity={orgDesignSensitivity}
-        year={year}
-      />
-      <OrgDesignSensitivityPanel rows={orgDesignSensitivity} />
-
       <DreAnnualTable dreOutput={dreOutput} />
-
-      <DreGovernanceSummaryPanel />
-
-      <DreBoardReadableExport selections={selections} dreOutput={dreOutput} />
     </div>
   );
 }

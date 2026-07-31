@@ -91,8 +91,8 @@ export const WORKSPACE_REGISTRY: WorkspaceDefinition[] = [
   },
   {
     id: "offer-scenarios",
-    group: "primary",
-    order: 1,
+    group: "academic",
+    order: 5,
     shortLabelKey: "wsOfferShortLabel",
     titleKey: "wsOfferTitle",
     purposeKey: "wsOfferPurpose",
@@ -119,13 +119,14 @@ export const WORKSPACE_REGISTRY: WorkspaceDefinition[] = [
         labelKey: "statusPendingIntegrationLabel",
       },
     ],
-    visibleInPrimaryNavigation: true,
-    visibleInSupportingNavigation: false,
+    returnPathTo: "dre-scenario-simulator",
+    visibleInPrimaryNavigation: false,
+    visibleInSupportingNavigation: true,
   },
   {
     id: "executive-org-design",
-    group: "primary",
-    order: 2,
+    group: "academic",
+    order: 6,
     shortLabelKey: "wsOrgDesignShortLabel",
     titleKey: "wsOrgDesignTitle",
     purposeKey: "wsOrgDesignPurpose",
@@ -134,8 +135,9 @@ export const WORKSPACE_REGISTRY: WorkspaceDefinition[] = [
     impactKey: "wsOrgDesignImpact",
     resultKey: "wsOrgDesignResult",
     status: "canonical",
-    visibleInPrimaryNavigation: true,
-    visibleInSupportingNavigation: false,
+    returnPathTo: "payroll",
+    visibleInPrimaryNavigation: false,
+    visibleInSupportingNavigation: true,
   },
   {
     id: "payroll",
@@ -178,7 +180,7 @@ export const WORKSPACE_REGISTRY: WorkspaceDefinition[] = [
   {
     id: "dre-scenario-simulator",
     group: "primary",
-    order: 4,
+    order: 1,
     shortLabelKey: "wsDreShortLabel",
     titleKey: "wsDreTitle",
     purposeKey: "wsDrePurpose",
@@ -186,7 +188,7 @@ export const WORKSPACE_REGISTRY: WorkspaceDefinition[] = [
     inputsKey: "wsDreInputs",
     impactKey: "wsDreImpact",
     resultKey: "wsDreResult",
-    status: "canonical",
+    status: "simulation",
     infoNoteKey: "wsDreReadingOrderNote",
     visibleInPrimaryNavigation: true,
     visibleInSupportingNavigation: false,
@@ -194,7 +196,7 @@ export const WORKSPACE_REGISTRY: WorkspaceDefinition[] = [
   {
     id: "capital-decision",
     group: "primary",
-    order: 5,
+    order: 4,
     shortLabelKey: "wsCapitalShortLabel",
     titleKey: "wsCapitalTitle",
     purposeKey: "wsCapitalPurpose",
@@ -206,20 +208,31 @@ export const WORKSPACE_REGISTRY: WorkspaceDefinition[] = [
     visibleInPrimaryNavigation: true,
     visibleInSupportingNavigation: false,
   },
+  {
+    id: "contribution-margin",
+    group: "primary",
+    order: 2,
+    shortLabelKey: "wsContributionMarginShortLabel",
+    titleKey: "wsContributionMarginTitle",
+    purposeKey: "wsContributionMarginPurpose",
+    decisionKey: "wsContributionMarginDecision",
+    inputsKey: "wsContributionMarginInputs",
+    impactKey: "wsContributionMarginImpact",
+    resultKey: "wsContributionMarginResult",
+    status: "governed_data",
+    canonicalDestination: "dre-scenario-simulator",
+    visibleInPrimaryNavigation: true,
+    visibleInSupportingNavigation: false,
+  },
 
-  // ── Academic Architecture: four governed division pages ───────────────
-  // V10-X2T.3A-R1: restored to primary navigation. Phase 15N's last
-  // explicitly-approved navigation state (documented in IMPLEMENTATION.md,
-  // 2026-06-18) listed these four as flat, top-level primary navigation
-  // items. Candidate 4 (25f1976) moved them behind a collapsed-by-default
-  // "More Sections" accordion with no cited approval for that demotion —
-  // a reachability regression, not an authorized simplification. `load`
-  // below is unaffected; it was never part of the four division pages and
-  // is not implicated by this restoration.
+  // ── Supporting: School Architecture ───────────────────────────────────
+  // The primary workflow is now the controller decision path. Offer, org
+  // design, academic divisions, and load remain reachable as supporting
+  // architecture references instead of competing with the financial flow.
   {
     id: "early-years",
     group: "academic",
-    order: 6,
+    order: 7,
     shortLabelKey: "wsEarlyYearsShortLabel",
     titleKey: "wsEarlyYearsTitle",
     purposeKey: "wsEarlyYearsPurpose",
@@ -228,13 +241,13 @@ export const WORKSPACE_REGISTRY: WorkspaceDefinition[] = [
     impactKey: "wsEarlyYearsImpact",
     resultKey: "wsEarlyYearsResult",
     status: "reference",
-    visibleInPrimaryNavigation: true,
-    visibleInSupportingNavigation: false,
+    visibleInPrimaryNavigation: false,
+    visibleInSupportingNavigation: true,
   },
   {
     id: "lower-school",
     group: "academic",
-    order: 7,
+    order: 8,
     shortLabelKey: "wsLowerSchoolShortLabel",
     titleKey: "wsLowerSchoolTitle",
     purposeKey: "wsLowerSchoolPurpose",
@@ -243,13 +256,13 @@ export const WORKSPACE_REGISTRY: WorkspaceDefinition[] = [
     impactKey: "wsLowerSchoolImpact",
     resultKey: "wsLowerSchoolResult",
     status: "reference",
-    visibleInPrimaryNavigation: true,
-    visibleInSupportingNavigation: false,
+    visibleInPrimaryNavigation: false,
+    visibleInSupportingNavigation: true,
   },
   {
     id: "ms",
     group: "academic",
-    order: 8,
+    order: 9,
     shortLabelKey: "wsMiddleSchoolShortLabel",
     titleKey: "wsMiddleSchoolTitle",
     purposeKey: "wsMiddleSchoolPurpose",
@@ -275,13 +288,13 @@ export const WORKSPACE_REGISTRY: WorkspaceDefinition[] = [
         labelKey: "evidenceGovernedDataLabel",
       },
     ],
-    visibleInPrimaryNavigation: true,
-    visibleInSupportingNavigation: false,
+    visibleInPrimaryNavigation: false,
+    visibleInSupportingNavigation: true,
   },
   {
     id: "hs",
     group: "academic",
-    order: 9,
+    order: 10,
     shortLabelKey: "wsHighSchoolShortLabel",
     titleKey: "wsHighSchoolTitle",
     purposeKey: "wsHighSchoolPurpose",
@@ -313,13 +326,13 @@ export const WORKSPACE_REGISTRY: WorkspaceDefinition[] = [
         labelKey: "evidencePendingValidationLabel",
       },
     ],
-    visibleInPrimaryNavigation: true,
-    visibleInSupportingNavigation: false,
+    visibleInPrimaryNavigation: false,
+    visibleInSupportingNavigation: true,
   },
   {
     id: "load",
     group: "academic",
-    order: 10,
+    order: 11,
     shortLabelKey: "wsLoadShortLabel",
     titleKey: "wsLoadTitle",
     purposeKey: "wsLoadPurpose",
@@ -337,7 +350,7 @@ export const WORKSPACE_REGISTRY: WorkspaceDefinition[] = [
   {
     id: "hr",
     group: "people",
-    order: 11,
+    order: 12,
     shortLabelKey: "wsHiringShortLabel",
     titleKey: "wsHiringTitle",
     purposeKey: "wsHiringPurpose",
@@ -355,7 +368,7 @@ export const WORKSPACE_REGISTRY: WorkspaceDefinition[] = [
   {
     id: "viability",
     group: "analysis",
-    order: 12,
+    order: 13,
     shortLabelKey: "wsViabilityShortLabel",
     titleKey: "wsViabilityTitle",
     purposeKey: "wsViabilityPurpose",

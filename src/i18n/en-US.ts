@@ -30,6 +30,9 @@ export const EN_US: Record<TranslationKey, string> = {
   navGroupPeople: "People",
   navGroupAnalysis: "Analysis",
   navSupportingToggleLabel: "More sections",
+  navScenarioBarLabel: "DRE scenario",
+  navScenarioBarSnapshotLabel: "Worksheet snapshot",
+  navScenarioBarNoLiveConnection: "no live connection",
 
   // ── Cover ──────────────────────────────────────────────────────────────
   coverEyebrow: "Rio de Janeiro Campus",
@@ -199,13 +202,25 @@ export const EN_US: Record<TranslationKey, string> = {
   // ── Workspace: Operating P&L ────────────────────────────────────────────
   wsDreShortLabel: "Operating P&L",
   wsDreTitle: "Operating P&L",
-  wsDrePurpose: "Governed operating scenario: enrollment, FOPAG, Direct Payroll, revenue, expenses, and EBITDA.",
-  wsDreDecision: "Whether the operating scenario is financially viable.",
-  wsDreInputs: "Opening package, occupancy scenario, tuition scenario, and organizational design option.",
-  wsDreImpact: "Single source of truth for the selected scenario's operating results.",
-  wsDreResult: "Scenario operating result (P&L).",
+  wsDrePurpose: "Operating P&L projection by scenario: enrollment, revenue, payroll, expenses, and EBITDA.",
+  wsDreDecision: "Whether the projected operation supports margin and scale before capital analysis.",
+  wsDreInputs: "Opening package, enrollment case, tuition case, and org-design model.",
+  wsDreImpact: "Technical basis for financial review; pending Finance closure and formal approval.",
+  wsDreResult: "Operating P&L for the selected scenario.",
   wsDreReadingOrderNote:
-    "Executive reading order: 1. Direct FOPAG · 2. Direct Payroll · 3. Net Operating Revenue · 4. EBITDA.",
+    "Executive read: Net Operating Revenue · Direct Payroll/FOPAG · Contribution Margin · EBITDA.",
+
+  // ── Workspace: Contribution Margin % ───────────────────────────────────
+  wsContributionMarginShortLabel: "Dashboard Simulator",
+  wsContributionMarginTitle: "Overview Dashboard",
+  wsContributionMarginPurpose:
+    "Visual contribution-margin read by DRE scenario: learners, sections, revenue, expenses, headcount, and FOPAG.",
+  wsContributionMarginDecision:
+    "Whether the selected DRE scenario generates enough margin to sustain FOPAG and direct costs.",
+  wsContributionMarginInputs:
+    "Shared DRE scenario: opening package, enrollment case, tuition case, and org-design model.",
+  wsContributionMarginImpact: "Consumes calculateDre() and calculateFopag(); does not create new financial assumptions.",
+  wsContributionMarginResult: "Contribution margin dashboard, FOPAG space, and tabular DRE.",
 
   // ── Workspace: Capital Decision ─────────────────────────────────────────
   wsCapitalShortLabel: "Capital Decision",
@@ -215,6 +230,100 @@ export const EN_US: Record<TranslationKey, string> = {
   wsCapitalInputs: "Operating scenario inherited from Operating P&L and CAPEX assumptions.",
   wsCapitalImpact: "Evaluates a P&L-owned operating scenario; does not recreate enrollment or payroll assumptions.",
   wsCapitalResult: "Capital-investment decision metrics.",
+
+
+  // ── Audited DRE governance/export additions ───────────────────────────
+  dreBoardExportTextHeading: "SCENARIO SUMMARY — FOR REVIEW",
+  dreBoardExportTextInputs: "SCENARIO INPUTS",
+  dreBoardExportTextOpeningPackage: "Opening package",
+  dreBoardExportTextOccupancy: "Captação",
+  dreBoardExportTextTuitionScenario: "Tuition scenario",
+  dreBoardExportTextOrgDesign: "Org design",
+  dreBoardExportTextOutputs: "SCENARIO OUTPUTS (DRE Operating Layer)",
+  dreBoardExportTextLearners2028: "Learners 2028",
+  dreBoardExportTextFirstEbitdaPositiveYear: "First EBITDA-positive year",
+  dreBoardExportTextEbitda2028: "EBITDA 2028",
+  dreBoardExportTextEbitda2032: "EBITDA 2032",
+  dreBoardExportTextEbitda2037: "EBITDA 2037",
+  dreBoardExportTextGovernance: "GOVERNANCE STATUS",
+  dreBoardExportTextCanCalculate: "Can calculate",
+  dreBoardExportTextCanSimulate: "Can simulate",
+  dreBoardExportTextCanCompare: "Can compare active scenarios",
+  dreBoardExportTextFinanceSourceConfirmed: "Finance source confirmed",
+  dreBoardExportTextBoardRatified: "Board-ratified",
+  dreBoardExportTextYes: "yes",
+  dreBoardExportTextNotYet: "not yet",
+  dreBoardExportTextNotWithinHorizon: "Not within horizon",
+  dreBoardExportTextNoticeHeading: "IMPORTANT — PROVISIONAL STATUS NOTICE",
+  dreBoardExportTextCalculatedNotice: "This scenario is technically calculated by the DRE/FOPAG operating layer.",
+  dreBoardExportTextNotCertifiedNotice: "It is NOT Finance certification and is NOT board-ratified.",
+  dreBoardExportTextEbitdaBoundaryNotice:
+    "EBITDA is an operating result; it is not cash flow, CAPEX, NPV, or investment payback.",
+  dreBoardExportTextMaterialLimitations: "Active material limitations ({n}), not calculation blockers:",
+  dreBoardExportTextUseLimitNotice:
+    "Use only for comparison and trade-off analysis; do not interpret as approved, final, or ratified.",
+  dreBoardExportTextWarningCount: "Active limitation count",
+  dreBoardExportTextGenerated: "Generated",
+
+  // ── DreEbitdaChart ───────────────────────────────────────────────────
+  dreScenarioContextBannerBadgeSourceBoundary: "Governed mixed v10/v7 source",
+  dreExecInterpMaterialLimitationsTitle: "Material limitations — do not block simulation",
+  dreGovSummaryStatusActiveGovernance: "Active governance",
+  dreGovSummaryStatusFinanceApproval: "Finance approval pending",
+  dreGovSummaryStatusScopeExclusion: "Scope exclusion",
+  dreGovSummaryStatusCapabilityUnavailable: "Capability unavailable",
+  dreGovSummaryStatusResolvedHistorical: "Resolved / historical",
+  dreGovSummaryStatusRetiredHistorical: "Retired / historical",
+  dreGovSummaryMethodologyMeta:
+    "Classes: {classes} · Finance: {finance} · Board: {board} · Owner: {owner}",
+  dreGovSummaryHistoricalTitle: "Historical or retired items",
+  dreGovItemTitleFallback: "Governance item",
+  dreGovItemBodyFallback: "See the governance register for detailed evidence.",
+  dreGovItemBoardFallback: "Active governance limitation with no calculation block.",
+  dreGovItemBoardDescontoMetodo: "Discount-method precision remains subject to Finance re-verification.",
+  dreGovItemBoardTuitionProvenance:
+    "Tuition source provenance is mixed by option and remains uncertified for planning approval.",
+  dreGovItemBoardTuitionApproval: "Finance approval or signed tuition xlsx is not yet recorded.",
+  dreGovItemBoardDiscountApproval:
+    "The discount schedule has v10 workbook evidence, but Finance sign-off is not yet recorded.",
+  dreGovItemBoardMsHsBoundary:
+    "MS/HS staffing is available as an aggregate estimate, not as ratified per-grade staffing.",
+  dreGovItemBoardMsHsReconciliation:
+    "Finance and Academic still need to reconcile non-identical MS/HS source records.",
+  dreGovItemBoardCorporateAllocation:
+    "Payroll-side corporate allocation and consolidated people cost are unavailable; direct campus payroll is not suppressed.",
+  dreGovItemTitleDescontoMetodo: "Desconto Metodo — re-verification of derived deduction",
+  dreGovItemBodyDescontoMetodo:
+    "D-R5: desconto_metodo is derived, not a direct annual extraction; it needs Finance re-verification. Receita and DRE continue calculating.",
+  dreGovItemTitleTuitionProvenance: "Tuition — provenance by option",
+  dreGovItemBodyTuitionProvenance:
+    "D-R6/F03: BP1-BP3 come from screenshot transcription; RJ4/RJ5 come from BP v8(2) equivalent to v8(3) by product-owner decision.",
+  dreGovItemTitleTuitionApproval: "Tuition — Finance approval",
+  dreGovItemBodyTuitionApproval:
+    "F03: tuition values calculate, but Finance approval or a signed xlsx has not yet been recorded.",
+  dreGovItemTitleDiscountApproval: "Average discount — v10 evidence and approval",
+  dreGovItemBodyDiscountApproval:
+    "F04: schedule is based on v10 PnL row 224 by product-owner decision; Finance sign-off is not yet recorded.",
+  dreGovItemTitleMsHsBoundary: "MS/HS — per-grade staffing boundary",
+  dreGovItemBodyMsHsBoundary:
+    "F06: FOPAG calculates MS/HS cost from a fixed FTE table, but per-grade detail remains unavailable as a ratified source.",
+  dreGovItemTitleMsHsReconciliation: "MS/HS — source reconciliation",
+  dreGovItemBodyMsHsReconciliation:
+    "F06: HS Option B is implemented as g9=4, g10=2, g11=3, g12=2; Finance+Academic reconciliation of non-identical sources remains pending.",
+  dreGovItemTitleCorporateAllocation: "Corporate allocation — capability unavailable",
+  dreGovItemBodyCorporateAllocation:
+    "CORPORATE-ALLOCATION: no payroll-side corporate-allocation adapter exists. Fixed corporate DRE lines are not consolidated people cost.",
+  dreGovItemTitleF01Historical: "F01 — Outras Receitas reajuste",
+  dreGovItemBodyF01Historical:
+    "Historical: the formula gap is resolved; calculateDre applies v10 row-11 Reajuste Despesas to Outras Receitas.",
+  dreGovItemTitleF05Historical: "F05 — retired t1_g3 baseline",
+  dreGovItemBodyF05Historical:
+    "Historical: t1_g3/base 228 vs workbook is not an active caveat; t1_g3 is retired and blocks zero active cells.",
+  dreGovItemTitleF02Resolved: "F02 — Descontos Metodo formula base",
+  dreGovItemBodyF02Resolved:
+    "Resolved in Phase 15I.2C; engine uses receitas_com_ensino_regular as the base.",
+
+  // ── DreLeverPanel (DRE Operacional) ─────────────────────────────────────
 
   // ── AboutModal ───────────────────────────────────────────────────────────
   aboutModalTitle: "Rio Strategic Org Design",
@@ -706,7 +815,7 @@ export const EN_US: Record<TranslationKey, string> = {
   dreScenarioContextBannerTuitionSuffix: "tuition",
   dreScenarioContextBannerOrgDesignSuffix: "org design",
   dreScenarioContextBannerBadgeOperatingLayer: "DRE operating layer",
-  dreScenarioContextBannerBadgeV8Source: "v8 PnL/DRE source",
+  dreScenarioContextBannerBadgeV8Source: "DRE source snapshot",
   dreScenarioContextBannerBadgeServiceContracts: "Service Contracts as DRE cost lines",
   dreScenarioContextBannerBadgeCapex: "CAPEX in Capital Decision",
   dreScenarioContextBannerAnalysisYearLabel: "Analysis year",
@@ -729,7 +838,7 @@ export const EN_US: Record<TranslationKey, string> = {
   dreExecInterpTitle: "Executive Simulator Interpretation",
   dreExecInterpSubtitle: "Decision support, not recommendation",
   dreExecInterpSimAvailableLabel: "Simulation available",
-  dreExecInterpSimAvailableBody: "All 108 combinations calculate",
+  dreExecInterpSimAvailableBody: "Active scenario combinations calculate",
   dreExecInterpFinanceClosurePendingLabel: "Finance-source closure pending",
   dreExecInterpFinanceClosurePendingBody: "{n} open assumption items — does not block simulation",
   dreExecInterpBoardPendingLabel: "Board ratification pending",
@@ -833,7 +942,7 @@ export const EN_US: Record<TranslationKey, string> = {
   dreGovSummaryDescOutrasReceitas: "Outras Receitas C9 source/index pending",
   dreGovSummaryDescTuitionProvenance: "Tuition signed XLSX pending",
   dreGovSummaryDescDiscountProvenance: "Discount schedule signed reference pending",
-  dreGovSummaryDescEnrollmentParity: "228 vs 246 scenario mapping pending",
+  dreGovSummaryDescEnrollmentParity: "Retired t1_g3 baseline retained as historical only",
   dreGovSummaryDescCapacitySync: "Payroll/capacity reconciliation ownership pending",
   dreGovSummaryStatusProvisional: "Provisional source",
   dreGovSummaryStatusReconciliation: "Reconciliation required",
@@ -887,7 +996,8 @@ export const EN_US: Record<TranslationKey, string> = {
   dreScopeBoundarySourceGovernanceHeader: "Source Governance",
   dreScopeBoundarySourceGovernanceBody:
     "The simulator separates calculation scope from source authority. DRE rows, payroll rows, and Service Contracts must remain tied to their governing sources.",
-  dreScopeBoundarySrcItem1: "v8 PnL/DRE workbook is the source of truth for DRE row-level values.",
+  dreScopeBoundarySrcItem1:
+    "Mixed source authority: row-11-dependent lines use v10 PnL row 11; historical lines outside that set remain on the defined forensic table.",
   dreScopeBoundarySrcItem2: "Service Contracts are category-tagged DRE cost lines, not a separate simulator layer.",
   dreScopeBoundarySrcItem3: "Folha de Pagamento and Benefícios are generated through the FOPAG/payroll engine.",
   dreScopeBoundarySrcItem4: "Older Service Contracts screenshot/extract values are audit-only / superseded.",

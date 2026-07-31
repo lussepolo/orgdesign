@@ -11,6 +11,7 @@ import type {
   DreEngineValidationReport,
 } from "./dreEngineValidationContract";
 import { calculateDre } from "./dreEngine";
+import { calculateDreTurmaDriver } from "./dreTurmaDriver";
 import { calculateReceita } from "./receitaEngine";
 import { RECEITA_PROJECTION_YEARS } from "./receitaEngineContract";
 import { calculateFopag } from "./fopagEngine";
@@ -443,20 +444,27 @@ export function runDreEngineValidation(): DreEngineValidationReport {
     );
   }
 
-  // ── Check 13: numero_de_turmas_is_unsupported_null ───────────────────────────
+  // ── Check 13: numero_de_turmas_matches_turma_driver ──────────────────────────
   {
-    const allNull = RECEITA_PROJECTION_YEARS.every(
-      (y) => result.byYear[y].numero_de_turmas === null,
+    const turmaOutput = calculateDreTurmaDriver({
+      openingPackageId: VALIDATION_INPUT.openingPackageId,
+      occupancyScenarioId: VALIDATION_INPUT.occupancyScenarioId,
+    });
+    const turmaByYear = new Map(
+      turmaOutput.yearTotals.map((record) => [record.year, record.numeroDeTurmas]),
+    );
+    const allMatch = RECEITA_PROJECTION_YEARS.every(
+      (y) => result.byYear[y].numero_de_turmas === turmaByYear.get(y),
     );
     checks.push(
-      allNull
+      allMatch && turmaOutput.diagnostics.length === 0
         ? pass(
-            "numero_de_turmas_is_unsupported_null",
-            "numero_de_turmas === null for all 20 years (no source data available)",
+            "numero_de_turmas_matches_turma_driver",
+            "numero_de_turmas matches the PnL row 222 turma driver for all 20 years",
           )
         : fail(
-            "numero_de_turmas_is_unsupported_null",
-            "numero_de_turmas is not null for some year — unexpected",
+            "numero_de_turmas_matches_turma_driver",
+            `DRE turmas mismatch or diagnostics present; diagnostics=${turmaOutput.diagnostics.length}`,
           ),
     );
   }

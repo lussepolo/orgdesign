@@ -24,6 +24,7 @@ const TAB_COLORS: Record<string, string> = {
   payroll: "bg-orange-100 text-orange-700",
   viability: "bg-lime-100 text-lime-700",
   "dre-scenario-simulator": "bg-sky-100 text-sky-700",
+  "contribution-margin": "bg-cyan-100 text-cyan-700",
   "capital-decision": "bg-red-100 text-red-700",
 };
 

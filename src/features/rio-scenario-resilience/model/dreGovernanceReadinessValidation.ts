@@ -8,6 +8,9 @@
 
 import {
   DRE_GOVERNANCE_READINESS,
+  DRE_ACTIVE_COMBINATION_COUNT,
+  DRE_ACTIVE_GOVERNANCE_ITEMS,
+  DRE_HISTORICAL_GOVERNANCE_ITEMS,
   DRE_CALCULATION_ENGINE_IS_READY,
   DRE_FINANCE_SOURCES_CONFIRMED,
   DRE_BOARD_RATIFIED,
@@ -34,15 +37,20 @@ export type DreGovernanceReadinessCheckId =
   | "payroll_registry_no_stale_fopag_sync"
   | "payroll_registry_no_stale_missing_implementation"
   | "payroll_registry_blocking_reason_is_reconciliation"
-  | "all_open_items_block_calculation_false"
-  | "all_open_items_block_ratification_true"
-  | "all_open_items_calculation_continues_true"
+  | "all_active_items_block_calculation_false"
+  | "active_ratification_items_are_explicit"
+  | "all_active_items_calculation_continues_true"
   | "finance_sources_confirmed_flag_false"
   | "board_ratified_flag_false"
   | "finance_source_closure_incomplete"
   | "board_ratification_ready_false"
   | "calculation_engine_is_ready_flag_true"
-  | "open_items_count_is_five"
+  | "active_items_count_is_current"
+  | "active_items_exclude_f01_formula_gap"
+  | "active_items_exclude_f05_retired"
+  | "historical_items_include_f01_and_f05"
+  | "corporate_allocation_not_finance_source_item"
+  | "active_combination_count_is_90"
   | "payroll_registry_status_blocked"
   | "canonical_fixture_2028_enrollment_258"
   | "canonical_fixture_ebitda_positive_by_2032";
@@ -103,8 +111,11 @@ export function runDreGovernanceReadinessValidation(): DreGovernanceReadinessRep
     : null;
 
   const allItemsBlockCalcFalse = gov.openItems.every((i) => i.blocksEngineCalculation === false);
-  const allItemsBlockRatificationTrue = gov.openItems.every((i) => i.blocksBoardRatification === true);
+  const ratificationBlockingItems = gov.openItems.filter((i) => i.boardRatificationStatus === "blocks_ratification");
   const allItemsCalcContinuesTrue = gov.openItems.every((i) => i.calculationContinues === true);
+  const activeKeys = new Set(DRE_ACTIVE_GOVERNANCE_ITEMS.map((item) => item.key));
+  const historicalKeys = new Set(DRE_HISTORICAL_GOVERNANCE_ITEMS.map((item) => item.key));
+  const corporateAllocation = DRE_ACTIVE_GOVERNANCE_ITEMS.find((item) => item.key === "corporate_allocation_unavailable");
 
   const checks: DreGovernanceReadinessCheck[] = [
     // ── Phase A: Three-state governance invariants ──────────────────────────────
@@ -184,22 +195,22 @@ export function runDreGovernanceReadinessValidation(): DreGovernanceReadinessRep
     ),
     // ── Phase D: Open items invariants ─────────────────────────────────────────
     check(
-      "all_open_items_block_calculation_false",
+      "all_active_items_block_calculation_false",
       allItemsBlockCalcFalse,
       true,
-      "All open items must have blocksEngineCalculation:false — engine always calculates.",
+      "All active governance items must have blocksEngineCalculation:false — engine always calculates.",
     ),
     check(
-      "all_open_items_block_ratification_true",
-      allItemsBlockRatificationTrue,
-      true,
-      "All open items must have blocksBoardRatification:true — ratification requires full Finance closure.",
+      "active_ratification_items_are_explicit",
+      ratificationBlockingItems.length,
+      6,
+      "Six active source/method/reconciliation items block ratification; corporate allocation is a capability/scope limitation, not a Finance-source approval item.",
     ),
     check(
-      "all_open_items_calculation_continues_true",
+      "all_active_items_calculation_continues_true",
       allItemsCalcContinuesTrue,
       true,
-      "All open items must have calculationContinues:true — governance state does not halt the engine.",
+      "All active governance items must have calculationContinues:true — governance state does not halt the engine.",
     ),
     // ── Phase E: Derived Boolean gate invariants ───────────────────────────────
     check(
@@ -232,13 +243,44 @@ export function runDreGovernanceReadinessValidation(): DreGovernanceReadinessRep
       true,
       "DRE_CALCULATION_ENGINE_IS_READY must be true — the engine is implemented.",
     ),
-    // ── Phase F: Open items count and registry state ───────────────────────────
-    // Phase 15I.2C: F02 resolved as engineering item — 5 open items remain.
+    // ── Phase F: Active model and registry state ───────────────────────────────
     check(
-      "open_items_count_is_five",
+      "active_items_count_is_current",
       gov.openItems.length,
-      5,
-      "Exactly five Finance-source open items must be registered (F02 resolved in Phase 15I.2C).",
+      7,
+      "Seven active non-calculation-blocking governance/scope items are displayed; retired F05 and resolved F01 formula gap are historical only.",
+    ),
+    check(
+      "active_items_exclude_f01_formula_gap",
+      activeKeys.has("outras_receitas_reajuste") || activeKeys.has("outras_receitas_reajuste_formula_gap"),
+      false,
+      "F01 must not appear as an active formula-gap warning after v10 row-11 adjustment was implemented.",
+    ),
+    check(
+      "active_items_exclude_f05_retired",
+      activeKeys.has("enrollment_baseline_parity") || activeKeys.has("enrollment_baseline_parity_retired"),
+      false,
+      "F05 must not appear in active warnings; t1_g3 is retired and blocks zero active cells.",
+    ),
+    check(
+      "historical_items_include_f01_and_f05",
+      historicalKeys.has("outras_receitas_reajuste_formula_gap") &&
+        historicalKeys.has("enrollment_baseline_parity_retired"),
+      true,
+      "F01 formula gap and F05 retired enrollment parity must remain historical/retired, not active.",
+    ),
+    check(
+      "corporate_allocation_not_finance_source_item",
+      corporateAllocation?.classifications.includes("capability_unavailable") === true &&
+        corporateAllocation?.boardRatificationStatus === "not_required",
+      true,
+      "Corporate allocation is an unavailable capability/scope limitation, not a Finance-source approval item or engine blocker.",
+    ),
+    check(
+      "active_combination_count_is_90",
+      DRE_ACTIVE_COMBINATION_COUNT,
+      90,
+      "Active DRE combinations are 2 opening packages × 3 captação scenarios × 5 tuition scenarios × 3 org-design options.",
     ),
     check(
       "payroll_registry_status_blocked",
@@ -261,7 +303,7 @@ export function runDreGovernanceReadinessValidation(): DreGovernanceReadinessRep
     ),
   ];
 
-  const EXPECTED_CHECK_COUNT = 24;
+  const EXPECTED_CHECK_COUNT = 29;
   if (checks.length !== EXPECTED_CHECK_COUNT) {
     throw new Error(
       `dreGovernanceReadinessValidation: expected ${EXPECTED_CHECK_COUNT} checks, got ${checks.length}`,

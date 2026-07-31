@@ -9,13 +9,19 @@ import { useState } from "react";
 import { Copy, Check, FileText } from "lucide-react";
 import { Card } from "../common/Card";
 import { useLocale } from "../../i18n/useLocale";
+import { PT_BR } from "../../i18n/pt-BR";
+import { EN_US } from "../../i18n/en-US";
+import type { Locale, TranslationKey } from "../../i18n/localeContract";
 import {
   OCCUPANCY_LABELS,
   TUITION_LABELS,
   ORG_DESIGN_OPTION_LABELS,
   formatOpeningPackageLabel,
 } from "./dreLeverLabels";
-import { DRE_GOVERNANCE_READINESS } from "../../features/rio-scenario-resilience/model/dreGovernanceReadiness";
+import {
+  DRE_ACTIVE_GOVERNANCE_ITEMS,
+  DRE_ACTIVE_COMBINATION_COUNT,
+} from "../../features/rio-scenario-resilience/model/dreGovernanceReadiness";
 import { RECEITA_PROJECTION_YEARS } from "../../features/rio-scenario-resilience/model/receitaEngineContract";
 import type { DreScenarioSimulatorSelections } from "../../hooks/useDreScenarioSimulator";
 import type { DreEngineOutput } from "../../features/rio-scenario-resilience/model/dreEngineContract";
@@ -25,18 +31,38 @@ interface DreBoardReadableExportProps {
   readonly dreOutput: DreEngineOutput;
 }
 
+const CATALOGS: Record<Locale, Record<TranslationKey, string>> = {
+  "pt-BR": PT_BR,
+  "en-US": EN_US,
+};
+
+const BOARD_LIMITATION_KEYS: Record<string, TranslationKey> = {
+  desconto_metodo_reverification: "dreGovItemBoardDescontoMetodo",
+  tuition_source_provenance_by_option: "dreGovItemBoardTuitionProvenance",
+  tuition_finance_signoff: "dreGovItemBoardTuitionApproval",
+  discount_schedule_finance_signoff: "dreGovItemBoardDiscountApproval",
+  ms_hs_grade_level_staffing_boundary: "dreGovItemBoardMsHsBoundary",
+  ms_hs_staffing_source_reconciliation: "dreGovItemBoardMsHsReconciliation",
+  corporate_allocation_unavailable: "dreGovItemBoardCorporateAllocation",
+};
+
+function translate(locale: Locale, key: TranslationKey): string {
+  return CATALOGS[locale][key];
+}
+
 export function buildBoardReadableExplanation(
   selections: DreScenarioSimulatorSelections,
   dreOutput: DreEngineOutput,
+  locale: Locale = "en-US",
 ): string {
+  const tx = (key: TranslationKey) => translate(locale, key);
   const ebitdaPositiveYear = RECEITA_PROJECTION_YEARS.find(
     (y) => dreOutput.byYear[y].ebitda > 0,
   );
   const yr2028 = dreOutput.byYear[2028];
   const yr2032 = dreOutput.byYear[2032];
   const yr2037 = dreOutput.byYear[2037];
-  const openItemCount = DRE_GOVERNANCE_READINESS.openItems.length;
-  const openItemCodes = ["F01", "F03", "F04", "F05", "F06"].join(", ");
+  const activeItemCount = DRE_ACTIVE_GOVERNANCE_ITEMS.length;
 
   const formatBRLText = (v: number) => {
     const abs = Math.abs(v);
@@ -47,43 +73,44 @@ export function buildBoardReadableExplanation(
   };
 
   return [
-    "SCENARIO SUMMARY — FOR REVIEW PURPOSES",
+    tx("dreBoardExportTextHeading"),
     "─────────────────────────────────────────────────────────",
     "",
-    "SCENARIO INPUTS",
-    `  Opening package: ${formatOpeningPackageLabel(selections.openingPackageId)} (${selections.openingPackageId})`,
-    `  Occupancy: ${OCCUPANCY_LABELS[selections.occupancyScenarioId] ?? selections.occupancyScenarioId}`,
-    `  Tuition scenario: ${TUITION_LABELS[selections.tuitionScenarioId] ?? selections.tuitionScenarioId}`,
-    `  Org design: ${ORG_DESIGN_OPTION_LABELS[selections.orgDesignOptionId] ?? selections.orgDesignOptionId}`,
+    tx("dreBoardExportTextInputs"),
+    `  ${tx("dreBoardExportTextOpeningPackage")}: ${formatOpeningPackageLabel(selections.openingPackageId)} (${selections.openingPackageId})`,
+    `  ${tx("dreBoardExportTextOccupancy")}: ${OCCUPANCY_LABELS[selections.occupancyScenarioId] ?? selections.occupancyScenarioId}`,
+    `  ${tx("dreBoardExportTextTuitionScenario")}: ${TUITION_LABELS[selections.tuitionScenarioId] ?? selections.tuitionScenarioId}`,
+    `  ${tx("dreBoardExportTextOrgDesign")}: ${ORG_DESIGN_OPTION_LABELS[selections.orgDesignOptionId] ?? selections.orgDesignOptionId}`,
     "",
-    "SCENARIO OUTPUTS (DRE Operating Layer)",
-    `  Learners 2028: ${yr2028.numero_de_alunos}`,
-    `  First EBITDA-positive year: ${ebitdaPositiveYear ?? "Not within horizon"}`,
-    `  EBITDA 2028: ${formatBRLText(yr2028.ebitda)}`,
-    `  EBITDA 2032: ${formatBRLText(yr2032.ebitda)}`,
-    `  EBITDA 2037: ${formatBRLText(yr2037.ebitda)}`,
+    tx("dreBoardExportTextOutputs"),
+    `  ${tx("dreBoardExportTextLearners2028")}: ${yr2028.numero_de_alunos}`,
+    `  ${tx("dreBoardExportTextFirstEbitdaPositiveYear")}: ${ebitdaPositiveYear ?? tx("dreBoardExportTextNotWithinHorizon")}`,
+    `  ${tx("dreBoardExportTextEbitda2028")}: ${formatBRLText(yr2028.ebitda)}`,
+    `  ${tx("dreBoardExportTextEbitda2032")}: ${formatBRLText(yr2032.ebitda)}`,
+    `  ${tx("dreBoardExportTextEbitda2037")}: ${formatBRLText(yr2037.ebitda)}`,
     "",
-    "GOVERNANCE STATUS",
-    "  Can calculate: yes",
-    "  Can simulate: yes",
-    "  Can compare scenarios: yes",
-    "  Finance-source confirmed: not yet",
-    "  Board-ratified: not yet",
+    tx("dreBoardExportTextGovernance"),
+    `  ${tx("dreBoardExportTextCanCalculate")}: ${tx("dreBoardExportTextYes")}`,
+    `  ${tx("dreBoardExportTextCanSimulate")}: ${tx("dreBoardExportTextYes")}`,
+    `  ${tx("dreBoardExportTextCanCompare")}: ${tx("dreBoardExportTextYes")} (${DRE_ACTIVE_COMBINATION_COUNT})`,
+    `  ${tx("dreBoardExportTextFinanceSourceConfirmed")}: ${tx("dreBoardExportTextNotYet")}`,
+    `  ${tx("dreBoardExportTextBoardRatified")}: ${tx("dreBoardExportTextNotYet")}`,
     "",
-    "IMPORTANT — PROVISIONAL STATUS NOTICE",
+    tx("dreBoardExportTextNoticeHeading"),
     "─────────────────────────────────────────────────────────",
-    "This scenario is technically calculated and internally consistent.",
-    "It is NOT Finance-source confirmed and NOT board-ratified.",
+    tx("dreBoardExportTextCalculatedNotice"),
+    tx("dreBoardExportTextNotCertifiedNotice"),
+    tx("dreBoardExportTextEbitdaBoundaryNotice"),
     "",
-    `The remaining ${openItemCount} open items (${openItemCodes}) are assumption provenance`,
-    "and reconciliation items, not calculation blockers. Simulation runs",
-    "regardless of their status.",
+    tx("dreBoardExportTextMaterialLimitations").replace("{n}", String(activeItemCount)),
+    ...DRE_ACTIVE_GOVERNANCE_ITEMS.map((item) =>
+      `  - ${tx(BOARD_LIMITATION_KEYS[item.key] ?? "dreGovItemBoardFallback")}`,
+    ),
     "",
-    "Do not interpret this scenario as approved, final, or ratified.",
-    "Use for comparison and trade-off analysis only.",
+    tx("dreBoardExportTextUseLimitNotice"),
     "",
-    `Source-status warning count: ${openItemCount} open items`,
-    `Generated: ${new Date().toISOString().slice(0, 10)}`,
+    `${tx("dreBoardExportTextWarningCount")}: ${activeItemCount}`,
+    `${tx("dreBoardExportTextGenerated")}: ${new Date().toISOString().slice(0, 10)}`,
   ].join("\n");
 }
 
@@ -91,9 +118,9 @@ export default function DreBoardReadableExport({
   selections,
   dreOutput,
 }: DreBoardReadableExportProps) {
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
   const [copied, setCopied] = useState(false);
-  const text = buildBoardReadableExplanation(selections, dreOutput);
+  const text = buildBoardReadableExplanation(selections, dreOutput, locale);
 
   function handleCopy() {
     navigator.clipboard.writeText(text).then(() => {

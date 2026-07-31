@@ -34,6 +34,7 @@ import type { DreEngineInput, DreEngineOutput, DreYearResult } from "./dreEngine
 import { calculateReceita } from "./receitaEngine";
 import { RECEITA_PROJECTION_YEARS } from "./receitaEngineContract";
 import { calculateFopag } from "./fopagEngine";
+import { calculateDreTurmaDriver } from "./dreTurmaDriver";
 import {
   adaptReceitasComEnsinoRegular,
   adaptNumeroDeAlunos,
@@ -85,6 +86,15 @@ export function calculateDre(input: DreEngineInput): DreEngineOutput {
     orgDesignOptionId: input.orgDesignOptionId,
     educatorTierByGrade: input.educatorTierByGrade,
   });
+
+  const turmaOutput = calculateDreTurmaDriver({
+    openingPackageId: input.openingPackageId,
+    occupancyScenarioId: input.occupancyScenarioId,
+  });
+
+  const turmasByYear = new Map(
+    turmaOutput.yearTotals.map((record) => [record.year, record.numeroDeTurmas]),
+  );
 
   // FOPAG year-totals lookup (FopagYearTotals.year is number)
   const fopagByYear = new Map<number, FopagYearTotals>();
@@ -401,7 +411,7 @@ export function calculateDre(input: DreEngineInput): DreEngineOutput {
     byYear[year] = {
       year,
       numero_de_alunos,
-      numero_de_turmas: null,
+      numero_de_turmas: turmasByYear.get(year) ?? 0,
       ticket_servico,
       receitas_com_ensino_regular,
       receitas_com_upselling,

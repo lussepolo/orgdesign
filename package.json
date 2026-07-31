@@ -61,6 +61,9 @@
     "validate:v10-rc2-4-gate7": "tsx scripts/validate-v10-rc2-4-gate7-source-fidelity.ts",
     "validate:v10-rc2-5-gate7": "tsx scripts/validate-v10-rc2-5-gate7-shared-tier-workflow.ts",
     "validate:v10-rc2-5-gate9": "tsx scripts/validate-v10-rc2-5-gate9-org-tree-payroll-parity.ts",
+    "validate:v10-rc2-6": "tsx scripts/validate-v10-rc2-6-dre-narrative-governance.ts",
+    "validate:v10-rc2-7": "tsx scripts/validate-v10-rc2-7-dre-turmas.ts",
+    "validate:navigation-flow": "tsx scripts/validate-navigation-flow.ts",
     "qa:v10-e1": "tsx tests/v10e1/v10-e1.run.ts"
   },
   "dependencies": {

@@ -6,36 +6,54 @@
 import { useState } from "react";
 import { Info, CheckCircle2, Clock, ChevronDown, ChevronUp } from "lucide-react";
 import { Card } from "../common/Card";
-import { DRE_GOVERNANCE_READINESS } from "../../features/rio-scenario-resilience/model/dreGovernanceReadiness";
+import {
+  DRE_ACTIVE_GOVERNANCE_ITEMS,
+  DRE_HISTORICAL_GOVERNANCE_ITEMS,
+} from "../../features/rio-scenario-resilience/model/dreGovernanceReadiness";
 import { useLocale } from "../../i18n/useLocale";
 import type { TranslationKey } from "../../i18n/localeContract";
 
-const F_CODE_MAP: Record<string, string> = {
-  outras_receitas_reajuste: "F01",
-  tuition_source_provenance: "F03",
-  discount_schedule_provenance: "F04",
-  enrollment_baseline_parity: "F05",
-  instructional_capacity_payroll_sync: "F06",
+const ITEM_TITLE_KEYS: Record<string, TranslationKey> = {
+  desconto_metodo_reverification: "dreGovItemTitleDescontoMetodo",
+  tuition_source_provenance_by_option: "dreGovItemTitleTuitionProvenance",
+  tuition_finance_signoff: "dreGovItemTitleTuitionApproval",
+  discount_schedule_finance_signoff: "dreGovItemTitleDiscountApproval",
+  ms_hs_grade_level_staffing_boundary: "dreGovItemTitleMsHsBoundary",
+  ms_hs_staffing_source_reconciliation: "dreGovItemTitleMsHsReconciliation",
+  corporate_allocation_unavailable: "dreGovItemTitleCorporateAllocation",
+  outras_receitas_reajuste_formula_gap: "dreGovItemTitleF01Historical",
+  enrollment_baseline_parity_retired: "dreGovItemTitleF05Historical",
+  descontos_metodo_formula_base_resolved: "dreGovItemTitleF02Resolved",
 };
 
-const F_DESCRIPTION_KEYS: Record<string, TranslationKey> = {
-  outras_receitas_reajuste: "dreGovSummaryDescOutrasReceitas",
-  tuition_source_provenance: "dreGovSummaryDescTuitionProvenance",
-  discount_schedule_provenance: "dreGovSummaryDescDiscountProvenance",
-  enrollment_baseline_parity: "dreGovSummaryDescEnrollmentParity",
-  instructional_capacity_payroll_sync: "dreGovSummaryDescCapacitySync",
+const ITEM_BODY_KEYS: Record<string, TranslationKey> = {
+  desconto_metodo_reverification: "dreGovItemBodyDescontoMetodo",
+  tuition_source_provenance_by_option: "dreGovItemBodyTuitionProvenance",
+  tuition_finance_signoff: "dreGovItemBodyTuitionApproval",
+  discount_schedule_finance_signoff: "dreGovItemBodyDiscountApproval",
+  ms_hs_grade_level_staffing_boundary: "dreGovItemBodyMsHsBoundary",
+  ms_hs_staffing_source_reconciliation: "dreGovItemBodyMsHsReconciliation",
+  corporate_allocation_unavailable: "dreGovItemBodyCorporateAllocation",
+  outras_receitas_reajuste_formula_gap: "dreGovItemBodyF01Historical",
+  enrollment_baseline_parity_retired: "dreGovItemBodyF05Historical",
+  descontos_metodo_formula_base_resolved: "dreGovItemBodyF02Resolved",
 };
 
 const STATUS_LABEL_KEYS: Record<string, TranslationKey> = {
-  provisional_source: "dreGovSummaryStatusProvisional",
+  active_governance_item: "dreGovSummaryStatusActiveGovernance",
+  finance_approval_pending: "dreGovSummaryStatusFinanceApproval",
   reconciliation_required: "dreGovSummaryStatusReconciliation",
-  pending_finance_confirmation: "dreGovSummaryStatusPendingConfirmation",
+  scope_exclusion: "dreGovSummaryStatusScopeExclusion",
+  capability_unavailable: "dreGovSummaryStatusCapabilityUnavailable",
+  resolved_historical: "dreGovSummaryStatusResolvedHistorical",
+  retired_historical: "dreGovSummaryStatusRetiredHistorical",
 };
 
 export default function DreGovernanceSummaryPanel() {
   const { t } = useLocale();
   const [showDetails, setShowDetails] = useState(false);
-  const openItems = DRE_GOVERNANCE_READINESS.openItems;
+  const activeItems = DRE_ACTIVE_GOVERNANCE_ITEMS;
+  const historicalItems = DRE_HISTORICAL_GOVERNANCE_ITEMS;
 
   return (
     <div data-testid="dre-governance-summary">
@@ -60,7 +78,7 @@ export default function DreGovernanceSummaryPanel() {
         </div>
 
         <p className="text-xs text-slate-500 mb-4">
-          {t("dreGovSummaryOpenItemsNote").replace("{n}", String(openItems.length))}
+          {t("dreGovSummaryOpenItemsNote").replace("{n}", String(activeItems.length))}
         </p>
 
         <button
@@ -82,12 +100,10 @@ export default function DreGovernanceSummaryPanel() {
               {t("dreGovSummaryDetailsIntro")}
             </p>
 
-            {openItems.map((item) => {
-              const fCode = F_CODE_MAP[item.key] ?? item.key;
-              const descriptionKey = F_DESCRIPTION_KEYS[item.key];
-              const description = descriptionKey ? t(descriptionKey) : item.label;
-              const statusLabelKey = STATUS_LABEL_KEYS[item.status];
-              const statusLabel = statusLabelKey ? t(statusLabelKey) : item.status;
+            {activeItems.map((item) => {
+              const statusLabelKey = STATUS_LABEL_KEYS[item.displayStatus];
+              const titleKey = ITEM_TITLE_KEYS[item.key] ?? "dreGovItemTitleFallback";
+              const bodyKey = ITEM_BODY_KEYS[item.key] ?? "dreGovItemBodyFallback";
               return (
                 <div
                   key={item.key}
@@ -97,36 +113,56 @@ export default function DreGovernanceSummaryPanel() {
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="font-mono text-[10px] font-bold text-amber-700 bg-amber-100 rounded px-1.5 py-0.5">
-                        {fCode}
+                        {item.internalIds.join(" / ")}
                       </span>
-                      <span className="text-xs font-semibold text-slate-700">{description}</span>
-                      <span className="text-[10px] text-amber-600 font-medium">{statusLabel}</span>
+                      <span className="text-xs font-semibold text-slate-700">{t(titleKey)}</span>
+                      <span className="text-[10px] text-amber-600 font-medium">{t(statusLabelKey)}</span>
                     </div>
                     <p className="mt-0.5 text-[11px] text-slate-500">
-                      {t("dreGovSummaryOwnerNote").replace("{owner}", item.requiredOwner)}
+                      {t(bodyKey)}
+                    </p>
+                    <p className="mt-1 text-[10px] leading-relaxed text-slate-500">
+                      {t("dreGovSummaryMethodologyMeta")
+                        .replace("{classes}", item.classifications.join(", "))
+                        .replace("{finance}", item.financeApprovalStatus)
+                        .replace("{board}", item.boardRatificationStatus)
+                        .replace("{owner}", item.requiredOwner)}
                     </p>
                   </div>
                 </div>
               );
             })}
 
-            <div className="flex items-start gap-3 rounded-lg border border-emerald-100 bg-emerald-50 px-3 py-2.5">
-              <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-600" />
-              <div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="font-mono text-[10px] font-bold text-emerald-700 bg-emerald-100 rounded px-1.5 py-0.5">
-                    F02
-                  </span>
-                  <span className="text-xs font-semibold text-slate-700">
-                    {t("dreGovSummaryF02Label")}
-                  </span>
-                  <span className="text-[10px] text-emerald-700 font-medium">
-                    {t("dreGovSummaryResolvedEngineering")}
-                  </span>
-                </div>
-                <p className="mt-0.5 text-[11px] text-slate-500">
-                  {t("dreGovSummaryF02Note")}
-                </p>
+            <div className="pt-2">
+              <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+                {t("dreGovSummaryHistoricalTitle")}
+              </p>
+              <div className="space-y-2">
+                {historicalItems.map((item) => {
+                  const statusLabelKey = STATUS_LABEL_KEYS[item.displayStatus];
+                  const titleKey = ITEM_TITLE_KEYS[item.key] ?? "dreGovItemTitleFallback";
+                  const bodyKey = ITEM_BODY_KEYS[item.key] ?? "dreGovItemBodyFallback";
+                  return (
+                    <div
+                      key={item.key}
+                      className="flex items-start gap-3 rounded-lg border border-emerald-100 bg-emerald-50 px-3 py-2.5"
+                    >
+                      <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-600" />
+                      <div>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="font-mono text-[10px] font-bold text-emerald-700 bg-emerald-100 rounded px-1.5 py-0.5">
+                            {item.internalIds.join(" / ")}
+                          </span>
+                          <span className="text-xs font-semibold text-slate-700">{t(titleKey)}</span>
+                          <span className="text-[10px] text-emerald-700 font-medium">
+                            {t(statusLabelKey)}
+                          </span>
+                        </div>
+                        <p className="mt-0.5 text-[11px] text-slate-500">{t(bodyKey)}</p>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>

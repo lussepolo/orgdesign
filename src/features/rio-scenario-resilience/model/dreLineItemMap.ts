@@ -307,12 +307,11 @@ const DRE_LINE_ITEM_MAP_DATA: readonly DreLineItemRecord[] = [
     horizon: "2028-2047",
     preOpsTreatment: "not_applicable",
     perpetuityTreatment: "not_applicable",
-    implementationStatus: "design_only_not_implemented",
+    implementationStatus: "implemented",
     notes:
-      "Phase 12B (Luciana): direct scenario input driver. Structural relationship " +
-      "to org-design / section-count engine outputs (sectionCountEngine.ts) not " +
-      "yet reconciled — this row records Finance's DRE-template classification " +
-      "only, not a calculation binding.",
+      "PnL row 222 equivalent: sum of workbook-style turmas by grade. T1/T2 use the " +
+      "documented Integral + Meio-período split; other active grades use the governed " +
+      "ROUNDUP(enrollment/studentsPerClass) formula capped at 2 via dreTurmaDriver.ts.",
   },
   {
     dreLineId: "numero_de_alunos",
@@ -2035,4 +2034,3 @@ const DRE_LINE_ITEM_MAP_DATA: readonly DreLineItemRecord[] = [
 ];
 
 export const DRE_LINE_ITEM_MAP: readonly DreLineItemRecord[] = DRE_LINE_ITEM_MAP_DATA;
-

@@ -13,7 +13,8 @@
 import { Telescope, Scale, HelpCircle, ClipboardList, AlertCircle, CheckCircle2 } from "lucide-react";
 import { Card } from "../common/Card";
 import {
-  DRE_GOVERNANCE_READINESS,
+  DRE_ACTIVE_COMBINATION_COUNT,
+  DRE_ACTIVE_GOVERNANCE_ITEMS,
   FINANCE_SOURCE_CLOSURE_COMPLETE,
   BOARD_RATIFICATION_READY,
 } from "../../features/rio-scenario-resilience/model/dreGovernanceReadiness";
@@ -50,29 +51,21 @@ const DECISION_QUESTIONS: Array<{ lensKey: TranslationKey; questionKey: Translat
   { lensKey: "dreExecInterpQLensCapex", questionKey: "dreExecInterpQCapex" },
 ];
 
-// ── F-code labels for pending evidence panel ──────────────────────────────────
-
-const F_CODE_MAP: Record<string, string> = {
-  outras_receitas_reajuste: "F01",
-  tuition_source_provenance: "F03",
-  discount_schedule_provenance: "F04",
-  enrollment_baseline_parity: "F05",
-  instructional_capacity_payroll_sync: "F06",
-};
-
-const F_LABEL_KEYS: Record<string, TranslationKey> = {
-  outras_receitas_reajuste: "dreExecInterpFLabelOutrasReceitas",
-  tuition_source_provenance: "dreExecInterpFLabelTuitionProvenance",
-  discount_schedule_provenance: "dreExecInterpFLabelDiscountProvenance",
-  enrollment_baseline_parity: "dreExecInterpFLabelEnrollmentParity",
-  instructional_capacity_payroll_sync: "dreExecInterpFLabelCapacitySync",
+const BOARD_LIMITATION_KEYS: Record<string, TranslationKey> = {
+  desconto_metodo_reverification: "dreGovItemBoardDescontoMetodo",
+  tuition_source_provenance_by_option: "dreGovItemBoardTuitionProvenance",
+  tuition_finance_signoff: "dreGovItemBoardTuitionApproval",
+  discount_schedule_finance_signoff: "dreGovItemBoardDiscountApproval",
+  ms_hs_grade_level_staffing_boundary: "dreGovItemBoardMsHsBoundary",
+  ms_hs_staffing_source_reconciliation: "dreGovItemBoardMsHsReconciliation",
+  corporate_allocation_unavailable: "dreGovItemBoardCorporateAllocation",
 };
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export default function DreExecutiveInterpretationPanel() {
   const { t } = useLocale();
-  const openItems = DRE_GOVERNANCE_READINESS.openItems;
+  const openItems = DRE_ACTIVE_GOVERNANCE_ITEMS;
 
   return (
     <Card
@@ -89,7 +82,9 @@ export default function DreExecutiveInterpretationPanel() {
             <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-emerald-700">
               {t("dreExecInterpSimAvailableLabel")}
             </div>
-            <div className="text-[11px] text-emerald-800">{t("dreExecInterpSimAvailableBody")}</div>
+            <div className="text-[11px] text-emerald-800">
+              {t("dreExecInterpSimAvailableBody").replace("{n}", String(DRE_ACTIVE_COMBINATION_COUNT))}
+            </div>
           </div>
         </div>
         <div className="flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2">
@@ -192,12 +187,12 @@ export default function DreExecutiveInterpretationPanel() {
         </p>
       </section>
 
-      {/* ── Pending evidence panel ────────────────────────────────────────── */}
+      {/* ── Material limitations panel ─────────────────────────────────────── */}
       <section className="mb-6">
         <div className="mb-3 flex items-center gap-2">
           <AlertCircle className="h-3.5 w-3.5 text-cockpit-meta" />
           <h4 className="text-[11px] font-bold uppercase tracking-[0.14em] text-cockpit-meta">
-            {t("dreExecInterpPendingEvidenceTitle")}
+            {t("dreExecInterpMaterialLimitationsTitle")}
           </h4>
         </div>
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
@@ -224,25 +219,20 @@ export default function DreExecutiveInterpretationPanel() {
         </div>
 
         <div className="mt-2 space-y-1.5">
-          {openItems.map((item) => {
-            const fCode = F_CODE_MAP[item.key] ?? item.key;
-            const labelKey = F_LABEL_KEYS[item.key];
-            const label = labelKey ? t(labelKey) : item.label;
-            return (
-              <div
-                key={item.key}
-                className="flex items-center gap-2 rounded-lg border border-amber-100 bg-amber-50 px-3 py-2"
-              >
-                <span className="font-mono text-[10px] font-bold text-amber-700 bg-amber-100 rounded px-1.5 py-0.5 shrink-0">
-                  {fCode}
-                </span>
-                <span className="text-xs text-slate-600">{label}</span>
-                <span className="ml-auto text-[10px] text-amber-600 font-medium shrink-0">
-                  {t("dreExecInterpNonBlocking")}
-                </span>
-              </div>
-            );
-          })}
+          {openItems.map((item) => (
+            <div
+              key={item.key}
+              className="flex items-center gap-2 rounded-lg border border-amber-100 bg-amber-50 px-3 py-2"
+            >
+              <span className="inline-block h-2 w-2 shrink-0 rounded-full bg-amber-400" />
+              <span className="text-xs text-slate-600">
+                {t(BOARD_LIMITATION_KEYS[item.key] ?? "dreGovItemBoardFallback")}
+              </span>
+              <span className="ml-auto text-[10px] text-amber-600 font-medium shrink-0">
+                {t("dreExecInterpNonBlocking")}
+              </span>
+            </div>
+          ))}
         </div>
       </section>
 

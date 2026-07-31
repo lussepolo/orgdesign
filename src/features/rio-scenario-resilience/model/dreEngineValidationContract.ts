@@ -22,7 +22,7 @@ export type DreEngineCheckId =
   // Behavioral: Outras Receitas formula
   | "outras_receitas_uses_base_per_learner_ratio"
   // Behavioral: driver and memo guards
-  | "numero_de_turmas_is_unsupported_null"
+  | "numero_de_turmas_matches_turma_driver"
   | "ticket_servico_is_formula_derived_not_constant"
   | "zero_learners_does_not_produce_nan"
   | "total_folha_de_pagamento_is_memo_not_summed_in_ebitda"
