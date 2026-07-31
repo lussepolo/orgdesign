@@ -3,7 +3,7 @@ import { Microscope, School, Search, Users } from "lucide-react";
 import { motion } from "motion/react";
 import { cn } from "../../lib/utils";
 import { useLocale } from "../../i18n/useLocale";
-import type { TranslationKey } from "../../i18n/localeContract";
+import { LOWER_SCHOOL_DATA } from "../../features/academic/model/academicStaffingModel";
 
 const Card = ({
   children,
@@ -60,14 +60,6 @@ const Badge = ({
     </span>
   );
 };
-
-const LOWER_SCHOOL_DATA: Array<{ gradeKey: TranslationKey; ratio: string; max: number }> = [
-  { gradeKey: "lowerSchoolGrade1", ratio: "1:11", max: 44 },
-  { gradeKey: "lowerSchoolGrade2", ratio: "1:11", max: 44 },
-  { gradeKey: "lowerSchoolGrade3", ratio: "1:11", max: 44 },
-  { gradeKey: "lowerSchoolGrade4", ratio: "1:11", max: 48 },
-  { gradeKey: "lowerSchoolGrade5", ratio: "1:11", max: 48 },
-];
 
 const LowerSchoolTab = () => {
   const { t } = useLocale();

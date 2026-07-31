@@ -54,6 +54,9 @@ import {
   FINANCE_SOURCE_CLOSURE_COMPLETE,
   BOARD_RATIFICATION_READY,
 } from "../src/features/rio-scenario-resilience/model/dreGovernanceReadiness";
+import { EARLY_YEARS_DATA, LOWER_SCHOOL_DATA } from "../src/features/academic/model/academicStaffingModel";
+import { EN_US } from "../src/i18n/en-US";
+import { PT_BR } from "../src/i18n/pt-BR";
 
 function readFile(path: string): string {
   try {
@@ -102,14 +105,14 @@ checkFalse(
 
 checkTrue(
   "ey_t2_max_28_present",
-  EY_TAB.includes('"Toddlers 2"') && EY_TAB.includes("max: 28"),
-  "EarlyYearsTab.tsx must contain Toddlers 2 with max:28",
+  EARLY_YEARS_DATA.some((item) => item.gradeKey === "earlyYearsGradeToddlers2" && item.max === 28),
+  "The shared Early Years staffing model must govern Toddlers 2 at max:28",
 );
 
 checkTrue(
   "ey_t1_max_28_preserved",
-  EY_TAB.includes('"Toddlers 1"') && EY_TAB.includes("max: 28"),
-  "Toddlers 1 max:28 must remain unchanged (regression guard)",
+  EARLY_YEARS_DATA.some((item) => item.gradeKey === "earlyYearsGradeToddlers1" && item.max === 28),
+  "The shared Early Years staffing model must preserve Toddlers 1 max:28",
 );
 
 // ── Section B — F-5.6-01: Lower School G4/G5 capacity ────────────────────────
@@ -126,24 +129,22 @@ checkFalse(
 
 checkTrue(
   "ls_g4_max_48_present",
-  LS_TAB.includes(
-    'grade: "Grade 4", focus: "Project-based Learning", model: "Lead + Assistant", ratio: "1:11", max: 48',
-  ),
-  "LowerSchoolTab.tsx must contain Grade 4 with max:48",
+  LOWER_SCHOOL_DATA.some((item) => item.gradeKey === "lowerSchoolGrade4" && item.max === 48),
+  "The shared Lower School staffing model must govern Grade 4 at max:48",
 );
 
 checkTrue(
   "ls_g5_max_48_present",
-  LS_TAB.includes(
-    'grade: "Grade 5", focus: "Transition & Leadership", model: "Lead + Assistant", ratio: "1:11", max: 48',
-  ),
-  "LowerSchoolTab.tsx must contain Grade 5 with max:48",
+  LOWER_SCHOOL_DATA.some((item) => item.gradeKey === "lowerSchoolGrade5" && item.max === 48),
+  "The shared Lower School staffing model must govern Grade 5 at max:48",
 );
 
 checkTrue(
   "ls_g1_g3_max_44_preserved",
-  LS_TAB.includes('"Grade 1"') && LS_TAB.includes('"Grade 3"') && LS_TAB.includes("max: 44"),
-  "Grade 1-3 max:44 must remain unchanged (regression guard)",
+  ["lowerSchoolGrade1", "lowerSchoolGrade2", "lowerSchoolGrade3"].every((gradeKey) =>
+    LOWER_SCHOOL_DATA.some((item) => item.gradeKey === gradeKey && item.max === 44),
+  ),
+  "The shared Lower School staffing model must preserve Grades 1-3 max:44",
 );
 
 // ── Section C — F-5.4-03: Cluster taxonomy (HiringProfileCardsTab.tsx) ───────
@@ -163,14 +164,18 @@ checkFalse(
 
 checkTrue(
   "hiring_global_studies_cluster_present",
-  HIRING_TAB.includes('"Global Studies & Project Design"'),
-  "HiringProfileCardsTab.tsx must contain '\"Global Studies & Project Design\"'",
+  HIRING_TAB.includes('labelKey: "hiringGlobalStudiesLabel"') &&
+    EN_US.hiringGlobalStudiesLabel === "Global Studies & Project Design" &&
+    PT_BR.hiringGlobalStudiesLabel.length > 0,
+  "The hiring card must use the governed cluster key with both locale values",
 );
 
 checkTrue(
   "hiring_language_acquisition_cluster_present",
-  HIRING_TAB.includes('"Language Acquisition & Global Perspectives"'),
-  "HiringProfileCardsTab.tsx must contain '\"Language Acquisition & Global Perspectives\"'",
+  HIRING_TAB.includes('labelKey: "hiringLanguageAcquisitionLabel"') &&
+    EN_US.hiringLanguageAcquisitionLabel === "Language Acquisition & Global Perspectives" &&
+    PT_BR.hiringLanguageAcquisitionLabel.length > 0,
+  "The hiring card must use the governed language-acquisition key with both locale values",
 );
 
 // ── Section D — F-5.4-03: grade6ClusterModel alignment (OfferScenariosTab.tsx)
@@ -184,8 +189,9 @@ checkFalse(
 
 checkTrue(
   "offer_global_studies_ampersand_present",
-  OFFER_TAB.includes('"Global Studies & Project Design:'),
-  "OfferScenariosTab.tsx grade6ClusterModel must use ampersand form 'Global Studies & Project Design'",
+  OFFER_TAB.includes('t("offerScenarioDGrade6ClusterModel3")') &&
+    EN_US.offerScenarioDGrade6ClusterModel3.startsWith("Global Studies & Project Design:"),
+  "The offer scenario must use the governed translation key with the ampersand taxonomy",
 );
 
 // ── Section E — F-5.4-02: Partial-coverage disclosure ────────────────────────
@@ -193,14 +199,17 @@ console.log("\nSection E — F-5.4-02: Partial-Coverage Disclosure (HiringProfil
 
 checkTrue(
   "hiring_disclosure_not_complete_hiring_list",
-  HIRING_TAB.includes("not a complete hiring authorization list"),
-  "HiringProfileCardsTab.tsx must contain disclosure 'not a complete hiring authorization list'",
+  HIRING_TAB.includes('t("hiringCardsDisclaimer")') &&
+    EN_US.hiringCardsDisclaimer.includes("not a complete hiring authorization list") &&
+    PT_BR.hiringCardsDisclaimer.length > 0,
+  "The hiring disclosure must be rendered from the governed key in both locales",
 );
 
 checkTrue(
   "hiring_disclosure_mentions_leadership_operations_support",
-  HIRING_TAB.includes("leadership, operations, support"),
-  "HiringProfileCardsTab.tsx disclosure must mention 'leadership, operations, support'",
+  EN_US.hiringCardsDisclaimer.includes("leadership, operations, support") &&
+    /lideran[cç]a.*opera[cç][oõ]es.*suporte/i.test(PT_BR.hiringCardsDisclaimer),
+  "The hiring disclosure must identify leadership, operations, and support scope in both locales",
 );
 
 // ── Section F — G-03: After School naming ────────────────────────────────────

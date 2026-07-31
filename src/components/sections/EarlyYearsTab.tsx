@@ -3,7 +3,7 @@ import { Baby, Heart, Languages, Users } from "lucide-react";
 import { motion } from "motion/react";
 import { cn } from "../../lib/utils";
 import { useLocale } from "../../i18n/useLocale";
-import type { TranslationKey } from "../../i18n/localeContract";
+import { EARLY_YEARS_DATA } from "../../features/academic/model/academicStaffingModel";
 
 const Card = ({
   children,
@@ -60,14 +60,6 @@ const Badge = ({
     </span>
   );
 };
-
-const EARLY_YEARS_DATA: Array<{ gradeKey: TranslationKey; ageKey: TranslationKey; ratio: string; max: number }> = [
-  { gradeKey: "earlyYearsGradeToddlers1", ageKey: "earlyYearsAgeToddlers1", ratio: "1:4.7", max: 28 },
-  { gradeKey: "earlyYearsGradeToddlers2", ageKey: "earlyYearsAgeToddlers2", ratio: "1:5", max: 28 },
-  { gradeKey: "earlyYearsGradePreK3", ageKey: "earlyYearsAgePreK3", ratio: "1:6", max: 36 },
-  { gradeKey: "earlyYearsGradePreK4", ageKey: "earlyYearsAgePreK4", ratio: "1:6", max: 36 },
-  { gradeKey: "earlyYearsGradeKinder", ageKey: "earlyYearsAgeKinder", ratio: "1:6.7", max: 40 },
-];
 
 const EarlyYearsTab = () => {
   const { t } = useLocale();
