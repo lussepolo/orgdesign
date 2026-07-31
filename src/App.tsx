@@ -280,6 +280,14 @@ function AppShell() {
   // tab switches. Capital Decision workspace lives here for the same reason.
   const [dreSelections, setDreSelections] = useState<DreScenarioSimulatorSelections>(DRE_DEFAULT_SELECTIONS);
   const capitalDecisionWorkspace = useCapitalDecisionWorkspace();
+  const capitalDecisionState = capitalDecisionWorkspace.state;
+  const importDreScenarioToCapital = capitalDecisionWorkspace.importFromDre;
+
+  const navigateToTab = React.useCallback((id: TabId) => {
+    setActiveTab(id);
+    setSupportingNavOpen(false);
+    window.requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: "auto" }));
+  }, []);
 
   // V10-RC2 Gate 3: Executive Org Design consumes the same openingPackageId/
   // occupancyScenarioId shared-contract dimensions as DRE, rather than a hardcoded
@@ -333,6 +341,23 @@ function AppShell() {
     }
   }, []);
 
+  const activeCapitalScenario = capitalDecisionState.scenarios.find(
+    (scenario) => scenario.id === capitalDecisionState.activeScenarioId,
+  );
+  const capitalDecisionUsesActiveDreScenario = Boolean(
+    activeCapitalScenario &&
+      activeCapitalScenario.input.openingPackageId === dreSelections.openingPackageId &&
+      activeCapitalScenario.input.occupancyScenarioId === dreSelections.occupancyScenarioId &&
+      activeCapitalScenario.input.tuitionScenarioId === dreSelections.tuitionScenarioId &&
+      activeCapitalScenario.input.orgDesignOptionId === dreSelections.orgDesignOptionId,
+  );
+
+  React.useEffect(() => {
+    if (activeTab === "capital-decision" && !capitalDecisionUsesActiveDreScenario) {
+      importDreScenarioToCapital(dreSelections);
+    }
+  }, [activeTab, capitalDecisionUsesActiveDreScenario, dreSelections, importDreScenarioToCapital]);
+
   const isPrimaryWorkspace = PRIMARY_WORKSPACE_ORDER.includes(activeTab);
   const activeWorkspace = activeTab !== "cover" && activeTab !== "staffing" ? getWorkspace(activeTab) : null;
   const returnPathTo = activeWorkspace?.returnPathTo;
@@ -342,12 +367,18 @@ function AppShell() {
     year: "numeric",
     timeZone: "UTC",
   }).format(new Date(`${DRE_WORKSHEET_SYNC_METADATA.lastSyncedDate}T00:00:00.000Z`));
+  const scenarioSnapshotCompactDate = new Intl.DateTimeFormat(locale, {
+    day: "2-digit",
+    month: "short",
+    timeZone: "UTC",
+  }).format(new Date(`${DRE_WORKSHEET_SYNC_METADATA.lastSyncedDate}T00:00:00.000Z`));
   const activeScenarioPills = [
     SCENARIO_OPENING_PACKAGE_LABELS[orgDesignOpeningPackageId],
     t(SCENARIO_OCCUPANCY_LABEL_KEYS[dreSelections.occupancyScenarioId]),
     TUITION_LABELS[dreSelections.tuitionScenarioId] ?? dreSelections.tuitionScenarioId,
     t(SCENARIO_ORG_DESIGN_LABEL_KEYS[dreSelections.orgDesignOptionId]),
   ];
+  const activeScenarioSummary = activeScenarioPills.join(" · ");
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -373,7 +404,7 @@ function AppShell() {
                   <TabButton
                     key={id}
                     active={activeTab === id}
-                    onClick={() => setActiveTab(id)}
+                    onClick={() => navigateToTab(id)}
                     label={t(workspace.shortLabelKey)}
                     icon={Icon}
                   />
@@ -397,15 +428,21 @@ function AppShell() {
               <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1.5 rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 text-[10px] font-bold text-slate-600">
                 <Database className="h-3.5 w-3.5 text-slate-400" />
                 <span className="uppercase tracking-widest text-slate-400">{t("navScenarioBarLabel")}</span>
+                <span className="min-w-0 max-w-full truncate rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-black text-slate-700 sm:hidden">
+                  {activeScenarioSummary}
+                </span>
                 {activeScenarioPills.map((label) => (
-                  <span key={label} className="rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-black text-slate-700">
+                  <span key={label} className="hidden rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-black text-slate-700 sm:inline-flex">
                     {label}
                   </span>
                 ))}
-                <span className="ml-0 rounded-full border border-emerald-100 bg-emerald-50 px-2 py-0.5 text-[10px] font-black text-emerald-700 md:ml-1">
+                <span className="hidden rounded-full border border-emerald-100 bg-emerald-50 px-2 py-0.5 text-[10px] font-black text-emerald-700 sm:inline-flex md:ml-1">
                   {t("navScenarioBarSnapshotLabel")}: {scenarioSnapshotDate}
                 </span>
-                <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400">
+                <span className="rounded-full border border-emerald-100 bg-emerald-50 px-2 py-0.5 text-[10px] font-black text-emerald-700 sm:hidden">
+                  Snapshot: {scenarioSnapshotCompactDate}
+                </span>
+                <span className="hidden text-[9px] font-bold uppercase tracking-widest text-slate-400 sm:inline">
                   {t("navScenarioBarNoLiveConnection")}
                 </span>
               </div>
@@ -436,7 +473,7 @@ function AppShell() {
                             <SupportingTabButton
                               key={workspace.id}
                               active={activeTab === workspace.id}
-                              onClick={() => setActiveTab(workspace.id)}
+                              onClick={() => navigateToTab(workspace.id)}
                               label={t(workspace.shortLabelKey)}
                               icon={Icon}
                             />
@@ -470,10 +507,10 @@ function AppShell() {
         <AnimatePresence mode="wait">
           <motion.div key={activeTab} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
             {activeTab !== "cover" && activeTab !== "payroll" && activeWorkspace && (
-              <WorkspaceContextBanner workspaceId={activeTab} onNavigate={setActiveTab} />
+              <WorkspaceContextBanner workspaceId={activeTab} onNavigate={navigateToTab} />
             )}
 
-            {activeTab === "cover" && <CoverTab onStart={() => setActiveTab("offer-scenarios")} />}
+            {activeTab === "cover" && <CoverTab onStart={() => navigateToTab("dre-scenario-simulator")} />}
             {activeTab === "hr" && <HiringProfileCardsTab />}
             {activeTab === "load" && <LoadTab msSections={msSections} hsSections={hsSections} />}
             {activeTab === "early-years" && <EarlyYearsTab />}
@@ -512,7 +549,7 @@ function AppShell() {
                 selections={dreSelections}
                 onSelectionsChange={setDreSelections}
                 onSendToCapitalDecision={capitalDecisionWorkspace.importFromDre}
-                onNavigateToCapitalDecision={() => setActiveTab("capital-decision")}
+                onNavigateToCapitalDecision={() => navigateToTab("capital-decision")}
               />
             )}
             {activeTab === "contribution-margin" && (
@@ -525,24 +562,24 @@ function AppShell() {
               <RioScenarioResiliencePreview
                 mode="integrated"
                 workspace={capitalDecisionWorkspace}
-                onNavigateToDre={() => setActiveTab("dre-scenario-simulator")}
+                onNavigateToDre={() => navigateToTab("dre-scenario-simulator")}
               />
             )}
 
             {activeTab !== "cover" && isPrimaryWorkspace && (
               <div className="mt-16 pt-8 border-t border-slate-200 flex flex-col md:flex-row items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
-                  <button onClick={() => { const currentIndex = PRIMARY_WORKSPACE_ORDER.indexOf(activeTab); if (currentIndex > 0) setActiveTab(PRIMARY_WORKSPACE_ORDER[currentIndex - 1]); }} className="flex items-center gap-2 px-6 py-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold text-slate-600 hover:bg-slate-50 transition-all shadow-sm">
+                  <button onClick={() => { const currentIndex = PRIMARY_WORKSPACE_ORDER.indexOf(activeTab); if (currentIndex > 0) navigateToTab(PRIMARY_WORKSPACE_ORDER[currentIndex - 1]); }} className="flex items-center gap-2 px-6 py-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold text-slate-600 hover:bg-slate-50 transition-all shadow-sm">
                     <ArrowLeft className="h-4 w-4" />{t("previousSectionLabel")}
                   </button>
                 </div>
                 <div className="flex items-center gap-4">
                   {activeTab !== PRIMARY_WORKSPACE_ORDER[PRIMARY_WORKSPACE_ORDER.length - 1] ? (
-                    <button onClick={() => { const currentIndex = PRIMARY_WORKSPACE_ORDER.indexOf(activeTab); if (currentIndex < PRIMARY_WORKSPACE_ORDER.length - 1) setActiveTab(PRIMARY_WORKSPACE_ORDER[currentIndex + 1]); }} className="flex items-center gap-2 px-8 py-3 bg-slate-900 rounded-2xl text-sm font-bold text-white hover:bg-slate-800 transition-all shadow-lg shadow-slate-200">
+                    <button onClick={() => { const currentIndex = PRIMARY_WORKSPACE_ORDER.indexOf(activeTab); if (currentIndex < PRIMARY_WORKSPACE_ORDER.length - 1) navigateToTab(PRIMARY_WORKSPACE_ORDER[currentIndex + 1]); }} className="flex items-center gap-2 px-8 py-3 bg-slate-900 rounded-2xl text-sm font-bold text-white hover:bg-slate-800 transition-all shadow-lg shadow-slate-200">
                       {t("nextSectionLabel")}<ArrowRight className="h-4 w-4" />
                     </button>
                   ) : (
-                    <button onClick={() => setActiveTab("cover")} className="flex items-center gap-2 px-8 py-3 bg-rose-600 rounded-2xl text-sm font-bold text-white hover:bg-rose-700 transition-all shadow-lg shadow-rose-100">
+                    <button onClick={() => navigateToTab("cover")} className="flex items-center gap-2 px-8 py-3 bg-rose-600 rounded-2xl text-sm font-bold text-white hover:bg-rose-700 transition-all shadow-lg shadow-rose-100">
                       {t("finishReturnToCoverLabel")}<Home className="h-4 w-4" />
                     </button>
                   )}
@@ -552,7 +589,7 @@ function AppShell() {
 
             {activeTab !== "cover" && !isPrimaryWorkspace && returnPathTo && (
               <div className="mt-16 pt-8 border-t border-slate-200 flex items-center justify-center">
-                <button onClick={() => setActiveTab(returnPathTo)} className="flex items-center gap-2 px-8 py-3 bg-slate-900 rounded-2xl text-sm font-bold text-white hover:bg-slate-800 transition-all shadow-lg shadow-slate-200">
+                <button onClick={() => navigateToTab(returnPathTo)} className="flex items-center gap-2 px-8 py-3 bg-slate-900 rounded-2xl text-sm font-bold text-white hover:bg-slate-800 transition-all shadow-lg shadow-slate-200">
                   {t("bannerReturnPathLabel")}: {t(getWorkspace(returnPathTo).shortLabelKey)}<ArrowRight className="h-4 w-4" />
                 </button>
               </div>

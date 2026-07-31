@@ -23,7 +23,7 @@ export default function WorksheetSyncStamp() {
             {isPt ? "Atualizado" : "Synced"} {date}
           </span>
         </div>
-        <div className="mt-0.5 truncate text-[10px] font-semibold text-amber-700">
+        <div className="mt-0.5 max-w-[34rem] whitespace-normal break-words text-[10px] font-semibold leading-snug text-amber-700">
           {DRE_WORKSHEET_SYNC_METADATA.sourceWorkbook} · {DRE_WORKSHEET_SYNC_METADATA.sourceSheet} ·{" "}
           {isPt ? "sem conexao live" : "no live connection"}
         </div>

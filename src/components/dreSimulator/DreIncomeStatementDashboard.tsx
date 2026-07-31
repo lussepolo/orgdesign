@@ -291,7 +291,7 @@ export default function DreIncomeStatementDashboard({
       }
       className="border-cockpit-border bg-cockpit-card shadow-[0_12px_32px_rgba(15,23,42,0.06)]"
     >
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-4 xl:grid-cols-8">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-8">
         {kpis.map((kpi) => (
           <div
             key={kpi.label}
@@ -302,7 +302,7 @@ export default function DreIncomeStatementDashboard({
             }
           >
             <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-cockpit-meta">{kpi.label}</div>
-            <div className={`mt-2 text-lg font-bold leading-tight tabular-nums ${kpi.strong ? "text-cockpit-teal" : "text-cockpit-ink"}`}>
+            <div className={`mt-2 break-words text-base font-bold leading-tight tabular-nums 2xl:text-lg ${kpi.strong ? "text-cockpit-teal" : "text-cockpit-ink"}`}>
               {kpi.value}
             </div>
           </div>

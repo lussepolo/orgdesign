@@ -139,11 +139,11 @@ export default function WorkspaceContextBanner({ workspaceId, activeSubviewId, o
       </div>
       <p className="mt-1.5 text-[11px] leading-relaxed text-cockpit-meta">{t(treatment.descKey)}</p>
 
-      <dl className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
+      <dl className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5">
         {fields.map((field) => (
-          <div key={field.labelKey}>
+          <div key={field.labelKey} className="min-w-0">
             <dt className="text-[9px] font-bold uppercase tracking-[0.14em] text-cockpit-meta">{t(field.labelKey)}</dt>
-            <dd className="mt-1 text-xs leading-relaxed text-cockpit-slate">{t(field.valueKey)}</dd>
+            <dd className="mt-1 break-words text-xs leading-relaxed text-cockpit-slate [overflow-wrap:anywhere]">{t(field.valueKey)}</dd>
           </div>
         ))}
       </dl>
