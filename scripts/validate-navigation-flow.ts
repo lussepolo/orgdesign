@@ -68,10 +68,16 @@ check("pt_overview_dashboard_title", PT_BR.wsContributionMarginTitle === "Overvi
 check("en_overview_dashboard_title", EN_US.wsContributionMarginTitle === "Overview Dashboard");
 
 const appSource = readFileSync("src/App.tsx", "utf8");
+const passwordGateSource = readFileSync("src/PasswordGate.tsx", "utf8");
 check("app_shell_has_persistent_dre_scenario_bar", appSource.includes("navScenarioBarLabel"));
+check("app_shell_exposes_financial_architecture_menu", appSource.includes("navFinancialArchitectureLabel"));
+check("app_shell_exposes_experience_architecture_menu", appSource.includes("navExperienceArchitectureLabel"));
+check("scenario_context_is_financial_only", appSource.includes("{isFinancialWorkspace && ("));
+check("financial_workspaces_use_scoped_gate", appSource.includes('<PasswordGate scope="financial">'));
+check("password_gate_has_financial_scope", passwordGateSource.includes('financial: "concept_rio_financial_auth"'));
 check("app_shell_uses_worksheet_sync_metadata", appSource.includes("DRE_WORKSHEET_SYNC_METADATA"));
 check("app_shell_has_single_navigation_handler", appSource.includes("const navigateToTab = React.useCallback"));
-check("navigation_handler_closes_supporting_drawer", appSource.includes("setSupportingNavOpen(false);"));
+check("navigation_handler_closes_navigation_menu", appSource.includes("setNavigationMenu(null);"));
 check("navigation_handler_resets_scroll_position", appSource.includes("window.scrollTo({ top: 0"));
 check("capital_imports_active_dre_scenario_by_default", appSource.includes("importDreScenarioToCapital(dreSelections);"));
 check("mobile_scenario_bar_has_compact_summary", appSource.includes("activeScenarioSummary"));

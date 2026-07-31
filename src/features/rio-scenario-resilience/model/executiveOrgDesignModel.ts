@@ -2,6 +2,7 @@ import { BACKOFFICE_CONFIG, LEADERSHIP_CONFIG, SPECIALISTS_CONFIG } from "../../
 import { orgDesignScenarioExtensionRoles } from "../data/orgDesignScenarioExtensions";
 import { getMsHsStaffingReadinessSummary } from "./msHsStaffingReadiness";
 import { SECONDARY_EDUCATOR_CAPACITY_MODEL } from "./secondaryEducatorCapacityModel";
+import { OPENING_PACKAGE_MIDDLE_SCHOOL_ACTIVATION } from "./openingPackageOccupancySourceData";
 
 export type ExecutiveOrgScenario = "minimum" | "balanced" | "premium";
 
@@ -287,8 +288,14 @@ function getUnresolvedCounselorIncrementHeadcount(
   return Math.max(0, totalIncrement - 1);
 }
 
-function isMiddleSchoolActive(year: ExecutiveOrgYear) {
-  return getMsHsStaffingReadinessSummary({ year }).middleSchool.activeGrades.length > 0;
+function getMiddleSchoolActivationYear(openingPackageId: string): number {
+  return OPENING_PACKAGE_MIDDLE_SCHOOL_ACTIVATION.find(
+    (record) => record.packageId === openingPackageId,
+  )?.activationYear ?? 2031;
+}
+
+function isMiddleSchoolActive(year: ExecutiveOrgYear, openingPackageId: string) {
+  return year >= getMiddleSchoolActivationYear(openingPackageId);
 }
 
 function isHighSchoolActive(year: ExecutiveOrgYear) {
@@ -579,7 +586,7 @@ function buildLearningEcosystemBranch(
   };
 }
 
-function buildAcademicDivisionsBranch(year: ExecutiveOrgYear): OrgTreeNode {
+function buildAcademicDivisionsBranch(year: ExecutiveOrgYear, openingPackageId: string): OrgTreeNode {
   const children: OrgTreeNode[] = [
     {
       id: "ey-principal",
@@ -625,13 +632,21 @@ function buildAcademicDivisionsBranch(year: ExecutiveOrgYear): OrgTreeNode {
     },
   ];
 
-  if (isMiddleSchoolActive(year)) {
+  if (isMiddleSchoolActive(year, openingPackageId)) {
+    const msPrincipalHeadcount = year >= 2031
+      ? getExistingRoleHeadcount("ms_principal", year)
+      : pendingHeadcount(
+          "T1→G6 activates Middle School in 2028; the leadership source currently starts MS Principal HC in 2031.",
+        );
     children.push(
       {
         id: "ms-principal",
         label: "Middle School Principal",
         variant: "yearBased",
-        ...getExistingRoleHeadcount("ms_principal", year),
+        note: year < 2031
+          ? "MS structure active through the selected T1→G6 opening package; payroll HC source pending reconciliation."
+          : undefined,
+        ...msPrincipalHeadcount,
       },
       {
         id: "ms-counselor",
@@ -719,6 +734,7 @@ function buildAcademicDivisionsBranch(year: ExecutiveOrgYear): OrgTreeNode {
 export function buildExecutiveOrgDesignTree(
   scenario: ExecutiveOrgScenario,
   year: ExecutiveOrgYear,
+  openingPackageId = "t1_g4",
 ): ExecutiveOrgTreeViewModel {
   const premiumChildren: OrgTreeNode[] =
     scenario === "premium"
@@ -742,7 +758,7 @@ export function buildExecutiveOrgDesignTree(
     children: [
       ...premiumChildren,
       buildOperationsBranch(scenario, year),
-      buildAcademicDivisionsBranch(year),
+      buildAcademicDivisionsBranch(year, openingPackageId),
       buildLearningEcosystemBranch(scenario, year),
       {
         id: "community-library",

@@ -26,10 +26,12 @@ export const EN_US: Record<TranslationKey, string> = {
   // ── Navigation groups ──────────────────────────────────────────────────
   navPrimaryAriaLabel: "Primary navigation",
   navSupportingAriaLabel: "Supporting navigation",
-  navGroupAcademic: "Academic Architecture",
+  navGroupAcademic: "Academic and Organizational Architecture",
   navGroupPeople: "People",
   navGroupAnalysis: "Analysis",
   navSupportingToggleLabel: "More sections",
+  navFinancialArchitectureLabel: "Financial Architecture",
+  navExperienceArchitectureLabel: "Experience Architecture",
   navScenarioBarLabel: "DRE scenario",
   navScenarioBarSnapshotLabel: "Worksheet snapshot",
   navScenarioBarNoLiveConnection: "no live connection",
@@ -331,6 +333,9 @@ export const EN_US: Record<TranslationKey, string> = {
   aboutModalIntro:
     "This tool stress-tests the financial and organizational feasibility of the Rio campus from pre-launch through full maturity (2028–2037). It maps educator headcount, caliber decisions, and tuition revenue against structural offer, occupancy, and organizational-design scenarios — surfacing the real cost of each strategic choice.",
   aboutModalTabsHeading: "What each workspace does",
+  aboutModalNavigationHeading: "How to navigate",
+  aboutModalNavigationBody:
+    "Financial Architecture brings together DRE, Dashboard Simulator, Turmas e Folha, and Capital Decision. Experience Architecture brings together offer, organizational design, academic divisions, load, and people. The DRE scenario appears only when a financial workspace is active.",
   aboutModalCloseLabel: "Close",
   aboutModalFooterNote: "Decision support tool for BU Vanguarda strategic planning.",
   aboutModalStatCostLogicLabel: "Cost logic",
@@ -577,6 +582,7 @@ export const EN_US: Record<TranslationKey, string> = {
   gateInstitution: "Escola Concept",
   gateTitleLine1: "Rio de Janeiro",
   gateTitleLine2: "Strategic Organizational Architecture",
+  gateFinancialTitle: "DRE and Capital Decision",
   gateInputPlaceholder: "Enter access code",
   gateEnterButton: "Enter",
   gateErrorMessage: "Incorrect code. Please try again.",

@@ -5,7 +5,12 @@ import { useLocale } from "./i18n/useLocale";
 // To change the password, run simpleHash('yournewpassword') in the browser console
 // and replace the PASS_HASH value below.
 const PASS_HASH = "ec8f6a6f"; // hash of 'lifewidelearning2026'
-const SESSION_KEY = "concept_rio_auth";
+const SESSION_KEYS = {
+  app: "concept_rio_auth",
+  financial: "concept_rio_financial_auth",
+} as const;
+
+type PasswordGateScope = keyof typeof SESSION_KEYS;
 
 function simpleHash(str: string): string {
   let hash = 0;
@@ -17,7 +22,13 @@ function simpleHash(str: string): string {
   return (hash >>> 0).toString(16);
 }
 
-export default function PasswordGate({ children }: { children: React.ReactNode }) {
+export default function PasswordGate({
+  children,
+  scope = "app",
+}: {
+  children: React.ReactNode;
+  scope?: PasswordGateScope;
+}) {
   const { t } = useLocale();
   const [authenticated, setAuthenticated] = useState(false);
   const [input, setInput] = useState("");
@@ -25,15 +36,15 @@ export default function PasswordGate({ children }: { children: React.ReactNode }
   const [unlocking, setUnlocking] = useState(false);
 
   useEffect(() => {
-    if (sessionStorage.getItem(SESSION_KEY) === "true") {
+    if (sessionStorage.getItem(SESSION_KEYS[scope]) === "true") {
       setAuthenticated(true);
     }
-  }, []);
+  }, [scope]);
 
   const attempt = useCallback(() => {
     if (simpleHash(input.trim()) === PASS_HASH) {
       setUnlocking(true);
-      sessionStorage.setItem(SESSION_KEY, "true");
+      sessionStorage.setItem(SESSION_KEYS[scope], "true");
       setTimeout(() => setAuthenticated(true), 600);
     } else {
       setError(true);
@@ -137,7 +148,7 @@ export default function PasswordGate({ children }: { children: React.ReactNode }
         >
           <span style={{ fontWeight: 500 }}>{t("gateTitleLine1")}</span>
           <br />
-          {t("gateTitleLine2")}
+          {t(scope === "financial" ? "gateFinancialTitle" : "gateTitleLine2")}
         </h1>
 
         {/* Input */}

@@ -103,6 +103,13 @@ export function AboutModal({ isOpen, onClose }: AboutModalProps) {
               <p className="text-xs text-slate-600 leading-relaxed">{t("aboutModalIntro")}</p>
             </div>
 
+            <div className="rounded-2xl border border-indigo-100 bg-indigo-50/60 p-4 mb-6">
+              <p className="text-[10px] font-black uppercase tracking-widest text-indigo-700 mb-1.5">
+                {t("aboutModalNavigationHeading")}
+              </p>
+              <p className="text-xs text-slate-600 leading-relaxed">{t("aboutModalNavigationBody")}</p>
+            </div>
+
             <div className="mb-5">
               <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">
                 {t("aboutModalTabsHeading")}
@@ -133,7 +140,9 @@ export function AboutModal({ isOpen, onClose }: AboutModalProps) {
 
             <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
               <p className="text-[10px] text-slate-400 italic">{t("aboutModalFooterNote")}</p>
-              <span className="text-[9px] font-black uppercase tracking-widest text-slate-300">{APP_VERSION_LABEL}</span>
+              <span className="text-[9px] font-black uppercase tracking-widest text-slate-300">
+                {t("appVersionLabel")} {APP_VERSION_LABEL}
+              </span>
             </div>
           </div>
         </motion.div>

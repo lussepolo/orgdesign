@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import PasswordGate from "./PasswordGate";
 
 // --- Utility ---
 function cn(...inputs: ClassValue[]) {
@@ -101,6 +102,13 @@ const WORKSPACE_ICONS: Record<TabId, React.ElementType> = {
   "contribution-margin": Percent,
   "capital-decision": Scale,
 };
+
+const FINANCIAL_WORKSPACE_IDS: TabId[] = [
+  "dre-scenario-simulator",
+  "contribution-margin",
+  "payroll",
+  "capital-decision",
+];
 
 const SUPPORTING_GROUP_LABEL_KEYS: Record<WorkspaceGroup, "navGroupAcademic" | "navGroupPeople" | "navGroupAnalysis" | null> = {
   home: null,
@@ -184,6 +192,38 @@ const SupportingTabButton = ({ active, onClick, label, icon: Icon }: { active: b
   >
     <Icon className={cn("h-3 w-3", active ? "text-white" : "text-slate-400")} />
     {label}
+  </button>
+);
+
+const ArchitectureNavButton = ({
+  active,
+  expanded,
+  onClick,
+  label,
+  icon: Icon,
+}: {
+  active: boolean;
+  expanded: boolean;
+  onClick: () => void;
+  label: string;
+  icon: React.ElementType;
+}) => (
+  <button
+    type="button"
+    onClick={onClick}
+    aria-expanded={expanded}
+    aria-controls="supporting-navigation-panel"
+    className={cn(
+      "flex h-9 shrink-0 items-center gap-1.5 rounded-lg border px-2.5 text-[10px] font-bold transition-all md:text-[11px]",
+      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2",
+      active || expanded
+        ? "border-indigo-200 bg-indigo-50 text-indigo-700"
+        : "border-slate-200 bg-white text-slate-500 hover:border-slate-300 hover:text-slate-900",
+    )}
+  >
+    <Icon className="h-3.5 w-3.5" />
+    <span className="hidden sm:inline">{label}</span>
+    <ChevronDown className={cn("h-3 w-3 transition-transform", expanded && "rotate-180")} />
   </button>
 );
 
@@ -277,7 +317,7 @@ function AppShell() {
   const [showAboutModal, setShowAboutModal] = useState(false);
   const [msSections, setMsSections] = useState(2);
   const [hsSections, setHsSections] = useState(2);
-  const [supportingNavOpen, setSupportingNavOpen] = useState(false);
+  const [navigationMenu, setNavigationMenu] = useState<"financial" | "experience" | null>(null);
 
   // Phase 15G.2: DRE selections lifted above the tab-switch boundary so they survive
   // tab switches. Capital Decision workspace lives here for the same reason.
@@ -288,7 +328,7 @@ function AppShell() {
 
   const navigateToTab = React.useCallback((id: TabId) => {
     setActiveTab(id);
-    setSupportingNavOpen(false);
+    setNavigationMenu(null);
     window.requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: "auto" }));
   }, []);
 
@@ -362,6 +402,10 @@ function AppShell() {
   }, [activeTab, capitalDecisionUsesActiveDreScenario, dreSelections, importDreScenarioToCapital]);
 
   const isPrimaryWorkspace = PRIMARY_WORKSPACE_ORDER.includes(activeTab);
+  const isFinancialWorkspace = FINANCIAL_WORKSPACE_IDS.includes(activeTab);
+  const isArchitectureWorkspace = getSupportingWorkspacesByGroup("academic").some(
+    (workspace) => workspace.id === activeTab,
+  );
   const activeWorkspace = activeTab !== "cover" && activeTab !== "staffing" ? getWorkspace(activeTab) : null;
   const returnPathTo = activeWorkspace?.returnPathTo;
   const scenarioSnapshotDate = new Intl.DateTimeFormat(locale, {
@@ -400,20 +444,28 @@ function AppShell() {
               aria-label={t("navPrimaryAriaLabel")}
               className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto rounded-xl bg-slate-100 p-1"
             >
-              {PRIMARY_WORKSPACE_ORDER.map((id) => {
-                const workspace = getWorkspace(id);
-                const Icon = WORKSPACE_ICONS[id];
-                return (
-                  <TabButton
-                    key={id}
-                    active={activeTab === id}
-                    onClick={() => navigateToTab(id)}
-                    label={t(workspace.shortLabelKey)}
-                    icon={Icon}
-                  />
-                );
-              })}
+              <TabButton
+                active={activeTab === "cover"}
+                onClick={() => navigateToTab("cover")}
+                label={t(getWorkspace("cover").shortLabelKey)}
+                icon={WORKSPACE_ICONS.cover}
+              />
             </nav>
+
+            <ArchitectureNavButton
+              active={isFinancialWorkspace}
+              expanded={navigationMenu === "financial"}
+              onClick={() => setNavigationMenu((current) => current === "financial" ? null : "financial")}
+              label={t("navFinancialArchitectureLabel")}
+              icon={PieChart}
+            />
+            <ArchitectureNavButton
+              active={isArchitectureWorkspace}
+              expanded={navigationMenu === "experience"}
+              onClick={() => setNavigationMenu((current) => current === "experience" ? null : "experience")}
+              label={t("navExperienceArchitectureLabel")}
+              icon={Layers}
+            />
 
             <div className="ml-auto flex shrink-0 items-center gap-2">
               <LanguageSelector />
@@ -427,7 +479,8 @@ function AppShell() {
           </div>
 
           <div className="flex flex-col gap-2">
-            <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+            {isFinancialWorkspace && (
+              <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
               <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1.5 rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 text-[10px] font-bold text-slate-600">
                 <Database className="h-3.5 w-3.5 text-slate-400" />
                 <span className="uppercase tracking-widest text-slate-400">{t("navScenarioBarLabel")}</span>
@@ -449,20 +502,29 @@ function AppShell() {
                   {t("navScenarioBarNoLiveConnection")}
                 </span>
               </div>
-              <button
-                type="button"
-                onClick={() => setSupportingNavOpen((v) => !v)}
-                aria-expanded={supportingNavOpen}
-                aria-controls="supporting-navigation-panel"
-                className="flex shrink-0 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-slate-500 shadow-sm transition-colors hover:border-slate-300 hover:text-slate-800"
-              >
-                <ChevronDown className={cn("h-3.5 w-3.5 transition-transform", supportingNavOpen && "rotate-180")} />
-                {t("navSupportingToggleLabel")}
-              </button>
-            </div>
-            {supportingNavOpen && (
+              </div>
+            )}
+            {navigationMenu && (
               <nav id="supporting-navigation-panel" aria-label={t("navSupportingAriaLabel")} className="flex flex-col gap-3 rounded-2xl border border-slate-100 bg-white p-3 md:p-4">
-                {SUPPORTING_GROUPS.map((group) => {
+                {navigationMenu === "financial" ? (
+                  <div>
+                    <h3 className="mb-1.5 text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400">{t("navFinancialArchitectureLabel")}</h3>
+                    <div className="flex flex-wrap gap-1.5">
+                      {FINANCIAL_WORKSPACE_IDS.map((id) => {
+                        const workspace = getWorkspace(id);
+                        return (
+                          <SupportingTabButton
+                            key={id}
+                            active={activeTab === id}
+                            onClick={() => navigateToTab(id)}
+                            label={t(workspace.shortLabelKey)}
+                            icon={WORKSPACE_ICONS[id]}
+                          />
+                        );
+                      })}
+                    </div>
+                  </div>
+                ) : SUPPORTING_GROUPS.map((group) => {
                   const labelKey = SUPPORTING_GROUP_LABEL_KEYS[group];
                   const workspaces = getSupportingWorkspacesByGroup(group);
                   if (!labelKey || workspaces.length === 0) return null;
@@ -550,12 +612,14 @@ function AppShell() {
               )}
               {activeTab === "viability" && <ViabilitySimulatorTab />}
               {activeTab === "dre-scenario-simulator" && (
-                <DreScenarioSimulatorTab
-                  selections={dreSelections}
-                  onSelectionsChange={setDreSelections}
-                  onSendToCapitalDecision={capitalDecisionWorkspace.importFromDre}
-                  onNavigateToCapitalDecision={() => navigateToTab("capital-decision")}
-                />
+                <PasswordGate scope="financial">
+                  <DreScenarioSimulatorTab
+                    selections={dreSelections}
+                    onSelectionsChange={setDreSelections}
+                    onSendToCapitalDecision={capitalDecisionWorkspace.importFromDre}
+                    onNavigateToCapitalDecision={() => navigateToTab("capital-decision")}
+                  />
+                </PasswordGate>
               )}
               {activeTab === "contribution-margin" && (
                 <ContributionMarginTab
@@ -564,11 +628,13 @@ function AppShell() {
                 />
               )}
               {activeTab === "capital-decision" && (
-                <RioScenarioResiliencePreview
-                  mode="integrated"
-                  workspace={capitalDecisionWorkspace}
-                  onNavigateToDre={() => navigateToTab("dre-scenario-simulator")}
-                />
+                <PasswordGate scope="financial">
+                  <RioScenarioResiliencePreview
+                    mode="integrated"
+                    workspace={capitalDecisionWorkspace}
+                    onNavigateToDre={() => navigateToTab("dre-scenario-simulator")}
+                  />
+                </PasswordGate>
               )}
             </React.Suspense>
 

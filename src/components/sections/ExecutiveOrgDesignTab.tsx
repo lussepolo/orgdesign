@@ -308,7 +308,10 @@ const ExecutiveOrgDesignTab = ({
   const [year, setYear] = useState<ExecutiveOrgYear>(2028);
   const [isProgressionPlaying, setIsProgressionPlaying] = useState(false);
 
-  const viewModel = useMemo(() => buildExecutiveOrgDesignTree(scenario, year), [scenario, year]);
+  const viewModel = useMemo(
+    () => buildExecutiveOrgDesignTree(scenario, year, openingPackageId),
+    [scenario, year, openingPackageId],
+  );
   const rootChildren = viewModel.root.children ?? [];
   const directRootNodes = rootChildren.filter((node) => !primaryBranchIds.has(node.id));
   const branchNodes = rootChildren.filter((node) => primaryBranchIds.has(node.id));

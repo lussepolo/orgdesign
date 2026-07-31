@@ -80,11 +80,11 @@ for (const scenarioOption of EXECUTIVE_ORG_SCENARIOS) {
 
   for (const yearOption of EXECUTIVE_ORG_YEARS) {
     const year: ExecutiveOrgYear = yearOption.year;
-    const tree = buildExecutiveOrgDesignTree(scenario, year);
-    const taggedNodes: OrgTreeNode[] = [];
-    collectPayrollTaggedNodes(tree.root, taggedNodes);
 
     for (const openingPackageId of OPENING_PACKAGE_IDS) {
+      const tree = buildExecutiveOrgDesignTree(scenario, year, openingPackageId);
+      const taggedNodes: OrgTreeNode[] = [];
+      collectPayrollTaggedNodes(tree.root, taggedNodes);
       const fopagOutput = calculateFopag({
         openingPackageId,
         occupancyScenarioId: OCCUPANCY_SCENARIO_ID,
@@ -114,6 +114,24 @@ for (const scenarioOption of EXECUTIVE_ORG_SCENARIOS) {
     }
   }
 }
+
+const t1G6OpeningTree = buildExecutiveOrgDesignTree("balanced", 2028, "t1_g6");
+const t1G6AcademicDivision = t1G6OpeningTree.root.children?.find(
+  (node) => node.id === "academic-divisions",
+);
+const t1G6MsPrincipal = t1G6AcademicDivision?.children?.find(
+  (node) => node.id === "ms-principal",
+);
+const t1G4OpeningTree = buildExecutiveOrgDesignTree("balanced", 2028, "t1_g4");
+const t1G4AcademicDivision = t1G4OpeningTree.root.children?.find(
+  (node) => node.id === "academic-divisions",
+);
+check(
+  4,
+  "T1→G6 2028 exposes the Middle School Principal node while T1→G4 does not",
+  Boolean(t1G6MsPrincipal) && !t1G4AcademicDivision?.children?.some((node) => node.id === "ms-principal"),
+  `t1_g6=${t1G6MsPrincipal?.headcountStatus ?? "missing"}, t1_g4=${t1G4AcademicDivision?.children?.some((node) => node.id === "ms-principal") ?? false}`,
+);
 
 check(
   1,

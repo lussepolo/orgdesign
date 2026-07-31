@@ -25,10 +25,12 @@ export const PT_BR = {
   // ── Navigation groups ──────────────────────────────────────────────────
   navPrimaryAriaLabel: "Navegação principal",
   navSupportingAriaLabel: "Navegação de apoio",
-  navGroupAcademic: "Arquitetura Acadêmica",
+  navGroupAcademic: "Arquitetura Acadêmica e Organizacional",
   navGroupPeople: "Pessoas",
   navGroupAnalysis: "Análises",
   navSupportingToggleLabel: "Mais seções",
+  navFinancialArchitectureLabel: "Arquitetura Financeira",
+  navExperienceArchitectureLabel: "Arquitetura da Experiência",
   navScenarioBarLabel: "Cenário DRE",
   navScenarioBarSnapshotLabel: "Snapshot da planilha",
   navScenarioBarNoLiveConnection: "sem conexão live",
@@ -330,6 +332,9 @@ export const PT_BR = {
   aboutModalIntro:
     "Esta ferramenta testa a viabilidade financeira e organizacional do campus do Rio, do pré-lançamento à maturidade plena (2028–2037). Ela mapeia o quadro docente, decisões de calibre e a receita de mensalidades contra cenários estruturais de oferta, ocupação e desenho organizacional — expondo o custo real de cada escolha estratégica.",
   aboutModalTabsHeading: "O que cada área faz",
+  aboutModalNavigationHeading: "Como navegar",
+  aboutModalNavigationBody:
+    "A Arquitetura Financeira reúne DRE, Dashboard Simulator, Turmas e Folha e Decisão de Capital. A Arquitetura da Experiência reúne oferta, desenho organizacional, divisões acadêmicas, carga e pessoas. O cenário DRE aparece apenas quando a leitura financeira está ativa.",
   aboutModalCloseLabel: "Fechar",
   aboutModalFooterNote: "Ferramenta de apoio à decisão para o planejamento estratégico da BU Vanguarda.",
   aboutModalStatCostLogicLabel: "Lógica de custo",
@@ -576,6 +581,7 @@ export const PT_BR = {
   gateInstitution: "Escola Concept",
   gateTitleLine1: "Rio de Janeiro",
   gateTitleLine2: "Arquitetura Organizacional Estratégica",
+  gateFinancialTitle: "DRE e Decisão de Capital",
   gateInputPlaceholder: "Digite o código de acesso",
   gateEnterButton: "Entrar",
   gateErrorMessage: "Código incorreto. Tente novamente.",
