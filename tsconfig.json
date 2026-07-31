@@ -23,7 +23,14 @@
     "allowImportingTsExtensions": true,
     "noEmit": true
   },
+  "include": [
+    "src",
+    "vite.config.ts",
+    "playwright.config.ts"
+  ],
   "exclude": [
+    "dist",
+    "test-results",
     "src/features/rio-scenario-resilience/components/DecisionLevers/OrgDesignLever.tsx",
     "src/features/rio-scenario-resilience/data/index.ts",
     "src/features/rio-scenario-resilience/model/inputReadinessRegistry.ts"

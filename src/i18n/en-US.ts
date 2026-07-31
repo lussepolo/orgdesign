@@ -48,7 +48,7 @@ export const EN_US: Record<TranslationKey, string> = {
   statusCanonicalLabel: "Canonical Model",
   statusCanonicalDesc: "Official source of truth for this result.",
   statusSimulationLabel: "Simulation",
-  statusSimulationDesc: "Exploratory scenario; does not yet modify the canonical model.",
+  statusSimulationDesc: "Decision simulation layer; calculates scenarios from available data, but does not replace Finance or board approval.",
   statusReferenceLabel: "Reference",
   statusReferenceDesc: "Supporting rationale; does not independently recalculate.",
   statusDiagnosticLabel: "Diagnostic",
@@ -202,13 +202,13 @@ export const EN_US: Record<TranslationKey, string> = {
   // ── Workspace: Operating P&L ────────────────────────────────────────────
   wsDreShortLabel: "Operating P&L",
   wsDreTitle: "Operating P&L",
-  wsDrePurpose: "Operating P&L projection by scenario: enrollment, revenue, payroll, expenses, and EBITDA.",
-  wsDreDecision: "Whether the projected operation supports margin and scale before capital analysis.",
-  wsDreInputs: "Opening package, enrollment case, tuition case, and org-design model.",
-  wsDreImpact: "Technical basis for financial review; pending Finance closure and formal approval.",
-  wsDreResult: "Operating P&L for the selected scenario.",
+  wsDrePurpose: "Choose and read the governed P&L scenario that drives Dashboard, Payroll, and Capital.",
+  wsDreDecision: "Whether the projected operation has enough revenue, margin, and scale to continue into payroll and capital review.",
+  wsDreInputs: "Opening package, enrollment case, tuition case, and org-design model shared across the app.",
+  wsDreImpact: "Updates the downstream read in Dashboard Simulator, Sections and Payroll, and Capital Decision; does not create assumptions outside approved engines.",
+  wsDreResult: "Active P&L scenario with students, sections, revenue, payroll, contribution margin, and EBITDA by year.",
   wsDreReadingOrderNote:
-    "Executive read: Net Operating Revenue · Direct Payroll/FOPAG · Contribution Margin · EBITDA.",
+    "Executive read: choose the scenario · validate Net Operating Revenue · compare FOPAG/Payroll · read Contribution Margin · move to Capital.",
 
   // ── Workspace: Contribution Margin % ───────────────────────────────────
   wsContributionMarginShortLabel: "Dashboard Simulator",

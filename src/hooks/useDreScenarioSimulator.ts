@@ -45,24 +45,15 @@ import {
   DRE_WORKING_SCENARIO_TUITION_SCENARIO_IDS,
   DRE_WORKING_SCENARIO_ORG_DESIGN_OPTION_IDS,
 } from "../features/rio-scenario-resilience/model/dreWorkingScenarioContract";
-import { WORKING_SCENARIO_SELECTIONS } from "../features/rio-scenario-resilience/model/dreWorkingScenario";
 import { RECEITA_PROJECTION_YEARS } from "../features/rio-scenario-resilience/model/receitaEngineContract";
-import type {
-  OpeningPackageId,
-  OccupancyScenarioId,
-  OpeningPackageProjectionYear,
-} from "../features/rio-scenario-resilience/model/openingPackageOccupancySourceDataContract";
-import type { TuitionScenarioId } from "../features/rio-scenario-resilience/model/revenueInputs";
+import { DRE_DEFAULT_SELECTIONS } from "./dreScenarioSelectionDefaults";
+import type { OpeningPackageProjectionYear } from "../features/rio-scenario-resilience/model/openingPackageOccupancySourceDataContract";
 import type { DreWorkingScenarioOrgDesignOptionId } from "../features/rio-scenario-resilience/model/dreWorkingScenarioContract";
 import type { DreEngineOutput } from "../features/rio-scenario-resilience/model/dreEngineContract";
 import type { FopagEngineOutput } from "../features/rio-scenario-resilience/model/fopagEngineContract";
+import type { DreScenarioSimulatorSelections } from "./dreScenarioSelectionDefaults";
 
-export interface DreScenarioSimulatorSelections {
-  openingPackageId: OpeningPackageId;
-  occupancyScenarioId: OccupancyScenarioId;
-  tuitionScenarioId: TuitionScenarioId;
-  orgDesignOptionId: DreWorkingScenarioOrgDesignOptionId;
-}
+export type { DreScenarioSimulatorSelections } from "./dreScenarioSelectionDefaults";
 
 export interface OrgDesignSensitivityRow {
   orgDesignOptionId: DreWorkingScenarioOrgDesignOptionId;
@@ -127,18 +118,9 @@ function reconcilePayroll(
 
 const LAST_PROJECTION_YEAR = RECEITA_PROJECTION_YEARS[RECEITA_PROJECTION_YEARS.length - 1];
 
-// Phase 13F working scenario — technical validation fixture only, not board-ratified.
-const DEFAULT_SELECTIONS: DreScenarioSimulatorSelections = {
-  openingPackageId: WORKING_SCENARIO_SELECTIONS.openingGrades.selectedOptionId as OpeningPackageId,
-  occupancyScenarioId:
-    WORKING_SCENARIO_SELECTIONS.occupancyEnrollment.selectedOptionId as OccupancyScenarioId,
-  tuitionScenarioId: WORKING_SCENARIO_SELECTIONS.tuition.selectedOptionId as TuitionScenarioId,
-  orgDesignOptionId:
-    WORKING_SCENARIO_SELECTIONS.orgDesignStructure.selectedOptionId as DreWorkingScenarioOrgDesignOptionId,
-};
-
-// Phase 15G.2: exported for App.tsx to initialise lifted DRE state.
-export const DRE_DEFAULT_SELECTIONS: DreScenarioSimulatorSelections = DEFAULT_SELECTIONS;
+// Phase 15G.2: re-exported for existing callers; App.tsx imports the lighter
+// defaults module directly to keep the shell free of DRE/FOPAG engines.
+export { DRE_DEFAULT_SELECTIONS } from "./dreScenarioSelectionDefaults";
 
 export {
   DRE_ENROLLMENT_LEVER_ACTIVE_OPENING_PACKAGE_IDS,
@@ -223,6 +205,6 @@ export function useDreScenarioSimulator({ selections, onSelectionsChange }: UseD
     fopagOutput,
     payrollReconciliation,
     orgDesignSensitivity,
-    defaultSelections: DEFAULT_SELECTIONS,
+    defaultSelections: DRE_DEFAULT_SELECTIONS,
   };
 }

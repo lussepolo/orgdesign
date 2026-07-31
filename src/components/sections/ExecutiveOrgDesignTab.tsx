@@ -1,12 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
-import * as XLSX from "xlsx";
 import { BookOpen, CheckCircle2, Download, GitBranch, Layers3 } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { useLocale } from "../../i18n/useLocale";
-import {
-  buildOrgDesignExportWorkbook,
-  buildOrgDesignExportFilename,
-} from "../../features/rio-scenario-resilience/model/orgDesignExportWorkbookBuilder";
 import {
   buildExecutiveOrgDesignTree,
   EXECUTIVE_ORG_SCENARIOS,
@@ -363,7 +358,14 @@ const ExecutiveOrgDesignTab = ({
   // orgDesignExportWorkbookBuilder.ts — the same shared engines and the same
   // live Educator tier selections the Grade Staffing Table above reads from,
   // never a separate calculation.
-  const handleDownloadOrgDesignExport = () => {
+  const handleDownloadOrgDesignExport = async () => {
+    const [
+      XLSX,
+      { buildOrgDesignExportWorkbook, buildOrgDesignExportFilename },
+    ] = await Promise.all([
+      import("xlsx"),
+      import("../../features/rio-scenario-resilience/model/orgDesignExportWorkbookBuilder"),
+    ]);
     const educatorTierByGrade = educatorTierSelection.getEducatorTierByGradeForScenario(
       openingPackageId,
       occupancyScenarioId,

@@ -29,7 +29,6 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import React, { useMemo, useState } from "react";
-import * as XLSX from "xlsx";
 import { Download, SlidersHorizontal, TrendingUp } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { useLocale } from "../../i18n/useLocale";
@@ -66,12 +65,7 @@ import {
 } from "../../features/rio-scenario-resilience/model/dreWorkingScenarioContract";
 import { TUITION_LABELS } from "../dreSimulator/dreLeverLabels";
 import WorksheetSyncStamp from "../common/WorksheetSyncStamp";
-import {
-  buildDreScenarioWorkbook,
-  buildDreScenarioExportFilename,
-  computeOrgDesignPayrollVariants,
-  type DreScenarioWorkbookViewModel,
-} from "../dreSimulator/dreScenarioWorkbook";
+import type { DreScenarioWorkbookViewModel } from "../dreSimulator/dreScenarioWorkbook";
 import type { DreScenarioSimulatorSelections } from "../../hooks/useDreScenarioSimulator";
 import type { UseEducatorTierSelectionResult } from "../../hooks/useEducatorTierSelection";
 
@@ -754,7 +748,18 @@ const PayrollProjectionTab = ({
     return [...byDiv.entries()].map(([divisionArea, headcount]) => ({ divisionArea, headcount }));
   }, [nonInstructionalRows]);
 
-  const handleDownloadProjectionTable = () => {
+  const handleDownloadProjectionTable = async () => {
+    const [
+      XLSX,
+      {
+        buildDreScenarioWorkbook,
+        buildDreScenarioExportFilename,
+        computeOrgDesignPayrollVariants,
+      },
+    ] = await Promise.all([
+      import("xlsx"),
+      import("../dreSimulator/dreScenarioWorkbook"),
+    ]);
     const selections: DreScenarioSimulatorSelections = {
       openingPackageId,
       occupancyScenarioId,

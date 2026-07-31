@@ -47,7 +47,7 @@ export const PT_BR = {
   statusCanonicalLabel: "Modelo Canônico",
   statusCanonicalDesc: "Fonte oficial de verdade para este resultado.",
   statusSimulationLabel: "Simulação",
-  statusSimulationDesc: "Cenário exploratório; ainda não altera o modelo canônico.",
+  statusSimulationDesc: "Camada de simulação para decisão; calcula cenários com dados disponíveis, mas não substitui aprovação Financeira ou do conselho.",
   statusReferenceLabel: "Referência",
   statusReferenceDesc: "Racional de apoio; não recalcula de forma independente.",
   statusDiagnosticLabel: "Diagnóstico",
@@ -201,13 +201,13 @@ export const PT_BR = {
   // ── Workspace: DRE Operacional ──────────────────────────────────────────
   wsDreShortLabel: "DRE Operacional",
   wsDreTitle: "DRE Operacional",
-  wsDrePurpose: "Projeção operacional de DRE por cenário: matrícula, receita, folha, despesas e EBITDA.",
-  wsDreDecision: "Se a operação projetada sustenta margem e escala antes da análise de capital.",
-  wsDreInputs: "Pacote de abertura, captação, mensalidade e desenho organizacional.",
-  wsDreImpact: "Base técnica para análise financeira; pendente de fechamento Financeiro e aprovação formal.",
-  wsDreResult: "DRE operacional do cenário selecionado.",
+  wsDrePurpose: "Escolher e ler o cenário DRE governado que orienta Dashboard, Folha e Capital.",
+  wsDreDecision: "Se a operação projetada tem receita, margem e escala suficientes para seguir à análise de folha e capital.",
+  wsDreInputs: "Pacote de abertura, captação, mensalidade e desenho organizacional compartilhados no app.",
+  wsDreImpact: "Atualiza a leitura downstream de Dashboard Simulator, Turmas e Folha e Decisão de Capital; não cria premissas fora dos motores aprovados.",
+  wsDreResult: "Cenário DRE ativo com alunos, turmas, receita, FOPAG, margem de contribuição e EBITDA por ano.",
   wsDreReadingOrderNote:
-    "Leitura executiva: Receita Operacional Líquida · Folha Direta/FOPAG · Margem de Contribuição · EBITDA.",
+    "Leitura executiva: escolha o cenário · valide Receita Operacional Líquida · compare FOPAG/Folha · leia Margem de Contribuição · siga para Capital.",
 
   // ── Workspace: Margem de Contribuição % ────────────────────────────────
   wsContributionMarginShortLabel: "Dashboard Simulator",

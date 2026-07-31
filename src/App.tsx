@@ -26,7 +26,6 @@ import {
   Percent,
   Target,
 } from "lucide-react";
-import { motion, AnimatePresence } from "motion/react";
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -35,25 +34,13 @@ function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-import HiringProfileCardsTab from "./components/sections/HiringProfileCardsTab";
-import ViabilitySimulatorTab from "./components/sections/ViabilitySimulatorTab";
-import OfferScenariosTab from "./components/sections/OfferScenariosTab";
-import ExecutiveOrgDesignTab from "./components/sections/ExecutiveOrgDesignTab";
-import EarlyYearsTab from "./components/sections/EarlyYearsTab";
-import LowerSchoolTab from "./components/sections/LowerSchoolTab";
-import MiddleSchoolTab from "./components/sections/MiddleSchoolTab";
-import HighSchoolTab from "./components/sections/HighSchoolTab";
-import LoadTab from "./components/sections/LoadTab";
-import AboutModal from "./components/sections/AboutModal";
-import DreScenarioSimulatorTab from "./components/sections/DreScenarioSimulatorTab";
-import ContributionMarginTab from "./components/sections/ContributionMarginTab";
-import SectionsAndPayrollWorkspace from "./components/sections/SectionsAndPayrollWorkspace";
 import WorkspaceContextBanner from "./components/common/WorkspaceContextBanner";
 import { TUITION_LABELS } from "./components/dreSimulator/dreLeverLabels";
-import { RioScenarioResiliencePreview } from "./features/rio-scenario-resilience/RioScenarioResiliencePreview";
 import { useCapitalDecisionWorkspace } from "./features/rio-scenario-resilience/hooks/useCapitalDecisionWorkspace";
-import { DRE_DEFAULT_SELECTIONS } from "./hooks/useDreScenarioSimulator";
-import type { DreScenarioSimulatorSelections } from "./hooks/useDreScenarioSimulator";
+import {
+  DRE_DEFAULT_SELECTIONS,
+  type DreScenarioSimulatorSelections,
+} from "./hooks/dreScenarioSelectionDefaults";
 import {
   isActiveOpeningPackageId,
   type ActiveOpeningPackageId,
@@ -73,6 +60,21 @@ import {
 } from "./config/workspaceRegistry";
 import { APP_VERSION_LABEL, APP_ABOUT_SEEN_STORAGE_KEY } from "./config/appMetadata";
 import { DRE_WORKSHEET_SYNC_METADATA } from "./config/worksheetSyncMetadata";
+
+const HiringProfileCardsTab = React.lazy(() => import("./components/sections/HiringProfileCardsTab"));
+const AboutModal = React.lazy(() => import("./components/sections/AboutModal"));
+const ViabilitySimulatorTab = React.lazy(() => import("./components/sections/ViabilitySimulatorTab"));
+const OfferScenariosTab = React.lazy(() => import("./components/sections/OfferScenariosTab"));
+const ExecutiveOrgDesignTab = React.lazy(() => import("./components/sections/ExecutiveOrgDesignTab"));
+const EarlyYearsTab = React.lazy(() => import("./components/sections/EarlyYearsTab"));
+const LowerSchoolTab = React.lazy(() => import("./components/sections/LowerSchoolTab"));
+const MiddleSchoolTab = React.lazy(() => import("./components/sections/MiddleSchoolTab"));
+const HighSchoolTab = React.lazy(() => import("./components/sections/HighSchoolTab"));
+const LoadTab = React.lazy(() => import("./components/sections/LoadTab"));
+const DreScenarioSimulatorTab = React.lazy(() => import("./components/sections/DreScenarioSimulatorTab"));
+const ContributionMarginTab = React.lazy(() => import("./components/sections/ContributionMarginTab"));
+const SectionsAndPayrollWorkspace = React.lazy(() => import("./components/sections/SectionsAndPayrollWorkspace"));
+const RioScenarioResiliencePreview = React.lazy(() => import("./features/rio-scenario-resilience/RioScenarioResiliencePreview"));
 
 // --- Types ---
 // "staffing" is retained only so the legacy, unmounted StaffingTab.tsx
@@ -143,6 +145,12 @@ const Badge = ({ children, variant = "info" }: { children: React.ReactNode, vari
   );
 };
 
+const WorkspaceLoadingFallback = () => (
+  <div className="rounded-2xl border border-slate-200 bg-white px-5 py-6 text-sm font-bold text-slate-500 shadow-sm">
+    Carregando seção...
+  </div>
+);
+
 const TabButton = ({ active, onClick, label, icon: Icon }: { active: boolean, onClick: () => void, label: string, icon: any }) => (
   <button
     type="button"
@@ -210,12 +218,7 @@ const CoverTab = ({ onStart }: { onStart: () => void }) => {
   const { t } = useLocale();
   return (
     <div className="min-h-[70vh] flex flex-col items-center justify-center text-center px-4">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-        className="max-w-4xl space-y-8"
-      >
+      <div className="max-w-4xl space-y-8 animate-[workspaceFadeIn_0.8s_ease-out_both]">
         <div className="flex justify-center mb-12">
           <div className="h-24 w-24 bg-slate-900 rounded-[2rem] flex items-center justify-center shadow-2xl rotate-3 hover:rotate-0 transition-transform duration-500">
             <GraduationCap className="h-12 w-12 text-white" />
@@ -263,7 +266,7 @@ const CoverTab = ({ onStart }: { onStart: () => void }) => {
             </div>
           </div>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 };
@@ -276,7 +279,7 @@ function AppShell() {
   const [hsSections, setHsSections] = useState(2);
   const [supportingNavOpen, setSupportingNavOpen] = useState(false);
 
-  // Phase 15G.2: DRE selections lifted above AnimatePresence so they survive
+  // Phase 15G.2: DRE selections lifted above the tab-switch boundary so they survive
   // tab switches. Capital Decision workspace lives here for the same reason.
   const [dreSelections, setDreSelections] = useState<DreScenarioSimulatorSelections>(DRE_DEFAULT_SELECTIONS);
   const capitalDecisionWorkspace = useCapitalDecisionWorkspace();
@@ -489,7 +492,9 @@ function AppShell() {
         </div>
       </header>
 
-      <AboutModal isOpen={showAboutModal} onClose={() => setShowAboutModal(false)} />
+      <React.Suspense fallback={null}>
+        <AboutModal isOpen={showAboutModal} onClose={() => setShowAboutModal(false)} />
+      </React.Suspense>
 
       <main className="max-w-[1600px] mx-auto px-4 md:px-6 py-8 md:py-12">
         {activeTab !== "cover" && activeWorkspace && (
@@ -504,67 +509,68 @@ function AppShell() {
           </div>
         )}
 
-        <AnimatePresence mode="wait">
-          <motion.div key={activeTab} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
+        <div key={activeTab} className="animate-[workspaceFadeIn_0.2s_ease-out_both]">
             {activeTab !== "cover" && activeTab !== "payroll" && activeWorkspace && (
               <WorkspaceContextBanner workspaceId={activeTab} onNavigate={navigateToTab} />
             )}
 
-            {activeTab === "cover" && <CoverTab onStart={() => navigateToTab("dre-scenario-simulator")} />}
-            {activeTab === "hr" && <HiringProfileCardsTab />}
-            {activeTab === "load" && <LoadTab msSections={msSections} hsSections={hsSections} />}
-            {activeTab === "early-years" && <EarlyYearsTab />}
-            {activeTab === "lower-school" && <LowerSchoolTab />}
-            {activeTab === "ms" && <MiddleSchoolTab sections={msSections} setSections={setMsSections} />}
-            {activeTab === "offer-scenarios" && <OfferScenariosTab />}
-            {activeTab === "executive-org-design" && (
-              <ExecutiveOrgDesignTab
-                openingPackageId={orgDesignOpeningPackageId}
-                onOpeningPackageIdChange={handleOrgDesignOpeningPackageIdChange}
-                occupancyScenarioId={dreSelections.occupancyScenarioId}
-                onOccupancyScenarioIdChange={handleOrgDesignOccupancyScenarioIdChange}
-                orgDesignOptionId={dreSelections.orgDesignOptionId}
-                onOrgDesignOptionIdChange={handleOrgDesignOptionIdChange}
-                educatorTierSelection={educatorTierSelection}
-                tuitionScenarioId={dreSelections.tuitionScenarioId}
-              />
-            )}
-            {activeTab === "hs" && <HighSchoolTab sections={hsSections} setSections={setHsSections} />}
-            {activeTab === "payroll" && (
-              <SectionsAndPayrollWorkspace
-                openingPackageId={orgDesignOpeningPackageId}
-                onOpeningPackageIdChange={handleOrgDesignOpeningPackageIdChange}
-                occupancyScenarioId={dreSelections.occupancyScenarioId}
-                onOccupancyScenarioIdChange={handleOrgDesignOccupancyScenarioIdChange}
-                tuitionScenarioId={dreSelections.tuitionScenarioId}
-                onTuitionScenarioIdChange={handleTuitionScenarioIdChange}
-                orgDesignOptionId={dreSelections.orgDesignOptionId}
-                onOrgDesignOptionIdChange={handleOrgDesignOptionIdChange}
-                educatorTierSelection={educatorTierSelection}
-              />
-            )}
-            {activeTab === "viability" && <ViabilitySimulatorTab />}
-            {activeTab === "dre-scenario-simulator" && (
-              <DreScenarioSimulatorTab
-                selections={dreSelections}
-                onSelectionsChange={setDreSelections}
-                onSendToCapitalDecision={capitalDecisionWorkspace.importFromDre}
-                onNavigateToCapitalDecision={() => navigateToTab("capital-decision")}
-              />
-            )}
-            {activeTab === "contribution-margin" && (
-              <ContributionMarginTab
-                selections={dreSelections}
-                onSelectionsChange={setDreSelections}
-              />
-            )}
-            {activeTab === "capital-decision" && (
-              <RioScenarioResiliencePreview
-                mode="integrated"
-                workspace={capitalDecisionWorkspace}
-                onNavigateToDre={() => navigateToTab("dre-scenario-simulator")}
-              />
-            )}
+            <React.Suspense fallback={<WorkspaceLoadingFallback />}>
+              {activeTab === "cover" && <CoverTab onStart={() => navigateToTab("dre-scenario-simulator")} />}
+              {activeTab === "hr" && <HiringProfileCardsTab />}
+              {activeTab === "load" && <LoadTab msSections={msSections} hsSections={hsSections} />}
+              {activeTab === "early-years" && <EarlyYearsTab />}
+              {activeTab === "lower-school" && <LowerSchoolTab />}
+              {activeTab === "ms" && <MiddleSchoolTab sections={msSections} setSections={setMsSections} />}
+              {activeTab === "offer-scenarios" && <OfferScenariosTab />}
+              {activeTab === "executive-org-design" && (
+                <ExecutiveOrgDesignTab
+                  openingPackageId={orgDesignOpeningPackageId}
+                  onOpeningPackageIdChange={handleOrgDesignOpeningPackageIdChange}
+                  occupancyScenarioId={dreSelections.occupancyScenarioId}
+                  onOccupancyScenarioIdChange={handleOrgDesignOccupancyScenarioIdChange}
+                  orgDesignOptionId={dreSelections.orgDesignOptionId}
+                  onOrgDesignOptionIdChange={handleOrgDesignOptionIdChange}
+                  educatorTierSelection={educatorTierSelection}
+                  tuitionScenarioId={dreSelections.tuitionScenarioId}
+                />
+              )}
+              {activeTab === "hs" && <HighSchoolTab sections={hsSections} setSections={setHsSections} />}
+              {activeTab === "payroll" && (
+                <SectionsAndPayrollWorkspace
+                  openingPackageId={orgDesignOpeningPackageId}
+                  onOpeningPackageIdChange={handleOrgDesignOpeningPackageIdChange}
+                  occupancyScenarioId={dreSelections.occupancyScenarioId}
+                  onOccupancyScenarioIdChange={handleOrgDesignOccupancyScenarioIdChange}
+                  tuitionScenarioId={dreSelections.tuitionScenarioId}
+                  onTuitionScenarioIdChange={handleTuitionScenarioIdChange}
+                  orgDesignOptionId={dreSelections.orgDesignOptionId}
+                  onOrgDesignOptionIdChange={handleOrgDesignOptionIdChange}
+                  educatorTierSelection={educatorTierSelection}
+                />
+              )}
+              {activeTab === "viability" && <ViabilitySimulatorTab />}
+              {activeTab === "dre-scenario-simulator" && (
+                <DreScenarioSimulatorTab
+                  selections={dreSelections}
+                  onSelectionsChange={setDreSelections}
+                  onSendToCapitalDecision={capitalDecisionWorkspace.importFromDre}
+                  onNavigateToCapitalDecision={() => navigateToTab("capital-decision")}
+                />
+              )}
+              {activeTab === "contribution-margin" && (
+                <ContributionMarginTab
+                  selections={dreSelections}
+                  onSelectionsChange={setDreSelections}
+                />
+              )}
+              {activeTab === "capital-decision" && (
+                <RioScenarioResiliencePreview
+                  mode="integrated"
+                  workspace={capitalDecisionWorkspace}
+                  onNavigateToDre={() => navigateToTab("dre-scenario-simulator")}
+                />
+              )}
+            </React.Suspense>
 
             {activeTab !== "cover" && isPrimaryWorkspace && (
               <div className="mt-16 pt-8 border-t border-slate-200 flex flex-col md:flex-row items-center justify-between gap-4">
@@ -594,8 +600,7 @@ function AppShell() {
                 </button>
               </div>
             )}
-          </motion.div>
-        </AnimatePresence>
+        </div>
       </main>
 
       <footer className="max-w-7xl mx-auto px-6 py-12 border-t border-slate-100">

@@ -75,6 +75,9 @@ check("navigation_handler_closes_supporting_drawer", appSource.includes("setSupp
 check("navigation_handler_resets_scroll_position", appSource.includes("window.scrollTo({ top: 0"));
 check("capital_imports_active_dre_scenario_by_default", appSource.includes("importDreScenarioToCapital(dreSelections);"));
 check("mobile_scenario_bar_has_compact_summary", appSource.includes("activeScenarioSummary"));
+check("workspace_routes_are_lazy_loaded", appSource.includes("React.lazy(() => import("));
+check("workspace_routes_are_wrapped_in_suspense", appSource.includes("<React.Suspense fallback={<WorkspaceLoadingFallback />}>"));
+check("app_shell_does_not_static_import_motion", !appSource.includes("from \"motion/react\""));
 const primaryNavClass = appSource.match(
   /aria-label=\{t\("navPrimaryAriaLabel"\)\}\s+className="([^"]+)"/,
 )?.[1];

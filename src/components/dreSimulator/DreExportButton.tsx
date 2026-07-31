@@ -1,11 +1,5 @@
 import { useState } from "react";
 import { Download, AlertTriangle } from "lucide-react";
-import * as XLSX from "xlsx";
-import {
-  buildDreScenarioWorkbook,
-  buildDreScenarioExportFilename,
-  computeOrgDesignPayrollVariants,
-} from "./dreScenarioWorkbook";
 import type {
   DreScenarioSimulatorSelections,
   OrgDesignSensitivityRow,
@@ -43,13 +37,24 @@ export default function DreExportButton({
   const { t } = useLocale();
   const [error, setError] = useState<string | null>(null);
 
-  const handleExport = () => {
+  const handleExport = async () => {
     if (!payrollReconciliation.isReconciled) {
       setError(t("dreExportBlockedError").replace("{n}", String(payrollReconciliation.mismatches.length)));
       return;
     }
     setError(null);
 
+    const [
+      XLSX,
+      {
+        buildDreScenarioWorkbook,
+        buildDreScenarioExportFilename,
+        computeOrgDesignPayrollVariants,
+      },
+    ] = await Promise.all([
+      import("xlsx"),
+      import("./dreScenarioWorkbook"),
+    ]);
     const exportedAt = new Date();
     const threeVersionPayroll = computeOrgDesignPayrollVariants(selections, dreOutput, fopagOutput);
     const workbook = buildDreScenarioWorkbook({
