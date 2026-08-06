@@ -330,21 +330,21 @@ export const PT_BR = {
   aboutModalTitle: "Rio Strategic Org Design",
   aboutModalSubtitle: "Escola Concept · BU Vanguarda · Lançamento Jan 2028",
   aboutModalIntro:
-    "Esta ferramenta testa a viabilidade financeira e organizacional do campus do Rio, do pré-lançamento à maturidade plena (2028–2037). Ela mapeia o quadro docente, decisões de calibre e a receita de mensalidades contra cenários estruturais de oferta, ocupação e desenho organizacional — expondo o custo real de cada escolha estratégica.",
+    "Este app é a arquitetura de decisão para o lançamento do campus Rio. Ele conecta DRE Operacional, leitura de dashboard, modelo de turmas e folha, exportações governadas e decisão de capital, mantendo oferta, divisões acadêmicas, carga docente e referências de pessoas como evidência de apoio.",
   aboutModalTabsHeading: "O que cada área faz",
   aboutModalNavigationHeading: "Como navegar",
   aboutModalNavigationBody:
-    "A Arquitetura Financeira reúne DRE, Dashboard Simulator, Turmas e Folha e Decisão de Capital. A Arquitetura da Experiência reúne oferta, desenho organizacional, divisões acadêmicas, carga e pessoas. O cenário DRE aparece apenas quando a leitura financeira está ativa.",
+    "Comece pela Arquitetura Financeira: escolha o cenário da DRE Operacional, leia o dashboard, revise Turmas e Folha e então avance para Decisão de Capital. Use a Arquitetura da Experiência para oferta, desenho organizacional, divisões acadêmicas, diagnósticos de carga docente e referências de contratação que explicam o modelo operacional por trás dos números.",
   aboutModalCloseLabel: "Fechar",
   aboutModalFooterNote: "Ferramenta de apoio à decisão para o planejamento estratégico da BU Vanguarda.",
   aboutModalStatCostLogicLabel: "Lógica de custo",
   aboutModalStatCostLogicValue: "Salário × 13 + Benefícios × 12",
-  aboutModalStatTuitionGrowthLabel: "Crescimento de mensalidade",
-  aboutModalStatTuitionGrowthValue: "8% ao ano a partir da base de 2028",
+  aboutModalStatTuitionGrowthLabel: "Reajuste de mensalidade",
+  aboutModalStatTuitionGrowthValue: "Canônico: 5,9% a partir de 2029",
   aboutModalStatTurmasSourceLabel: "Fonte de turmas",
-  aboutModalStatTurmasSourceValue: "Confirmada a partir da planilha",
+  aboutModalStatTurmasSourceValue: "Motores FOPAG/DRE compartilhados",
   aboutModalStatCoverageScopeLabel: "Escopo de cobertura",
-  aboutModalStatCoverageScopeValue: "Receita menos FOPAG modelado",
+  aboutModalStatCoverageScopeValue: "Receita, folha, EBITDA e capital",
 
   // ── Payroll Export Matrix (subview B content) ──────────────────────────
   exportMatrixTitle: "Matriz de Exportação de Folha",

@@ -48,7 +48,9 @@ export function AboutModal({ isOpen, onClose }: AboutModalProps) {
 
   if (!isOpen) return null;
 
-  const describedWorkspaces = WORKSPACE_REGISTRY.filter((w) => w.purposeKey).sort((a, b) => a.order - b.order);
+  const describedWorkspaces = WORKSPACE_REGISTRY.filter((w) => w.purposeKey || w.subviews?.length).sort(
+    (a, b) => a.order - b.order,
+  );
 
   const stats = [
     { labelKey: "aboutModalStatCostLogicLabel", valueKey: "aboutModalStatCostLogicValue" },
@@ -121,7 +123,9 @@ export function AboutModal({ isOpen, onClose }: AboutModalProps) {
                     <div>
                       <div className="text-[11px] font-black text-slate-800">{t(workspace.titleKey)}</div>
                       <div className="text-[10px] text-slate-500 leading-relaxed mt-0.5">
-                        {workspace.purposeKey ? t(workspace.purposeKey) : null}
+                        {workspace.purposeKey
+                          ? t(workspace.purposeKey)
+                          : workspace.subviews?.map((subview) => t(subview.purposeKey)).join(" ")}
                       </div>
                     </div>
                   </div>

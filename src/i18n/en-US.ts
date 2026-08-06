@@ -331,21 +331,21 @@ export const EN_US: Record<TranslationKey, string> = {
   aboutModalTitle: "Rio Strategic Org Design",
   aboutModalSubtitle: "Escola Concept · BU Vanguarda · Jan 2028 Launch",
   aboutModalIntro:
-    "This tool stress-tests the financial and organizational feasibility of the Rio campus from pre-launch through full maturity (2028–2037). It maps educator headcount, caliber decisions, and tuition revenue against structural offer, occupancy, and organizational-design scenarios — surfacing the real cost of each strategic choice.",
+    "This app is the decision architecture for the Rio campus launch. It connects the operating P&L, dashboard read, sections and payroll model, governed exports, and capital decision layer, while keeping offer, academic-division, load, and people references visible as supporting evidence.",
   aboutModalTabsHeading: "What each workspace does",
   aboutModalNavigationHeading: "How to navigate",
   aboutModalNavigationBody:
-    "Financial Architecture brings together DRE, Dashboard Simulator, Turmas e Folha, and Capital Decision. Experience Architecture brings together offer, organizational design, academic divisions, load, and people. The DRE scenario appears only when a financial workspace is active.",
+    "Start in Financial Architecture: choose the Operating P&L scenario, read the dashboard, review Sections and Payroll, then move to Capital Decision. Use Experience Architecture for offer, organizational design, academic divisions, teaching-load diagnostics, and hiring references that explain the operating model behind the numbers.",
   aboutModalCloseLabel: "Close",
   aboutModalFooterNote: "Decision support tool for BU Vanguarda strategic planning.",
   aboutModalStatCostLogicLabel: "Cost logic",
   aboutModalStatCostLogicValue: "Salary × 13 + Benefits × 12",
-  aboutModalStatTuitionGrowthLabel: "Tuition growth",
-  aboutModalStatTuitionGrowthValue: "8% per year from 2028 base",
+  aboutModalStatTuitionGrowthLabel: "Tuition adjustment",
+  aboutModalStatTuitionGrowthValue: "Canonical 5.9% from 2029",
   aboutModalStatTurmasSourceLabel: "Sections source",
-  aboutModalStatTurmasSourceValue: "Confirmed from spreadsheet",
+  aboutModalStatTurmasSourceValue: "Shared FOPAG/DRE engines",
   aboutModalStatCoverageScopeLabel: "Coverage scope",
-  aboutModalStatCoverageScopeValue: "Revenue less modeled FOPAG",
+  aboutModalStatCoverageScopeValue: "Revenue, payroll, EBITDA, and capital",
 
   // ── Payroll Export Matrix (subview B content) ──────────────────────────
   exportMatrixTitle: "Governed Payroll Exports",
